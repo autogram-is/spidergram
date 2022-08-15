@@ -12,6 +12,8 @@ classDiagram
         <<Node>>
         -type:~symbol~ 'design_pattern'
         +name~string~
+        +description~string~
+        +documentation~URL~
         +occursOn(Resource, properties)~OccursOn~
     }
 
