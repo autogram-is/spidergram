@@ -2,8 +2,6 @@
 
 Spidergram's core consists of the UNIQUE-URL and RESOURCE data types, linked by RESPONDS-WITH and LINKS-TO relationships. Other Spidergram plugins add additional domain concepts and relationships to capture design pattern usage, different hierarchies for organizing the site's content, ownership of different portions of the site by individuals or groups, and more.
 
-Storage-intensive data for individual resources (or other entities) can be handled by the PAYLOAD entity. Raw text, filepaths, etc can be stored here for fast loading on a per-Resource basis.
-
 ```mermaid
 erDiagram
     UNIQUE-URL {
@@ -16,36 +14,21 @@ erDiagram
         string url
         int responseCode
         data headers
+        string body
+        string filename
+    }
+    STATUS {
+        string url
+        int responseCode
+        data headers
     }
 
-    HIERARCHY-ITEM {
-        string name
-        string family
-        string description
-        data rules
-    }
-
-    PATTERN {
-        string name
-        string description
-        string documentation
-    }
-
-    OWNER name
-        string description
-    }
-
-    PAYLOAD {
-        string type
-        blob data
-    }
-
-    RESOURCE ||--o{ PAYLOAD : has
+    UNIQUE-URL ||--o| STATUS : RespondsWith
     UNIQUE-URL ||--o| RESOURCE : RespondsWith
     RESOURCE }o--o{ UNIQUE-URL : LinksTo
-    RESOURCE }o--o{ HIERARCHY-ITEM : LivesAt
-    HIERARCHY-ITEM |o--o{ HIERARCHY-ITEM : HasParent
-    PATTERN }o--o{ RESOURCE : OccursOn
-    OWNER }o--o{ RESOURCE : IsResponsibleFor
-    OWNER }o--o{ HIERARCHY-ITEM : IsResponsibleFor
+    CUSTOM-ENTITY }o..o{ RESOURCE : RelatesTo
 ```
+
+Because so much critical information is stored on the Resource entity it might make sense to shift its Body property to a separate Payload table, responsible for storing any large but optional properties representing the Resource's data in raw or processed form.
+
+Smaller property data (category names, HTML metadata, etc) can be added directly to the Resource entity, but caution should be exercised.
