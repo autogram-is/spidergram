@@ -4,7 +4,7 @@ How will Spidergram tackle discovering/auditing design systems? We treat a given
 
 Convenience functions exist on both DesignPattern and Resource to create a new OccursOn instance.
 
-From a code perspective, it looks like so:
+## Class Diagram:
 
 ```mermaid
 classDiagram
@@ -27,7 +27,7 @@ classDiagram
     }
     
     class Resource {
-        <<Interface Extension>>
+        <<Mixin>>
         +includesPattern(DesignPattern, properties)~OccursOn~
     }
 
