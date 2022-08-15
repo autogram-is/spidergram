@@ -35,18 +35,12 @@ classDiagram
   OccursOn --|> Resource
 ```
 
-These two interfaces should also be defined by the Patterns system: 
+A PatternExtractor function signature should also be registered by the Patterns system: 
 
 ```
-PatternInstances = {
-  pattern:DesignPattern;
-  instances:OccursOn[];
-}
-
-PatternExtractor = Extractor<Resource, PatternInstances[]>
-
+PatternExtractor = Extractor<Resource, OccursOn[]>
 // Alternately:
-PatternExtractor = (r:Resource) => PatternInstances[];
+PatternExtractor = (r:Resource) => OccursOn[];
 ```
 
 A PatternExtractor, given a Resource, is expected to parse it for instances of one or more design patterns, create an OccursOn object describing each instance that was found, and return them all keyed by pattern. Most PatternExtractors will probably find just one pattern, but makes support for multi-pattern extractors explicit.
@@ -54,3 +48,26 @@ A PatternExtractor, given a Resource, is expected to parse it for instances of o
 This approach makes it possible to use "mega-extractors" that are responsible for many different kinds of patterns, or smaller pattern-specific ones that might be reused or repurposed.
 
 By convention, the extra properties added to the OccursOn relationship should contain text, URLs, numerical data, and other properties that are explicitly part of the design pattern itself. For example, a CTA pattern might have a 'CTA Title', a 'Subhead,' a 'style', and a destination URL. Capturing those four pieces of information and adding them to the OccursOn object each time the pattern is encountered makes it possible to compare pattern occurrences in later analysis steps.
+
+Some (currently speculative) example code based on the existing conventions of the codebase:
+
+```
+const cheerio = new CheerioParser();
+
+const IbmCarbonCard:PatternExtractor = (r:Resource) => {
+  const occurrences:OccursOn[] = [];
+  const c = Pattern.load('Card');
+  const items = cheerio.load(r.body).('$.bx--tile').forEach((element) => {
+    let cardProperties = { 
+      heading: ...,
+      eyebrow: ...,
+      copy: ...,
+      image: ...,
+      variation: ...,
+      cta: ...
+    };
+    occurrences.push(c.occursOn(r, cardProperties));
+  });
+  return occurrences;
+}
+```
