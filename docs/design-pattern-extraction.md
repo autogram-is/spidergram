@@ -35,7 +35,7 @@ classDiagram
   OccursOn --|> Resource
 ```
 
-These two interfaces should also be defined by the Patterns system: 
+These Typescript Types are also be defined by the Patterns system: 
 
 ```
 PatternInstances = {
@@ -49,7 +49,7 @@ PatternExtractor = Extractor<Resource, PatternInstances[]>
 PatternExtractor = (r:Resource) => PatternInstances[];
 ```
 
-A PatternExtractor, given a Resource, is expected to parse it for instances of one or more design patterns, create an OccursOn object describing each instance that was found, and return them all keyed by pattern. Most PatternExtractors will probably find just one pattern, but makes support for multi-pattern extractors explicit.
+A PatternExtractor is a function that, given a Resource and potentially some configuration options, is expected to parse the Resource for instances of one or more design patterns, create an OccursOn object describing each instance of the pattern that was found, and return them all keyed by pattern. Most PatternExtractors will probably find just one pattern, but makes support for multi-pattern extractors explicit. The application or script that called the PatternExtractor is responsible for persisting the returned data; the PatternExtractor's job is just to parse it out of the Resource.
 
 This approach makes it possible to use "mega-extractors" that are responsible for many different kinds of patterns, or smaller pattern-specific ones that might be reused or repurposed.
 
