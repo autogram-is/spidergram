@@ -1,2 +1,2 @@
-# spidergram
-Umbrella project for the Spidergram family of crawling and analysis tools
+# Spidergram: Structural analysis tools for complex web sites
+
