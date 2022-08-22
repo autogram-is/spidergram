@@ -44,4 +44,4 @@ Fixtures in the `known` directory are used to reproduce a fixed site structure â
 
 ## Snapshots
 
-The `shapshots` directory contains recorded HTTP responses obtained from real-world servers, mostly representative of odd or extreme edge cases. They'll accumulate as we go.
+The `shapshots` directory contains recorded HTTP responses obtained from real-world servers, mostly representative of odd or extreme edge cases or well-known home pages. They'll accumulate as we go, and are used with `ava-nock` during testing.
