@@ -9,7 +9,7 @@ import {
 } from 'got-scraping';
 import { FingerprintGenerator } from 'fingerprint-generator';
 import { Entity } from '@autogram/autograph';
-import { Filter } from '../types.js';
+import { Filter } from '../util/index.js';
 import {
   UniqueUrl,
   Resource,

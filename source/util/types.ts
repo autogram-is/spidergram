@@ -1,17 +1,5 @@
 import { Dictionary } from '@autogram/autograph';
 
-export {
-  ParsedUrl,
-  NormalizedUrl,
-  ParsedUrlSet,
-  NormalizedUrlSet,
-  UrlFilters,
-  UrlMutators,
-} from '@autogram/url-tools';
-
-export { Dictionary } from '@autogram/autograph';
-export { JsonObject, JsonValue } from 'type-fest';
-
 export type Filter<T> = (input: T, ...args: any[]) => boolean;
 export type Mutator<T> = (input: T, ...args: any[]) => T;
 export type Extractor<T, D = Dictionary> = (input: T, ...args: any[]) => D;

@@ -2,7 +2,7 @@ import { performance } from 'node:perf_hooks';
 import PQueue from 'p-queue';
 import { GraphLike, UniqueUrl, UniqueUrlSet, Entity, Resource, Status, RespondsWith } from '../graph/index.js';
 import { Fetcher } from '../fetch/index.js';
-import { ParsedUrl, Filter, FilterSet } from '../types.js';
+import { ParsedUrl, Filter, FilterSet } from '../util/index.js';
 import { Crawler } from './crawler.js';
 
 export class BatchCrawler extends Crawler {

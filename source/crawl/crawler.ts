@@ -2,7 +2,7 @@ import PQueue from 'p-queue';
 import { EventEmitter } from 'eventemitter3';
 import { GraphLike, UniqueUrlSet } from '../graph/index.js';
 import { Fetcher } from '../fetch/index.js';
-import { Filter, FilterSet, INTERVALS } from '../types.js';
+import { Filter, FilterSet, INTERVALS } from '../util/types.js';
 
 export interface ConcurrencyOptions {
   concurrency: number;
