@@ -1,10 +1,11 @@
+import { PartialDeep } from 'type-fest';
 import PQueue from 'p-queue';
 import { EventEmitter } from 'eventemitter3';
-import { GraphLike, UniqueUrlSet } from '../graph/index.js';
+import { GraphLike, Entity, UniqueUrlSet } from '../graph/index.js';
 import { Fetcher } from '../fetch/index.js';
-import { Filter, FilterSet, INTERVALS } from '../util/types.js';
+import { ParsedUrl, Filter, FilterSet, INTERVALS } from '../util/index.js';
 
-export interface ConcurrencyOptions {
+export interface ConcurrencySettings {
   concurrency: number;
   interval: number;
   intervalCap: number;
@@ -12,46 +13,63 @@ export interface ConcurrencyOptions {
   autoStart: boolean;
 }
 
-const concurrencyDefaults: ConcurrencyOptions = {
-  concurrency: 20,
-  interval: INTERVALS.second,
-  intervalCap: 5,
-  timeout: INTERVALS.minute * 3,
-  autoStart: false,
-};
-
-export const CrawlRules: FilterSet<ParsedUrl> = {
-  check: (url: ParsedUrl) => true,
-  fetch: (url: ParsedUrl) => true,
-  follow: (url: ParsedUrl) => true,
-  ignore: (url: ParsedUrl) => true,
+export interface CrawlerRules extends FilterSet<ParsedUrl> {
+  check: Filter<ParsedUrl>,
+  fetch: Filter<ParsedUrl>,
+  follow: Filter<ParsedUrl>,
+  ignore: Filter<ParsedUrl>
 }
 
+export interface CrawlerOptions {
+  rules: CrawlerRules,
+  concurrency: ConcurrencySettings
+}
+
+export const defaultCrawlOptions: CrawlerOptions = {
+  rules: {
+    check: (url: ParsedUrl) => true,
+    fetch: (url: ParsedUrl) => true,
+    follow: (url: ParsedUrl) => true,
+    ignore: (url: ParsedUrl) => true,  
+  },
+  concurrency: {
+    concurrency: 20,
+    interval: INTERVALS.second,
+    intervalCap: 5,
+    timeout: INTERVALS.minute * 3,
+    autoStart: false,  
+  }
+};
 export abstract class Crawler extends EventEmitter {
   queue: PQueue;
-  
+  should: CrawlerRules;
+  concurrency: ConcurrencySettings;
+
   constructor(
     public graph: GraphLike,
     public fetcher: Fetcher,
-    throttle: Partial<ConcurrencyOptions> = {} 
+    customOptions: Partial<CrawlerOptions> = {} 
 ) {
     super();
-    this.queue = new PQueue({
-      ...concurrencyDefaults,
-      ...throttle
-    });
+    const options: CrawlerOptions = {
+      ...defaultCrawlOptions
+    };
+    if (customOptions.rules) {
+      options.rules =  {
+        ...options.rules,
+        ...customOptions.rules
+      };
+      if (customOptions.rules) 
+        options.concurrency =  {
+          ...options.concurrency,
+          ...customOptions.concurrency
+        };
+    };
+
+    this.should = options.rules;
+    this.concurrency = options.concurrency;
+    this.queue = new PQueue(options.concurrency);
   }
 
-  abstract crawl(urls?: UniqueUrlSet): Promise<void>;
+  abstract crawl(urls?: UniqueUrlSet): Promise<Entity[]>
 }
-
-export type CrawlUpdate = {
-  message: string;
-  status: {
-    processed: number;
-    discovered: number;
-    remaining: number;
-    failed: number;
-  };
-  complete: boolean;
-};

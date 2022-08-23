@@ -1,15 +1,15 @@
-import { fileURLToPath } from 'node:url';
-import { sync as mkdirp } from 'mkdirp';
+import { Merge } from 'type-fest';
 import {
   gotScraping,
   Request,
   RequestError,
   PlainResponse,
   OptionsInit,
+  Headers,
+  got
 } from 'got-scraping';
-import { FingerprintGenerator } from 'fingerprint-generator';
+import { FingerprintGenerator, HeaderGeneratorOptions } from 'fingerprint-generator';
 import { Entity } from '@autogram/autograph';
-import { Filter } from '../util/index.js';
 import {
   UniqueUrl,
   Resource,
@@ -18,64 +18,73 @@ import {
   RequestShape,
   RespondsWith,
 } from '../graph/index.js';
-import { Fetcher } from './fetcher.js';
+import { defaultFetcherOptions, Fetcher, FetcherOptions } from './fetcher.js';
 import { StreamDownloader } from './stream-downloader.js';
 import { HEADER_PRESETS } from './header-presets.js';
+import { Options } from 'got';
 
-export type GotRules = {
-  store: Filter<ResponseShape>;
-  download: Filter<ResponseShape>;
-  discard: Filter<ResponseShape>;
-};
+type GotFetcherOptions = FetcherOptions & {
+  gotConfig: OptionsInit;
+}
+
+const defaultGotFetcherOptions: GotFetcherOptions = {
+  ...defaultFetcherOptions,
+  gotConfig: {
+    throwHttpErrors: false,
+    followRedirect: true,
+    headerGenerator: new FingerprintGenerator(),
+    headerGeneratorOptions: HEADER_PRESETS.MODERN_DESKTOP,
+  } as OptionsInit
+}
 
 export class GotFetcher extends Fetcher {
-  options: OptionsInit;
-  should: GotRules;
-  downloadPath: string;
+  gotConfig: OptionsInit;
+
   constructor(
-    options: OptionsInit = {},
-    rules: Partial<GotRules> = {},
-    downloadPath?: string,
+    customOptions: Partial<GotFetcherOptions> = {},
   ) {
     super();
-    this.should = {
-      store: () => true,
-      download: () => true,
-      discard: () => false,
-      ...rules,
+    const options: GotFetcherOptions = {
+      ...defaultGotFetcherOptions,
+      ...customOptions
     };
-    this.options = {
+
+    this.gotConfig = {
       throwHttpErrors: false,
       followRedirect: true,
       headerGenerator: new FingerprintGenerator(),
       headerGeneratorOptions: HEADER_PRESETS.MODERN_DESKTOP,
       ...options,
     };
-    if (this.options.headers === undefined) {
-      this.options.headers = {};
+    if (this.gotConfig.headers === undefined) {
+      this.gotConfig.headers = options.headers;
+    } else {
+      this.gotConfig.headers = {
+        ...this.gotConfig.headers,
+        ...options.headers
+      }
     }
-
-    const defaultDir = fileURLToPath(
-      new URL('/data/downloads', import.meta.url),
-    );
-    this.downloadPath = downloadPath ?? defaultDir;
-    mkdirp(this.downloadPath);
   }
 
   async check(url: UniqueUrl): Promise<Entity[]> {
     return new Promise<Entity[]>((resolve, reject) => {
-      this.options.headers!.referer = url.url;
-      try {
-        const r = gotScraping.head(url.url, this.options);
 
-        /**
-        .then((r:Response) => {
-          resolve(this.statusFromResponse(url, r.request.options, r))
-          const s = new Status(r.url, r.statusCode, r.statusMessage, r.headers);
-          const rw = new RespondsWith(url, s, r.request.options);
-          resolve([s, rw]);
-        });
-        */
+      const requestOptions: OptionsInit = {
+        url: url.url,
+        headers: {
+          referer: url.referer,
+        },
+        ...this.gotConfig,
+      }
+
+      try {
+        gotScraping.head(requestOptions)
+          .then((r:Response) => {
+            resolve(this.statusFromResponse(url, r.request.options, r))
+            const s = new Status(r.url, r.statusCode, r.statusMessage, r.headers);
+            const rw = new RespondsWith(url, s, r.request.options);
+            resolve([s, rw]);
+          });
       } catch (error: unknown) {
         if (error instanceof RequestError) {
           const s = new Status(url.url, -1, error.message);
@@ -91,15 +100,18 @@ export class GotFetcher extends Fetcher {
   async fetch(url: UniqueUrl): Promise<Entity[]> {
     let stream: Request;
     let result: Promise<Entity[]>;
-    this.options.headers!.referer = url.url;
+
+    const requestOptions: OptionsInit = {
+      url: url.url,
+      headers: {
+        referer: url.referer,
+      },
+      ...this.gotConfig,
+    }
 
     return new Promise<Entity[]>((resolve, reject) => {
       try {
-        stream = gotScraping.stream(url.url, {
-          ...this.options,
-          isStream: true,
-        });
-        stream
+        const stream = gotScraping.stream(requestOptions)
           .on('downloadProgress', (p) => this.emit('downloadProgress', p))
           .once('response', async (response: PlainResponse) => {
             const requestOptions = stream.response!.request.options;
