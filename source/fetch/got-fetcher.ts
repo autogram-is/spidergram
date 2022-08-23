@@ -21,7 +21,6 @@ import {
 import { defaultFetcherOptions, Fetcher, FetcherOptions } from './fetcher.js';
 import { StreamDownloader } from './stream-downloader.js';
 import { HEADER_PRESETS } from './header-presets.js';
-import { Options } from 'got';
 
 type GotFetcherOptions = FetcherOptions & {
   gotConfig: OptionsInit;
