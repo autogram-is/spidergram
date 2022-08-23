@@ -1,9 +1,10 @@
-import { fileURLToPath } from 'node:url';
 import { sync as mkdirp } from 'mkdirp';
 import { EventEmitter } from 'eventemitter3';
 import { Entity } from '@autogram/autograph';
+import { FingerprintGenerator, HeaderGeneratorOptions } from 'fingerprint-generator';
+import { BROWSER_PRESETS } from './browser-presets.js';
 import { FilterSet, Filter, Dictionary } from '../util/index.js';
-import { UniqueUrl, ResponseShape } from '../graph/index.js';
+import { UniqueUrl, HeaderShape, RequestShape, ResponseShape } from '../graph/index.js';
 
 export interface FetchRules extends FilterSet<ResponseShape> {
   store: Filter<ResponseShape>;
@@ -12,8 +13,8 @@ export interface FetchRules extends FilterSet<ResponseShape> {
 }
 export interface FetcherOptions {
   rules: FetchRules,
-  downloadPath: string,
   headers: Dictionary<string>,
+  browserPreset: Partial<HeaderGeneratorOptions>,
 }
 
 export const defaultFetcherOptions: FetcherOptions = {
@@ -22,13 +23,13 @@ export const defaultFetcherOptions: FetcherOptions = {
     download: () => true,
     discard: () => false,
   },
-  downloadPath: fileURLToPath(new URL('/data/downloads', import.meta.url)),
   headers: {},
+  browserPreset: BROWSER_PRESETS.MODERN_DESKTOP
 }
 export abstract class Fetcher extends EventEmitter {
   should: FetchRules;
-  downloadPath: string;
   headers: Dictionary<string>;
+  browserPreset: Partial<HeaderGeneratorOptions>;
 
   constructor(customOptions: Partial<FetcherOptions> = {}) {
     super();
@@ -38,10 +39,8 @@ export abstract class Fetcher extends EventEmitter {
     }
 
     this.should = options.rules;
-    this.downloadPath = options.downloadPath;
     this.headers = options.headers;
-
-    mkdirp(this.downloadPath);
+    this.browserPreset = options.browserPreset;
   }
   
   abstract fetch(url: UniqueUrl, ...args: unknown[]): Promise<Entity[]>;

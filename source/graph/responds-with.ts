@@ -1,12 +1,8 @@
-import { Reference, Edge, Dictionary } from '@autogram/autograph';
+import { Dictionary } from '../util/index.js';
+import { Reference, Edge } from '@autogram/autograph';
 import { UniqueUrl, Resource, Status } from './index.js';
-import { HeaderShape } from './status.js';
+import { HeaderShape, RequestShape } from './index.js';
 
-export interface RequestShape {
-  method?: string;
-  url?: string | URL;
-  headers: HeaderShape;
-}
 export class RespondsWith extends Edge implements RequestShape {
   predicate = 'responds_with';
   method: string;

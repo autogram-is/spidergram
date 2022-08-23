@@ -6,55 +6,55 @@ import { HeaderGeneratorOptions } from 'fingerprint-generator';
  *
  * @type {Record<string, Partial<HeaderGeneratorOptions>>}
  */
-export const HEADER_PRESETS: Record<
+export const BROWSER_PRESETS: Record<
   string,
   Partial<HeaderGeneratorOptions>
 > = {};
 
-HEADER_PRESETS.MODERN_DESKTOP = {
+BROWSER_PRESETS.MODERN_DESKTOP = {
   browserListQuery: 'last 5 versions',
 };
-HEADER_PRESETS.MODERN_MOBILE = {
-  ...HEADER_PRESETS.MODERN_DESKTOP,
+BROWSER_PRESETS.MODERN_MOBILE = {
+  ...BROWSER_PRESETS.MODERN_DESKTOP,
   devices: ['mobile'],
 };
-HEADER_PRESETS.MODERN_LINUX = {
-  ...HEADER_PRESETS.MODERN_DESKTOP,
+BROWSER_PRESETS.MODERN_LINUX = {
+  ...BROWSER_PRESETS.MODERN_DESKTOP,
   operatingSystems: ['linux'],
 };
-HEADER_PRESETS.MODERN_LINUX_FIREFOX = {
+BROWSER_PRESETS.MODERN_LINUX_FIREFOX = {
   browserListQuery: 'last 5 firefox versions',
   operatingSystems: ['linux'],
 };
-HEADER_PRESETS.MODERN_LINUX_CHROME = {
+BROWSER_PRESETS.MODERN_LINUX_CHROME = {
   browserListQuery: 'last 5 chrome versions',
   operatingSystems: ['linux'],
 };
-HEADER_PRESETS.MODERN_WINDOWS = {
-  ...HEADER_PRESETS.MODERN_DESKTOP,
+BROWSER_PRESETS.MODERN_WINDOWS = {
+  ...BROWSER_PRESETS.MODERN_DESKTOP,
   operatingSystems: ['windows'],
 };
-HEADER_PRESETS.MODERN_WINDOWS_FIREFOX = {
+BROWSER_PRESETS.MODERN_WINDOWS_FIREFOX = {
   browserListQuery: 'last 5 firefox versions',
   operatingSystems: ['windows'],
 };
-HEADER_PRESETS.MODERN_WINDOWS_CHROME = {
+BROWSER_PRESETS.MODERN_WINDOWS_CHROME = {
   browserListQuery: 'last 5 chrome versions',
   operatingSystems: ['windows'],
 };
-HEADER_PRESETS.MODERN_MACOS = {
-  ...HEADER_PRESETS.MODERN_DESKTOP,
+BROWSER_PRESETS.MODERN_MACOS = {
+  ...BROWSER_PRESETS.MODERN_DESKTOP,
   operatingSystems: ['macos'],
 };
-HEADER_PRESETS.MODERN_MACOS_FIREFOX = {
+BROWSER_PRESETS.MODERN_MACOS_FIREFOX = {
   browserListQuery: 'last 5 firefox versions',
   operatingSystems: ['macos'],
 };
-HEADER_PRESETS.MODERN_MACOS_CHROME = {
+BROWSER_PRESETS.MODERN_MACOS_CHROME = {
   browserListQuery: 'last 5 chrome versions',
   operatingSystems: ['macos'],
 };
-HEADER_PRESETS.MODERN_ANDROID = {
-  ...HEADER_PRESETS.MODERN_MOBILE,
+BROWSER_PRESETS.MODERN_ANDROID = {
+  ...BROWSER_PRESETS.MODERN_MOBILE,
   operatingSystems: ['android'],
 };

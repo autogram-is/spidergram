@@ -1,12 +1,9 @@
-import { Merge } from 'type-fest';
 import {
   gotScraping,
   Request,
   RequestError,
   PlainResponse,
   OptionsInit,
-  Headers,
-  got
 } from 'got-scraping';
 import { FingerprintGenerator, HeaderGeneratorOptions } from 'fingerprint-generator';
 import { Entity } from '@autogram/autograph';
@@ -20,7 +17,7 @@ import {
 } from '../graph/index.js';
 import { defaultFetcherOptions, Fetcher, FetcherOptions } from './fetcher.js';
 import { StreamDownloader } from './stream-downloader.js';
-import { HEADER_PRESETS } from './header-presets.js';
+import { HEADER_PRESETS } from './browser-presets.js';
 
 type GotFetcherOptions = FetcherOptions & {
   gotConfig: OptionsInit;

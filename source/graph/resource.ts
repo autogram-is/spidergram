@@ -1,6 +1,6 @@
-import { IncomingHttpHeaders } from 'node:http';
-import { Node, Dictionary } from '@autogram/autograph';
-import { ResponseShape, HeaderShape } from './status.js';
+import { Dictionary } from '../util/index.js';
+import { Node } from '@autogram/autograph';
+import { ResponseShape, HeaderShape } from './index.js';
 
 export class Resource extends Node implements ResponseShape {
   type = 'resource';

@@ -1,13 +1,6 @@
-import { Node, Dictionary } from '@autogram/autograph';
-
-export interface HeaderShape extends Dictionary<number | string | string[]> {}
-
-export interface ResponseShape {
-  url?: string;
-  statusCode?: number;
-  statusMessage?: string;
-  headers: HeaderShape,
-}
+import { Dictionary } from '../util/index.js';
+import { Node } from '@autogram/autograph';
+import { HeaderShape, ResponseShape } from './index.js';
 
 export class Status extends Node implements ResponseShape {
   type = 'status';
