@@ -1,10 +1,12 @@
 import { Node, Dictionary } from '@autogram/autograph';
 
+export interface HeaderShape extends Dictionary<number | string | string[]> {}
+
 export interface ResponseShape {
   url?: string;
   statusCode?: number;
   statusMessage?: string;
-  headers: Dictionary<number | string | string[]>,
+  headers: HeaderShape,
 }
 
 export class Status extends Node implements ResponseShape {
@@ -15,7 +17,7 @@ export class Status extends Node implements ResponseShape {
     public url: string,
     public statusCode: number = -1,
     public statusMessage: string = '',
-    headers: Dictionary<string | string[]> = {},
+    headers: HeaderShape,
   ) {
     super('status');
   }

@@ -1,13 +1,13 @@
 import { IncomingHttpHeaders } from 'node:http';
 import { Node, Dictionary } from '@autogram/autograph';
-import { ResponseShape } from './status.js';
+import { ResponseShape, HeaderShape } from './status.js';
 
 export class Resource extends Node implements ResponseShape {
   type = 'resource';
   url!: string;
   statusCode!: number;
   statusMessage!: string;
-  headers!: IncomingHttpHeaders;
+  headers!: HeaderShape;
   body?: string;
   filePath?: string;
 
@@ -15,7 +15,7 @@ export class Resource extends Node implements ResponseShape {
     url: string,
     statusCode?: number,
     statusMessage?: string,
-    headers: IncomingHttpHeaders = {},
+    headers: HeaderShape = {},
     body = '',
     filePath = '',
   ) {
