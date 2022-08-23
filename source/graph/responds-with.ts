@@ -1,17 +1,16 @@
-import { OutgoingHttpHeaders } from 'node:http';
 import { Reference, Edge, Dictionary } from '@autogram/autograph';
 import { UniqueUrl, Resource, Status } from './index.js';
 
 export interface RequestShape {
   method?: string;
   url?: string | URL;
-  headers: OutgoingHttpHeaders;
+  headers: Dictionary<number | string | string[]>;
 }
 export class RespondsWith extends Edge implements RequestShape {
   predicate = 'responds_with';
   method: string;
   url: string | URL;
-  headers: OutgoingHttpHeaders;
+  headers: Dictionary<number | string | string[]>;
 
   constructor(
     uniqueUrl: Reference<UniqueUrl>,
