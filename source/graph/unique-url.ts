@@ -27,6 +27,7 @@ export class UniqueUrl extends Node {
       try {
         const parsed = new NormalizedUrl(url, baseUrl);
         this.url = parsed.href;
+        this.parsed = parsed;
         this.parsable = true;
       } catch (error: unknown) {
         if (error instanceof TypeError) {
@@ -38,7 +39,7 @@ export class UniqueUrl extends Node {
       }
     } else {
       this.url = url.href;
-      this.pared = url;
+      this.parsed = url;
       this.parsable = true;
     }
 
