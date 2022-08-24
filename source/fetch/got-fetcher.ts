@@ -3,6 +3,9 @@ import { gotScraping, Response, RequestError } from "got-scraping";
 import { Fetcher } from "../fetch/index.js";
 import { Entity, UniqueUrl, RequestShape, ResponseShape, Status, Resource, RespondsWith } from '../graph/index.js';
 import { DownloaderHelper, DownloadEndedStats, DownloaderHelperOptions } from 'node-downloader-helper';
+import * as fs from 'node:fs';
+import { Buffer } from 'node:buffer';
+import { StreamDownloader } from '../fetch/index.js';
 import mkdirp from 'mkdirp';
 
 const gotDefaultOptions = {
@@ -53,22 +56,16 @@ export class GotFetcher extends Fetcher {
 
     const directory = [this.workingDirectory, 'downloads', resource.id].join('/');
     mkdirp.sync(directory);
-
-    const downloadOptions: DownloaderHelperOptions = {
-      body: req.body,
-      retry: true,
-      headers: req.headers,
-    };
+    const fileName = StreamDownloader.getFileName(res.headers, uu.parsed!);
+    const filePath = [directory, fileName].join('/');
 
     return new Promise((resolve, reject) => {
-      new DownloaderHelper(uu.url, directory, downloadOptions)
-        .on('end', (info: DownloadEndedStats) => {
-          resource.filePath = info.filePath;
-          resolve([resource, rw]);
-        })
-        .on('error', (err: unknown) => reject(err))
-        .start().catch((err: unknown) => reject(err));
+      fs.writeFile(filePath, res.rawBody, (err: unknown) => {
+        if (is.error(err)) reject(err);
+        resource.filePath = filePath;
+        resolve([resource, rw]);
       });
+    });
   }
 
   protected async savedResource(uu: UniqueUrl, res: Response): Promise<Entity[]> {
