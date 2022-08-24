@@ -1,13 +1,13 @@
 import is from '@sindresorhus/is';
 import { gotScraping, Progress, Response, RequestError } from "got-scraping";
-import { Fetcher } from "./fetcher.js";
+import { Fetcher, StreamDownloader, ResponseFilters } from "../fetch/index.js";
 import { Entity, UniqueUrl, RequestShape, ResponseShape, Status, Resource, RespondsWith } from '../graph/index.js';
-import { ResponseFilters } from "./index.js";
 
 const gotDefaultOptions = {
   throwHttpErrors: false,
   followRedirect: true,
 };
+
 export class GotFetcher extends Fetcher {
   check(uu: UniqueUrl, ...args: unknown[]): Promise<Entity[]> {
     const customHeaders = uu.referer ? { referer: uu.referer } : {};
@@ -47,11 +47,21 @@ export class GotFetcher extends Fetcher {
           const req = this.normalizeRequestShape(stream);
 
           if (this.rules.discard(resp) || ResponseFilters.isError(resp)) {
+            stream.destroy();
             resolve(this.statusFromResponse(uu, stream));
           } else if (this.rules.download(resp)) {
+            this.resourceFromDownload(uu, stream)
+              .then((entities: Entity[]) => {
+                stream.destroy();
+                resolve(entities);
+              });
             console.log('downloading');
           } else if (this.rules.store(resp)) {
-            console.log('fetching');
+            this.resourceFromBody(uu, stream)
+            .then((entities: Entity[]) => {
+              stream.destroy();
+              resolve(entities);
+            });
           }
         })
         .on('downloadProgress', (progress: Progress) => {
@@ -66,22 +76,57 @@ export class GotFetcher extends Fetcher {
     });
   }
 
-  private async resourceFromBody(uu: UniqueUrl, stream: Response): Promise<Entity[]> {
-    return [];
+  protected async resourceFromBody(uu: UniqueUrl, stream: Response): Promise<Entity[]> {
+    return new Promise((resolve, reject) => {
+      StreamDownloader.stringify(stream).then(
+        (body: string) => {
+          const resource = new Resource(
+            stream.url,
+            stream.statusCode,
+            stream.statusMessage,
+            stream.headers,
+            body,
+          );
+          const rw = new RespondsWith(uu, resource, this.normalizeRequestShape(stream));
+          resolve([resource, rw]);
+        })
+        .catch((error: unknown) => {
+          reject(error);
+        })
+        .finally(() => {
+          stream.destroy();
+        })
+      });
   }
 
-  private async resourceFromDownload(uu: UniqueUrl, stream: Response): Promise<Entity[]> {
-    return [];
+  protected async resourceFromDownload(uu: UniqueUrl, stream: Response): Promise<Entity[]> {
+    const resource = new Resource(stream.url, stream.statusCode, stream.statusMessage, stream.headers);
+    const dir = [this.filePath, 'download', resource.id].join('/');
+
+    return new Promise((resolve, reject) => {
+      StreamDownloader.download(stream, dir)
+        .then((value: string) => {
+          resource.filePath = value;
+          const rw = new RespondsWith(uu, resource, this.normalizeRequestShape(stream));
+          resolve([resource, rw]);
+        })
+        .catch((error: unknown) => {
+          reject(error);
+        })
+        .finally(() => {
+          stream.destroy();
+        })
+      });
   }
 
-  private statusFromResponse(uu: UniqueUrl, res: Response): Entity[] {
+  protected statusFromResponse(uu: UniqueUrl, res: Response): Entity[] {
     const req = this.normalizeRequestShape(res);
     const s = new Status(res.url, res.statusCode, res.statusMessage, res.headers);
     const rw = new RespondsWith(uu, s, req);
     return [s, rw];
   }
 
-  private statusFromError(uu: UniqueUrl, err: RequestError): Entity[] {
+  protected statusFromError(uu: UniqueUrl, err: RequestError): Entity[] {
     let req: RequestShape;
     if (is.object(err.response)) {
       req = this.normalizeRequestShape(err.response);
@@ -97,7 +142,7 @@ export class GotFetcher extends Fetcher {
     return [s, rw];
   }
 
-  private normalizeResponseShape(res: Response): ResponseShape {
+  protected normalizeResponseShape(res: Response): ResponseShape {
     const rs: ResponseShape = {
       url: res.url,
       headers: res.request.options.headers,
@@ -107,7 +152,7 @@ export class GotFetcher extends Fetcher {
     return rs;
   }
 
-  private normalizeRequestShape(res: Response): RequestShape {
+  protected normalizeRequestShape(res: Response): RequestShape {
     const rs: RequestShape = {
       method: res.request.options.method,
       url: res.url,
