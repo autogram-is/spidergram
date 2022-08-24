@@ -4,7 +4,7 @@ import { Fetcher } from "../fetch/index.js";
 import { Entity, UniqueUrl, RequestShape, ResponseShape, Status, Resource, RespondsWith } from '../graph/index.js';
 import * as fs from 'node:fs';
 import { Buffer } from 'node:buffer';
-import { StreamDownloader } from '../fetch/index.js';
+import { getResponseFilename } from '../fetch/get-response-filename.js';
 import mkdirp from 'mkdirp';
 
 const gotDefaultOptions = {
@@ -55,7 +55,7 @@ export class GotFetcher extends Fetcher {
 
     const directory = [this.workingDirectory, 'downloads', resource.id].join('/');
     mkdirp.sync(directory);
-    const fileName = StreamDownloader.getFileName(res.headers, uu.parsed!);
+    const fileName = getResponseFilename(res.headers, uu.parsed!);
     const filePath = [directory, fileName].join('/');
 
     return new Promise((resolve, reject) => {
