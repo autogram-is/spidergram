@@ -29,11 +29,11 @@ export class SimpleCrawler extends Crawler {
       if (this.rules.ignore(parsed)) {
         resolve([url]);
       } else if (this.rules.fetch(parsed)) {
-        this.fetcher.fetch(url).then(entities => {
+        this.fetcher.fetch(url).then((entities: Entity[]) => {
           resolve(entities);
         });
       } else if (this.rules.check(parsed)) {
-        this.fetcher.check(url).then(entities => {
+        this.fetcher.fetch(url).then((entities: Entity[]) => {
           resolve(entities);
         });
       }

@@ -55,6 +55,5 @@ export abstract class Fetcher extends EventEmitter {
     }
   }
   
-  abstract check(url: UniqueUrl, ...args: unknown[]): Promise<Entity[]>;
   abstract fetch(url: UniqueUrl, ...args: unknown[]): Promise<Entity[]>;
 }
