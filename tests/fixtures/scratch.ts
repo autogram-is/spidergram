@@ -1,19 +1,22 @@
-import { Pipeline, Graph, Crawl, Fetch, Util } from '../../source/index.js';
-import { gotScraping, Response } from 'got-scraping';
-import { BROWSER_PRESETS } from '../../source/fetch/index.js';
+import { Graph, Fetch } from '../../source/index.js';
+import { got, Progress } from 'got-scraping';
+import { UniqueUrl, Entity } from '../../source/graph/index.js';
+import { StreamDownloader } from '../../source/fetch/stream-downloader.js';
+import { ParsedUrl } from '@autogram/url-tools';
 
-const url = new Graph.UniqueUrl('https://example.com');
+
+const uu = new Graph.UniqueUrl('https://example.com');
 const headers: Graph.HeaderShape = {
   referer: 'https://google.com',
 }
 
-const f = new Fetch.GotFetcher();
-f.check(url).then((es: Graph.Entity[]) => console.log(es));
+const f = new Fetch.GotFetcher()
+  .on('status', (uu: UniqueUrl, statusCode: number) => console.log(`HTTP ${statusCode} - ${uu.url}`))
+  .on('save', (uu: UniqueUrl, statusCode: number) => console.log(`Saved - ${uu.url}`))
+  .on('download', (uu: UniqueUrl) => console.log(`Downloading - ${uu.url}`))
+  .on('downloadProgress', (uu: UniqueUrl, progress: Progress) => console.log(`Downloading (${progress.percent}%) - ${uu.url}`))
+  .on('error', (err: Error) => console.log(`ERROR ${err}`))
 
-/**
-const s = gotScraping.head(url, options).then((value: Response<string>) => {
-  console.log(value.url);
-  console.log(value.statusCode);
-  console.log(value.headers);
-});
-**/
+f.check(uu, headers)
+  .then((ent: Entity[]) => console.log(ent))
+  .catch((reason: any) => console.log(reason));
