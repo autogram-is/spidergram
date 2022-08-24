@@ -4,13 +4,12 @@ import { HeaderShape, ResponseShape } from './index.js';
 
 export class Status extends Node implements ResponseShape {
   type = 'status';
-  headers!: Dictionary<number | string | string[]>;
 
   constructor(
     public url: string,
     public statusCode: number = -1,
     public statusMessage: string = '',
-    headers: HeaderShape,
+    public headers: HeaderShape = {},
   ) {
     super('status');
   }

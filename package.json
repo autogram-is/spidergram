@@ -17,7 +17,8 @@
     "compile": "tsc",
     "prepare": "run-s clean compile",
     "pretest": "run-s clean compile",
-    "posttest": "npm run lint"
+    "posttest": "npm run lint",
+    "scratch": "run-s clean compile; node dist/tests/fixtures/scratch.js"
   },
   "files": [
     "dist/src/**/*"
@@ -41,7 +42,8 @@
   },
   "ava": {
     "files": [
-      "tests/*"
+      "tests/**/*",
+      "!tests/fixtures"
     ],
     "typescript": {
       "rewritePaths": {

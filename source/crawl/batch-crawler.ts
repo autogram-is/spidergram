@@ -26,13 +26,13 @@ export class SimpleCrawler extends Crawler {
     const parsed = url.parsed as ParsedUrl;
 
     return new Promise((resolve) => {
-      if (this.should.ignore(parsed)) {
+      if (this.rules.ignore(parsed)) {
         resolve([url]);
-      } else if (this.should.fetch(parsed)) {
+      } else if (this.rules.fetch(parsed)) {
         this.fetcher.fetch(url).then(entities => {
           resolve(entities);
         });
-      } else if (this.should.check(parsed)) {
+      } else if (this.rules.check(parsed)) {
         this.fetcher.check(url).then(entities => {
           resolve(entities);
         });

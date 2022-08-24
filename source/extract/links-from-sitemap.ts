@@ -31,7 +31,7 @@ export const linksFromSitemap = (
     
     // Try to guess the format from the content-type headers.
     let mimeType: MIMEType | undefined;
-    if (mimeType = Mime.parse(r.headers['content-type'] ?? '')) {
+    if (mimeType = Mime.parse(r.headers['content-type']?.toString() ?? '')) {
       // Horrible degenerate text files full of URLs; split on newlines and call it a day.
       if (mimeType.essence === 'text/plain') {
         return r.body.split('\n').map(url => { return { href: url.trim() }} );

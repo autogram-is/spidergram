@@ -17,52 +17,60 @@ export const isError = (response: ResponseShape): boolean => {
 };
 
 export const isText = (response: ResponseShape): boolean => {
-  if ((response.headers['content-type'] ?? '').length === 0) return false;
-  const mime = new MIMEType(response.headers['content-type'] ?? '');
+  const contentType = response.headers['content-type']?.toString() ?? '';
+  if (contentType.length === 0) return false;
+  const mime = new MIMEType(contentType);
   return mime.type === 'text';
 };
 
 export const isHtml = (response: ResponseShape): boolean => {
-  if ((response.headers['content-type'] ?? '').length === 0) return false;
-  const mime = new MIMEType(response.headers['content-type'] ?? '');
+  const contentType = response.headers['content-type']?.toString() ?? '';
+  if (contentType.length === 0) return false;
+  const mime = new MIMEType(contentType);
   return mime.isHTML();
 };
 
 export const isTextData = (response: ResponseShape): boolean => {
-  if ((response.headers['content-type'] ?? '').length === 0) return false;
-  const mime = new MIMEType(response.headers['content-type'] ?? '');
+  const contentType = response.headers['content-type']?.toString() ?? '';
+  if (contentType.length === 0) return false;
+  const mime = new MIMEType(contentType );
   return (
     mime.isXML() || ['json', 'json+ld', 'csv', 'tsv'].includes(mime.subtype)
   );
 };
 
 export const isMedia = (response: ResponseShape): boolean => {
-  if ((response.headers['content-type'] ?? '').length === 0) return false;
-  const mime = new MIMEType(response.headers['content-type'] ?? '');
+  const contentType = response.headers['content-type']?.toString() ?? '';
+  if (contentType.length === 0) return false;
+  const mime = new MIMEType(contentType);
   return ['image', 'video', 'audio'].includes(mime.type);
 };
 
 export const isJavascript = (response: ResponseShape): boolean => {
-  if ((response.headers['content-type'] ?? '').length === 0) return false;
-  const mime = new MIMEType(response.headers['content-type'] ?? '');
+  const contentType = response.headers['content-type']?.toString() ?? '';
+  if (contentType.length === 0) return false;
+  const mime = new MIMEType(contentType);
   return mime.isJavaScript();
 };
 
 export const isDesignAsset = (response: ResponseShape): boolean => {
-  if ((response.headers['content-type'] ?? '').length === 0) return false;
-  const mime = new MIMEType(response.headers['content-type'] ?? '');
+  const contentType = response.headers['content-type']?.toString() ?? '';
+  if (contentType.length === 0) return false;
+  const mime = new MIMEType(contentType);
   return mime.subtype === 'css' || mime.type === 'font';
 };
 
 export const isApp = (response: ResponseShape): boolean => {
-  if ((response.headers['content-type'] ?? '').length === 0) return false;
-  const mime = new MIMEType(response.headers['content-type'] ?? '');
+  const contentType = response.headers['content-type']?.toString() ?? '';
+  if (contentType.length === 0) return false;
+  const mime = new MIMEType(contentType);
   return mime.type === 'application';
 };
 
 export const isPdf = (response: ResponseShape): boolean => {
-  if ((response.headers['content-type'] ?? '').length === 0) return false;
-  const mime = new MIMEType(response.headers['content-type'] ?? '');
+  const contentType = response.headers['content-type']?.toString() ?? '';
+  if (contentType.length === 0) return false;
+  const mime = new MIMEType(contentType);
   return mime.type === 'application' && mime.subtype === 'pdf';
 };
 

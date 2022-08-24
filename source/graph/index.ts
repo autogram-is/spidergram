@@ -17,7 +17,7 @@ export {
   EntityFilter,
 } from '@autogram/autograph';
 
-export interface HeaderShape extends Dictionary<number | string | string[]> {}
+export interface HeaderShape extends Dictionary<string | string[]> {}
 
 export interface RequestShape {
   method: string;

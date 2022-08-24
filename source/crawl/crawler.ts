@@ -1,6 +1,6 @@
 import { PartialDeep } from 'type-fest';
 import PQueue from 'p-queue';
-import { EventEmitter } from 'eventemitter3';
+import { EventEmitter } from 'node:events';
 import { GraphLike, Entity, UniqueUrlSet } from '../graph/index.js';
 import { Fetcher } from '../fetch/index.js';
 import { ParsedUrl, Filter, FilterSet, INTERVALS } from '../util/index.js';
@@ -42,7 +42,7 @@ export const defaultCrawlOptions: CrawlerOptions = {
 };
 export abstract class Crawler extends EventEmitter {
   queue: PQueue;
-  should: CrawlerRules;
+  rules: CrawlerRules;
   concurrency: ConcurrencySettings;
 
   constructor(
@@ -66,7 +66,7 @@ export abstract class Crawler extends EventEmitter {
         };
     };
 
-    this.should = options.rules;
+    this.rules = options.rules;
     this.concurrency = options.concurrency;
     this.queue = new PQueue(options.concurrency);
   }
