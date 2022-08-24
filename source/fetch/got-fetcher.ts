@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { gotScraping, Response, RequestError } from "got-scraping";
 import { Fetcher } from "../fetch/index.js";
 import { Entity, UniqueUrl, RequestShape, ResponseShape, Status, Resource, RespondsWith } from '../graph/index.js';
-import { DownloaderHelper, DownloadEndedStats, DownloaderHelperOptions } from 'node-downloader-helper';
 import * as fs from 'node:fs';
 import { Buffer } from 'node:buffer';
 import { StreamDownloader } from '../fetch/index.js';
