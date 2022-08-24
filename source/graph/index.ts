@@ -27,7 +27,7 @@ export interface RequestShape {
 }
 
 export interface ResponseShape {
-  url?: string;
+  url: string;
   statusCode?: number;
   statusMessage?: string;
   headers: HeaderShape,

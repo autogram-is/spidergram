@@ -1,4 +1,3 @@
-import { fileURLToPath } from 'node:url';
 import { EventEmitter } from 'node:events';
 import { Entity } from '@autogram/autograph';
 import { FingerprintGenerator, HeaderGeneratorOptions } from 'fingerprint-generator';
@@ -13,7 +12,7 @@ export interface FetchRules extends FilterSet<ResponseShape> {
 }
 export interface FetcherOptions {
   rules: FetchRules,
-  filePath: string,
+  downloadDirectory: string,
   customHeaders: HeaderShape,
   browserPreset: Partial<HeaderGeneratorOptions>,
 }
@@ -21,10 +20,10 @@ export interface FetcherOptions {
 export const defaultFetcherOptions: FetcherOptions = {
   rules: {
     store: () => true,
-    download: () => true,
+    download: () => false,
     discard: () => false,
   },
-  filePath: 'download/',
+  downloadDirectory: 'crawl_data',
   customHeaders: {},
   browserPreset: BROWSER_PRESETS.MODERN_DESKTOP
 }
@@ -32,7 +31,7 @@ export abstract class Fetcher extends EventEmitter {
   rules: FetchRules;
   defaultHeaders: HeaderShape;
   browserPreset: Partial<HeaderGeneratorOptions>;
-  filePath: string;
+  downloadDirectory: string;
 
   constructor(customOptions: Partial<FetcherOptions> = {}) {
     super();
@@ -41,7 +40,7 @@ export abstract class Fetcher extends EventEmitter {
       ...customOptions
     }
 
-    this.filePath = fileURLToPath(new URL('/data/downloads', import.meta.url)),
+    this.downloadDirectory = options.downloadDirectory,
     this.rules = options.rules;
     this.defaultHeaders = options.customHeaders;
     this.browserPreset = options.browserPreset;

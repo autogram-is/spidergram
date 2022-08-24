@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { gotScraping, Progress, Response, RequestError } from "got-scraping";
+import { gotScraping, Response, RequestError } from "got-scraping";
 import { Fetcher, StreamDownloader, ResponseFilters } from "../fetch/index.js";
 import { Entity, UniqueUrl, RequestShape, ResponseShape, Status, Resource, RespondsWith } from '../graph/index.js';
 
@@ -9,7 +9,7 @@ const gotDefaultOptions = {
 };
 
 export class GotFetcher extends Fetcher {
-  check(uu: UniqueUrl, ...args: unknown[]): Promise<Entity[]> {
+  async check(uu: UniqueUrl, ...args: unknown[]): Promise<Entity[]> {
     const customHeaders = uu.referer ? { referer: uu.referer } : {};
     const requestOptions = {
       headers: this.buildRequestHeaders(customHeaders),
@@ -32,7 +32,7 @@ export class GotFetcher extends Fetcher {
     });
   }
 
-  fetch(uu: UniqueUrl, ...args: unknown[]): Promise<Entity[]> {
+  async fetch(uu: UniqueUrl, ...args: unknown[]): Promise<Entity[]> {
     const customHeaders = uu.referer ? { referer: uu.referer } : {};
     const requestOptions = {
       headers: this.buildRequestHeaders(customHeaders),
@@ -41,34 +41,33 @@ export class GotFetcher extends Fetcher {
 
     const result: Entity[] = [];
     return new Promise((resolve, reject) => {
-      gotScraping.stream(uu.url, requestOptions)
-        .once('response', (stream: Response) => {
+      gotScraping(uu.url, requestOptions)
+        .on('response', async (stream: Response) => {
           const resp = this.normalizeResponseShape(stream);
           const req = this.normalizeRequestShape(stream);
 
           if (this.rules.discard(resp) || ResponseFilters.isError(resp)) {
-            stream.destroy();
+            this.emit('status', uu, resp.statusCode);
             resolve(this.statusFromResponse(uu, stream));
+
           } else if (this.rules.download(resp)) {
-            this.resourceFromDownload(uu, stream)
+            await this.resourceFromDownload(uu, stream)
+              .then((entities: Entity[]) => {
+                stream.destroy();
+                resolve(entities);
+              })
+          } else if (this.rules.store(resp)) {
+            this.emit('save', uu);
+            await this.resourceFromBody(uu, stream)
               .then((entities: Entity[]) => {
                 stream.destroy();
                 resolve(entities);
               });
-            console.log('downloading');
-          } else if (this.rules.store(resp)) {
-            this.resourceFromBody(uu, stream)
-            .then((entities: Entity[]) => {
-              stream.destroy();
-              resolve(entities);
-            });
           }
         })
-        .on('downloadProgress', (progress: Progress) => {
-          this.emit('downloadProgress', uu, progress);
-        })
-        .once('error', (err: Error) => {
+        .catch((err: Error) => {
           if (err instanceof RequestError) {
+            this.emit('error', err);
             resolve(this.statusFromError(uu, err));
           }
           else reject(err);
@@ -92,30 +91,25 @@ export class GotFetcher extends Fetcher {
         })
         .catch((error: unknown) => {
           reject(error);
-        })
-        .finally(() => {
-          stream.destroy();
-        })
+        });
       });
   }
 
   protected async resourceFromDownload(uu: UniqueUrl, stream: Response): Promise<Entity[]> {
     const resource = new Resource(stream.url, stream.statusCode, stream.statusMessage, stream.headers);
-    const dir = [this.filePath, 'download', resource.id].join('/');
+    const dir = [this.downloadDirectory, 'download', resource.id].join('/');
 
     return new Promise((resolve, reject) => {
-      StreamDownloader.download(stream, dir)
+      const fileName = StreamDownloader.getFileName(stream.headers, uu.parsed!);
+      StreamDownloader.download(stream, dir, fileName)
         .then((value: string) => {
-          resource.filePath = value;
+          resource.downloadDirectory = value;
           const rw = new RespondsWith(uu, resource, this.normalizeRequestShape(stream));
           resolve([resource, rw]);
         })
         .catch((error: unknown) => {
           reject(error);
-        })
-        .finally(() => {
-          stream.destroy();
-        })
+        });
       });
   }
 
