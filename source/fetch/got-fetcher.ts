@@ -51,7 +51,7 @@ export class GotFetcher extends Fetcher {
     );
     const rw = new RespondsWith(uu, resource, req);
 
-    const directory = [this.downloadDirectory, resource.id].join('/');
+    const directory = [this.workingDirectory, 'downloads', resource.id].join('/');
     mkdirp.sync(directory);
 
     const downloadOptions: DownloaderHelperOptions = {
@@ -63,11 +63,11 @@ export class GotFetcher extends Fetcher {
     return new Promise((resolve, reject) => {
       new DownloaderHelper(uu.url, directory, downloadOptions)
         .on('end', (info: DownloadEndedStats) => {
-          resource.filePath = info.fileName;
+          resource.filePath = info.filePath;
           resolve([resource, rw]);
         })
-        .on('error', (err: unknown) => console.log('Download Failed', err))
-        .start().catch((err: unknown) => console.error(err));
+        .on('error', (err: unknown) => reject(err))
+        .start().catch((err: unknown) => reject(err));
       });
   }
 
