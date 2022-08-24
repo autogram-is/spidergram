@@ -1,6 +1,8 @@
-import { gotScraping, HTTPError, Progress, Response, RequestError, Options } from "got-scraping";
-import { Fetcher, FetcherOptions } from "./fetcher.js";
-import { Entity, UniqueUrl, HeaderShape, RequestShape, ResponseShape, Status, Resource, RespondsWith } from '../graph/index.js';
+import is from '@sindresorhus/is';
+import { gotScraping, Progress, Response, RequestError } from "got-scraping";
+import { Fetcher } from "./fetcher.js";
+import { Entity, UniqueUrl, RequestShape, ResponseShape, Status, Resource, RespondsWith } from '../graph/index.js';
+import { ResponseFilters } from "./index.js";
 
 const gotDefaultOptions = {
   throwHttpErrors: false,
@@ -18,7 +20,8 @@ export class GotFetcher extends Fetcher {
     return new Promise((resolve, reject) => {
       gotScraping.head(uu.url, requestOptions)
         .then((res: Response) => {
-          resolve(this.statusFromHead(uu, res));
+          this.emit('status', uu, res.statusCode);
+          resolve(this.statusFromResponse(uu, res));
         })
         .catch((reason: unknown) => {
           if (reason instanceof RequestError) {
@@ -38,40 +41,79 @@ export class GotFetcher extends Fetcher {
 
     const result: Entity[] = [];
     return new Promise((resolve, reject) => {
-      const stream = gotScraping.stream(uu.url, requestOptions)
-        .once('response', (response: Response) => {
+      gotScraping.stream(uu.url, requestOptions)
+        .once('response', (stream: Response) => {
+          const resp = this.normalizeResponseShape(stream);
+          const req = this.normalizeRequestShape(stream);
 
+          if (this.rules.discard(resp) || ResponseFilters.isError(resp)) {
+            resolve(this.statusFromResponse(uu, stream));
+          } else if (this.rules.download(resp)) {
+            console.log('downloading');
+          } else if (this.rules.store(resp)) {
+            console.log('fetching');
+          }
         })
         .on('downloadProgress', (progress: Progress) => {
           this.emit('downloadProgress', uu, progress);
         })
-        .once('error', (err: Error) => {});
+        .once('error', (err: Error) => {
+          if (err instanceof RequestError) {
+            resolve(this.statusFromError(uu, err));
+          }
+          else reject(err);
+        });
     });
   }
 
+  private async resourceFromBody(uu: UniqueUrl, stream: Response): Promise<Entity[]> {
+    return [];
+  }
 
+  private async resourceFromDownload(uu: UniqueUrl, stream: Response): Promise<Entity[]> {
+    return [];
+  }
 
-  private statusFromHead(uu: UniqueUrl, res: Response): Entity[] {
-    const req: RequestShape = {
-      method: res.request.options.method ?? 'HEAD',
-      url: res.url,
-      headers: res.request.options.headers,
-      body: res.request.options.body?.toString()
-    };
+  private statusFromResponse(uu: UniqueUrl, res: Response): Entity[] {
+    const req = this.normalizeRequestShape(res);
     const s = new Status(res.url, res.statusCode, res.statusMessage, res.headers);
     const rw = new RespondsWith(uu, s, req);
     return [s, rw];
   }
 
   private statusFromError(uu: UniqueUrl, err: RequestError): Entity[] {
-    const req: RequestShape = {
-      url: uu.url,
-      method: err.response?.request.options.method ?? 'GET',
-      headers: err.response?.request.options.headers ?? {},
-      body: err.response?.request.options.body?.toString() ?? ''
-    };
+    let req: RequestShape;
+    if (is.object(err.response)) {
+      req = this.normalizeRequestShape(err.response);
+    } else {
+      req = {
+        method: 'GET',
+        url: uu.url,
+        headers: {},
+      }
+    }
     const s = new Status(uu.url, -1, `${err.name} ${err.code} ${err.message}`, err.response?.headers ?? {});
     const rw = new RespondsWith(uu, s, req);
     return [s, rw];
+  }
+
+  private normalizeResponseShape(res: Response): ResponseShape {
+    const rs: ResponseShape = {
+      url: res.url,
+      headers: res.request.options.headers,
+      statusCode: res.statusCode,
+      statusMessage: res.statusMessage
+    }
+    return rs;
+  }
+
+  private normalizeRequestShape(res: Response): RequestShape {
+    const rs: RequestShape = {
+      method: res.request.options.method,
+      url: res.url,
+      headers: res.request.options.headers,
+      body: res.request.options.body?.toString(),
+    }
+    return rs;
   }
 }
