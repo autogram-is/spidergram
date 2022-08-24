@@ -1,7 +1,12 @@
 import is from '@sindresorhus/is';
 import { gotScraping, Response, RequestError } from "got-scraping";
-import { Fetcher, StreamDownloader, ResponseFilters } from "../fetch/index.js";
+import { Fetcher } from "../fetch/index.js";
 import { Entity, UniqueUrl, RequestShape, ResponseShape, Status, Resource, RespondsWith } from '../graph/index.js';
+import { DownloaderHelper, DownloadEndedStats, DownloaderHelperOptions } from 'node-downloader-helper';
+import * as fs from 'node:fs';
+import { Buffer } from 'node:buffer';
+import { StreamDownloader } from '../fetch/index.js';
+import mkdirp from 'mkdirp';
 
 const gotDefaultOptions = {
   throwHttpErrors: false,
@@ -9,28 +14,6 @@ const gotDefaultOptions = {
 };
 
 export class GotFetcher extends Fetcher {
-  async check(uu: UniqueUrl, ...args: unknown[]): Promise<Entity[]> {
-    const customHeaders = uu.referer ? { referer: uu.referer } : {};
-    const requestOptions = {
-      headers: this.buildRequestHeaders(customHeaders),
-      ...gotDefaultOptions,
-    };
-
-    const result: Entity[] = [];
-    return new Promise((resolve, reject) => {
-      gotScraping.head(uu.url, requestOptions)
-        .then((res: Response) => {
-          this.emit('status', uu, res.statusCode);
-          resolve(this.statusFromResponse(uu, res));
-        })
-        .catch((reason: unknown) => {
-          if (reason instanceof RequestError) {
-            resolve(this.statusFromError(uu, reason));
-          }
-          else reject(reason);
-        });
-    });
-  }
 
   async fetch(uu: UniqueUrl, ...args: unknown[]): Promise<Entity[]> {
     const customHeaders = uu.referer ? { referer: uu.referer } : {};
@@ -38,89 +21,76 @@ export class GotFetcher extends Fetcher {
       headers: this.buildRequestHeaders(customHeaders),
       ...gotDefaultOptions,
     };
-
-    const result: Entity[] = [];
     return new Promise((resolve, reject) => {
       gotScraping(uu.url, requestOptions)
-        .on('response', async (stream: Response) => {
-          const resp = this.normalizeResponseShape(stream);
-          const req = this.normalizeRequestShape(stream);
-
-          if (this.rules.discard(resp) || ResponseFilters.isError(resp)) {
-            this.emit('status', uu, resp.statusCode);
-            resolve(this.statusFromResponse(uu, stream));
-
-          } else if (this.rules.download(resp)) {
-            await this.resourceFromDownload(uu, stream)
-              .then((entities: Entity[]) => {
-                stream.destroy();
-                resolve(entities);
-              })
-          } else if (this.rules.store(resp)) {
-            this.emit('save', uu);
-            await this.resourceFromBody(uu, stream)
-              .then((entities: Entity[]) => {
-                stream.destroy();
-                resolve(entities);
-              });
-          }
+        .then((response: Response) => {
+          const shape = this.normalizeResponseShape(response);
+          if (this.rules.discard(shape)) {
+            resolve(new Array<Entity>(uu));
+          } else if (this.rules.download(shape)) {
+            resolve(this.downloadedResource(uu, response));
+          } else if (this.rules.store(shape)) {
+            resolve(this.savedResource(uu, response));
+          } else {
+            resolve(this.responseStatus(uu, response));
+          }  
         })
-        .catch((err: Error) => {
-          if (err instanceof RequestError) {
-            this.emit('error', err);
-            resolve(this.statusFromError(uu, err));
+        .catch((error: unknown) => {
+          if (error instanceof RequestError) {
+            resolve(this.errorStatus(uu, error));
           }
-          else reject(err);
+          else throw error;
         });
     });
   }
 
-  protected async resourceFromBody(uu: UniqueUrl, stream: Response): Promise<Entity[]> {
-    return new Promise((resolve, reject) => {
-      StreamDownloader.stringify(stream).then(
-        (body: string) => {
-          const resource = new Resource(
-            stream.url,
-            stream.statusCode,
-            stream.statusMessage,
-            stream.headers,
-            body,
-          );
-          const rw = new RespondsWith(uu, resource, this.normalizeRequestShape(stream));
-          resolve([resource, rw]);
-        })
-        .catch((error: unknown) => {
-          reject(error);
-        });
-      });
-  }
+  protected async downloadedResource(uu: UniqueUrl, res: Response): Promise<Entity[]> {
+    const req = this.normalizeRequestShape(res);
+    const resource = new Resource(
+      res.url,
+      res.statusCode,
+      res.statusMessage,
+      res.headers
+    );
+    const rw = new RespondsWith(uu, resource, req);
 
-  protected async resourceFromDownload(uu: UniqueUrl, stream: Response): Promise<Entity[]> {
-    const resource = new Resource(stream.url, stream.statusCode, stream.statusMessage, stream.headers);
-    const dir = [this.downloadDirectory, 'download', resource.id].join('/');
+    const directory = [this.workingDirectory, 'downloads', resource.id].join('/');
+    mkdirp.sync(directory);
+    const fileName = StreamDownloader.getFileName(res.headers, uu.parsed!);
+    const filePath = [directory, fileName].join('/');
 
     return new Promise((resolve, reject) => {
-      const fileName = StreamDownloader.getFileName(stream.headers, uu.parsed!);
-      StreamDownloader.download(stream, dir, fileName)
-        .then((value: string) => {
-          resource.downloadDirectory = value;
-          const rw = new RespondsWith(uu, resource, this.normalizeRequestShape(stream));
-          resolve([resource, rw]);
-        })
-        .catch((error: unknown) => {
-          reject(error);
-        });
+      fs.writeFile(filePath, res.rawBody, (err: unknown) => {
+        if (is.error(err)) reject(err);
+        resource.filePath = filePath;
+        resolve([resource, rw]);
       });
+    });
   }
 
-  protected statusFromResponse(uu: UniqueUrl, res: Response): Entity[] {
+  protected async savedResource(uu: UniqueUrl, res: Response): Promise<Entity[]> {
+    return new Promise((resolve) => {
+      const req = this.normalizeRequestShape(res);
+      let resource = new Resource(
+        res.url,
+        res.statusCode,
+        res.statusMessage,
+        res.headers,
+        res.rawBody.toString()
+      );
+      const rw = new RespondsWith(uu, resource, req);
+      resolve([resource, rw]);
+    });
+  }
+
+  protected responseStatus(uu: UniqueUrl, res: Response): Entity[] {
     const req = this.normalizeRequestShape(res);
     const s = new Status(res.url, res.statusCode, res.statusMessage, res.headers);
     const rw = new RespondsWith(uu, s, req);
     return [s, rw];
   }
 
-  protected statusFromError(uu: UniqueUrl, err: RequestError): Entity[] {
+  protected errorStatus(uu: UniqueUrl, err: RequestError): Entity[] {
     let req: RequestShape;
     if (is.object(err.response)) {
       req = this.normalizeRequestShape(err.response);

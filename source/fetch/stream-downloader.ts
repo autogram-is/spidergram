@@ -13,7 +13,7 @@ const pipeline = promisify(Readable.pipeline);
 type IncomingHeaders = HttpHeaders | Http2Headers;
 
 export class StreamDownloader {
-  static async stringify(stream: Readable) : Promise<string> {
+  static async stringifyStream(stream: Readable) : Promise<string> {
     const chunks: Uint8Array[] = [];
     return new Promise((resolve, reject) => {
       stream
@@ -27,7 +27,7 @@ export class StreamDownloader {
     });
   }
 
-  static async download(
+  static async downloadStream(
     stream: Readable,
     directory: string,
     filename: string,

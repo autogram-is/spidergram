@@ -1,13 +1,15 @@
 import { Dictionary } from '../util/index.js';
 import { Node } from '@autogram/autograph';
 import { ResponseShape, HeaderShape } from './index.js';
+import { stat } from 'fs';
 
 export class Resource extends Node implements ResponseShape {
   type = 'resource';
   url!: string;
-  statusCode!: number;
-  statusMessage!: string;
-  headers!: HeaderShape;
+  statusCode?: number;
+  statusMessage?: string;
+  
+  headers: HeaderShape = {};
   body?: string;
   filePath?: string;
 
@@ -20,14 +22,11 @@ export class Resource extends Node implements ResponseShape {
     filePath = '',
   ) {
     super('resource');
-    const data: Dictionary = {
-      url,
-      statusCode,
-      statusMessage,
-      headers,
-      body,
-      filePath,
-    };
+    this.statusCode = statusCode;
+    this.statusMessage = statusMessage;
+    this.headers = headers;
+    this.body = body;
+    this.filePath = filePath;
   }
 }
 

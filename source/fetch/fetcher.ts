@@ -12,7 +12,7 @@ export interface FetchRules extends FilterSet<ResponseShape> {
 }
 export interface FetcherOptions {
   rules: FetchRules,
-  downloadDirectory: string,
+  workingDirectory: string,
   customHeaders: HeaderShape,
   browserPreset: Partial<HeaderGeneratorOptions>,
 }
@@ -23,7 +23,7 @@ export const defaultFetcherOptions: FetcherOptions = {
     download: () => false,
     discard: () => false,
   },
-  downloadDirectory: 'crawl_data',
+  workingDirectory: 'crawl_data',
   customHeaders: {},
   browserPreset: BROWSER_PRESETS.MODERN_DESKTOP
 }
@@ -31,7 +31,7 @@ export abstract class Fetcher extends EventEmitter {
   rules: FetchRules;
   defaultHeaders: HeaderShape;
   browserPreset: Partial<HeaderGeneratorOptions>;
-  downloadDirectory: string;
+  workingDirectory: string;
 
   constructor(customOptions: Partial<FetcherOptions> = {}) {
     super();
@@ -40,7 +40,7 @@ export abstract class Fetcher extends EventEmitter {
       ...customOptions
     }
 
-    this.downloadDirectory = options.downloadDirectory,
+    this.workingDirectory = options.workingDirectory,
     this.rules = options.rules;
     this.defaultHeaders = options.customHeaders;
     this.browserPreset = options.browserPreset;
@@ -55,6 +55,5 @@ export abstract class Fetcher extends EventEmitter {
     }
   }
   
-  abstract check(url: UniqueUrl, ...args: unknown[]): Promise<Entity[]>;
   abstract fetch(url: UniqueUrl, ...args: unknown[]): Promise<Entity[]>;
 }
