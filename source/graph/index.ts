@@ -13,7 +13,6 @@ export {
   Entity,
   Edge,
   EdgeSelector,
-  EntityMap,
   EntityFilter,
 } from '@autogram/autograph';
 
