@@ -1,6 +1,6 @@
 {
   "name": "spidergram",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Structural analysis tools for complex web sites",
   "exports": "./dist/source/index.js",
   "types": "./dist/source/index.d.ts",
@@ -18,10 +18,10 @@
     "prepare": "run-s clean compile",
     "pretest": "run-s clean compile",
     "posttest": "npm run lint",
-    "scratch": "run-s clean compile; node dist/tests/fixtures/scratch.js"
+    "scratch": "npm run clean; npm run compile; node dist/tests/fixtures/scratch.js"
   },
   "files": [
-    "dist/src/**/*"
+    "dist/source/**/*"
   ],
   "xo": {
     "space": true,
