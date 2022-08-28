@@ -3,7 +3,6 @@ import { gotScraping, Response, RequestError } from "got-scraping";
 import { Fetcher } from "../fetch/index.js";
 import { Entity, UniqueUrl, RequestShape, ResponseShape, Status, Resource, RespondsWith } from '../graph/index.js';
 import * as fs from 'node:fs';
-import { Buffer } from 'node:buffer';
 import { getResponseFilename } from '../fetch/get-response-filename.js';
 import mkdirp from 'mkdirp';
 

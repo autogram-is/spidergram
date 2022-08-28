@@ -10,14 +10,14 @@ export interface FetchRules extends FilterSet<ResponseShape> {
   download: Filter<ResponseShape>;
   discard: Filter<ResponseShape>;
 }
-export interface FetcherOptions {
+export interface FetchOptions {
   rules: FetchRules,
   workingDirectory: string,
   customHeaders: HeaderShape,
   browserPreset: Partial<HeaderGeneratorOptions>,
 }
 
-export const defaultFetcherOptions: FetcherOptions = {
+export const defaultFetchOptions: FetchOptions = {
   rules: {
     store: () => true,
     download: () => false,
@@ -33,10 +33,10 @@ export abstract class Fetcher extends EventEmitter {
   browserPreset: Partial<HeaderGeneratorOptions>;
   workingDirectory: string;
 
-  constructor(customOptions: Partial<FetcherOptions> = {}) {
+  constructor(customOptions: Partial<FetchOptions> = {}) {
     super();
-    const options: FetcherOptions = {
-      ...defaultFetcherOptions,
+    const options: FetchOptions = {
+      ...defaultFetchOptions,
       ...customOptions
     }
 
