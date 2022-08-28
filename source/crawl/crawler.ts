@@ -1,9 +1,9 @@
-import { PartialDeep } from 'type-fest';
 import PQueue from 'p-queue';
 import { EventEmitter } from 'node:events';
-import { GraphLike, Entity, UniqueUrlSet } from '../graph/index.js';
+import { Entity, UniqueUrlSet } from '../graph/index.js';
 import { Fetcher } from '../fetch/index.js';
 import { ParsedUrl, Filter, FilterSet, INTERVALS } from '../util/index.js';
+import { Graph, Mutable, Readable } from '@autogram/autograph';
 
 export interface ConcurrencySettings {
   concurrency: number;
@@ -46,7 +46,7 @@ export abstract class Crawler extends EventEmitter {
   concurrency: ConcurrencySettings;
 
   constructor(
-    public graph: GraphLike,
+    public graph: Graph & Readable & Mutable,
     public fetcher: Fetcher,
     customOptions: Partial<CrawlerOptions> = {} 
 ) {

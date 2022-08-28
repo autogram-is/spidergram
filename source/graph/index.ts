@@ -6,14 +6,17 @@ export { Resource } from './resource.js';
 export { RespondsWith } from './responds-with.js';
 export { LinksTo } from './links-to.js';
 export {
-  Graph as GraphLike,
-  GraphData,
-  GraphStorage,
-  MemoryGraph,
-  Entity,
-  Edge,
-  EdgeSelector,
+  Entity, isEntity, isEntityData,
+  Node, isNode, isNodeData,
+  Edge, isEdge, isEdgeData,
   EntityFilter,
+  Match,
+  Predicate,
+  where,
+  Graph,
+  NodeSet,
+  EdgeSet,
+  JsonGraph
 } from '@autogram/autograph';
 
 export interface HeaderShape extends Dictionary<string | string[]> {}

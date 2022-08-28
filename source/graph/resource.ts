@@ -1,7 +1,5 @@
-import { Dictionary } from '../util/index.js';
 import { Node } from '@autogram/autograph';
 import { ResponseShape, HeaderShape } from './index.js';
-import { stat } from 'fs';
 
 export class Resource extends Node implements ResponseShape {
   type = 'resource';
