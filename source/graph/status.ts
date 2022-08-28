@@ -1,5 +1,5 @@
-import { Dictionary } from '../util/index.js';
 import { Node } from '@autogram/autograph';
+import { Dictionary } from '../util/index.js';
 import { HeaderShape, ResponseShape } from './index.js';
 
 export class Status extends Node implements ResponseShape {

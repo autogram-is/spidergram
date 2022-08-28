@@ -8,6 +8,7 @@ export {
   UrlFilters,
   UrlMutators,
 } from '@autogram/url-tools';
+
 export {
   Filter,
   Mutator,
@@ -15,5 +16,8 @@ export {
   FilterSet,
   MutatorSet,
   ExtractorSet,
-  INTERVALS
+  INTERVALS,
+  HeaderShape,
+  RequestShape,
+  ResponseShape,
 } from './types.js';

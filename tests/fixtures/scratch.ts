@@ -1,15 +1,17 @@
-import { Graph, Fetch} from '../../source/index.js';
-import { Entity } from '../../source/graph/index.js';
+import { HeaderShape, Entity, UniqueUrl, GotFetcher } from '../../source/index.js';
 
-
-const uu = new Graph.UniqueUrl('https://example.com');
-const headers: Graph.HeaderShape = {
+const uu = new UniqueUrl('https://example.com');
+const headers: HeaderShape = {
   referer: 'https://google.com',
-}
+};
 
-const f = new Fetch.GotFetcher()
+const f = new GotFetcher();
 f.rules.download = () => true;
 
 f.fetch(uu, headers)
-  .then((ent: Entity[]) => console.log(ent))
-  .catch((reason: any) => console.log(reason));
+  .then((ent: Entity[]) => {
+    console.log(ent);
+  })
+  .catch((error: any) => {
+    console.log(error);
+  });

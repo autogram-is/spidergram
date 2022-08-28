@@ -1,9 +1,12 @@
 import { EventEmitter } from 'node:events';
 import { Entity } from '@autogram/autograph';
-import { FingerprintGenerator, HeaderGeneratorOptions } from 'fingerprint-generator';
-import * as BROWSER_PRESETS from './browser-presets.js';
+import {
+  FingerprintGenerator,
+  HeaderGeneratorOptions,
+} from 'fingerprint-generator';
 import { FilterSet, Filter } from '../util/index.js';
 import { UniqueUrl, ResponseShape, HeaderShape } from '../graph/index.js';
+import * as BROWSER_PRESETS from './browser-presets.js';
 
 export interface FetchRules extends FilterSet<ResponseShape> {
   store: Filter<ResponseShape>;
@@ -11,10 +14,10 @@ export interface FetchRules extends FilterSet<ResponseShape> {
   discard: Filter<ResponseShape>;
 }
 export interface FetchOptions {
-  rules: FetchRules,
-  workingDirectory: string,
-  customHeaders: HeaderShape,
-  browserPreset: Partial<HeaderGeneratorOptions>,
+  rules: FetchRules;
+  workingDirectory: string;
+  customHeaders: HeaderShape;
+  browserPreset: Partial<HeaderGeneratorOptions>;
 }
 
 export const defaultFetchOptions: FetchOptions = {
@@ -25,8 +28,8 @@ export const defaultFetchOptions: FetchOptions = {
   },
   workingDirectory: 'crawl_data',
   customHeaders: {},
-  browserPreset: BROWSER_PRESETS.MODERN_DESKTOP
-}
+  browserPreset: BROWSER_PRESETS.MODERN_DESKTOP,
+};
 export abstract class Fetcher extends EventEmitter {
   rules: FetchRules;
   defaultHeaders: HeaderShape;
@@ -37,10 +40,9 @@ export abstract class Fetcher extends EventEmitter {
     super();
     const options: FetchOptions = {
       ...defaultFetchOptions,
-      ...customOptions
-    }
-
-    this.workingDirectory = options.workingDirectory,
+      ...customOptions,
+    };
+    this.workingDirectory = options.workingDirectory;
     this.rules = options.rules;
     this.defaultHeaders = options.customHeaders;
     this.browserPreset = options.browserPreset;
@@ -51,9 +53,9 @@ export abstract class Fetcher extends EventEmitter {
     return {
       ...this.defaultHeaders,
       ...generator.getHeaders(),
-      ...customHeaders
-    }
+      ...customHeaders,
+    };
   }
-  
+
   abstract fetch(url: UniqueUrl, ...args: unknown[]): Promise<Entity[]>;
 }

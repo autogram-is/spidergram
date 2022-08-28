@@ -9,7 +9,7 @@ type IncomingHeaders = HttpHeaders | Http2Headers;
 export const getResponseFilename = (
   headers: IncomingHeaders,
   url: URL,
-  fallback: string = 'response'
+  fallback = 'response',
 ): string => {
   const filenameRx = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
   let filename: string | undefined;
@@ -37,4 +37,4 @@ export const getResponseFilename = (
   }
 
   return filename;
-}
+};

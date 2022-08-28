@@ -11,6 +11,7 @@ export class UniqueUrl extends Node {
     toPlainOnly: true,
   })
   parsed?: NormalizedUrl;
+
   type = 'unique_url';
   url: string;
   parsable!: boolean;

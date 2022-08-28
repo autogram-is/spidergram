@@ -1,7 +1,12 @@
-import { Dictionary } from '../util/index.js';
 import { Reference, Edge } from '@autogram/autograph';
-import { UniqueUrl, Resource, Status } from './index.js';
-import { HeaderShape, RequestShape } from './index.js';
+import { Dictionary } from '../util/index.js';
+import {
+  UniqueUrl,
+  Resource,
+  Status,
+  HeaderShape,
+  RequestShape,
+} from './index.js';
 
 export class RespondsWith extends Edge implements RequestShape {
   predicate = 'responds_with';

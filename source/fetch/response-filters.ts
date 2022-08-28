@@ -33,7 +33,7 @@ export const isHtml = (response: ResponseShape): boolean => {
 export const isTextData = (response: ResponseShape): boolean => {
   const contentType = response.headers['content-type']?.toString() ?? '';
   if (contentType.length === 0) return false;
-  const mime = new MIMEType(contentType );
+  const mime = new MIMEType(contentType);
   return (
     mime.isXML() || ['json', 'json+ld', 'csv', 'tsv'].includes(mime.subtype)
   );

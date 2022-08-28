@@ -4,24 +4,24 @@ import { Crawler } from './crawler.js';
 
 export class SimpleCrawler extends Crawler {
   async crawl(urls: UniqueUrlSet): Promise<Entity[]> {
-    const results: Entity[] = [];
+    let results: Entity[] = [];
 
     return new Promise((resolve) => {
-      for (let url of urls.values()) {
+      for (const url of urls.values()) {
         this.queue.add(async () => {
-          this.processUrl(url as UniqueUrl).then((entities) => {
-            results.concat(entities);
+          await this.processUrl(url).then((entities) => {
+            results = [...results, ...entities];
             this.emit('processed', url);
-          })
+          });
         });
       }
-  
+
       this.queue.onIdle().then(() => {
         resolve(results);
-      })
+      });
     });
   }
-  
+
   async processUrl(url: UniqueUrl): Promise<Entity[]> {
     const parsed = url.parsed as ParsedUrl;
 

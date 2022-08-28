@@ -6,7 +6,7 @@ export class Resource extends Node implements ResponseShape {
   url!: string;
   statusCode?: number;
   statusMessage?: string;
-  
+
   headers: HeaderShape = {};
   body?: string;
   filePath?: string;

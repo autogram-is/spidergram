@@ -9,10 +9,27 @@ export interface MutatorSet<T> extends Record<string, Mutator<T>> {}
 export interface ExtractorSet<T, D = Dictionary>
   extends Record<string, Extractor<T, D>> {}
 
+export interface HeaderShape extends Dictionary<string | string[]> {}
+
+export interface RequestShape {
+  method: string;
+  url: string | URL;
+  headers: HeaderShape;
+  body?: string;
+}
+
+export interface ResponseShape {
+  url: string;
+  statusCode?: number;
+  statusMessage?: string;
+  headers: HeaderShape;
+  body?: string;
+}
+
 export enum INTERVALS {
   none = 0,
   second = 1000,
-  minute = 60 * INTERVALS.second,
-  hour = 60 * INTERVALS.minute,
-  day = 24 * INTERVALS.hour,
+  minute = 60 * second,
+  hour = 60 * minute,
+  day = 24 * hour,
 }

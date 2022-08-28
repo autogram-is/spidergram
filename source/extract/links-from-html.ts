@@ -1,55 +1,57 @@
 import is from '@sindresorhus/is';
-import { Resource } from '../graph';
 import { Dictionary } from '@autogram/autograph';
+import { Resource } from '../graph/index.js';
 import { CheerioParser, CheerioOptions } from './cheerio.js';
 
 export type HtmlLink = {
-  href: string,
-  rel?: string,
-  title?: string,
-  attributes?: Dictionary<string>,
-  data?: string,
-}
+  href: string;
+  rel?: string;
+  title?: string;
+  attributes?: Dictionary<string>;
+  data?: string | Dictionary<string>;
+};
 
 export type LinkExtractorOptions = CheerioOptions & {
-  ignoreSelfLinkAnchors?: boolean,
-  ignoreEmptyHref?: boolean,
-}
+  ignoreSelfLinkAnchors?: boolean;
+  ignoreEmptyHref?: boolean;
+};
 
-const linkDefaults:LinkExtractorOptions = {
+const linkDefaults: LinkExtractorOptions = {
   ignoreSelfLinkAnchors: true,
   ignoreEmptyHref: true,
-}
+};
 
 export const linksFromHtml = (
   r: Resource,
-  selector: string = 'body a',
-  customOptions: LinkExtractorOptions = {}
+  selector = 'body a',
+  customOptions: LinkExtractorOptions = {},
 ): HtmlLink[] => {
   const options = {
     ...linkDefaults,
-    ...customOptions
+    ...customOptions,
   };
-  const results:HtmlLink[] = [];
+  const results: HtmlLink[] = [];
 
   if (is.nonEmptyString(r.body)) {
     const $ = new CheerioParser(r.body).root;
 
-    $(selector).each((i, e) => {
-      const href: string = $(e).attr('href') ?? '';
+    $(selector).each((i, element) => {
+      const href: string = $(element).attr('href') ?? '';
 
-      if (!(href.length === 0 && options.ignoreEmptyHref)) {
-        if (!(href.startsWith('#') && options.ignoreSelfLinkAnchors)) {
-          results.push({
-            href: href,
-            rel: $(e).attr('rel') ?? '',
-            title: $(e).text() ?? '',
-            attributes: $(e).attr() as Dictionary<string>,
-            data: $(e).data() ?? {},
-          });  
-        }
-      };
+      if (
+        !(href.length === 0 && options.ignoreEmptyHref) &&
+        !(href.startsWith('#') && options.ignoreSelfLinkAnchors)
+      ) {
+        results.push({
+          href,
+          rel: $(element).attr('rel') ?? '',
+          title: $(element).text() ?? '',
+          attributes: $(element).attr() as Dictionary<string>,
+          data: $(element).data() ?? {},
+        });
+      }
     });
-  };
+  }
+
   return results;
 };
