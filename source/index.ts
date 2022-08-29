@@ -34,7 +34,6 @@ export {
   FetchRules,
   defaultFetchOptions,
   GotFetcher,
-  getResponseFilename,
   BROWSER_PRESETS,
   ResponseFilters,
 } from './fetch/index.js';
@@ -60,6 +59,7 @@ export {
   HeaderShape,
   RequestShape,
   ResponseShape,
+  FileManager
 } from './util/index.js';
 
 export {

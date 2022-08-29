@@ -21,3 +21,5 @@ export {
   RequestShape,
   ResponseShape,
 } from './types.js';
+
+export { FileManager } from './file.js'

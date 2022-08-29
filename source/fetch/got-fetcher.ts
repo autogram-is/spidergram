@@ -12,7 +12,7 @@ import {
   Resource,
   RespondsWith,
 } from '../graph/index.js';
-import { getResponseFilename } from '../fetch/get-response-filename.js';
+import { FileManager } from '../util/index.js';
 
 const gotDefaultOptions = {
   throwHttpErrors: false,
@@ -61,13 +61,11 @@ export class GotFetcher extends Fetcher {
     );
     const rw = new RespondsWith(uu, resource, request);
 
-    const directory = [this.workingDirectory, 'downloads', resource.id].join(
-      '/',
-    );
-    mkdirp.sync(directory);
-    const fileName = getResponseFilename(res.headers, uu.parsed!);
+    const directory = ['downloads', resource.id].join('/');
+    const fileName = FileManager.filenameFromHeaders(res.headers, uu.parsed!);
     const filePath = [directory, fileName].join('/');
 
+    FileManager.ensureDirectory(directory);
     return new Promise((resolve, reject) => {
       fs.writeFile(filePath, res.rawBody, (error: unknown) => {
         if (is.error(error)) reject(error);
@@ -132,7 +130,7 @@ export class GotFetcher extends Fetcher {
   protected normalizeResponseShape(res: Response): ResponseShape {
     const rs: ResponseShape = {
       url: res.url,
-      headers: res.request.options.headers,
+      headers: res.headers,
       statusCode: res.statusCode,
       statusMessage: res.statusMessage,
     };
