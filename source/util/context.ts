@@ -8,7 +8,7 @@ import mkdirp from 'mkdirp';
 export interface ContextHandler {
   directory: string;
 
-  ensureSubdirectory(relativePath: string, create: boolean): Promise<void>;
+  ensureSubdirectory(relativePath: string, create?: boolean): Promise<void>;
   ensureFile(relativePath: string, subdirectory?: string): Promise<Stats>;
 
   get<T = unknown>(key: string): T;
@@ -25,7 +25,7 @@ export class DefaultContext {
     this.directory = fileURLToPath(new URL('./', import.meta.url));
   }
 
-  async ensureSubdirectory(relativePath: string, create: boolean): Promise<void> {
+  async ensureSubdirectory(relativePath: string, create: boolean = true): Promise<void> {
     const fullPath = fileURLToPath(new URL(relativePath, this.directory));
     return fs.access(fullPath)
       .catch((reason: unknown) => {

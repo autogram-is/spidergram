@@ -1,4 +1,4 @@
-import * as fs from 'node:fs';
+import * as fs from 'node:fs/promises';
 import is from '@sindresorhus/is';
 import { gotScraping, Response, RequestError } from 'got-scraping';
 import mkdirp from 'mkdirp';
@@ -12,7 +12,7 @@ import {
   Resource,
   RespondsWith,
 } from '../graph/index.js';
-import { FileManager } from '../util/index.js';
+import { FileManager, Context} from '../util/index.js';
 
 const gotDefaultOptions = {
   throwHttpErrors: false,
@@ -60,19 +60,14 @@ export class GotFetcher extends Fetcher {
       res.headers,
     );
     const rw = new RespondsWith(uu, resource, request);
-
-    const directory = ['downloads', resource.id].join('/');
+    let directory = [Context.directory, 'downloads', resource.id].join('/');
+    await Context.ensureSubdirectory(directory);
     const fileName = FileManager.filenameFromHeaders(res.headers, uu.parsed!);
     const filePath = [directory, fileName].join('/');
 
-    FileManager.ensureDirectory(directory);
-    return new Promise((resolve, reject) => {
-      fs.writeFile(filePath, res.rawBody, (error: unknown) => {
-        if (is.error(error)) reject(error);
-        resource.filePath = filePath;
-        resolve([resource, rw]);
-      });
-    });
+    return fs.writeFile(filePath, res.rawBody)
+      .then(() => resource.filePath = filePath)
+      .then(() => [resource, rw]);
   }
 
   protected async savedResource(
