@@ -1,4 +1,4 @@
-import { testElement } from "domutils";
+import path from 'node:path';
 import { JsonGraph, UniqueUrlSet, SimpleCrawler, Context } from "../../source/index.js";
 
 const uus = new UniqueUrlSet([
@@ -14,8 +14,7 @@ const c = new SimpleCrawler();
       graph.set(entities);
     });
 
-  graph.save('/Users/jeff/test.ndjson').then(() => {
+  graph.save(path.join(Context.directory, 'test.ndjson')).then(() => {
     console.log("it works!");
   });
 })();
-

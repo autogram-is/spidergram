@@ -28,7 +28,7 @@ export class DefaultContext {
   directory: string;
 
   protected constructor() {
-    this.directory = fileURLToPath(new URL('./', import.meta.url));
+    this.directory = process.cwd();
   }
 
   async ensureSubdirectory(relativePath: string, create = true): Promise<void> {
