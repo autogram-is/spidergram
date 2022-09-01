@@ -60,7 +60,8 @@ export {
   HeaderShape,
   RequestShape,
   ResponseShape,
-  FileManager
+  FileManager,
+  Context
 } from './util/index.js';
 
 export {

@@ -5,6 +5,7 @@ import fsp from 'node:fs/promises';
 import fs, { PathLike } from 'node:fs';
 import { IncomingHttpHeaders as HttpHeaders } from 'node:http';
 import { IncomingHttpHeaders as Http2Headers } from 'node:http2';
+import { Context } from '../util/index.js';
 
 import mkdirp from 'mkdirp';
 import mime from 'mime';
@@ -12,21 +13,8 @@ import mime from 'mime';
 type IncomingHeaders = HttpHeaders | Http2Headers;
 
 export class FileManager {
-  static baseDirectory: string = '.';
-
-  static async ensureDirectory(subDirectory?: string, create: boolean = true): Promise<void> {
-    let dir = this.baseDirectory;
-    if (is.nonEmptyStringAndNotWhitespace(subDirectory)) {
-      dir = [dir, subDirectory].join('/');
-    }
-
-    return new Promise((resolve, reject) => {
-      const func = (create) ? mkdirp : fsp.stat
-      func(dir)
-        .then(() => resolve())
-        .catch((reason: unknown) => reject(reason));
-    });
-  }
+  static ensureDirectory = Context.ensureSubdirectory;
+  static ensureFile = Context.ensureFile;
 
   static filenameFromHeaders(
     headers: IncomingHeaders,
