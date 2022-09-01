@@ -82,6 +82,7 @@
     "fingerprint-generator": "^2.0.2",
     "got-scraping": "^3.2.9",
     "header-generator": "^2.0.3",
+    "listr2": "^5.0.2",
     "mime": "^3.0.0",
     "mkdirp": "^1.0.4",
     "ow": "^1.0.0",

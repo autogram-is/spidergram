@@ -13,9 +13,6 @@ import mime from 'mime';
 type IncomingHeaders = HttpHeaders | Http2Headers;
 
 export class FileManager {
-  static ensureDirectory = Context.ensureSubdirectory;
-  static ensureFile = Context.ensureFile;
-
   static filenameFromHeaders(
     headers: IncomingHeaders,
     url: URL,
