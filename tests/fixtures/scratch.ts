@@ -1,17 +1,12 @@
-import { HeaderShape, Entity, UniqueUrl, GotFetcher } from '../../source/index.js';
+import { Entity, UniqueUrl, UniqueUrlSet, SimpleCrawler } from '../../source/index.js';
 
-const uu = new UniqueUrl('https://example.com');
-const headers: HeaderShape = {
-  referer: 'https://google.com',
-};
+const uus = new UniqueUrlSet(['https://example.com']);
 
-const f = new GotFetcher();
-f.rules.download = () => true;
+const c = new SimpleCrawler()
+  .once('finish', (progress: Record<string, number>) => {})
 
-f.fetch(uu, headers)
-  .then((ent: Entity[]) => {
-    console.log(ent);
-  })
-  .catch((error: any) => {
-    console.log(error);
-  });
+c.crawl(uus).then(entities => {
+  for(let e of entities) {
+    console.log(e);
+  }
+});
