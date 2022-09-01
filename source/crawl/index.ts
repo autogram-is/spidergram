@@ -1,7 +1,2 @@
-export {
-  CrawlOptions,
-  CrawlRules,
-  ConcurrencySettings,
-  defaultCrawlOptions,
-} from './crawler.js';
-export { SimpleCrawler } from './simple-crawler.js';
+export { Crawler, CrawlRules, CrawlProgress } from './crawler.js';
+export { SimpleCrawler, QueueOptions, PostFetchFunction } from './simple-crawler.js';

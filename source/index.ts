@@ -39,11 +39,12 @@ export {
 } from './fetch/index.js';
 
 export {
-  CrawlOptions,
+  Crawler,
   CrawlRules,
-  ConcurrencySettings,
-  defaultCrawlOptions,
+  CrawlProgress,
   SimpleCrawler,
+  QueueOptions,
+  PostFetchFunction,
 } from './crawl/index.js';
 
 export { JsonObject, JsonValue } from 'type-fest';
