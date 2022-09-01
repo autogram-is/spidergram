@@ -12,7 +12,7 @@ import {
   Resource,
   RespondsWith,
 } from '../graph/index.js';
-import { FileManager, Context} from '../util/index.js';
+import { FileManager, Context } from '../util/index.js';
 
 const gotDefaultOptions = {
   throwHttpErrors: false,
@@ -50,51 +50,55 @@ export class GotFetcher extends Fetcher {
 
   protected async downloadedResource(
     uu: UniqueUrl,
-    res: Response,
+    response: Response,
   ): Promise<Entity[]> {
-    const request = this.normalizeRequestShape(res);
+    const request = this.normalizeRequestShape(response);
     const resource = new Resource(
-      res.url,
-      res.statusCode,
-      res.statusMessage,
-      res.headers,
+      response.url,
+      response.statusCode,
+      response.statusMessage,
+      response.headers,
     );
     const rw = new RespondsWith(uu, resource, request);
-    let directory = [Context.directory, 'downloads', resource.id].join('/');
+    const directory = [Context.directory, 'downloads', resource.id].join('/');
     await Context.ensureSubdirectory(directory);
-    const fileName = FileManager.filenameFromHeaders(res.headers, uu.parsed!);
+    const fileName = FileManager.filenameFromHeaders(
+      response.headers,
+      uu.parsed!,
+    );
     const filePath = [directory, fileName].join('/');
 
-    return fs.writeFile(filePath, res.rawBody)
-      .then(() => resource.filePath = filePath)
-      .then(() => [resource, rw]);
+    return fs.writeFile(filePath, response.rawBody).then(() => {
+      resource.filePath = filePath;
+      return [resource, rw];
+    });
   }
 
   protected async savedResource(
     uu: UniqueUrl,
-    res: Response,
+    response: Response,
   ): Promise<Entity[]> {
     return new Promise((resolve) => {
-      const request = this.normalizeRequestShape(res);
+      const request = this.normalizeRequestShape(response);
       const resource = new Resource(
-        res.url,
-        res.statusCode,
-        res.statusMessage,
-        res.headers,
-        res.rawBody.toString(),
+        response.url,
+        response.statusCode,
+        response.statusMessage,
+        response.headers,
+        response.rawBody.toString(),
       );
       const rw = new RespondsWith(uu, resource, request);
       resolve([resource, rw]);
     });
   }
 
-  protected responseStatus(uu: UniqueUrl, res: Response): Entity[] {
-    const request = this.normalizeRequestShape(res);
+  protected responseStatus(uu: UniqueUrl, response: Response): Entity[] {
+    const request = this.normalizeRequestShape(response);
     const s = new Status(
-      res.url,
-      res.statusCode,
-      res.statusMessage,
-      res.headers,
+      response.url,
+      response.statusCode,
+      response.statusMessage,
+      response.headers,
     );
     const rw = new RespondsWith(uu, s, request);
     return [s, rw];
@@ -122,22 +126,22 @@ export class GotFetcher extends Fetcher {
     return [s, rw];
   }
 
-  protected normalizeResponseShape(res: Response): ResponseShape {
+  protected normalizeResponseShape(response: Response): ResponseShape {
     const rs: ResponseShape = {
-      url: res.url,
-      headers: res.headers,
-      statusCode: res.statusCode,
-      statusMessage: res.statusMessage,
+      url: response.url,
+      headers: response.headers,
+      statusCode: response.statusCode,
+      statusMessage: response.statusMessage,
     };
     return rs;
   }
 
-  protected normalizeRequestShape(res: Response): RequestShape {
+  protected normalizeRequestShape(response: Response): RequestShape {
     const rs: RequestShape = {
-      method: res.request.options.method,
-      url: res.url,
-      headers: res.request.options.headers,
-      body: res.request.options.body?.toString(),
+      method: response.request.options.method,
+      url: response.url,
+      headers: response.request.options.headers,
+      body: response.request.options.body?.toString(),
     };
     return rs;
   }

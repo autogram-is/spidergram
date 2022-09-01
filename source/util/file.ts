@@ -1,19 +1,18 @@
-import is from '@sindresorhus/is';
-
 import { URL } from 'node:url';
 import fsp from 'node:fs/promises';
 import fs, { PathLike } from 'node:fs';
 import { IncomingHttpHeaders as HttpHeaders } from 'node:http';
 import { IncomingHttpHeaders as Http2Headers } from 'node:http2';
-import { Context } from '../util/index.js';
+import is from '@sindresorhus/is';
 
 import mkdirp from 'mkdirp';
 import mime from 'mime';
+import { Context } from '../util/index.js';
 
 type IncomingHeaders = HttpHeaders | Http2Headers;
 
-export class FileManager {
-  static filenameFromHeaders(
+export const FileManager = {
+  filenameFromHeaders(
     headers: IncomingHeaders,
     url: URL,
     fallback = 'response',
@@ -22,7 +21,8 @@ export class FileManager {
     let filename: string | undefined;
 
     if (!is.nonEmptyStringAndNotWhitespace(filename))
-      filename = (filenameRx.exec(headers['content-disposition'] ?? '') ?? [])[0];
+      filename = (filenameRx.exec(headers['content-disposition'] ?? '') ??
+        [])[0];
 
     if (!is.nonEmptyStringAndNotWhitespace(filename))
       filename = (headers['content-location'] ?? '').split('/').pop();
@@ -44,5 +44,5 @@ export class FileManager {
     }
 
     return filename;
-  };
-}
+  },
+};

@@ -22,5 +22,5 @@ export {
   ResponseShape,
 } from './types.js';
 
-export { FileManager } from './file.js'
-export { Context } from './context.js'
+export { FileManager } from './file.js';
+export { Context } from './context.js';

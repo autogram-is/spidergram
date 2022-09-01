@@ -1,4 +1,4 @@
-import path from 'node:path'
+import path from 'node:path';
 import { PathLike, Stats } from 'node:fs';
 import * as fs from 'node:fs/promises';
 import { URL, fileURLToPath } from 'node:url';
@@ -17,37 +17,37 @@ export interface ContextHandler {
 
 export class DefaultContext {
   protected static instance: DefaultContext;
-
   protected values: Record<string, unknown> = {};
+
+  static getInstance() {
+    if (is.undefined(DefaultContext.instance))
+      DefaultContext.instance = new DefaultContext();
+    return DefaultContext.instance;
+  }
+
   directory: string;
 
   protected constructor() {
     this.directory = fileURLToPath(new URL('./', import.meta.url));
   }
 
-  async ensureSubdirectory(relativePath: string, create: boolean = true): Promise<void> {
+  async ensureSubdirectory(relativePath: string, create = true): Promise<void> {
     const fullPath = fileURLToPath(new URL(relativePath, this.directory));
-    return fs.access(fullPath)
-      .catch((reason: unknown) => {
-        if (create) {
-          mkdirp.sync(fullPath);
-        } else {
-          Promise.reject(reason);
-        }
+    if (create) {
+      await mkdirp(fullPath).catch((error: Error) => {
+        throw error;
       });
+    }
+
+    return fs.access(fullPath);
   }
 
   async ensureFile(fileName: string, subdirectory?: string): Promise<Stats> {
-    const directoryPath = (subdirectory)
+    const directoryPath = subdirectory
       ? [this.directory, subdirectory].join(path.delimiter)
       : this.directory;
     const fullPath = fileURLToPath(new URL(fileName, directoryPath));
-    return fs.stat(directoryPath)
-  }
-
-  static getInstance() {
-    if (is.undefined(DefaultContext.instance)) DefaultContext.instance = new DefaultContext();
-    return DefaultContext.instance;
+    return fs.stat(directoryPath);
   }
 
   get<T = unknown>(key: string): T {

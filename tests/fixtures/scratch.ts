@@ -1,3 +1,21 @@
-import { Context } from '../../source/util/context.js';
+import { testElement } from "domutils";
+import { JsonGraph, UniqueUrlSet, SimpleCrawler, Context } from "../../source/index.js";
 
-console.log(Context.directory);
+const uus = new UniqueUrlSet([
+  "https://blakemasters.com"
+]);
+const graph = new JsonGraph();
+const c = new SimpleCrawler();
+
+(async () => {
+  await c.crawl(uus)
+    .then(entities => {
+      console.log(entities);
+      graph.set(entities);
+    });
+
+  graph.save('/Users/jeff/test.ndjson').then(() => {
+    console.log("it works!");
+  });
+})();
+
