@@ -35,7 +35,7 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
     return new Promise((resolve) => {
       for (const uu of urls.values()) {
         this.queue.add(async () => {
-          await this.fetcher.fetch(uu)
+          return this.fetcher.fetch(uu)
             .then((entities: Entity[]): Entity[]  => {
               if (is.function_(this.postProcessor)) {
                 return this.postProcessor(uu, entities);
