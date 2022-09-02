@@ -20,37 +20,38 @@ const gotDefaultOptions = {
 };
 
 export class GotFetcher extends Fetcher {
+
   async fetch(uu: UniqueUrl, ...args: unknown[]): Promise<Entity[]> {
     const customHeaders = uu.referer ? { referer: uu.referer } : {};
     const requestOptions = {
       headers: this.buildRequestHeaders(customHeaders),
       ...gotDefaultOptions,
     };
-    return new Promise((resolve, reject) => {
-      gotScraping(uu.url, requestOptions)
-        .then((response: Response) => {
-          const shape = this.normalizeResponseShape(response);
-          if (this.rules.discard(shape)) {
-            this.emit('skip', uu);
-            resolve([uu]);
-          } else if (this.rules.download(shape)) {
-            this.emit('fetch', uu);
-            resolve(this.downloadedResource(uu, response));
-          } else if (this.rules.store(shape)) {
-            this.emit('fetch', uu);
-            resolve(this.savedResource(uu, response));
-          } else {
-            this.emit('fetch', uu);
-            resolve(this.responseStatus(uu, response));
-          }
-        })
-        .catch((error: unknown) => {
-          if (error instanceof RequestError) {
-            this.emit('error', error, uu);
-            resolve(this.errorStatus(uu, error));
-          } else throw error;
-        });
-    });
+    return gotScraping(uu.url, requestOptions)
+      .then((response: Response) => {
+        const shape = this.normalizeResponseShape(response);
+        if (this.rules.discard(shape)) {
+          this.emit('skip', uu);
+          return [uu];
+        } else if (this.rules.download(shape)) {
+          this.emit('fetch', uu);
+          return this.downloadedResource(uu, response);
+        } else if (this.rules.store(shape)) {
+          this.emit('fetch', uu);
+          return this.savedResource(uu, response);
+        } else {
+          this.emit('status', uu);
+          return this.responseStatus(uu, response);
+        }
+      })
+      .catch((error: unknown) => {
+        if (error instanceof RequestError) {
+          this.emit('fail', error, uu);
+          return this.errorStatus(uu, error);
+        } else {
+          throw error;
+        }
+      });
   }
 
   protected async downloadedResource(
@@ -66,7 +67,7 @@ export class GotFetcher extends Fetcher {
     );
     const rw = new RespondsWith(uu, resource, request);
     const directory = [Context.directory, 'downloads', resource.id].join('/');
-    await Context.ensureSubdirectory(directory);
+    Context.ensureSubdirectory(directory);
     const fileName = FileManager.filenameFromHeaders(
       response.headers,
       uu.parsed!,

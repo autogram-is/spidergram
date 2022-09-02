@@ -47,7 +47,7 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
   }
 
   eventNames(): string[] {
-    return ['start', 'skip', 'fetch', 'error'];
+    return ['start', 'skip', 'process'];
   }
 
   async crawl(uus: UniqueUrlSet): Promise<Entity[]> {
@@ -56,22 +56,31 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
     const results: Entity[] = [];
 
     this.progress.total = uus.size;
+
+    this.fetcher
+      .on('skip', (uu: UniqueUrl) => {
+        this.progress.skipped++;
+        this.emit('process', uu, this.progress);
+      })
+      .on('fetch', (uu: UniqueUrl) => {
+        this.progress.fetched++;
+        this.emit('process', uu, this.progress);
+      })
+      .on('status', (uu: UniqueUrl) => {
+        this.progress.fetched++;
+        this.emit('process', uu, this.progress);
+      })
+      .on('fail', (error: unknown, uu: UniqueUrl) => {
+        this.progress.errors++;
+        this.emit('process', uu, this.progress);
+      })
+
     this.emit('start', this.progress);
-
-    this.fetcher.on('fetch', (uu: UniqueUrl) => {
-      this.progress.fetched++;
-      this.emit('fetch', uu, this.progress);
-    });
-
-    this.fetcher.on('error', (uu: UniqueUrl) => {
-      this.progress.errors++;
-      this.emit('error', (reason: Error) => reason, uu, this.progress);
-    });
 
     for (const uu of uus.values()) {
       if (is.urlInstance(uu.parsed) && this.rules.ignore(uu.parsed)) {
         this.progress.skipped++;
-        this.emit('skip', uu, this.progress);
+        this.emit('process', uu, this.progress);
       }
 
       promises.push(

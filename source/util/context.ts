@@ -1,7 +1,6 @@
 import process from 'node:process';
 import path from 'node:path';
-import { PathLike, Stats } from 'node:fs';
-import * as fs from 'node:fs/promises';
+import { PathLike, Stats, statSync } from 'node:fs';
 import { URL, fileURLToPath } from 'node:url';
 import is from '@sindresorhus/is';
 import mkdirp from 'mkdirp';
@@ -9,8 +8,9 @@ import mkdirp from 'mkdirp';
 export interface ContextHandler {
   directory: string;
 
-  ensureSubdirectory(relativePath: string, create?: boolean): Promise<void>;
-  ensureFile(relativePath: string, subdirectory?: string): Promise<Stats>;
+  ensureSubdirectory(...subdirectories: string[]): Stats | false;
+  fileExists(relativePath: string, subdirectory?: string): Stats | false;
+  path(relativePath?: string): string;
 
   get<T = unknown>(key: string): T;
   set<T = unknown>(key: string, value: T): void;
@@ -25,30 +25,41 @@ export class DefaultContext {
 
   protected static instance: DefaultContext;
 
-  directory: string;
+  _directory: string;
   protected values: Record<string, unknown> = {};
 
   protected constructor() {
-    this.directory = process.cwd();
+    this._directory = process.cwd();
   }
 
-  async ensureSubdirectory(relativePath: string, create = true): Promise<void> {
-    const fullPath = fileURLToPath(new URL(relativePath, this.directory));
-    if (create) {
-      await mkdirp(fullPath).catch((error: Error) => {
-        throw error;
-      });
-    }
-
-    return fs.access(fullPath);
+  get directory(): string {
+    return this._directory;
   }
 
-  async ensureFile(fileName: string, subdirectory?: string): Promise<Stats> {
-    const directoryPath = subdirectory
-      ? [this.directory, subdirectory].join(path.delimiter)
+  set directory(value: string) {
+    this._directory = value;
+    this.ensureSubdirectory('./');
+  }
+
+  ensureSubdirectory(...subdirectories: string[]): Stats | false {
+    const fullPath = path.parse(path.resolve(this.directory, ...subdirectories));
+    mkdirp.sync(fullPath.dir);
+    return statSync(fullPath.dir) ?? false;
+  }
+
+  fileExists(fileName: string, ...subdirectories: string[]): Stats | false {
+    const directoryPath = (subdirectories.length > 0)
+      ? [this.directory, ...subdirectories].join(path.delimiter)
       : this.directory;
     const fullPath = fileURLToPath(new URL(fileName, directoryPath));
-    return fs.stat(directoryPath);
+    return statSync(fullPath) ?? false;
+  }
+
+  path(relativePath?: string): string {
+    if (relativePath) {
+      return path.resolve(this._directory, relativePath);
+    }
+    return path.resolve(this._directory);
   }
 
   get<T = unknown>(key: string): T {

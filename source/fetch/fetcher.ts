@@ -48,6 +48,10 @@ export abstract class Fetcher extends EventEmitter {
     this.browserPreset = options.browserPreset;
   }
 
+  eventNames(): string[] {
+    return ['start', 'skip', 'fetch', 'fail'];
+  }
+
   buildRequestHeaders(customHeaders: HeaderShape = {}): HeaderShape {
     const generator = new FingerprintGenerator(this.browserPreset);
     return {
@@ -56,6 +60,9 @@ export abstract class Fetcher extends EventEmitter {
       ...customHeaders,
     };
   }
+
+  init(...args: unknown[]): void { }
+  teardown(): void { }
 
   abstract fetch(url: UniqueUrl, ...args: unknown[]): Promise<Entity[]>;
 }
