@@ -32,6 +32,5 @@ c.on('process', (uu: UniqueUrl, progress: CrawlProgress) => {
     graph.set(entities);
   });
 
-  console.log(Context.path("test.ndjson"))
   await graph.save(Context.path("test.ndjson"));
 })();
