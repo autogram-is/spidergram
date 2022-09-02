@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 import { UrlFilter } from '@autogram/url-tools';
 import PQueue from 'p-queue';
-import { Entity, UniqueUrlSet } from '../graph/index.js';
+import { Entity, UniqueUrl, UniqueUrlSet } from '../graph/index.js';
 import { ParsedUrl, FilterSet } from '../util/index.js';
 
 export interface CrawlProgress extends Record<string, number> {
@@ -17,5 +17,5 @@ export interface CrawlRules extends FilterSet<ParsedUrl> {
 export interface Crawler extends EventEmitter {
   rules: CrawlRules;
   progress: CrawlProgress;
-  crawl(urls?: UniqueUrlSet): Promise<Entity[]>;
+  crawl(urls?: UniqueUrl[]): Promise<Entity[]>;
 }

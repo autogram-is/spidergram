@@ -50,12 +50,12 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
     return ['start', 'skip', 'process'];
   }
 
-  async crawl(uus: UniqueUrlSet): Promise<Entity[]> {
+  async crawl(urls: UniqueUrl[]): Promise<Entity[]> {
     const queue = new PQueue(this.queueSettings);
     const promises: Array<Promise<void>> = [];
     const results: Entity[] = [];
 
-    this.progress.total = uus.size;
+    this.progress.total = urls.length;
 
     this.fetcher
       .on('skip', (uu: UniqueUrl) => {
@@ -77,7 +77,7 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
 
     this.emit('start', this.progress);
 
-    for (const uu of uus.values()) {
+    for (const uu of urls) {
       if (is.urlInstance(uu.parsed) && this.rules.ignore(uu.parsed)) {
         this.progress.skipped++;
         this.emit('process', uu, this.progress);

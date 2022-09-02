@@ -27,7 +27,7 @@ c.on('process', (uu: UniqueUrl, progress: CrawlProgress) => {
 });
 
 (async () => {
-  await c.crawl(uus).then((entities) => {
+  await c.crawl([...uus]).then((entities) => {
     console.log(entities.length, 'entities returned');
     graph.set(entities);
   });
