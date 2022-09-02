@@ -8,7 +8,7 @@ import {
   GotFetcher,
 } from '../../source/index.js';
 
-Context.directory += '/crawl_data';
+Context.directory += './crawl_data';
 
 const uus = new UniqueUrlSet([
   'https://angrylittletree.com',
@@ -31,5 +31,7 @@ c.on('process', (uu: UniqueUrl, progress: CrawlProgress) => {
     console.log(entities.length, 'entities returned');
     graph.set(entities);
   });
-  await graph.save(Context.path('test.ndjson'))
+
+  console.log(Context.path("test.ndjson"))
+  await graph.save(Context.path("test.ndjson"));
 })();

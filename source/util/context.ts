@@ -8,9 +8,9 @@ import mkdirp from 'mkdirp';
 export interface ContextHandler {
   directory: string;
 
-  ensureSubdirectory(...subdirectories: string[]): Stats | false;
-  fileExists(relativePath: string, subdirectory?: string): Stats | false;
-  path(relativePath?: string): string;
+  ensureSubdirectory(path?: string, create?: boolean): Stats | false;
+  fileExists(path: string): Stats | false;
+  path(path?: string): string;
 
   get<T = unknown>(key: string): T;
   set<T = unknown>(key: string, value: T): void;
@@ -38,25 +38,20 @@ export class DefaultContext {
 
   set directory(value: string) {
     this._directory = value;
-    this.ensureSubdirectory('./');
+    this.ensureSubdirectory();
   }
 
-  ensureSubdirectory(...subdirectories: string[]): Stats | false {
-    const fullPath = path.parse(path.resolve(this.directory, ...subdirectories));
-    mkdirp.sync(fullPath.dir);
-    return statSync(fullPath.dir) ?? false;
+  ensureSubdirectory(path?: string, create: boolean = true): Stats | false {
+    mkdirp.sync(this.path(path));
+    return statSync(this.path(path)) ?? false;
   }
 
-  fileExists(fileName: string, ...subdirectories: string[]): Stats | false {
-    const directoryPath = (subdirectories.length > 0)
-      ? [this.directory, ...subdirectories].join(path.delimiter)
-      : this.directory;
-    const fullPath = fileURLToPath(new URL(fileName, directoryPath));
-    return statSync(fullPath) ?? false;
+  fileExists(filePath: string): Stats | false {
+    return statSync(this.path(filePath)) ?? false;
   }
 
   path(relativePath?: string): string {
-    if (relativePath) {
+    if (is.nonEmptyStringAndNotWhitespace(relativePath)) {
       return path.resolve(this._directory, relativePath);
     }
     return path.resolve(this._directory);
