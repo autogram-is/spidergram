@@ -29,7 +29,7 @@ export interface ResponseShape {
 export enum INTERVALS {
   none = 0,
   second = 1000,
-  minute = 60 * second,
-  hour = 60 * minute,
-  day = 24 * hour,
+  minute = 60_000,
+  hour = 3_600_000,
+  day = 86_400_000,
 }
