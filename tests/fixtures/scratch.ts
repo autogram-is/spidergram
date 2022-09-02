@@ -8,7 +8,7 @@ import {
   GotFetcher,
 } from '../../source/index.js';
 
-Context.directory += './crawl_data';
+Context.directory += '/crawl_data';
 
 const uus = new UniqueUrlSet([
   'https://angrylittletree.com',
