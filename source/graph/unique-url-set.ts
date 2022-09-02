@@ -1,4 +1,5 @@
 import { NormalizedUrl } from '@autogram/url-tools';
+import is from '@sindresorhus/is';
 import { UniqueUrl } from './unique-url.js';
 
 type ValidUniqueUrlInput = UniqueUrl | NormalizedUrl | string;
@@ -6,18 +7,13 @@ type ValidUniqueUrlInput = UniqueUrl | NormalizedUrl | string;
 export class UniqueUrlSet extends Set<UniqueUrl> {
   verifier = new Set<string>();
   unparsable = new Set<string>();
-  keepUnparsable = false;
 
-  public constructor(keepUnparsable: boolean);
-  public constructor(values: ValidUniqueUrlInput[]);
   public constructor(
-    values?: ValidUniqueUrlInput[] | boolean,
-    keepUnparsable = false,
+    input?: ValidUniqueUrlInput[],
+    public keepUnparsable: boolean = false,
   ) {
     super();
-    if (keepUnparsable) this.keepUnparsable = keepUnparsable;
-    if (values !== undefined && typeof values !== 'boolean')
-      this.addItems(values);
+    if (is.array(input)) this.addItems(input);
   }
 
   override add(value: ValidUniqueUrlInput): this {
