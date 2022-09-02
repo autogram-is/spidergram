@@ -1,3 +1,4 @@
+import process from 'node:process';
 import path from 'node:path';
 import { PathLike, Stats } from 'node:fs';
 import * as fs from 'node:fs/promises';
@@ -16,16 +17,16 @@ export interface ContextHandler {
 }
 
 export class DefaultContext {
-  protected static instance: DefaultContext;
-  protected values: Record<string, unknown> = {};
-
   static getInstance() {
     if (is.undefined(DefaultContext.instance))
       DefaultContext.instance = new DefaultContext();
     return DefaultContext.instance;
   }
 
+  protected static instance: DefaultContext;
+
   directory: string;
+  protected values: Record<string, unknown> = {};
 
   protected constructor() {
     this.directory = process.cwd();

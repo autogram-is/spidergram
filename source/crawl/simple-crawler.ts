@@ -2,7 +2,7 @@ import { EventEmitter } from 'node:events';
 import is from '@sindresorhus/is';
 import PQueue from 'p-queue';
 import { ParsedUrl } from '@autogram/url-tools';
-import { Entity, UniqueUrl, UniqueUrlSet } from '../graph/index.js';
+import { Entity, UniqueUrlSet, UniqueUrl } from '../graph/index.js';
 import { INTERVALS } from '../index.js';
 import { Fetcher, GotFetcher } from '../fetch/index.js';
 import { Crawler } from './crawler.js';
@@ -47,43 +47,47 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
   }
 
   eventNames(): string[] {
-    return ['start', 'skip', 'fetch', 'error', 'finish'];
+    return ['start', 'skip', 'fetch', 'error'];
   }
 
-  async crawl(urls: UniqueUrlSet): Promise<Entity[]> {
+  async crawl(uus: UniqueUrlSet): Promise<Entity[]> {
     const queue = new PQueue(this.queueSettings);
-    this.progress.total = urls.size;
-    let results: Entity[] = [];
+    const promises: Array<Promise<void>> = [];
+    const results: Entity[] = [];
 
+    this.progress.total = uus.size;
     this.emit('start', this.progress);
 
-    return new Promise((resolve) => {
-      for (const uu of urls.values()) {
-        if (is.urlInstance(uu.parsed) && this.rules.ignore(uu.parsed)) {
-          this.progress.skipped++;
-          this.emit('skip', uu, this.progress);
-        }
+    this.fetcher.on('fetch', (uu: UniqueUrl) => {
+      this.progress.fetched++;
+      this.emit('fetch', uu, this.progress);
+    });
 
+    this.fetcher.on('error', (uu: UniqueUrl) => {
+      this.progress.errors++;
+      this.emit('error', (reason: Error) => reason, uu, this.progress);
+    });
+
+    for (const uu of uus.values()) {
+      if (is.urlInstance(uu.parsed) && this.rules.ignore(uu.parsed)) {
+        this.progress.skipped++;
+        this.emit('skip', uu, this.progress);
+      }
+
+      promises.push(
         queue.add(async () => {
           await this.fetcher
             .fetch(uu)
             .then((entities) => this.postFetch(uu, entities))
             .then((entities) => {
-              results = [...results, ...entities];
-              this.progress.fetched++;
-              this.emit('fetch', uu, this.progress);
-            })
-            .catch((error: unknown) => {
-              this.progress.errors++;
-              this.emit('error', error, uu, this.progress);
+              results.push(...entities);
             });
-        });
-      }
+        }),
+      );
+    }
 
-      queue.onIdle().then(() => {
-        this.emit('finish', this.progress);
-        resolve(results);
-      });
-    });
+    await Promise.all(promises);
+    this.emit('finish', this.progress);
+    return results;
   }
 }

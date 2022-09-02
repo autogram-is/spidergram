@@ -31,17 +31,22 @@ export class GotFetcher extends Fetcher {
         .then((response: Response) => {
           const shape = this.normalizeResponseShape(response);
           if (this.rules.discard(shape)) {
+            this.emit('skip', uu);
             resolve([uu]);
           } else if (this.rules.download(shape)) {
+            this.emit('fetch', uu);
             resolve(this.downloadedResource(uu, response));
           } else if (this.rules.store(shape)) {
+            this.emit('fetch', uu);
             resolve(this.savedResource(uu, response));
           } else {
+            this.emit('fetch', uu);
             resolve(this.responseStatus(uu, response));
           }
         })
         .catch((error: unknown) => {
           if (error instanceof RequestError) {
+            this.emit('error', error, uu);
             resolve(this.errorStatus(uu, error));
           } else throw error;
         });
