@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 import is from '@sindresorhus/is';
 import PQueue from 'p-queue';
-import { ParsedUrl } from '@autogram/url-tools';
+import { ParsedUrl, NormalizedUrl } from '@autogram/url-tools';
 import { Entity, UniqueUrlSet, UniqueUrl } from '../graph/index.js';
 import { INTERVALS } from '../index.js';
 import { Fetcher, GotFetcher } from '../fetch/index.js';
@@ -38,6 +38,7 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
     fetched: 0,
     skipped: 0,
     errors: 0,
+    invalid: 0,
   };
 
   constructor(customFetcher?: Fetcher, postFetch?: PostFetchFunction) {
@@ -50,12 +51,14 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
     return ['start', 'skip', 'process'];
   }
 
-  async crawl(urls: UniqueUrl[]): Promise<Entity[]> {
+  async crawl(input?: UniqueUrlSet | UniqueUrl[] | NormalizedUrl[] | string[]): Promise<Entity[]> {
+    const urls = (input instanceof UniqueUrlSet) ? input : new UniqueUrlSet(input, true);
     const queue = new PQueue(this.queueSettings);
     const promises: Array<Promise<void>> = [];
     const results: Entity[] = [];
 
-    this.progress.total = urls.length;
+    this.progress.total = urls.size;
+    this.progress.invalid = urls.unparsable.size;
 
     this.fetcher
       .on('skip', (uu: UniqueUrl) => {
@@ -77,7 +80,7 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
 
     this.emit('start', this.progress);
 
-    for (const uu of urls) {
+    for (const uu of [...urls]) {
       if (is.urlInstance(uu.parsed) && this.rules.ignore(uu.parsed)) {
         this.progress.skipped++;
         this.emit('process', uu, this.progress);
