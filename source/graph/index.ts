@@ -1,11 +1,11 @@
 import { Dictionary } from '../util/index.js';
 
-export { UniqueUrl } from './unique-url.js';
+export { UniqueUrl, isUniqueUrl } from './unique-url.js';
 export { UniqueUrlSet } from './unique-url-set.js';
-export { Status } from './status.js';
-export { Resource } from './resource.js';
-export { RespondsWith } from './responds-with.js';
-export { LinksTo } from './links-to.js';
+export { Status, isStatus } from './status.js';
+export { Resource, isResource } from './resource.js';
+export { RespondsWith, isRespondsWith } from './responds-with.js';
+export { LinksTo, isLinksTo } from './links-to.js';
 
 export {
   Entity,

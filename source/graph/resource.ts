@@ -1,4 +1,4 @@
-import { Node } from '@autogram/autograph';
+import { Node, isNode } from '@autogram/autograph';
 import { ResponseShape, HeaderShape } from './index.js';
 
 export class Resource extends Node implements ResponseShape {
@@ -29,3 +29,7 @@ export class Resource extends Node implements ResponseShape {
 }
 
 Node.types.set('resource', Resource);
+
+export function isResource(input: unknown): input is Resource {
+  return isNode(input) && input.type == 'resource';
+}

@@ -66,9 +66,14 @@ export {
 
 export {
   UniqueUrl,
+  isUniqueUrl,
   UniqueUrlSet,
   Status,
+  isStatus,
   Resource,
+  isResource,
   RespondsWith,
+  isRespondsWith,
   LinksTo,
+  isLinksTo
 } from './graph/index.js';

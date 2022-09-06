@@ -1,4 +1,4 @@
-import { Node } from '@autogram/autograph';
+import { Node, isNode } from '@autogram/autograph';
 import { Dictionary } from '../util/index.js';
 import { HeaderShape, ResponseShape } from './index.js';
 
@@ -16,3 +16,7 @@ export class Status extends Node implements ResponseShape {
 }
 
 Node.types.set('status', Status);
+
+export function isStatus(input: unknown): input is Status {
+  return isNode(input) && input.type == 'status';
+}

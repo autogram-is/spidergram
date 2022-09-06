@@ -1,4 +1,4 @@
-import { Node, Edge, Dictionary, Reference } from '@autogram/autograph';
+import { Node, Edge, isEdge, Dictionary, Reference } from '@autogram/autograph';
 
 export class LinksTo extends Edge {
   predicate = 'links_to';
@@ -14,3 +14,7 @@ export class LinksTo extends Edge {
 }
 
 Edge.types.set('links_to', LinksTo);
+
+export function isLinksTo(input: unknown): input is LinksTo {
+  return isEdge(input) && input.predicate == 'links_to';
+}

@@ -1,4 +1,4 @@
-import { Node, Dictionary, Transform, Type } from '@autogram/autograph';
+import { Node, isNode, Dictionary, Transform, Type } from '@autogram/autograph';
 import { NormalizedUrl } from '@autogram/url-tools';
 
 export class UniqueUrl extends Node {
@@ -53,3 +53,7 @@ export class UniqueUrl extends Node {
 }
 
 Node.types.set('unique_url', UniqueUrl);
+
+export function isUniqueUrl(input: unknown): input is UniqueUrl {
+  return isNode(input) && input.type == 'unique_url';
+}
