@@ -1,19 +1,20 @@
-import { NormalizedUrl } from '@autogram/url-tools';
+import { URL } from 'node:url';
 import is from '@sindresorhus/is';
+import { NormalizedUrl, UrlSet, UrlMutator, NormalizedUrlSet } from '@autogram/url-tools';
 import { UniqueUrl } from './unique-url.js';
 
 type ValidUniqueUrlInput = UniqueUrl | NormalizedUrl | string;
-
+type ValidMultiUrlInput = string | URL | UniqueUrl | string[] | URL[] | UrlSet | UniqueUrlSet;
 export class UniqueUrlSet extends Set<UniqueUrl> {
   verifier = new Set<string>();
   unparsable = new Set<string>();
 
   public constructor(
     input?: ValidUniqueUrlInput[],
-    public keepUnparsable: boolean = false,
+    public keepUnparsable: boolean = true,
   ) {
     super();
-    if (is.array(input)) this.addItems(input);
+    if (is.nonEmptyArray(input)) this.addItems(input);
   }
 
   override add(value: ValidUniqueUrlInput): this {
@@ -66,7 +67,7 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
   }
 
   protected parse(input: ValidUniqueUrlInput): UniqueUrl | false {
-    if (typeof input === 'string') {
+    if (is.nonEmptyStringAndNotWhitespace(input)) {
       input = new UniqueUrl(input);
       if (input.parsable || this.keepUnparsable) {
         return input;
@@ -76,7 +77,7 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
       return false;
     }
 
-    if (input instanceof URL) {
+    if (is.urlInstance(input)) {
       return new UniqueUrl(input.href);
     }
 
