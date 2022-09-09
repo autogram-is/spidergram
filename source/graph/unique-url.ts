@@ -21,12 +21,13 @@ export class UniqueUrl extends Node {
     public referer = '',
     public depth = 0,
     baseUrl?: string,
+    normalizer = NormalizedUrl.normalizer
   ) {
     super('unique_url');
     let data: Dictionary;
     if (typeof url === 'string') {
       try {
-        const parsed = new NormalizedUrl(url, baseUrl);
+        const parsed = new NormalizedUrl(url, baseUrl, normalizer);
         this.url = parsed.href;
         this.parsed = parsed;
         this.parsable = true;
@@ -39,8 +40,9 @@ export class UniqueUrl extends Node {
         }
       }
     } else {
-      this.url = url.href;
-      this.parsed = url;
+      const normalized = new NormalizedUrl(url.href, baseUrl, normalizer);
+      this.url = normalized.href;
+      this.parsed = normalized;
       this.parsable = true;
     }
 
@@ -48,6 +50,10 @@ export class UniqueUrl extends Node {
   }
 
   protected getIdSeed(): unknown {
+    return this.url;
+  }
+
+  toString(): string {
     return this.url;
   }
 }
