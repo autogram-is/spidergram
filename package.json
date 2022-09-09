@@ -87,6 +87,7 @@
     "mkdirp": "^1.0.4",
     "ow": "^1.0.0",
     "p-queue": "^7.3.0",
+    "robots-txt-parser": "github:russellsteadman/robots-txt-parser",
     "type-fest": "^2.17.0",
     "whatwg-mimetype": "^3.0.0"
   }
