@@ -2,10 +2,11 @@ import { EventEmitter } from 'node:events';
 import is from '@sindresorhus/is';
 import PQueue from 'p-queue';
 import { ParsedUrl, NormalizedUrl } from '@autogram/url-tools';
-import { Entity, UniqueUrlSet, UniqueUrl } from '../graph/index.js';
+import { Graph, Readable, Mutable } from '@autogram/autograph';
+import { Entity, Resource, Status, RespondsWith, LinksTo, UniqueUrlSet, UniqueUrl, JsonGraph } from '../graph/index.js';
 import { INTERVALS } from '../index.js';
 import { Fetcher, GotFetcher } from '../fetch/index.js';
-import { Crawler } from './crawler.js';
+import { Crawler, CrawlerOptions } from './crawler.js';
 
 export type PostFetchFunction = (uu: UniqueUrl, entities: Entity[]) => Entity[];
 
@@ -17,11 +18,19 @@ export interface QueueOptions {
   autoStart?: boolean;
 }
 
-export class SimpleCrawler extends EventEmitter implements Crawler {
-  fetcher: Fetcher;
-  postFetch: PostFetchFunction;
+export interface SimpleCrawlerOptions extends CrawlerOptions {
+  graph?: GraphHandle;
+  customFetcher?: Fetcher;
+}
 
+export type GraphHandle = Graph & Readable & Mutable;
+export class SimpleCrawler extends EventEmitter implements Crawler {
+  graph: GraphHandle;
+  fetcher: Fetcher;
+  queue: PQueue;
+  
   rules = {
+    isTarget: (url: ParsedUrl) => true,
     ignore: (url: ParsedUrl) => false,
   };
 
@@ -36,15 +45,17 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
   progress = {
     total: 0,
     fetched: 0,
+    found: 0,
     skipped: 0,
     errors: 0,
     invalid: 0,
   };
 
-  constructor(customFetcher?: Fetcher, postFetch?: PostFetchFunction) {
+  constructor(options: SimpleCrawlerOptions = {}) {
     super();
-    this.fetcher = customFetcher ?? new GotFetcher();
-    this.postFetch = postFetch ?? ((uu, entities) => entities);
+    this.fetcher = options.customFetcher ?? new GotFetcher();
+    this.graph = options.graph ?? new JsonGraph();
+    this.queue = new PQueue(this.queueSettings);
   }
 
   eventNames(): string[] {
@@ -53,7 +64,6 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
 
   async crawl(input?: UniqueUrlSet | UniqueUrl[] | NormalizedUrl[] | string[]): Promise<Entity[]> {
     const urls = (input instanceof UniqueUrlSet) ? input : new UniqueUrlSet(input, true);
-    const queue = new PQueue(this.queueSettings);
     const promises: Array<Promise<void>> = [];
     const results: Entity[] = [];
 
@@ -81,25 +91,36 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
     this.emit('start', this.progress);
 
     for (const uu of [...urls]) {
-      if (is.urlInstance(uu.parsed) && this.rules.ignore(uu.parsed)) {
-        this.progress.skipped++;
-        this.emit('process', uu, this.progress);
+      if (is.urlInstance(uu.parsed)) {
+        if (this.rules.ignore(uu.parsed)) {
+          // rejected
+        }
+        else {
+          promises.push(
+            this.queue.add(async () => {
+              await this.fetcher
+                .fetch(uu)
+                .then((entities) => {
+                  results.push(...entities);
+                });
+            }),
+          );    
+        }
+      } else {
+        // rejected
       }
-
-      promises.push(
-        queue.add(async () => {
-          await this.fetcher
-            .fetch(uu)
-            .then((entities) => this.postFetch(uu, entities))
-            .then((entities) => {
-              results.push(...entities);
-            });
-        }),
-      );
     }
 
     await Promise.all(promises);
     this.emit('finish', this.progress);
     return results;
+  }
+
+  parseForLinks(resource: Resource) {
+
+  }
+
+  async processUrl(url: UniqueUrl) : Promise<void> {
+
   }
 }
