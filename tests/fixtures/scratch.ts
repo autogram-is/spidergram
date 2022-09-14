@@ -15,22 +15,22 @@ const uus = new UniqueUrlSet([
   'https://ethanmarcotte.com',
   'https://karenmcgrane.com',
   'https://autogram.is',
-  'https://domain-that-wont-exist.biz'
+  'https://domain-that-wont-exist.biz',
 ]);
 
 const graph = new JsonGraph();
 graph.set([...uus.values()]);
 
-const c = new SimpleCrawler();
+const c = new SimpleCrawler({
+  graph,
+  rules: {},
+});
+
 c.on('process', (uu: UniqueUrl, progress: CrawlProgress) => {
   console.log(progress, uu.url);
 });
 
 (async () => {
-  await c.crawl([...uus]).then((entities) => {
-    console.log(entities.length, 'entities returned');
-    graph.set(entities);
-  });
-
-  await graph.save(Context.path("test.ndjson"));
+  await c.crawl([...uus]);
+  await graph.save(Context.path('test.ndjson'));
 })();

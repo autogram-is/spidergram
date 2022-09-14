@@ -1,7 +1,11 @@
 import { EventEmitter } from 'node:events';
 import { UrlFilter } from '@autogram/url-tools';
-import { Entity, UniqueUrl } from '../graph/index.js';
+import { Graph, Readable, Mutable } from '@autogram/autograph';
+import { UniqueUrl } from '../graph/index.js';
 import { ParsedUrl, FilterSet } from '../util/index.js';
+
+export interface GraphHandle extends Graph, Readable, Mutable {}
+
 export interface CrawlProgress extends Record<string, number> {
   total: number;
   fetched: number;
@@ -15,13 +19,15 @@ export interface CrawlRules extends FilterSet<ParsedUrl> {
   ignore: UrlFilter;
 }
 
-export interface CrawlerOptions {
-  rules?: CrawlRules;
+export interface CrawlOptions {
+  rules?: Partial<CrawlRules>;
+  graph?: GraphHandle;
 }
 
 export interface Crawler extends EventEmitter {
   rules: CrawlRules;
   progress: CrawlProgress;
+  graph: GraphHandle;
 
-  crawl(urls?: UniqueUrl[]): Promise<Entity[]>;
+  crawl(urls: UniqueUrl[]): Promise<void>;
 }
