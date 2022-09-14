@@ -30,5 +30,5 @@ export class RespondsWith extends Edge implements RequestShape {
 Edge.types.set('responds_with', RespondsWith);
 
 export function isRespondsWith(input: unknown): input is RespondsWith {
-  return isEdge(input) && input.predicate == 'responds_with';
+  return isEdge(input) && input.predicate === 'responds_with';
 }

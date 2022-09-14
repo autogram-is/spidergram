@@ -41,7 +41,7 @@ export class DefaultContext {
     this.ensureSubdirectory();
   }
 
-  ensureSubdirectory(path?: string, create: boolean = true): Stats | false {
+  ensureSubdirectory(path?: string, create = true): Stats | false {
     mkdirp.sync(this.path(path));
     return statSync(this.path(path)) ?? false;
   }
@@ -54,6 +54,7 @@ export class DefaultContext {
     if (is.nonEmptyStringAndNotWhitespace(relativePath)) {
       return path.resolve(this._directory, relativePath);
     }
+
     return path.resolve(this._directory);
   }
 

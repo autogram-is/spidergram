@@ -61,8 +61,8 @@ export abstract class Fetcher extends EventEmitter {
     };
   }
 
-  init(...args: unknown[]): void { }
-  teardown(): void { }
+  init(...args: unknown[]): void {}
+  teardown(): void {}
 
   abstract fetch(url: UniqueUrl, ...args: unknown[]): Promise<Entity[]>;
 }

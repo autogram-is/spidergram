@@ -31,5 +31,5 @@ export class Resource extends Node implements ResponseShape {
 Node.types.set('resource', Resource);
 
 export function isResource(input: unknown): input is Resource {
-  return isNode(input) && input.type == 'resource';
+  return isNode(input) && input.type === 'resource';
 }

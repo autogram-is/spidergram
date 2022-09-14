@@ -7,6 +7,7 @@ import { CheerioParser, CheerioOptions } from './cheerio.js';
 
 export type SitemapLink = {
   href: string;
+  context?: string;
   title?: string;
   publication?: string;
   updated?: string;
@@ -56,6 +57,7 @@ export const linksFromSitemap = (
       if (is.nonEmptyStringAndNotWhitespace(href)) {
         results.push({
           href,
+          context: 'sitemap',
           updated,
           changefreq,
           priority: is.numericString(priority) ? Number(priority) : undefined,
@@ -71,6 +73,7 @@ export const linksFromSitemap = (
         if (is.nonEmptyStringAndNotWhitespace(href)) {
           results.push({
             href,
+            context: 'sitemap-index',
             updated,
           });
         }
@@ -85,6 +88,7 @@ export const linksFromSitemap = (
         if (is.nonEmptyStringAndNotWhitespace(href)) {
           results.push({
             href,
+            context: 'atom-feed',
             updated,
           });
         }
@@ -99,6 +103,7 @@ export const linksFromSitemap = (
         if (is.nonEmptyStringAndNotWhitespace(href)) {
           results.push({
             href,
+            context: 'rss-feed',
             updated,
           });
         }
@@ -109,8 +114,9 @@ export const linksFromSitemap = (
     if (results.length === 0) {
       // HTML
       $('body a').each((i, element) => {
-        const href = $(element).attr('href');
-        const title = $(element).text();
+        $(element).attr('href');
+        ('text-sitemap');
+        $(element).text();
       });
     }
   }

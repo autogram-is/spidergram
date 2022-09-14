@@ -20,7 +20,6 @@ const gotDefaultOptions = {
 };
 
 export class GotFetcher extends Fetcher {
-
   async fetch(uu: UniqueUrl, ...args: unknown[]): Promise<Entity[]> {
     const customHeaders = uu.referer ? { referer: uu.referer } : {};
     const requestOptions = {
@@ -33,24 +32,28 @@ export class GotFetcher extends Fetcher {
         if (this.rules.discard(shape)) {
           this.emit('skip', uu);
           return [uu];
-        } else if (this.rules.download(shape)) {
+        }
+
+        if (this.rules.download(shape)) {
           this.emit('fetch', uu);
           return this.downloadedResource(uu, response);
-        } else if (this.rules.store(shape)) {
+        }
+
+        if (this.rules.store(shape)) {
           this.emit('fetch', uu);
           return this.savedResource(uu, response);
-        } else {
-          this.emit('status', uu);
-          return this.responseStatus(uu, response);
         }
+
+        this.emit('status', uu);
+        return this.responseStatus(uu, response);
       })
       .catch((error: unknown) => {
         if (error instanceof RequestError) {
           this.emit('fail', error, uu);
           return this.errorStatus(uu, error);
-        } else {
-          throw error;
         }
+
+        throw error;
       });
   }
 

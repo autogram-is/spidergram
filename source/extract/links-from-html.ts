@@ -5,6 +5,7 @@ import { CheerioParser, CheerioOptions } from './cheerio.js';
 
 export type HtmlLink = {
   href: string;
+  context?: string;
   rel?: string;
   title?: string;
   attributes?: Dictionary<string>;
@@ -23,7 +24,7 @@ const linkDefaults: LinkExtractorOptions = {
 
 export const linksFromHtml = (
   r: Resource,
-  selector = 'body a',
+  selectors: string | Dictionary<string> = 'body a',
   customOptions: LinkExtractorOptions = {},
 ): HtmlLink[] => {
   const options = {
@@ -31,26 +32,32 @@ export const linksFromHtml = (
     ...customOptions,
   };
   const results: HtmlLink[] = [];
+  if (typeof selectors === 'string') {
+    selectors = { default: selectors };
+  }
 
   if (is.nonEmptyString(r.body)) {
     const $ = new CheerioParser(r.body).root;
 
-    $(selector).each((i, element) => {
-      const href: string = $(element).attr('href') ?? '';
+    for (const key in selectors) {
+      $(selectors[key]).each((i, element) => {
+        const href: string = $(element).attr('href') ?? '';
 
-      if (
-        !(href.length === 0 && options.ignoreEmptyHref) &&
-        !(href.startsWith('#') && options.ignoreSelfLinkAnchors)
-      ) {
-        results.push({
-          href,
-          rel: $(element).attr('rel') ?? '',
-          title: $(element).text() ?? '',
-          attributes: $(element).attr() as Dictionary<string>,
-          data: $(element).data() ?? {},
-        });
-      }
-    });
+        if (
+          !(href.length === 0 && options.ignoreEmptyHref) &&
+          !(href.startsWith('#') && options.ignoreSelfLinkAnchors)
+        ) {
+          results.push({
+            href,
+            context: key,
+            rel: $(element).attr('rel') ?? '',
+            title: $(element).text() ?? '',
+            attributes: $(element).attr() as Dictionary<string>,
+            data: $(element).data() ?? {},
+          });
+        }
+      });
+    }
   }
 
   return results;

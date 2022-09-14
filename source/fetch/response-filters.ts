@@ -30,6 +30,13 @@ export const isHtml = (response: ResponseShape): boolean => {
   return mime.isHTML();
 };
 
+export const isSitemap = (response: ResponseShape): boolean => {
+  const contentType = response.headers['content-type']?.toString() ?? '';
+  if (contentType.length === 0) return false;
+  const mime = new MIMEType(contentType);
+  return mime.isXML() && response.url.toLowerCase().includes('sitemap');
+};
+
 export const isTextData = (response: ResponseShape): boolean => {
   const contentType = response.headers['content-type']?.toString() ?? '';
   if (contentType.length === 0) return false;

@@ -21,7 +21,7 @@ export class UniqueUrl extends Node {
     public referer = '',
     public depth = 0,
     baseUrl?: string,
-    normalizer = NormalizedUrl.normalizer
+    normalizer = NormalizedUrl.normalizer,
   ) {
     super('unique_url');
     let data: Dictionary;
@@ -49,11 +49,11 @@ export class UniqueUrl extends Node {
     this.assignId();
   }
 
-  protected getIdSeed(): unknown {
+  toString(): string {
     return this.url;
   }
 
-  toString(): string {
+  protected getIdSeed(): unknown {
     return this.url;
   }
 }
@@ -61,5 +61,5 @@ export class UniqueUrl extends Node {
 Node.types.set('unique_url', UniqueUrl);
 
 export function isUniqueUrl(input: unknown): input is UniqueUrl {
-  return isNode(input) && input.type == 'unique_url';
+  return isNode(input) && input.type === 'unique_url';
 }

@@ -18,5 +18,5 @@ export class Status extends Node implements ResponseShape {
 Node.types.set('status', Status);
 
 export function isStatus(input: unknown): input is Status {
-  return isNode(input) && input.type == 'status';
+  return isNode(input) && input.type === 'status';
 }
