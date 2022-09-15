@@ -1,6 +1,7 @@
 import { EventEmitter } from 'node:events';
 import is from '@sindresorhus/is';
 import { ParsedUrl, NormalizedUrl } from '@autogram/url-tools';
+import { INTERVALS } from '../index.js';
 import {
   Entity,
   Resource,
@@ -21,23 +22,40 @@ import {
 import { Extractor } from '../util/types.js';
 import { UniqueUrlPool } from './unique-url-pool.js';
 import { Crawler, CrawlOptions, GraphHandle } from './crawler.js';
+import PQueue from 'p-queue';
 
 export interface SimpleCrawlOptions extends CrawlOptions {
   graph?: GraphHandle;
   fetcher?: Fetcher;
   extractor?: Extractor<Resource, HtmlLink[] | SitemapLink[]>;
+  queue?: ConcurrencyOptions
 }
 
+export interface ConcurrencyOptions {
+  concurrency?: number;
+  interval?: number;
+  intervalCap?: number;
+  timeout?: number;
+  autoStart?: boolean;
+}
+
+const concurrencyDefaults: ConcurrencyOptions = {
+  concurrency: 20,
+  interval: INTERVALS.second,
+  intervalCap: 5,
+  timeout: INTERVALS.minute * 3,
+  autoStart: true,
+};
 export class SimpleCrawler extends EventEmitter implements Crawler {
   graph: GraphHandle;
   fetcher: Fetcher;
-  pool: UniqueUrlPool;
-  extractor: Extractor<Resource, HtmlLink[] | SitemapLink[]>;
+  queue: PQueue;
+  seen: UniqueUrlSet;
 
   rules = {
     isTarget: (url: ParsedUrl) => true,
     parse: (url: ParsedUrl) => true,
-    follow: (url: ParsedUrl) => false,
+    follow: (url: ParsedUrl) => true,
     ignore: (url: ParsedUrl) => false,
   };
 
@@ -47,30 +65,28 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
     found: 0,
     skipped: 0,
     errors: 0,
-    invalid: 0,
   };
 
   constructor(options: SimpleCrawlOptions = {}) {
     super();
     this.fetcher = options.fetcher ?? new GotFetcher();
     this.graph = options.graph ?? new JsonGraph();
-    this.pool = new UniqueUrlPool(this.processUrl);
-    this.extractor = options.extractor ?? linksFromHtml;
+    this.queue = new PQueue(options.queue ?? concurrencyDefaults);
     this.rules = {
       ...this.rules,
       ...options.rules,
     };
+    this.seen = new UniqueUrlSet();
   }
 
   eventNames(): string[] {
-    return ['start', 'skip', 'process', 'discover', 'error', 'fail'];
+    return ['start', 'skip', 'process', 'fail'];
   }
 
   async crawl(input?: UniqueUrl[] | NormalizedUrl[] | string[]): Promise<void> {
     if (is.undefined(input)) return;
-    const pool = new UniqueUrlSet(input);
-    this.progress.total = this.pool.size;
-    this.progress.invalid = this.pool.unparsable.size;
+    const seedUrls = new UniqueUrlSet(input);
+    this.progress.total = seedUrls.size;
 
     // Pass on status events from the Fetcher class;
     this.fetcher
@@ -89,25 +105,37 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
       .on('fail', (error: unknown, uu: UniqueUrl) => {
         this.progress.errors++;
         this.emit('process', uu, this.progress);
-      });
+      })
 
     this.emit('start', this.progress);
 
-    const url = this.pool.next();
-    if (url && is.urlInstance(url.parsed)) {
-      console.log('queueing');
-      if (this.rules.ignore(url.parsed)) this.pool.skip(url);
-      await this.queueUrl(url);
+    for (let url of seedUrls.values()) {
+      this.enqueue(url);
     }
 
-    this.emit('finish', this.progress);
+    return this.queue.onIdle();
+  }
+
+  enqueue(url: UniqueUrl): void {
+    if (!this.seen.has(url)) {
+      this.queue.add(async () => await this.processUrl(url));
+      this.seen.add(url);
+    }
+  }
+
+  async processUrl(targetUrl: UniqueUrl): Promise<void> {
+    return this.fetcher
+      .fetch(targetUrl)
+      .then(entities => {
+        this.processFetchResults(targetUrl, entities);
+      })
+      .catch((reason: unknown) => {
+        this.emit('fail', reason, targetUrl);
+      });
   }
 
   processFetchResults(targetUrl: UniqueUrl, fetchResults: Entity[]): void {
-    console.log(`Recieved response: ${targetUrl.url}`);
-    // Save the resulting resources and mark the URL as completed.
     this.graph.add(fetchResults);
-    this.pool.complete(targetUrl);
 
     const resource = (fetchResults.find((entity) => isResource(entity)) as Resource | undefined);
 
@@ -115,9 +143,9 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
       const foundLinks = this.parseForLinks(resource);
 
       for (let entity of foundLinks) {
-        // Find UniqueUrls and enqueue them
-        if (isUniqueUrl(entity)) {
-          this.pool.add(entity);
+        if (isUniqueUrl(entity) && entity.parsed && this.rules.follow(entity.parsed)) {
+          this.progress.total++
+          this.enqueue(entity as UniqueUrl);
         }
       }
 
@@ -130,7 +158,7 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
 
     let foundLinks: SitemapLink[] | HtmlLink[] = [];
     if (isHtml(resource)) {
-      foundLinks = this.extractor(resource);
+      foundLinks = linksFromHtml(resource);
     }
 
     if (isSitemap(resource)) {
@@ -141,52 +169,20 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
     if (foundLinks.length > 0) {
       const newUniques = new UniqueUrlSet();
 
-      for (const link of foundLinks) {
-        const normalized = new NormalizedUrl(link.href, resource.url);
-        if (this.rules.ignore(normalized)) {
-          continue;
-        } else {
-          const newUnique = new UniqueUrl(normalized, resource.url);
-          if (!newUniques.has(newUnique)) entities.push(newUnique);
-          entities.push(new LinksTo(resource, newUnique, link));
-        }
-      }
-    }
-
-    // Now cull out any that already exist in the pool or graph.
-    const trulyNewEntities: Entity[] = [];
-
-    for (const entity of entities) {
-      if (isUniqueUrl(entity)) {
-        if (!this.pool.has(entity) && !this.graph.has(entity)) {
+      for (let link of foundLinks) {
+        const newUnique = new UniqueUrl(link.href, resource.url);
+        if (!newUniques.has(newUnique) && !this.graph.has(newUnique)) {
           this.progress.found++;
-          trulyNewEntities.push(entity);
-          if (entity.parsed && this.rules.follow(entity.parsed)) {
-            this.pool.add(entity);
-          }
+          entities.push(newUnique);
         }
-      } else {
-        // It's a LinksTo record
-        trulyNewEntities.push(entity);
+        entities.push(new LinksTo(resource, newUnique, link));
+
+        if (newUnique.parsed && !this.rules.ignore(newUnique.parsed)) {
+          if (!newUniques.has(newUnique)) entities.push(newUnique);
+        }
       }
     }
 
-    return trulyNewEntities;
-  }
-
-  queueUrl(targetUrl: UniqueUrl) {
-    this.pool.queue.add(() => this.processUrl(targetUrl));
-  }
-
-  async processUrl(targetUrl: UniqueUrl): Promise<void> {
-    return this.fetcher
-      .fetch(targetUrl)
-      .then(entities => {
-        console.log(entities);
-        // this.processFetchResults(targetUrl, entities);
-      })
-      .catch((reason: unknown) => {
-        this.emit('fail', reason, targetUrl);
-      });
+    return entities;
   }
 }
