@@ -78,7 +78,7 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
   }
 
   eventNames(): string[] {
-    return ['start', 'skip', 'process', 'fail'];
+    return ['start', 'process', 'fail'];
   }
 
   async crawl(input?: UniqueUrl[] | NormalizedUrl[] | string[]): Promise<GraphHandle> {
@@ -86,24 +86,10 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
     const seedUrls = new UniqueUrlSet(input);
     this.progress.total = seedUrls.size;
 
-    // Pass on status events from the Fetcher class;
     this.fetcher
       .on('skip', (uu: UniqueUrl) => {
         this.progress.skipped++;
-        this.emit('skip', uu, this.progress);
       })
-      .on('fetch', (uu: UniqueUrl) => {
-        this.progress.fetched++;
-        this.emit('process', uu, this.progress);
-      })
-      .on('status', (uu: UniqueUrl) => {
-        this.progress.fetched++;
-        this.emit('process', uu, this.progress);
-      })
-      .on('fail', (error: unknown, uu: UniqueUrl) => {
-        this.progress.errors++;
-        this.emit('process', uu, this.progress);
-      });
 
     this.emit('start', this.progress);
 
@@ -112,14 +98,15 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
     }
 
     return this.queue.onIdle()
-      .then(() => this.graph);
+      .then(() => {
+        this.emit('finish', this.progress);
+        return this.graph
+      });
   }
 
   enqueue(url: UniqueUrl): void {
     if (!this.seen.has(url)) {
-      this.queue
-        .add(async () => this.processUrl(url))
-        .catch((error: unknown) => this.emit('fail', error, url));
+      this.queue.add(async () => await this.processUrl(url))
       this.seen.add(url);
     }
   }
@@ -130,7 +117,12 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
       .then((entities) => {
         this.processFetchResults(targetUrl, entities);
       })
+      .then(() => {
+        this.progress.fetched++;
+        this.emit('process', targetUrl, this.progress);
+      })
       .catch((error: unknown) => {
+        this.progress.errors++;
         this.emit('fail', error, targetUrl);
       });
   }
@@ -149,7 +141,8 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
         if (
           isUniqueUrl(entity) &&
           entity.parsed &&
-          this.rules.follow(entity.parsed)
+          this.rules.follow(entity.parsed) && 
+          !this.seen.has(entity)
         ) {
           this.progress.total++;
           this.enqueue(entity);
@@ -177,7 +170,7 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
       const newUniques = new UniqueUrlSet();
 
       for (const link of foundLinks) {
-        const newUnique = new UniqueUrl(link.href, resource.url);
+        const newUnique = new UniqueUrl(link.href, resource.url, 0, resource.url);
         // This bit right here is actually quite expensive; the graph check
         // in particular can be ruinous if we're working against a SQL DB and
         // there are loads of individual links. Revisit it as soon as possible.
