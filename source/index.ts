@@ -78,3 +78,13 @@ export {
   LinksTo,
   isLinksTo,
 } from './graph/index.js';
+
+export { 
+  CheerioParser,
+  CheerioOptions,
+  linksFromHtml,
+  HtmlLink,
+  linksFromSitemap,
+  SitemapLink,
+  metadataFromResource
+} from './extract/index.js';
