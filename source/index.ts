@@ -42,9 +42,10 @@ export {
   Crawler,
   CrawlRules,
   CrawlProgress,
+  CrawlOptions,
+  CrawlHelpers,
   SimpleCrawler,
-  QueueOptions,
-  PostFetchFunction,
+  SimpleCrawlOptions,
 } from './crawl/index.js';
 
 export { JsonObject, JsonValue } from 'type-fest';
@@ -75,5 +76,5 @@ export {
   RespondsWith,
   isRespondsWith,
   LinksTo,
-  isLinksTo
+  isLinksTo,
 } from './graph/index.js';

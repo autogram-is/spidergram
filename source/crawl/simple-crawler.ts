@@ -1,16 +1,37 @@
 import { EventEmitter } from 'node:events';
 import is from '@sindresorhus/is';
-import PQueue from 'p-queue';
 import { ParsedUrl, NormalizedUrl } from '@autogram/url-tools';
-import { Graph, Readable, Mutable } from '@autogram/autograph';
-import { Entity, Resource, Status, RespondsWith, LinksTo, UniqueUrlSet, UniqueUrl, JsonGraph } from '../graph/index.js';
+import PQueue from 'p-queue';
 import { INTERVALS } from '../index.js';
+import {
+  Entity,
+  Resource,
+  isResource,
+  LinksTo,
+  UniqueUrlSet,
+  UniqueUrl,
+  JsonGraph,
+  isUniqueUrl,
+} from '../graph/index.js';
 import { Fetcher, GotFetcher } from '../fetch/index.js';
-import { Crawler, CrawlerOptions } from './crawler.js';
+import { isHtml, isSitemap } from '../fetch/response-filters.js';
+import { linksFromHtml, HtmlLink } from '../extract/links-from-html.js';
+import {
+  linksFromSitemap,
+  SitemapLink,
+} from '../extract/links-from-sitemap.js';
+import { Extractor } from '../util/types.js';
+import { UniqueUrlPool } from './unique-url-pool.js';
+import { Crawler, CrawlOptions, GraphHandle } from './crawler.js';
 
-export type PostFetchFunction = (uu: UniqueUrl, entities: Entity[]) => Entity[];
+export interface SimpleCrawlOptions extends CrawlOptions {
+  graph?: GraphHandle;
+  fetcher?: Fetcher;
+  extractor?: Extractor<Resource, HtmlLink[] | SitemapLink[]>;
+  queue?: ConcurrencyOptions;
+}
 
-export interface QueueOptions {
+export interface ConcurrencyOptions {
   concurrency?: number;
   interval?: number;
   intervalCap?: number;
@@ -18,28 +39,24 @@ export interface QueueOptions {
   autoStart?: boolean;
 }
 
-export interface SimpleCrawlerOptions extends CrawlerOptions {
-  graph?: GraphHandle;
-  customFetcher?: Fetcher;
-}
-
-export type GraphHandle = Graph & Readable & Mutable;
+const concurrencyDefaults: ConcurrencyOptions = {
+  concurrency: 20,
+  interval: INTERVALS.second,
+  intervalCap: 5,
+  timeout: INTERVALS.minute * 3,
+  autoStart: true,
+};
 export class SimpleCrawler extends EventEmitter implements Crawler {
   graph: GraphHandle;
   fetcher: Fetcher;
   queue: PQueue;
-  
+  seen: UniqueUrlSet;
+
   rules = {
     isTarget: (url: ParsedUrl) => true,
+    parse: (url: ParsedUrl) => true,
+    follow: (url: ParsedUrl) => true,
     ignore: (url: ParsedUrl) => false,
-  };
-
-  queueSettings: QueueOptions = {
-    concurrency: 20,
-    interval: INTERVALS.second,
-    intervalCap: 5,
-    timeout: INTERVALS.minute * 3,
-    autoStart: true,
   };
 
   progress = {
@@ -48,32 +65,34 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
     found: 0,
     skipped: 0,
     errors: 0,
-    invalid: 0,
   };
 
-  constructor(options: SimpleCrawlerOptions = {}) {
+  constructor(options: SimpleCrawlOptions = {}) {
     super();
-    this.fetcher = options.customFetcher ?? new GotFetcher();
+    this.fetcher = options.fetcher ?? new GotFetcher();
     this.graph = options.graph ?? new JsonGraph();
-    this.queue = new PQueue(this.queueSettings);
+    this.queue = new PQueue(options.queue ?? concurrencyDefaults);
+    this.rules = {
+      ...this.rules,
+      ...options.rules,
+    };
+    this.seen = new UniqueUrlSet();
   }
 
   eventNames(): string[] {
-    return ['start', 'skip', 'process'];
+    return ['start', 'skip', 'process', 'fail'];
   }
 
-  async crawl(input?: UniqueUrlSet | UniqueUrl[] | NormalizedUrl[] | string[]): Promise<Entity[]> {
-    const urls = (input instanceof UniqueUrlSet) ? input : new UniqueUrlSet(input, true);
-    const promises: Array<Promise<void>> = [];
-    const results: Entity[] = [];
+  async crawl(input?: UniqueUrl[] | NormalizedUrl[] | string[]): Promise<void> {
+    if (is.undefined(input)) return;
+    const seedUrls = new UniqueUrlSet(input);
+    this.progress.total = seedUrls.size;
 
-    this.progress.total = urls.size;
-    this.progress.invalid = urls.unparsable.size;
-
+    // Pass on status events from the Fetcher class;
     this.fetcher
       .on('skip', (uu: UniqueUrl) => {
         this.progress.skipped++;
-        this.emit('process', uu, this.progress);
+        this.emit('skip', uu, this.progress);
       })
       .on('fetch', (uu: UniqueUrl) => {
         this.progress.fetched++;
@@ -86,41 +105,103 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
       .on('fail', (error: unknown, uu: UniqueUrl) => {
         this.progress.errors++;
         this.emit('process', uu, this.progress);
-      })
+      });
 
     this.emit('start', this.progress);
 
-    for (const uu of [...urls]) {
-      if (is.urlInstance(uu.parsed)) {
-        if (this.rules.ignore(uu.parsed)) {
-          // rejected
+    for (const url of seedUrls.values()) {
+      this.enqueue(url);
+    }
+
+    return this.queue.onIdle();
+  }
+
+  enqueue(url: UniqueUrl): void {
+    if (!this.seen.has(url)) {
+      this.queue
+        .add(async () => this.processUrl(url))
+        .catch((error: unknown) => this.emit('fail', error, url));
+      this.seen.add(url);
+    }
+  }
+
+  async processUrl(targetUrl: UniqueUrl): Promise<void> {
+    return this.fetcher
+      .fetch(targetUrl)
+      .then((entities) => {
+        this.processFetchResults(targetUrl, entities);
+      })
+      .catch((error: unknown) => {
+        this.emit('fail', error, targetUrl);
+      });
+  }
+
+  processFetchResults(targetUrl: UniqueUrl, fetchResults: Entity[]): void {
+    this.graph.add(fetchResults);
+
+    const resource = fetchResults.find((entity) => isResource(entity)) as
+      | Resource
+      | undefined;
+
+    if (resource && this.rules.parse(targetUrl.parsed!)) {
+      const foundLinks = this.parseForLinks(resource);
+
+      for (const entity of foundLinks) {
+        if (
+          isUniqueUrl(entity) &&
+          entity.parsed &&
+          this.rules.follow(entity.parsed)
+        ) {
+          this.progress.total++;
+          this.enqueue(entity);
         }
-        else {
-          promises.push(
-            this.queue.add(async () => {
-              await this.fetcher
-                .fetch(uu)
-                .then((entities) => {
-                  results.push(...entities);
-                });
-            }),
-          );    
+      }
+
+      this.graph.add(foundLinks);
+    }
+  }
+
+  parseForLinks(resource: Resource): Entity[] {
+    const entities: Entity[] = [];
+
+    let foundLinks: SitemapLink[] | HtmlLink[] = [];
+    if (isHtml(resource)) {
+      foundLinks = linksFromHtml(resource);
+    }
+
+    if (isSitemap(resource)) {
+      foundLinks = linksFromSitemap(resource);
+    }
+
+    // Build entities for each link
+    if (foundLinks.length > 0) {
+      const newUniques = new UniqueUrlSet();
+
+      for (const link of foundLinks) {
+        const newUnique = new UniqueUrl(link.href, resource.url);
+        // This bit right here is actually quite expensive; the graph check
+        // in particular can be ruinous if we're working against a SQL DB and
+        // there are loads of individual links. Revisit it as soon as possible.
+        if (
+          !newUniques.has(newUnique) &&
+          !this.seen.has(newUnique) &&
+          !this.graph.has(newUnique)
+        ) {
+          this.progress.found++;
+          entities.push(newUnique);
         }
-      } else {
-        // rejected
+
+        entities.push(new LinksTo(resource, newUnique, link));
+
+        if (
+          newUnique.parsed &&
+          !this.rules.ignore(newUnique.parsed) &&
+          !newUniques.has(newUnique)
+        )
+          entities.push(newUnique);
       }
     }
 
-    await Promise.all(promises);
-    this.emit('finish', this.progress);
-    return results;
-  }
-
-  parseForLinks(resource: Resource) {
-
-  }
-
-  async processUrl(url: UniqueUrl) : Promise<void> {
-
+    return entities;
   }
 }
