@@ -21,7 +21,6 @@ import {
   SitemapLink,
 } from '../extract/links-from-sitemap.js';
 import { Extractor } from '../util/types.js';
-import { UniqueUrlPool } from './unique-url-pool.js';
 import { Crawler, CrawlOptions, GraphHandle } from './crawler.js';
 
 export interface SimpleCrawlOptions extends CrawlOptions {
@@ -30,7 +29,6 @@ export interface SimpleCrawlOptions extends CrawlOptions {
   extractor?: Extractor<Resource, HtmlLink[] | SitemapLink[]>;
   queue?: ConcurrencyOptions;
 }
-
 export interface ConcurrencyOptions {
   concurrency?: number;
   interval?: number;
@@ -55,7 +53,7 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
   rules = {
     isTarget: (url: ParsedUrl) => true,
     parse: (url: ParsedUrl) => true,
-    follow: (url: ParsedUrl) => true,
+    follow: (url: ParsedUrl) => false,
     ignore: (url: ParsedUrl) => false,
   };
 

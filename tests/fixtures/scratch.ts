@@ -1,3 +1,4 @@
+import { CrawlHelpers } from '../../source/crawl/index.js';
 import {
   Context,
   JsonGraph,
@@ -17,13 +18,16 @@ const uus = new UniqueUrlSet([
   'https://autogram.is',
   'https://domain-that-wont-exist.biz',
 ]);
-
+const targetHosts = CrawlHelpers.getUniqueHosts([...uus]);
 const graph = new JsonGraph();
-graph.set([...uus.values()]);
+graph.set([...uus]);
 
 const c = new SimpleCrawler({
   graph,
-  rules: {},
+  rules: {
+    isTarget: url => targetHosts.includes(url.hostname),
+    follow: url => targetHosts.includes(url.hostname)
+  },
 });
 
 c.on('process', (uu: UniqueUrl, progress: CrawlProgress) => {
