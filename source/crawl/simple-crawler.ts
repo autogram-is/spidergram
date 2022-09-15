@@ -106,7 +106,7 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
 
   enqueue(url: UniqueUrl): void {
     if (!this.seen.has(url)) {
-      this.queue.add(async () => await this.processUrl(url))
+      this.queue.add(async () => this.processUrl(url))
       this.seen.add(url);
     }
   }
@@ -135,7 +135,7 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
       | undefined;
 
     if (resource && this.rules.parse(targetUrl.parsed!)) {
-      const foundLinks = this.parseForLinks(resource);
+      const foundLinks = this.parseForLinks(resource, targetUrl.depth++);
 
       for (const entity of foundLinks) {
         if (
@@ -153,7 +153,7 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
     }
   }
 
-  parseForLinks(resource: Resource): Entity[] {
+  parseForLinks(resource: Resource, depth = 0): Entity[] {
     const entities: Entity[] = [];
 
     let foundLinks: SitemapLink[] | HtmlLink[] = [];
