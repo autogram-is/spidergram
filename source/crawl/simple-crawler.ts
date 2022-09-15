@@ -171,7 +171,10 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
 
       for (let link of foundLinks) {
         const newUnique = new UniqueUrl(link.href, resource.url);
-        if (!newUniques.has(newUnique) && !this.graph.has(newUnique)) {
+        // This bit right here is actually quite expensive; the graph check
+        // in particular can be ruinous if we're working against a SQL DB and
+        // there are loads of individual links. Revisit it as soon as possible.
+        if (!newUniques.has(newUnique) && !this.seen.has(newUnique) && !this.graph.has(newUnique)) {
           this.progress.found++;
           entities.push(newUnique);
         }
