@@ -170,7 +170,7 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
       const newUniques = new UniqueUrlSet();
 
       for (const link of foundLinks) {
-        const newUnique = new UniqueUrl(link.href, resource.url, 0, resource.url);
+        const newUnique = new UniqueUrl(link.href, resource.url, depth, resource.url);
         // This bit right here is actually quite expensive; the graph check
         // in particular can be ruinous if we're working against a SQL DB and
         // there are loads of individual links. Revisit it as soon as possible.
