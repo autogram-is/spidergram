@@ -20,6 +20,7 @@ export class Resource extends Node implements ResponseShape {
     filePath = '',
   ) {
     super('resource');
+    this.url = url;
     this.statusCode = statusCode;
     this.statusMessage = statusMessage;
     this.headers = headers;
