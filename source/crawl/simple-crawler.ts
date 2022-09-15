@@ -83,8 +83,8 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
     return ['start', 'skip', 'process', 'fail'];
   }
 
-  async crawl(input?: UniqueUrl[] | NormalizedUrl[] | string[]): Promise<void> {
-    if (is.undefined(input)) return;
+  async crawl(input?: UniqueUrl[] | NormalizedUrl[] | string[]): Promise<GraphHandle> {
+    if (is.undefined(input)) return Promise.resolve(this.graph);
     const seedUrls = new UniqueUrlSet(input);
     this.progress.total = seedUrls.size;
 
@@ -113,7 +113,8 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
       this.enqueue(url);
     }
 
-    return this.queue.onIdle();
+    return this.queue.onIdle()
+      .then(() => this.graph);
   }
 
   enqueue(url: UniqueUrl): void {

@@ -29,5 +29,5 @@ export interface Crawler extends EventEmitter {
   progress: CrawlProgress;
   graph: GraphHandle;
 
-  crawl(urls: UniqueUrl[]): Promise<void>;
+  crawl(urls: UniqueUrl[]): Promise<GraphHandle>;
 }
