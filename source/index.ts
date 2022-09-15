@@ -45,7 +45,7 @@ export {
   CrawlOptions,
   CrawlHelpers,
   SimpleCrawler,
-  SimpleCrawlOptions
+  SimpleCrawlOptions,
 } from './crawl/index.js';
 
 export { JsonObject, JsonValue } from 'type-fest';
