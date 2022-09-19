@@ -69,7 +69,7 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
     super();
     this.fetcher = options.fetcher ?? new GotFetcher();
     this.graph = options.graph ?? new JsonGraph();
-    this.queue = new PQueue(options.queue ?? concurrencyDefaults);
+    this.queue = new PQueue({ ...concurrencyDefaults, ...options.queue });
     this.rules = {
       ...this.rules,
       ...options.rules,

@@ -30,7 +30,7 @@ for (let uu of uus) {
 const graph = new JsonGraph();
 graph.set([...uus]);
 
-const c = new SimpleCrawler({ graph });
+const c = new SimpleCrawler({ graph, queue: { intervalCap: 10 } });
 c.rules.follow = url => targetHosts.has(url.domain);
 
 c.on('process', (uu: UniqueUrl, progress: CrawlProgress) => {
