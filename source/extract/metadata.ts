@@ -1,16 +1,9 @@
 import is from '@sindresorhus/is';
-import { getProperty, setProperty, hasProperty, deepKeys } from 'dot-prop';
+import { Property, Properties, getProperty, setProperty } from '../util/index.js';
 
 import { CheerioParser } from './cheerio.js';
-import { Dictionary, Resource } from '../index.js';
+import { Resource } from '../index.js';
 import { isHtml } from '../fetch/response-filters.js';
-
-export type Properties<T = string | number | boolean > = { [property: string]: Property<T> };
-export type Property<T = string | number | boolean > =
-  | T
-  | Property[]
-  | Properties
-  | undefined
 
 export function metadataFromResource(resource: Resource): Properties {
   const results: Properties = {};
@@ -30,7 +23,13 @@ export function metadataFromResource(resource: Resource): Properties {
       }
     })
 
+    results.body = $('body').attr()
+    const bodyClasses = $('body').attr('class');
+    if (bodyClasses) {
+      results.body.class = bodyClasses.replace(/s+/, ' ').split(' ');
+    }
     results.title = getProperty(results, 'og.title', $('head title').text().toString());
+
   }
   return results;
 }

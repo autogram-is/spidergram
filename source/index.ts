@@ -63,6 +63,10 @@ export {
   ResponseShape,
   FileManager,
   Context,
+  Property, 
+  Properties,
+  getProperty,
+  setProperty
 } from './util/index.js';
 
 export {
@@ -86,5 +90,6 @@ export {
   HtmlLink,
   linksFromSitemap,
   SitemapLink,
-  metadataFromResource
+  metadataFromResource,
+  statsFromMarkup
 } from './extract/index.js';

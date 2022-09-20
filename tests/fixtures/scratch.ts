@@ -1,4 +1,5 @@
-import { metadataFromResource } from '../../source/extract/metadata-from-resource.js';
+import { metadataFromResource } from '../../source/extract/metadata.js';
+import { statsFromMarkup } from '../../source/extract/markup-stats.js';
 
 import {
   Context,
@@ -7,7 +8,6 @@ import {
   UniqueUrlSet,
   SimpleCrawler,
   CrawlProgress,
-  GotFetcher,
   where,
   isResource
 } from '../../source/index.js';
@@ -15,11 +15,7 @@ import {
 Context.directory += '/crawl_data';
 
 const uus = new UniqueUrlSet([
-  'https://angrylittletree.com',
-  'https://ethanmarcotte.com',
   'https://karenmcgrane.com',
-  'https://autogram.is',
-  'https://domain-that-wont-exist.biz',
 ]);
 
 const targetHosts = new Set<string>();
@@ -40,6 +36,8 @@ c.on('process', (uu: UniqueUrl, progress: CrawlProgress) => {
 (async () => {
   await c.crawl([...uus]);
 
+  console.log('Content crawled!')
+
   const resources = graph.nodes(
     where('type', { eq: 'resource' }),
     where('title', { exists: false })
@@ -47,14 +45,15 @@ c.on('process', (uu: UniqueUrl, progress: CrawlProgress) => {
   
   for (let resource of resources) {
     if (isResource(resource)) {
-      const meta = metadataFromResource(resource);
-      for (let k in meta) {
-        resource[k] = meta[k];
-      }
+      resource.meta = metadataFromResource(resource);
+      resource.markupStats = statsFromMarkup(resource);
       graph.set(resource);
     }
-  }  
+    console.log('====')
+    console.log(resource.meta)
+    console.log(resource.markupStats)
+  }
 
-  await graph.save(Context.path('test-crawl.ndjson'));
+  await graph.save(Context.path('karenmcgrane.ndjson'));
 })();
 

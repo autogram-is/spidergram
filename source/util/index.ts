@@ -24,3 +24,4 @@ export {
 
 export { FileManager } from './file.js';
 export { Context } from './context.js';
+export { Property, Properties, getProperty, setProperty } from './properties.js';

@@ -15,11 +15,11 @@ import {
 } from '../graph/index.js';
 import { Fetcher, GotFetcher } from '../fetch/index.js';
 import { isHtml, isSitemap } from '../fetch/response-filters.js';
-import { linksFromHtml, HtmlLink } from '../extract/links-from-html.js';
+import { linksFromHtml, HtmlLink } from '../extract/links.js';
 import {
   linksFromSitemap,
   SitemapLink,
-} from '../extract/links-from-sitemap.js';
+} from '../extract/sitemap-links.js';
 import { Extractor } from '../util/types.js';
 import { Crawler, CrawlOptions, GraphHandle } from './crawler.js';
 
