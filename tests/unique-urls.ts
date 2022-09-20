@@ -1,7 +1,6 @@
 import test from 'ava';
 import { JsonGraph, where } from '@autogram/autograph';
-import { UniqueUrl } from '../source/index.js';
-import { Context } from '../source/index.js';
+import { Context, UniqueUrl } from '../source/index.js';
 
 test('save and reload url', async (t) => {
   Context.directory += '/crawl_data';
@@ -18,4 +17,6 @@ test('save and reload url', async (t) => {
   const nodes = g2.nodes(where('type', { eq: 'unique_url' }));
 
   t.assert(nodes !== undefined);
+
+  console.log(nodes);
 });
