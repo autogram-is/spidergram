@@ -63,10 +63,10 @@ export {
   ResponseShape,
   FileManager,
   Context,
-  Property, 
+  Property,
   Properties,
   getProperty,
-  setProperty
+  setProperty,
 } from './util/index.js';
 
 export {
@@ -83,7 +83,7 @@ export {
   isLinksTo,
 } from './graph/index.js';
 
-export { 
+export {
   CheerioParser,
   CheerioOptions,
   linksFromHtml,
@@ -91,5 +91,5 @@ export {
   linksFromSitemap,
   SitemapLink,
   metadataFromResource,
-  statsFromMarkup
+  statsFromMarkup,
 } from './extract/index.js';

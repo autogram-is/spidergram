@@ -9,25 +9,23 @@ import {
   SimpleCrawler,
   CrawlProgress,
   where,
-  isResource
+  isResource,
 } from '../../source/index.js';
 
 Context.directory += '/crawl_data';
 
-const uus = new UniqueUrlSet([
-  'https://karenmcgrane.com',
-]);
+const uus = new UniqueUrlSet(['https://karenmcgrane.com']);
 
 const targetHosts = new Set<string>();
-for (let uu of uus) {
-  if (uu.parsed) targetHosts.add(uu.parsed.domain)
+for (const uu of uus) {
+  if (uu.parsed) targetHosts.add(uu.parsed.domain);
 }
 
 const graph = new JsonGraph();
 graph.set([...uus]);
 
 const c = new SimpleCrawler({ graph, queue: { intervalCap: 10 } });
-c.rules.follow = url => targetHosts.has(url.domain);
+c.rules.follow = (url) => targetHosts.has(url.domain);
 
 c.on('process', (uu: UniqueUrl, progress: CrawlProgress) => {
   console.log(progress, uu.url);
@@ -36,24 +34,24 @@ c.on('process', (uu: UniqueUrl, progress: CrawlProgress) => {
 (async () => {
   await c.crawl([...uus]);
 
-  console.log('Content crawled!')
+  console.log('Content crawled!');
 
   const resources = graph.nodes(
     where('type', { eq: 'resource' }),
-    where('title', { exists: false })
+    where('title', { exists: false }),
   );
-  
-  for (let resource of resources) {
+
+  for (const resource of resources) {
     if (isResource(resource)) {
       resource.meta = metadataFromResource(resource);
       resource.markupStats = statsFromMarkup(resource);
       graph.set(resource);
     }
-    console.log('====')
-    console.log(resource.meta)
-    console.log(resource.markupStats)
+
+    console.log('====');
+    console.log(resource.meta);
+    console.log(resource.markupStats);
   }
 
   await graph.save(Context.path('karenmcgrane.ndjson'));
 })();
-

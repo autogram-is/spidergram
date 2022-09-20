@@ -16,10 +16,7 @@ import {
 import { Fetcher, GotFetcher } from '../fetch/index.js';
 import { isHtml, isSitemap } from '../fetch/response-filters.js';
 import { linksFromHtml, HtmlLink } from '../extract/links.js';
-import {
-  linksFromSitemap,
-  SitemapLink,
-} from '../extract/sitemap-links.js';
+import { linksFromSitemap, SitemapLink } from '../extract/sitemap-links.js';
 import { Extractor } from '../util/types.js';
 import { Crawler, CrawlOptions, GraphHandle } from './crawler.js';
 
@@ -81,15 +78,16 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
     return ['start', 'process', 'fail'];
   }
 
-  async crawl(input?: UniqueUrl[] | NormalizedUrl[] | string[]): Promise<GraphHandle> {
-    if (is.undefined(input)) return Promise.resolve(this.graph);
+  async crawl(
+    input?: UniqueUrl[] | NormalizedUrl[] | string[],
+  ): Promise<GraphHandle> {
+    if (is.undefined(input)) return this.graph;
     const seedUrls = new UniqueUrlSet(input);
     this.progress.total = seedUrls.size;
 
-    this.fetcher
-      .on('skip', (uu: UniqueUrl) => {
-        this.progress.skipped++;
-      })
+    this.fetcher.on('skip', (uu: UniqueUrl) => {
+      this.progress.skipped++;
+    });
 
     this.emit('start', this.progress);
 
@@ -97,16 +95,15 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
       this.enqueue(url);
     }
 
-    return this.queue.onIdle()
-      .then(() => {
-        this.emit('finish', this.progress);
-        return this.graph
-      });
+    return this.queue.onIdle().then(() => {
+      this.emit('finish', this.progress);
+      return this.graph;
+    });
   }
 
   enqueue(url: UniqueUrl): void {
     if (!this.seen.has(url)) {
-      this.queue.add(async () => this.processUrl(url))
+      this.queue.add(async () => this.processUrl(url));
       this.seen.add(url);
     }
   }
@@ -141,7 +138,7 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
         if (
           isUniqueUrl(entity) &&
           entity.parsed &&
-          this.rules.follow(entity.parsed) && 
+          this.rules.follow(entity.parsed) &&
           !this.seen.has(entity)
         ) {
           this.progress.total++;
@@ -170,7 +167,12 @@ export class SimpleCrawler extends EventEmitter implements Crawler {
       const newUniques = new UniqueUrlSet();
 
       for (const link of foundLinks) {
-        const newUnique = new UniqueUrl(link.href, resource.url, depth, resource.url);
+        const newUnique = new UniqueUrl(
+          link.href,
+          resource.url,
+          depth,
+          resource.url,
+        );
         // This bit right here is actually quite expensive; the graph check
         // in particular can be ruinous if we're working against a SQL DB and
         // there are loads of individual links. Revisit it as soon as possible.
