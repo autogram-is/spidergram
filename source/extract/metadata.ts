@@ -21,7 +21,7 @@ export function metadataFromResource(resource: Resource): Properties {
         $(element).attr('name')?.trim() ?? $(element).attr('property')?.trim();
       const value = $(element).attr('content')?.trim();
       if (key) {
-        if (key == 'description') {
+        if (key === 'description') {
           setProp(results, key, value);
         } else {
           appendProperty(results, key, value);

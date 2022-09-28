@@ -4,7 +4,9 @@ import { NormalizedUrl } from '@autogram/url-tools';
 export class UniqueUrl extends Node {
   @Type(() => NormalizedUrl)
   @Transform(
-    ({ value }) => value ? new NormalizedUrl(value.href ?? '', undefined, (u) => u) : undefined,
+    ({ value }) => {
+      (value !== undefined) ? new NormalizedUrl(value.href, undefined, (u) => u) : undefined;
+    },
     { toClassOnly: true },
   )
   @Transform(({ value }) => (value as NormalizedUrl).properties, {
@@ -13,7 +15,7 @@ export class UniqueUrl extends Node {
   parsed?: NormalizedUrl;
 
   type = 'unique_url';
-  url: string;
+  url!: string;
   parsable!: boolean;
 
   constructor(
@@ -24,7 +26,6 @@ export class UniqueUrl extends Node {
     normalizer = NormalizedUrl.normalizer,
   ) {
     super('unique_url');
-    let data: Dictionary;
     if (typeof url === 'string') {
       try {
         const parsed = new NormalizedUrl(url, baseUrl, normalizer);
