@@ -1,18 +1,26 @@
-import { getMeta } from '../../source/extract/metadata.js';
-import { getLinks } from '../../source/extract/links.js';
-import * as cheerio from 'cheerio';
-import { CheerioCrawler, KeyValueStore } from 'crawlee';
+import {CheerioCrawler, Dataset, enqueueLinks} from 'crawlee';
+import {getLinks} from '../../source/links.js';
 
-const crawler = new CheerioCrawler({
-  async requestHandler({ crawler, request, response, log, enqueueLinks }) {
-    log.info(`${request.url} crawled`);
-  },
-  failedRequestHandler({ crawler, request, response, log }) {
-    log.debug(`${request.url}: ${response.statusMessage}`);
-  },
-  maxConcurrency: 10,
-  maxRequestsPerMinute: 600,
-});
-
-// Run the crawler with initial request
-await crawler.run(['https://karenmcgrane.com']);
+(async () => {
+  const results = await Dataset.open('results');
+  const crawlee = new CheerioCrawler({
+    async requestHandler({crawler, request, response, $, log}) {
+      const result = {
+        url: request.url,
+        statusCode: response.statusCode,
+        statusMessage: response.statusMessage,
+        headers: response.headers,
+      };
+      await results.pushData(result);
+      const links = getLinks($).map(link => link.href);
+      await enqueueLinks({
+        urls: links,
+        requestQueue: await crawler.getRequestQueue()
+      });
+      log.info(`${request.url} (${result.statusCode})`);
+    }
+  });
+  
+  // Run the crawler with initial request
+  await crawlee.run(['https://karenmcgrane.com']);
+})();

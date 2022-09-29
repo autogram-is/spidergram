@@ -1,19 +1,19 @@
 import is from '@sindresorhus/is';
+import * as cheerio from 'cheerio';
 import {
   Property,
   Properties,
   getProperty,
   setProperty,
-} from '../util/index.js';
-import * as cheerio from 'cheerio';
+} from './properties.js';
 
 export function getMeta(input: cheerio.Root | string): Properties {
   const $ = is.string(input) ? cheerio.load(input) : input;
   const results: Properties = {};
   const meta = $('head meta');
   meta.each((index, element) => {
-    const key =
-      $(element).attr('name')?.trim() ?? $(element).attr('property')?.trim();
+    const key
+      = $(element).attr('name')?.trim() ?? $(element).attr('property')?.trim();
     const value = $(element).attr('content')?.trim();
     if (key) {
       if (key === 'description') {

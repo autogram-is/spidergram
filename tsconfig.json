@@ -1,14 +1,28 @@
 {
   "compilerOptions": {
+		"emitDecoratorMetadata": true,
+		"importHelpers": true,
+		"importsNotUsedAsValues": "remove",
+		"incremental": true,
+		"newLine": "lf",
+		"noEmitHelpers": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"preserveConstEnums": true,
+		"pretty": true,
+		"removeComments": false,
+		"resolveJsonModule": true,
     "target": "ES2022",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
-    "lib": ["ES2022"],                                   /* Specify a set of bundled library declaration files that describe the target runtime environment. */
+    "lib": ["DOM"],                                      /* Specify a set of bundled library declaration files that describe the target runtime environment. */
     "experimentalDecorators": true,                      /* Enable experimental support for TC39 stage 2 draft decorators. */
     "module": "ES2022",                                  /* Specify what module code is generated. */
     "moduleResolution": "node",                          /* Specify how TypeScript looks up a file from a given module specifier. */
     "declaration": true,                                 /* Generate .d.ts files from TypeScript and JavaScript files in your project. */
     "declarationMap": true,                              /* Create sourcemaps for d.ts files. */
     "sourceMap": true,                                   /* Create source map files for emitted JavaScript files. */
-    "outDir": "./dist/",                                 /* Specify an output folder for all emitted files. */
+    "outDir": "dist",                                 /* Specify an output folder for all emitted files. */
     "allowSyntheticDefaultImports": true,                /* Allow 'import x from y' when a module doesn't have a default export. */
     "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
     "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
