@@ -1,11 +1,10 @@
-import { Dictionary } from '@autogram/autograph';
-
 export type Filter<T> = (input: T, ...args: any[]) => boolean;
 export type Mutator<T> = (input: T, ...args: any[]) => T;
 export type Extractor<T, D = Dictionary> = (input: T, ...args: any[]) => D;
 
 export interface FilterSet<T> extends Record<string, Filter<T>> {}
 export interface MutatorSet<T> extends Record<string, Mutator<T>> {}
+export type Dictionary<S = string> = Record<string, S>;
 export interface ExtractorSet<T, D = Dictionary>
   extends Record<string, Extractor<T, D>> {}
 
