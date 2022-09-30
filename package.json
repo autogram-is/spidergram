@@ -40,12 +40,13 @@
     "@types/object-hash": "^2.2.1",
     "@types/uuid": "^8.3.4",
     "ava": "^4.3.1",
-    "typescript": "^4.7.4",
     "ts-node": "^10.8.0",
+    "typescript": "^4.7.4",
     "xo": "^0.51.0"
   },
   "dependencies": {
     "@sindresorhus/is": "^5.3.0",
+    "arangojs": "^7.8.0",
     "cheerio": "^1.0.0-rc.12",
     "crawlee": "^3.0.4",
     "dot-prop": "^7.2.0"

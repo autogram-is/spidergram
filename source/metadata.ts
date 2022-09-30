@@ -5,7 +5,7 @@ import {
   Properties,
   getProperty,
   setProperty,
-} from './properties.js';
+} from './graph/properties.js';
 
 export function getMeta(input: cheerio.Root | string): Properties {
   const $ = is.string(input) ? cheerio.load(input) : input;
