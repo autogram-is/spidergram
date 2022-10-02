@@ -3,22 +3,10 @@ import { Node, isNode, Dictionary, Transform, Type } from '@autogram/autograph';
 import { NormalizedUrl } from '@autogram/url-tools';
 
 export class UniqueUrl extends Node {
-  @Transform(
-    ({ value }) => {
-      try {
-        return new NormalizedUrl(value.href, undefined, (u) => u);
-      } catch {
-        return undefined;
-      }
-    },
-    { toClassOnly: true },
-  )
-  @Transform(({ value }) => {
-    return (value as NormalizedUrl).properties
-  }, {
-    toPlainOnly: true,
-  })
+
   @Type(() => NormalizedUrl)
+  @Transform(({ value }) => value ? new NormalizedUrl(value, undefined, (u) => u) : undefined, { toClassOnly: true })
+  @Transform(({ value }) => value ? (value as NormalizedUrl).properties : undefined, { toPlainOnly: true })
   parsed?: NormalizedUrl;
 
   type = 'unique_url';
