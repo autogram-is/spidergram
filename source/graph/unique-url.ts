@@ -4,7 +4,6 @@ import { NormalizedUrl } from '@autogram/url-tools';
 
 export class UniqueUrl extends Node {
 
-  @Type(() => NormalizedUrl)
   @Transform(({ value, type }) => {
     if (type === 0) {
       // Class to plain
