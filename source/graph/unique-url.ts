@@ -1,25 +1,24 @@
+import is from '@sindresorhus/is';
 import { Node, isNode, Dictionary, Transform, Type } from '@autogram/autograph';
 import { NormalizedUrl } from '@autogram/url-tools';
 
 export class UniqueUrl extends Node {
-  @Type(() => NormalizedUrl)
   @Transform(
-    ({ obj, key, value }) => {
-      console.log(obj);
-      console.log(key);
-      console.log(value);
-      return ('href' in value) ? new NormalizedUrl(value.href, undefined, (u) => u) : undefined;
+    ({ value }) => {
+      try {
+        return new NormalizedUrl(value.href, undefined, (u) => u);
+      } catch {
+        return undefined;
+      }
     },
     { toClassOnly: true },
   )
-  @Transform(({ obj, key, value }) => {
-    console.log(obj);
-    console.log(key);
-    console.log(value);
+  @Transform(({ value }) => {
     return (value as NormalizedUrl).properties
   }, {
     toPlainOnly: true,
   })
+  @Type(() => NormalizedUrl)
   parsed?: NormalizedUrl;
 
   type = 'unique_url';
@@ -34,7 +33,7 @@ export class UniqueUrl extends Node {
     normalizer = NormalizedUrl.normalizer,
   ) {
     super('unique_url');
-    if (typeof url === 'string') {
+    if (is.string(url)) {
       try {
         const parsed = new NormalizedUrl(url, baseUrl, normalizer);
         this.url = parsed.href;
@@ -48,11 +47,14 @@ export class UniqueUrl extends Node {
           throw error;
         }
       }
-    } else {
+    } else if (is.urlInstance(url)) {
       const normalized = new NormalizedUrl(url.href, baseUrl, normalizer);
       this.url = normalized.href;
       this.parsed = normalized;
       this.parsable = true;
+    }
+    else {
+      this.parsable = false;
     }
 
     this.assignId();
