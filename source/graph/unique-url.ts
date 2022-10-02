@@ -5,8 +5,15 @@ import { NormalizedUrl } from '@autogram/url-tools';
 export class UniqueUrl extends Node {
 
   @Type(() => NormalizedUrl)
-  @Transform(({ value }) => value ? new NormalizedUrl(value, undefined, (u) => u) : undefined, { toClassOnly: true })
-  @Transform(({ value }) => value ? (value as NormalizedUrl).properties : undefined, { toPlainOnly: true })
+  @Transform(({ value, type }) => {
+    if (type === 0) {
+      // Class to plain
+      return value ? (value as NormalizedUrl).properties : undefined;
+    } else if (type === 1) {
+      // Plain to class
+      return value ? new NormalizedUrl(value, undefined, (u) => u) : undefined;
+    }
+  })
   parsed?: NormalizedUrl;
 
   type = 'unique_url';
