@@ -5,7 +5,7 @@ export class UniqueUrl extends Node {
   @Type(() => NormalizedUrl)
   @Transform(
     ({ value }) => {
-      (value !== undefined) ? new NormalizedUrl(value.href, undefined, (u) => u) : undefined;
+      ('href' in value) ? new NormalizedUrl(value.href, undefined, (u) => u) : undefined;
     },
     { toClassOnly: true },
   )
