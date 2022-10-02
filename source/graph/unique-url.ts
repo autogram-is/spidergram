@@ -4,12 +4,20 @@ import { NormalizedUrl } from '@autogram/url-tools';
 export class UniqueUrl extends Node {
   @Type(() => NormalizedUrl)
   @Transform(
-    ({ value }) => {
-      ('href' in value) ? new NormalizedUrl(value.href, undefined, (u) => u) : undefined;
+    ({ obj, key, value }) => {
+      console.log(obj);
+      console.log(key);
+      console.log(value);
+      return ('href' in value) ? new NormalizedUrl(value.href, undefined, (u) => u) : undefined;
     },
     { toClassOnly: true },
   )
-  @Transform(({ value }) => (value as NormalizedUrl).properties, {
+  @Transform(({ obj, key, value }) => {
+    console.log(obj);
+    console.log(key);
+    console.log(value);
+    return (value as NormalizedUrl).properties
+  }, {
     toPlainOnly: true,
   })
   parsed?: NormalizedUrl;
