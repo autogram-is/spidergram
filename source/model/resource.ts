@@ -5,7 +5,7 @@ export type ResourceData = {
   url?: string | URL;
   code?: number | string;
   message?: string;
-  headers?: Record<string, string | string[]>;
+  headers?: Record<string, string | string[] | undefined>;
   body?: string;
 } & VerticeData;
 
@@ -14,7 +14,7 @@ export class Resource extends Vertice {
   url!: string;
   code!: number;
   message!: string;
-  headers!: Record<string, string | string[]>;
+  headers!: Record<string, string | string[] | undefined>;
   body?: string;
 
   constructor(data: ResourceData = {}) {
