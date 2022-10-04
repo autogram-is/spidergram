@@ -17,6 +17,11 @@ export { Transform, Exclude } from 'class-transformer';
 export type Reference<T extends Vertice = Vertice> = T | [ string, Uuid ] | string;
 export type VerticeData = Record<string, unknown>;
 
+export interface CollectionMeta {
+  isEdge?: true;
+  constructor: ClassConstructor<Vertice>;
+}
+
 export function isVertice(value: unknown): value is Vertice {
   return (
     is.object(value) &&
@@ -37,7 +42,7 @@ export abstract class Vertice {
   @Exclude({ toPlainOnly: true, toClassOnly: false })
   _rev?: string;
 
-  static readonly types = new Map<string, ClassConstructor<any>>();
+  static readonly types = new Map<string, CollectionMeta>();
 
   static idFromReference(r: Reference): string {
     if (is.string(r)) {
@@ -96,12 +101,14 @@ export abstract class Vertice {
     ) as Vertice;
 
     if (isVertice(object)) {
-      const ctor = Vertice.types.get(object._collection as string) ?? Node;
-      return plainToInstance(
-        ctor,
-        object,
-        Vertice.getSerializerOptions(),
-      ) as InstanceType<T>;
+      const ctor = Vertice.types.get(object._collection)?.constructor;
+      if (ctor) { 
+        return plainToInstance(
+          ctor,
+          object,
+          Vertice.getSerializerOptions(),
+        ) as InstanceType<T>;
+      }
     }
 
     throw new TypeError('Vertices require collection and key or id');

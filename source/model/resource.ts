@@ -38,4 +38,4 @@ export class Resource extends Vertice {
   }
 }
 
-Vertice.types.set('resources', Resource);
+Vertice.types.set('resources', { constructor: Resource });

@@ -8,10 +8,8 @@ test("spidergraph connection", async (t) => {
 });
 
 test("insert", async (t) => {
-  const a = new Arango('test');
+  const a = new Arango();
   const uu = new UniqueUrl({ url: 'http://test.com' });
   a.add(uu);
   t.assert(await a.db.exists());
 });
-
-

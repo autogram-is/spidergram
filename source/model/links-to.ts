@@ -21,4 +21,4 @@ export class LinksTo extends Edge {
   }
 }
 
-Vertice.types.set('links_to', LinksTo);
+Vertice.types.set('links_to', { constructor: LinksTo, isEdge: true });

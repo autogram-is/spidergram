@@ -67,4 +67,4 @@ export class UniqueUrl extends Vertice {
   }
 }
 
-Vertice.types.set('unique_urls', UniqueUrl);
+Vertice.types.set('unique_urls', { constructor: UniqueUrl });

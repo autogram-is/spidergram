@@ -19,6 +19,7 @@ export class Arango {
       ...options,
       databaseName: undefined
     });
+
     if (options.databaseName) {
       this.db = this.systemDb.database(options.databaseName)
     } else {
@@ -57,7 +58,11 @@ export class Arango {
     for (let type of Vertice.types.keys()) {
       this.db.collection(type).exists().then(exists => {
         if (!exists) {
-          promises.push(this.db.createCollection(type));
+          if (Vertice.types.get(type)?.isEdge) {
+            promises.push(this.db.createEdgeCollection(type));
+          } else {
+            promises.push(this.db.createCollection(type));
+          }
         }
       });
     }

@@ -38,4 +38,4 @@ export class RespondsWith extends Edge {
   }
 }
 
-Vertice.types.set('responds_with', RespondsWith);
+Vertice.types.set('responds_with', { constructor: RespondsWith, isEdge: true });
