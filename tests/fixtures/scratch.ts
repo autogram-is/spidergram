@@ -3,7 +3,7 @@ import {getLinks} from '../../source/extractors/links.js';
 import {UniqueUrl, RespondsWith, Resource, LinksTo} from '../../source/model/index.js';
 import {Arango} from '../../source/arango.js';
 
-const crawlName = 'uli';
+const crawlName = 'karen';
 
 // This song-and-dance should go into our wrapper class.
 const a = new Arango();
