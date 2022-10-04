@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { UniqueUrl } from './unique-url.js';
 import { Resource } from './resource.js';
 import { Edge, EdgeData } from './edge.js';
