@@ -1,5 +1,5 @@
 import {CheerioCrawler, enqueueLinks} from 'crawlee';
-import {getLinks} from '../../source/links.js';
+import {getLinks} from '../../source/extractors/links.js';
 
 (async () => {
   const crawlee = new CheerioCrawler({
