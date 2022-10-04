@@ -71,6 +71,8 @@ a.initialize(); // won't harm existing data, ensures we have all our collections
   
   // Run the crawler with initial request
   const firstUrl = new UniqueUrl({ url: 'http://karenmcgrane.com' });
+  a.add(firstUrl);
+  
   const seedRequests = [new Request({
     url: firstUrl.url,
     uniqueKey: firstUrl.key,
