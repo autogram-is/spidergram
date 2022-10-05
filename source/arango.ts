@@ -38,16 +38,19 @@ export class Arango {
     const promises: Promise<DocumentMetadata>[] = [];
     const overwriteMode = (overWriteExisting) ? 'replace' : 'ignore';
     if (!is.array(input)) input = [input];
+    
+    // To ensure we don't have any premature reference insertions, we
+    // save all vertices before saving edges.
     for (const vertice of input) {
       if (!isEdge(vertice)) {
         promises.push(this.db.collection(vertice._collection)
           .save(vertice.toJSON(), { overwriteMode: overwriteMode }));
       }
     }
-    for (const vertice of input) {
-      if (isEdge(vertice)) {
-        promises.push(this.db.collection(vertice._collection)
-          .save(vertice.toJSON(), { overwriteMode: overwriteMode }));
+    for (const edge of input) {
+      if (isEdge(edge)) {
+        promises.push(this.db.collection(edge._collection)
+          .save(edge.toJSON(), { overwriteMode: overwriteMode }));
       }
     }
     return Promise.all(promises);

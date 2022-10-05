@@ -12,7 +12,6 @@ export type RespondsWithData = {
 
 export class RespondsWith extends Edge {
   override _collection = 'responds_with';
-  url!: string;
   method!: string;
   headers!: Record<string, string | string[] | undefined>;
 

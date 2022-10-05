@@ -51,7 +51,7 @@ export abstract class Vertice {
     } else if (is.array(r)) {
       return r.join('/');
     } else {
-      return r._id;
+      return r.id;
     }
   }
 
