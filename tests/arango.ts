@@ -3,20 +3,25 @@ import { Arango } from "../source/arango.js";
 import { UniqueUrl, Resource, RespondsWith, LinksTo } from "../source/model/index.js";
 
 test("spidergraph connection", async (t) => {
-  const g = new Arango('spidergram');
-  t.assert(await g.db.exists());
+  const g = new Arango();
+  t.assert(g.systemDb !== undefined);
 });
 
 test("insert", async (t) => {
   const a = new Arango();
+  await a.load('spidergram_inserts');
+
   const uu = new UniqueUrl({ url: 'http://test.com' });
-  a.add(uu);
+  await a.add(uu);
+
   t.assert(await a.db.exists());
 });
 
 
 test("edges", async (t) => {
-  const a = new Arango('spidergram');
+  const a = new Arango();
+  await a.load('spidergram_edges');
+
   const uu = new UniqueUrl({ url: 'http://test.com' });
   const re = new Resource({
     url: 'http://test.com',
