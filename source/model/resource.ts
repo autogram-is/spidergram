@@ -25,10 +25,12 @@ export class Resource extends Vertice {
     this.url = url?.toString() ?? '';
 
     // Ensure there's a statuscode for the resource
-    if (is.undefined(code)) {
-      this.code = -1;
-    } else if (is.string(code)) {
+    if (is.numericString(code)) {
       this.code = Number.parseInt(code);
+    } else if (is.number(code)) {
+      this.code = code;
+    } else {
+      this.code = -1;
     }
 
     // Default the message and headers
