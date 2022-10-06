@@ -1,26 +1,25 @@
-import {CheerioCrawler, Request} from 'crawlee';
+import {CheerioCrawler, Request, log} from 'crawlee';
 import {getLinks} from '../../source/extractors/links.js';
 import {UniqueUrl, RespondsWith, Resource, LinksTo} from '../../source/model/index.js';
 import {Arango} from '../../source/arango.js';
 import { NormalizedUrl, UrlFilters } from '@autogram/url-tools';
 import { getMeta } from '../../source/index.js';
 
-const crawlName = 'test';
-
-// This song-and-dance should go into our wrapper class.
+const crawlName = 'ethan1';
 const a = new Arango();
-if ((await a.systemDb.listDatabases()).includes(crawlName)) {
-  a.db = a.systemDb.database(crawlName);
-} else {
-  a.db = await a.systemDb.createDatabase(crawlName);
-  await a.initialize(); // won't harm existing data, ensures we have all our collections
-}
+await a.load(crawlName);
+
+log.setLevel(log.LEVELS.ERROR);
 
 // Here's our crawl handler.
 (async () => {
   const crawlee = new CheerioCrawler({
-    async requestHandler({crawler, request, response, $, log}) {
-      // Get the UniqueUrl we've stored in the request userData
+    autoscaledPoolOptions: {
+      maxTasksPerMinute: 120,
+      maxConcurrency: 5,
+    },
+    async requestHandler(context) {
+      const {crawler, request, response, $ } = context;
       const ru = UniqueUrl.fromJSON(request.userData);
 
       const rs = new Resource({
@@ -68,12 +67,33 @@ if ((await a.systemDb.listDatabases()).includes(crawlName)) {
         }
       }
       await a.add(foundLinks);
-      log.info(`${request.url} (Response: ${response.statusCode}) (Links: ${foundLinks.length/2})`);
-    }
+      console.log(`${request.url} (Response: ${response.statusCode}) (Links: ${foundLinks.length/2})`);
+    },
+    failedRequestHandler(context, error) {
+      const { request, response } = context;
+      const ru = UniqueUrl.fromJSON(request.userData);
+
+      const rs = new Resource({
+        url: request.loadedUrl ?? request.url,
+        code: response.statusCode ?? -1,
+        message: response.statusMessage ?? error.message,
+        headers: response.headers ?? {}
+      });
+
+      const rw = new RespondsWith({
+        url: ru,
+        resource: rs,
+        method: request.method,
+        headers: request.headers ?? {}
+      })
+
+      a.add([ru, rw]);
+      console.log(`${request.url} (Response: ${response.statusCode})`);
+    },
   });
   
   // Run the crawler with initial request
-  const firstUrl = new UniqueUrl({ url: 'https://autogram.is' });
+  const firstUrl = new UniqueUrl({ url: 'https://ethanmarcotte.com' });
   await a.add(firstUrl);
   
   const seedRequests = [new Request({

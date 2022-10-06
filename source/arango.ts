@@ -5,31 +5,77 @@ import { Vertice, isEdge } from "./model/index.js";
 import { DocumentMetadata } from "arangojs/documents.js";
 import { DocumentCollection } from "arangojs/collection.js";
 
+
+// TODO: Alter to follow Crawlee conventions;
+// await Arango.open() returns an instance of the Arango class
+//   with a particular db loaded;
+// await Arango.add/set/etc operates on the database itself
+
 export class Arango {
-  db: Database;
   systemDb: Database;
+  private _activeDb?: Database;
 
-  constructor(options: Partial<Config> | string = {}) {
-    if (is.string(options)) {
-      options = { databaseName: options };
-    }
+  constructor(options: Partial<Config> = {}) {
     options.url ??= 'http://127.0.0.1:8529';
-    
-    this.systemDb = new Database({
-      ...options,
-      databaseName: undefined
-    });
-
-    if (options.databaseName) {
-      this.db = this.systemDb.database(options.databaseName)
-    } else {
-      this.db = this.systemDb;
-    }
-
-    this.initialize().catch(reason => { throw reason });
+    this.systemDb = new Database(options);
   }
 
-  /* Mutable methods */
+  /*
+   * Load, save, and access working databases
+   */
+
+  get db(): Database {
+    if (this._activeDb !== undefined) {
+      return this._activeDb;
+    } else {
+      throw new Error('No working database loaded');
+    }
+  }
+
+  async load(databaseName: string): Promise<Database> {
+    if (is.nonEmptyStringAndNotWhitespace(databaseName)) {
+      if ((await this.systemDb.listDatabases()).includes(databaseName)) {
+        this._activeDb = this.systemDb.database(databaseName);
+        await this.initialize();
+      } else {
+        await this.systemDb.createDatabase(databaseName)
+        .then((database) => {
+          this._activeDb = database;
+          this.initialize();
+          return this._activeDb;
+        });
+      }
+    } else {
+      return Promise.reject(new Error('No db name given'));
+    }
+
+    if (this._activeDb) {
+      return Promise.resolve(this._activeDb);
+    } else {
+      return Promise.reject(new Error('No database loaded, no databasename given'));
+    }
+  }
+
+  async initialize(): Promise<DocumentCollection[]> {
+    const promises: Promise<DocumentCollection>[] = [];
+    for (let type of Vertice.types.keys()) {
+      this.db.collection(type).exists().then(exists => {
+        if (!exists) {
+          if (Vertice.types.get(type)?.isEdge) {
+            promises.push(this.db.createEdgeCollection(type));
+          } else {
+            promises.push(this.db.createCollection(type));
+          }
+        }
+      });
+    }
+    return Promise.all(promises);
+  }
+
+  /*
+   * Convenience wrappers for bulk-saving of arbitrary documents
+   */
+
   add(input: Vertice | Vertice[]): Promise<DocumentMetadata[]> {
     return this.set(input, false);
   }
@@ -52,22 +98,6 @@ export class Arango {
         promises.push(this.db.collection(edge._collection)
           .save(edge.toJSON(), { overwriteMode: overwriteMode }));
       }
-    }
-    return Promise.all(promises);
-  }
-
-  async initialize(): Promise<DocumentCollection[]> {
-    const promises: Promise<DocumentCollection>[] = [];
-    for (let type of Vertice.types.keys()) {
-      this.db.collection(type).exists().then(exists => {
-        if (!exists) {
-          if (Vertice.types.get(type)?.isEdge) {
-            promises.push(this.db.createEdgeCollection(type));
-          } else {
-            promises.push(this.db.createCollection(type));
-          }
-        }
-      });
     }
     return Promise.all(promises);
   }
