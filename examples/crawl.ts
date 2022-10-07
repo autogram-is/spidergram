@@ -1,12 +1,12 @@
 import {CheerioCrawler, log} from 'crawlee';
-import {UniqueUrl} from '../../source/model/index.js';
-import {Arango} from '../../source/arango.js';
-import { SpidergramCrawlingContext } from '../../source/spider/context.js';
-import { failedRequestHandler } from '../../source/failure-handler.js';
-import { buildCheerioRouter } from '../../source/cheerio-router.js';
-import { buildRequests } from '../../source/spider/urls/build-requests.js';
+import {UniqueUrl} from '../source/model/index.js';
+import {Arango} from '../source/arango.js';
+import { SpidergramCrawlingContext } from '../source/spider/context.js';
+import { failedRequestHandler } from '../source/failure-handler.js';
+import { buildCheerioRouter } from '../source/cheerio-router.js';
+import { buildRequests } from '../source/spider/urls/build-requests.js';
 
-const crawlName = 'karen';
+const crawlName = 'example';
 const seedUrls = ['http://karenmcgrane.com'];
 
 const a = new Arango();
@@ -14,9 +14,7 @@ await a.load(crawlName);
 
 log.setLevel(log.LEVELS.ERROR);
 
-const spidergram: SpidergramCrawlingContext = {
-  storage: a,
-};
+const spidergram: SpidergramCrawlingContext = { storage: a };
 
 // Here's our crawl handler.
 (async () => {
@@ -34,6 +32,6 @@ const spidergram: SpidergramCrawlingContext = {
   // Run the crawler with initial request
   const seedUniqueUrls = seedUrls.map(u => new UniqueUrl({ url: u }));
   await a.add(seedUniqueUrls);
-
+  
   await crawlee.run(buildRequests(seedUniqueUrls));
 })();
