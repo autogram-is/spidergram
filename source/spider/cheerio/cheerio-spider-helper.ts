@@ -1,6 +1,8 @@
+import is from '@sindresorhus/is';
+import * as cheerio from 'cheerio';
 import { CheerioCrawlingContext, Request } from 'crawlee';
 import { UniqueUrl, RespondsWith, Resource, LinksTo } from '../../model/index.js';
-import { HtmlLink } from '../../analysis/links.js';
+import { HtmlLink } from '../index.js';
 import { SpiderContext } from '../context.js';
 
 export function buildRequest(url: UniqueUrl) {
@@ -70,3 +72,35 @@ export async function buildResourceLink(
     });
   }
 }
+
+export const extractLinks = (
+  input: cheerio.Root | string,
+  selectors: Record<string, string> = { default: 'body a' },
+  ignoreSelfLinkAnchors = true,
+  ignoreEmptyHref = true,
+): HtmlLink[] => {
+  const results: HtmlLink[] = [];
+  const $ = is.string(input) ? cheerio.load(input) : input;
+  
+  for (const key in selectors) {
+    $(selectors[key]).each((i, element) => {
+      const href: string = $(element).attr('href') ?? '';
+
+      if (
+        !(href.length === 0 && ignoreEmptyHref)
+        && !(href.startsWith('#') && ignoreSelfLinkAnchors)
+      ) {
+        results.push({
+          href,
+          context: key,
+          rel: $(element).attr('rel') ?? '',
+          title: $(element).text() ?? '',
+          attributes: $(element).attr() as Record<string, string>,
+          data: $(element).data() ?? {},
+        });
+      }
+    });
+  }
+
+  return results;
+};

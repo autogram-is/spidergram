@@ -3,7 +3,7 @@ import { SpiderContext, UrlRules, UrlMutatorWithContext, LinkSelectors, Response
 import { CheerioCrawler, CheerioCrawlerOptions, Configuration } from 'crawlee';
 import { cheerioSpiderRequestHandler, cheerioSpiderFailureHandler } from './request-handlers.js';
 
-export interface SpiderOptions {
+export interface CheerioSpiderOptions {
   storage: Arango,
   linkSelectors: LinkSelectors,
   urlNormalizer: UrlMutatorWithContext,
@@ -14,7 +14,7 @@ export interface SpiderOptions {
 export class CheerioSpider extends CheerioCrawler {
   protected static context: SpiderContext;
 
-  constructor(options: Partial<CheerioCrawlerOptions> & Partial<SpiderOptions> = {}, config?: Configuration) {
+  constructor(options: Partial<CheerioCrawlerOptions> & Partial<CheerioSpiderOptions> = {}, config?: Configuration) {
     const { storage, linkSelectors, urlRules, responseRules, urlNormalizer, ...crawleeOptions } = options;
     
     crawleeOptions.requestHandler ??= (input) => cheerioSpiderRequestHandler(input, CheerioSpider.context);

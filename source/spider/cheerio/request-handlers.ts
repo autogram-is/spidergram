@@ -1,8 +1,8 @@
 import { SpiderContext } from '../context.js';
 import { CheerioCrawlingContext, Request } from 'crawlee';
 import { UniqueUrl, RespondsWith, Resource, LinksTo } from '../../index.js';
-import { getLinks } from '../../analysis/index.js';
-import { HtmlLink } from '../../analysis/links.js';
+import { extractLinks } from './cheerio-spider-helper.js';
+import { HtmlLink } from '../index.js';
 
 /**
  * Our default request handler; it retrieves, saves, and parses responses
@@ -46,11 +46,11 @@ import { HtmlLink } from '../../analysis/links.js';
     }
   
     // If the crawl rules say to parse the current response for links,
-    // feed the cheerio instance and selector list to the getLinks
+    // feed the cheerio instance and selector list to the extractLinks
     // helper function, then iterate over the results.
     if (responseRules.parseLinks(response, spidergram)) {
       const q = await crawler.getRequestQueue();
-      for (let link of getLinks($, linkSelectors)) {
+      for (let link of extractLinks($, linkSelectors)) {
         const { uniqueUrl, linksTo } = await buildResourceLink(context, spidergram, link);
         if (urlRules.save(uniqueUrl, spidergram)) {
           await storage.add(uniqueUrl);
