@@ -12,16 +12,13 @@ export type HtmlLink = {
 
 export const getLinks = (
   input: cheerio.Root | string,
-  selectors: string | Record<string, string> = 'body a',
+  selectors: Record<string, string> = { default: 'body a' },
   ignoreSelfLinkAnchors = true,
   ignoreEmptyHref = true,
 ): HtmlLink[] => {
   const results: HtmlLink[] = [];
   const $ = is.string(input) ? cheerio.load(input) : input;
-  if (typeof selectors === 'string') {
-    selectors = {default: selectors};
-  }
-
+  
   for (const key in selectors) {
     $(selectors[key]).each((i, element) => {
       const href: string = $(element).attr('href') ?? '';
