@@ -1,8 +1,7 @@
 import {CheerioCrawler, log} from 'crawlee';
 import {UniqueUrl} from '../../source/model/index.js';
 import {Arango} from '../../source/arango.js';
-import { SpidergramCrawlingContext } from '../../source/spider/context.js';
-import { failedRequestHandler } from '../../source/failure-handler.js';
+import { SpidergramCrawlingContext, failedRequestHandler } from '../../source/spider/index.js';
 import { buildCheerioRouter } from '../../source/cheerio-router.js';
 import { buildRequests } from '../../source/spider/urls/build-requests.js';
 

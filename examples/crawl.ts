@@ -1,22 +1,20 @@
-import {CheerioCrawler, log} from 'crawlee';
-import {UniqueUrl} from '../source/model/index.js';
-import {Arango} from '../source/arango.js';
-import { SpidergramCrawlingContext } from '../source/spider/context.js';
-import { failedRequestHandler } from '../source/failure-handler.js';
+import { CheerioCrawler } from 'crawlee';
+
+import { UniqueUrl } from '../source/model/index.js';
+import { Arango } from '../source/arango.js';
+import { SpidergramCrawlingContext, failedRequestHandler } from '../source/spider/index.js';
 import { buildCheerioRouter } from '../source/cheerio-router.js';
 import { buildRequests } from '../source/spider/urls/build-requests.js';
 
-const crawlName = 'example';
-const seedUrls = ['http://karenmcgrane.com'];
+// Set up the crawl context
+const spidergram: SpidergramCrawlingContext = { storage: new Arango() };
+await spidergram.storage.load('example');
 
-const a = new Arango();
-await a.load(crawlName);
+// Populate the initial URL list
+const seedUrls = ['http://autogram.is'];
+const seedUniqueUrls = seedUrls.map(u => new UniqueUrl({ url: u }));
 
-log.setLevel(log.LEVELS.ERROR);
-
-const spidergram: SpidergramCrawlingContext = { storage: a };
-
-// Here's our crawl handler.
+// Initialize a CheerioCrawler...
 (async () => {
   const crawlee = new CheerioCrawler({
     autoscaledPoolOptions: {
@@ -24,14 +22,12 @@ const spidergram: SpidergramCrawlingContext = { storage: a };
       maxConcurrency: 1,
     },
     requestHandler: buildCheerioRouter(spidergram),
-    async failedRequestHandler(context, error) {
-      await failedRequestHandler(context.request, context.response, error, spidergram);
-    },
+    failedRequestHandler: (context, error) => {
+      failedRequestHandler(context.request, context.response, error, spidergram);
+    }
   });
   
-  // Run the crawler with initial request
-  const seedUniqueUrls = seedUrls.map(u => new UniqueUrl({ url: u }));
-  await a.add(seedUniqueUrls);
+  await spidergram.storage.add(seedUniqueUrls);
   
-  await crawlee.run(buildRequests(seedUniqueUrls));
+  console.log(await crawlee.run(buildRequests(seedUniqueUrls)));
 })();

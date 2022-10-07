@@ -160,12 +160,11 @@ export abstract class Vertice {
     return getProperty(this, path);
   }
 
-  set<T extends typeof Vertice = typeof this>(
-    this: T,
+  set(
     path: string,
     value: unknown
-  ): InstanceType<T> {
-    return setProperty(this, path, value) as InstanceType<T>;
+  ) {
+    return setProperty(this, path, value);
   }
 
   has(path: string): boolean {

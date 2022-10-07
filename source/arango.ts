@@ -5,6 +5,7 @@ import { Vertice, isEdge } from "./model/index.js";
 import { DocumentMetadata } from "arangojs/documents.js";
 import { DocumentCollection } from "arangojs/collection.js";
 
+export { aql } from 'arangojs';
 
 // TODO: Alter to follow Crawlee conventions;
 // await Arango.open() returns an instance of the Arango class

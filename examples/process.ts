@@ -1,47 +1,24 @@
-import { aql } from 'arangojs';
-import { JsonObject } from '../source/index.js';
-import { Arango } from '../source/arango.js';
-import { Resource } from '../source/model/index.js';
-import { getMeta } from '../source/index.js';
+import { Arango, aql } from '../source/arango.js';
+import { ProcessOptions, processResources } from '../source/analysis/process-resources.js';
 
+import { getMeta } from '../source/analysis/index.js';
 import { htmlToText } from 'html-to-text';
 import readability from 'readability-scores';
 
+// Load the Example database
 const a = new Arango();
 await a.load('example');
-const resourceCollection = a.db.collection<JsonObject>('resources');
-const resources: Resource[] = [];
 
-async function process() {
-  try {
-    const raw = await a.db.query(aql`
-      FOR r in ${resourceCollection}
-        FILTER r.body != null
-        RETURN r
-    `);
-    
-    for await (const r of raw) {
-      const resource = Resource.fromJSON(r as JsonObject);
-      if (resource.body !== undefined) {
-        // Extract page metadata, strip markup from the body html,
-        // and calculate its readability score.
+// Set up a simple filter
+const filter = aql`FILTER resource.body != null`;
 
-        resource.metadata ??= getMeta(resource.body);
-        resource.text ??= htmlToText(resource.body);
-        
-        resource.readability ??= readability(resource.text as string);
-
-        // Add it to the queue of resources to save.
-        resources.push(resource);
-      }
-    }
-
-    return a.set(resources);
-
-  } catch (error: unknown) {
-    console.error(error);
-    return Promise.resolve([]);
-  }
+// Create a handful of processors mapping Resource properties
+// to functions that should populate them
+const options:ProcessOptions = {
+  metadata: resource => (resource.body) ? getMeta(resource.body) : undefined,
+  text: resource => (resource.body) ? htmlToText(resource.body) : undefined,
+  readability: resource => (resource.text) ? readability(resource.text as string) : undefined,
 }
 
-console.log(await process());
+const results = await processResources(a, filter, options);
+console.log(results);

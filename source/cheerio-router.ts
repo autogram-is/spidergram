@@ -1,23 +1,9 @@
-import { CheerioCrawler, CheerioCrawlingContext, createCheerioRouter, Request } from "crawlee";
-import { SpidergramCrawlingContext } from "./spider/context.js";
-import { UniqueUrl, RespondsWith, Resource, LinksTo } from './model/index.js';
-import { getLinks } from './extractors/links.js';
-import { getMeta } from './index.js';
+import { CheerioCrawlingContext, createCheerioRouter, Request } from "crawlee";
 import { NormalizedUrl, UrlFilters } from "@autogram/url-tools";
-import { failedRequestHandler } from './failure-handler.js';
 
-export function CheerioSpidergram(spidergram: SpidergramCrawlingContext): CheerioCrawler {
-  return new CheerioCrawler({
-    autoscaledPoolOptions: {
-      maxTasksPerMinute: 240,
-      maxConcurrency: 2,
-    },
-    requestHandler: buildCheerioRouter(spidergram),
-    async failedRequestHandler(context, error) {
-      await failedRequestHandler(context.request, context.response, error, spidergram);
-    }
-  });
-}
+import { SpidergramCrawlingContext } from "./spider/index.js";
+import { UniqueUrl, RespondsWith, Resource, LinksTo } from './model/index.js';
+import { getLinks, getMeta } from './analysis/index.js';
 
 export function buildCheerioRouter(spidergram: SpidergramCrawlingContext) {
   const router = createCheerioRouter();

@@ -1,6 +1,6 @@
 import { Request } from "crawlee";
-import { SpidergramCrawlingContext } from "./spider/context.js";
-import { UniqueUrl, Resource, RespondsWith } from './model/index.js';
+import { SpidergramCrawlingContext } from "./context.js";
+import { UniqueUrl, Resource, RespondsWith } from '../model/index.js';
 import { IncomingMessage } from "http";
 
 export async function failedRequestHandler(request: Request, response: IncomingMessage, error: Error, spidergram: SpidergramCrawlingContext) {
