@@ -8,6 +8,7 @@ export interface CheerioSpiderOptions {
   storage: Arango,
   linkSelectors: LinkSelectors,
   urlNormalizer: UrlMutatorWithContext,
+  saveUnparsableUrls: boolean,
   urlRules: Partial<UrlRules>;
   responseRules: Partial<ResponseRules>;
 }
@@ -16,7 +17,15 @@ export class CheerioSpider extends CheerioCrawler {
   protected static context: SpiderContext;
 
   constructor(options: Partial<CheerioCrawlerOptions> & Partial<CheerioSpiderOptions> = {}, config?: Configuration) {
-    const { storage, linkSelectors, urlRules, responseRules, urlNormalizer, ...crawleeOptions } = options;
+    const {
+      storage,
+      linkSelectors,
+      urlRules,
+      responseRules,
+      urlNormalizer,
+      saveUnparsableUrls,
+      ...crawleeOptions
+    } = options;
     
     crawleeOptions.requestHandler ??= (input) => cheerioSpiderRequestHandler(input, CheerioSpider.context);
     crawleeOptions.failedRequestHandler ??= (input, error) => cheerioSpiderFailureHandler(input, error, CheerioSpider.context);
@@ -35,6 +44,7 @@ export class CheerioSpider extends CheerioCrawler {
         ...defaultContext.urlRules,
         ...urlRules  
       },
+      saveUnparsableUrls: saveUnparsableUrls ?? defaultContext.saveUnparsableUrls,
     };
 
     NormalizedUrl.normalizer = CheerioSpider.context.urlNormalizer;

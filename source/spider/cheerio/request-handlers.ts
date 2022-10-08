@@ -52,14 +52,19 @@ import { HtmlLink } from '../index.js';
       const q = await crawler.getRequestQueue();
       for (let link of extractLinks($, linkSelectors)) {
         const { uniqueUrl, linksTo } = await buildResourceLink(context, spidergram, link);
-        if (urlRules.save(uniqueUrl, spidergram)) {
+        if (
+          (uniqueUrl.parsable && urlRules.save(uniqueUrl.parsed!, spidergram))
+          || spidergram.saveUnparsableUrls
+        ) {
           await storage.add(uniqueUrl);
           if (linksTo) await storage.add(linksTo);
         }
-    
+        
         // if the url qualifies for continued crawling
-        if (urlRules.enqueue(uniqueUrl, spidergram)) {
-          await q.addRequest(buildRequest(uniqueUrl));
+        if (uniqueUrl.parsable) {
+          if (urlRules.enqueue(uniqueUrl.parsed!, spidergram)) {
+            await q.addRequest(buildRequest(uniqueUrl));
+          }
         }
       }
     }

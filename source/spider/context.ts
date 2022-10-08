@@ -18,6 +18,7 @@ export const defaultContext: SpiderContext = {
     download: () => false,
     parseLinks: () => true,
   },
+  saveUnparsableUrls: true,
   urlNormalizer: (url) => NormalizedUrl.normalizer(url),
   currentUniqueUrl: undefined,
   currentResource: undefined
@@ -29,6 +30,7 @@ export interface SpiderContext extends Record<string, unknown>  {
   linkSelectors: LinkSelectors,
   urlNormalizer: UrlMutatorWithContext,
   responseRules: ResponseRules,
+  saveUnparsableUrls: boolean,
   currentUniqueUrl?: UniqueUrl,
   currentResource?: Resource,
 }
@@ -37,12 +39,12 @@ export type UrlMutatorWithContext<T = unknown> = (
   found: ParsedUrl,
   current?: ParsedUrl,
   referer?: ParsedUrl,
-  context?: Record<string, T>
+  context?: SpiderContext
 ) => ParsedUrl;
 
 export type UrlFilterWithContext = (
-  found: UniqueUrl,
-  context: SpiderContext
+  found: ParsedUrl,
+  context?: SpiderContext
 ) => boolean;
 
 export interface LinkSelectors extends Record<string, string> {
@@ -128,22 +130,20 @@ export interface LinkSelectors extends Record<string, string> {
   parseLinks: ResponseFilterWithContext;
 }
 
-export function sameDomain(foundUrl: UniqueUrl, context: SpiderContext): boolean {
-  if (!foundUrl.parsable) return false;
-  if (!UrlFilters.isWebProtocol(foundUrl.parsed!)) return false
+export function sameDomain(foundUrl: ParsedUrl, context?: SpiderContext): boolean {
+  if (!UrlFilters.isWebProtocol(foundUrl)) return false
 
-  const currentUrl = context.currentUniqueUrl?.parsed;
+  const currentUrl = context?.currentUniqueUrl?.parsed;
   if (currentUrl === undefined) return false;
 
-  return (foundUrl.parsed!.domain.toLowerCase() === currentUrl.domain.toLowerCase())
+  return (foundUrl.domain.toLowerCase() === currentUrl.domain.toLowerCase())
 }
 
-export function sameHostname(foundUrl: UniqueUrl, context: SpiderContext): boolean {
-  if (!foundUrl.parsable) return false;
-  if (!UrlFilters.isWebProtocol(foundUrl.parsed!)) return false
+export function sameHostname(foundUrl: ParsedUrl, context?: SpiderContext): boolean {
+  if (!UrlFilters.isWebProtocol(foundUrl)) return false
 
-  const currentUrl = context.currentUniqueUrl?.parsed;
+  const currentUrl = context?.currentUniqueUrl?.parsed;
   if (currentUrl === undefined) return false;
 
-  return (foundUrl.parsed!.hostname.toLowerCase() === currentUrl.hostname.toLowerCase())
+  return (foundUrl.hostname.toLowerCase() === currentUrl.hostname.toLowerCase())
 }
