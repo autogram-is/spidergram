@@ -2,6 +2,7 @@ import { Arango } from '../../arango.js';
 import { SpiderContext, UrlRules, UrlMutatorWithContext, LinkSelectors, ResponseRules, defaultContext } from '../context.js';
 import { CheerioCrawler, CheerioCrawlerOptions, Configuration } from 'crawlee';
 import { cheerioSpiderRequestHandler, cheerioSpiderFailureHandler } from './request-handlers.js';
+import { NormalizedUrl } from '@autogram/url-tools';
 
 export interface CheerioSpiderOptions {
   storage: Arango,
@@ -35,5 +36,7 @@ export class CheerioSpider extends CheerioCrawler {
         ...urlRules  
       },
     };
+
+    NormalizedUrl.normalizer = CheerioSpider.context.urlNormalizer;
   }
 }
