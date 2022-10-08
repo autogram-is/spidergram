@@ -1,12 +1,12 @@
 {
   "name": "spidergram",
-  "version": "0.6.0",
+  "version": "3.0.0",
   "description": "Structural analysis tools for complex web sites",
   "exports": "./dist/source/index.js",
   "types": "./dist/source/index.d.ts",
   "type": "module",
   "engines": {
-    "node": ">=14.20.0"
+    "node": ">=16.0.0"
   },
   "scripts": {
     "clean": "rm -rf ./dist",
