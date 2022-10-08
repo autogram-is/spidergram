@@ -14,8 +14,8 @@ export class LinksTo extends Edge {
   constructor(data: LinksToData = {}) {
     const { url, resource, ...dataForSuper } = data;
     
-    dataForSuper.from ??= url;
-    dataForSuper.to ??= resource;
+    dataForSuper.from ??= resource;
+    dataForSuper.to ??= url;
 
     super(dataForSuper);
   }
