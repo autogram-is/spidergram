@@ -1,8 +1,8 @@
 import { Arango } from '../../arango.js';
 import { SpiderContext, UrlRules, UrlMutatorWithContext, LinkSelectors, ResponseRules, defaultContext } from '../context.js';
 import { CheerioCrawler, CheerioCrawlerOptions, Configuration } from 'crawlee';
-import { cheerioSpiderRequestHandler, cheerioSpiderFailureHandler } from './request-handlers.js';
 import { NormalizedUrl } from '@autogram/url-tools';
+import { CheerioSpiderHandlers } from './cheerio-spider-handlers.js';
 
 export interface CheerioSpiderOptions {
   storage: Arango,
@@ -26,9 +26,11 @@ export class CheerioSpider extends CheerioCrawler {
       saveUnparsableUrls,
       ...crawleeOptions
     } = options;
+
+    const handlers = new CheerioSpiderHandlers();
     
-    crawleeOptions.requestHandler ??= (input) => cheerioSpiderRequestHandler(input, CheerioSpider.context);
-    crawleeOptions.failedRequestHandler ??= (input, error) => cheerioSpiderFailureHandler(input, error, CheerioSpider.context);
+    crawleeOptions.requestHandler ??= (input) => handlers.requestHandler(input, CheerioSpider.context);
+    crawleeOptions.failedRequestHandler ??= (input, error) => handlers.failureHandler(input, error, CheerioSpider.context);
 
     super(crawleeOptions, config);
 

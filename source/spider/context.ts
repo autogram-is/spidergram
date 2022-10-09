@@ -4,6 +4,15 @@ import { Resource } from "../model/resource.js";
 import { ParsedUrl, NormalizedUrl, UrlFilters } from '@autogram/url-tools';
 import { IncomingMessage } from 'http';
 
+export interface SpiderOptions {
+  storage: Arango,
+  linkSelectors: LinkSelectors,
+  urlNormalizer: UrlMutatorWithContext,
+  saveUnparsableUrls: boolean,
+  urlRules: Partial<UrlRules>;
+  responseRules: Partial<ResponseRules>;
+}
+
 export const defaultContext: SpiderContext = {
   storage: new Arango(),
   linkSelectors: { default: 'body a' },
