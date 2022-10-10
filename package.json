@@ -71,6 +71,7 @@
     "crawlee": "^3.0.4",
     "dot-prop": "^7.2.0",
     "dotenv": "^16.0.3",
+    "enquirer": "^2.3.6",
     "html-to-text": "^8.2.1",
     "listr2": "^5.0.5",
     "mime": "^3.0.0",

@@ -2,6 +2,7 @@ import { Arango, aql } from '../../source/arango.js';
 import { CheerioSpider } from '../../source/spider/cheerio/cheerio-spider.js';
 import { ProcessOptions, processResources } from '../../source/analysis/index.js';
 import { JsonObject } from '../../source/types.js';
+import { log } from 'crawlee';
 
 // Assorted parsing helpers
 import { getMeta } from '../../source/analysis/index.js';
@@ -16,67 +17,78 @@ import { Readable } from 'stream';
 XLSX.stream.set_readable(Readable);
 import { LinkSummaries } from '../../source/reports/link-summaries.js';
 import { AqlQuery } from 'arangojs/aql.js';
+import { Listr } from 'listr2';
 
-const targetDomain = 'example.com';
-const a = new Arango();
-await a.load(targetDomain.replace('.', '_'));
+interface Ctx {
+  targetDomain: string;
+  storage: Arango;
+}  
 
-await crawl();
-await process();
-await report();
-
-/**
- * Crawl a URL and all of its linked pages
- */
-export async function crawl() {
-  const spider = new CheerioSpider({
-    storage: a,
-    autoscaledPoolOptions: {
-      maxConcurrency: 5,
-      maxTasksPerMinute: 360
+await new Listr<Ctx>([
+{
+  title: 'Setup',
+    task: async (ctx, task) => {
+      ctx.targetDomain = await task.prompt({
+        type: 'Text',
+        message: 'Domain to crawl:',
+        initial: 'example.com'
+      });
+      ctx.storage = new Arango();
+      await ctx.storage.load(ctx.targetDomain.replace('.', '_'));
+      task.title = `Crawling ${ctx.targetDomain}`;
     }
-  });
-  const crawlResults = await spider.run([`https://${targetDomain}`]);
-  console.log(crawlResults);
-  return Promise.resolve();
-}
-
-/**
- * Iterate over the results and extract useful information
- */
-
-export async function process() {
-  const filter = aql`FILTER resource.body != null`;
-  const options:ProcessOptions = {
-    metadata: resource => (resource.body) ? getMeta(resource.body) : undefined,
-    text: resource => (resource.body) ? htmlToText(resource.body, { 
-      baseElements: { selectors: ['main'] }
-    }) : undefined,
-    readability: resource => (resource.text) ? readability(resource.text as string) : undefined,
+  },
+  {
+    title: 'Site crawl',
+    task: async (ctx, task) => {
+      log.setLevel(log.LEVELS.OFF);
+      const spider = new CheerioSpider({
+        storage: ctx.storage,
+        autoscaledPoolOptions: {
+          maxConcurrency: 5,
+          maxTasksPerMinute: 360
+        }
+      });
+      const c = await spider.run([`https://${ctx.targetDomain}`]);
+      task.title = `${c.requestsFinished} requests processed, ${c.requestsFailed} failed, in ${c.requestTotalDurationMillis / 1000}s`;
+      return Promise.resolve();
+    }
+  },
+  {
+    title: 'Post-processing',
+    task: async (ctx, task) => {
+      const filter = aql`FILTER resource.body != null`;
+      const options:ProcessOptions = {
+        metadata: resource => (resource.body) ? getMeta(resource.body) : undefined,
+        text: resource => (resource.body) ? htmlToText(resource.body, { 
+          baseElements: { selectors: ['main'] }
+        }) : undefined,
+        readability: resource => (resource.text) ? readability(resource.text as string) : undefined,
+      }
+      const processResults = await processResources(ctx.storage, filter, options);
+      task.title = `Records processed, ${Object.keys(processResults.errors).length} errors.`;
+      return Promise.resolve();
+    }
+  },
+  {
+    title: 'Report generation',
+    task: async (ctx, task) => {
+      const queries: Record<string, AqlQuery> = {
+        'Pages': LinkSummaries.pages(),
+        'Errors': LinkSummaries.errors(),
+        'Malformed URLs': LinkSummaries.malformed(),
+        'Non-Web URLs': LinkSummaries.excludeProtocol(),
+        'External Links': LinkSummaries.outlinks([ctx.targetDomain])
+      };
+      const workbook = XLSX.utils.book_new();
+      for (let key in queries) {
+        const cursor = await ctx.storage.db.query(queries[key]);
+        const result = (await cursor.all()).map(value => value as JsonObject);
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(result), key);
+      }
+      XLSX.writeFileXLSX(workbook, `storage/${ctx.targetDomain}.xlsx`);
+      task.title = `${ctx.targetDomain}.xlsx generated.`;
+      return Promise.resolve();
+    }
   }
-  const processResults = await processResources(a, filter, options);
-  console.log(processResults.errors ?? 'All records processed successfully');
-  return Promise.resolve();
-}
-
-/**
- * Generate a spreadsheet with some useful reports
- */
-export async function report() {
-  const queries: Record<string, AqlQuery> = {
-    'Pages': LinkSummaries.pages(),
-    'Errors': LinkSummaries.errors(),
-    'Malformed URLs': LinkSummaries.malformed(),
-    'Non-Web URLs': LinkSummaries.excludeProtocol(),
-    'External Links': LinkSummaries.outlinks([targetDomain])
-  };
-  const workbook = XLSX.utils.book_new();
-  for (let key in queries) {
-    const cursor = await a.db.query(queries[key]);
-    const result = (await cursor.all()).map(value => value as JsonObject);
-    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(result), key);
-  }
-  XLSX.writeFileXLSX(workbook, `storage/${targetDomain}.xlsx`);
-  console.log(`storage/${targetDomain}.xlsx generated.`);
-  return Promise.resolve();
-}
+]).run();
