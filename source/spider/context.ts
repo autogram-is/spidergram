@@ -1,7 +1,7 @@
 import { Arango } from "../arango.js";
 import { UniqueUrl } from "../model/unique-url.js";
 import { Resource } from "../model/resource.js";
-import { ParsedUrl, NormalizedUrl, UrlFilters } from '@autogram/url-tools';
+import { ParsedUrl, UrlFilters, UrlMutators } from '@autogram/url-tools';
 import { IncomingMessage } from 'http';
 
 export interface SpiderOptions {
@@ -28,7 +28,7 @@ export const defaultContext: SpiderContext = {
     parseLinks: () => true,
   },
   saveUnparsableUrls: true,
-  urlNormalizer: (url) => NormalizedUrl.normalizer(url),
+  urlNormalizer: (url) => UrlMutators.defaultNormalizer(url),
   currentUniqueUrl: undefined,
   currentResource: undefined
 }
