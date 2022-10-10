@@ -1,16 +1,17 @@
+import is from '@sindresorhus/is';
 import { Node, isNode, Dictionary, Transform, Type } from '@autogram/autograph';
 import { NormalizedUrl } from '@autogram/url-tools';
 
 export class UniqueUrl extends Node {
-  @Type(() => NormalizedUrl)
-  @Transform(
-    ({ value }) => {
-      (value !== undefined) ? new NormalizedUrl(value.href, undefined, (u) => u) : undefined;
-    },
-    { toClassOnly: true },
-  )
-  @Transform(({ value }) => (value as NormalizedUrl).properties, {
-    toPlainOnly: true,
+
+  @Transform(({ value, type }) => {
+    if (type === 0) {
+      // Class to plain
+      return value ? (value as NormalizedUrl).properties : undefined;
+    } else if (type === 1) {
+      // Plain to class
+      return value ? new NormalizedUrl(value, undefined, (u) => u) : undefined;
+    }
   })
   parsed?: NormalizedUrl;
 
@@ -26,7 +27,7 @@ export class UniqueUrl extends Node {
     normalizer = NormalizedUrl.normalizer,
   ) {
     super('unique_url');
-    if (typeof url === 'string') {
+    if (is.string(url)) {
       try {
         const parsed = new NormalizedUrl(url, baseUrl, normalizer);
         this.url = parsed.href;
@@ -40,11 +41,14 @@ export class UniqueUrl extends Node {
           throw error;
         }
       }
-    } else {
+    } else if (is.urlInstance(url)) {
       const normalized = new NormalizedUrl(url.href, baseUrl, normalizer);
       this.url = normalized.href;
       this.parsed = normalized;
       this.parsable = true;
+    }
+    else {
+      this.parsable = false;
     }
 
     this.assignId();
