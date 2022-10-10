@@ -25,8 +25,8 @@ interface Ctx {
 }  
 
 await new Listr<Ctx>([
-{
-  title: 'Setup',
+  {
+    title: 'Setup',
     task: async (ctx, task) => {
       ctx.targetDomain = await task.prompt({
         type: 'Text',
