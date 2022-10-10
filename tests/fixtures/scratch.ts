@@ -17,7 +17,7 @@ XLSX.stream.set_readable(Readable);
 import { LinkSummaries } from '../../source/reports/link-summaries.js';
 import { AqlQuery } from 'arangojs/aql.js';
 
-const targetDomain = 'autogram.is';
+const targetDomain = 'example.com';
 const a = new Arango();
 await a.load(targetDomain.replace('.', '_'));
 
