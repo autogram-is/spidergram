@@ -1,7 +1,11 @@
-import { CrawlingContext, Request } from "crawlee";
+import is from '@sindresorhus/is';
+import { URL } from 'node:url';
+import { BrowserCrawlingContext, CrawlingContext, Request, KeyValueStore, CheerioCrawlingContext } from "crawlee";
 import { SpiderContext } from "./context.js";
 import { UniqueUrl, RespondsWith, Resource, LinksTo } from "../model/index.js";
-
+import { IncomingHttpHeaders as HttpHeaders } from "http";
+import { IncomingHttpHeaders as Http2Headers} from "http2";
+import mime from 'mime';
 /**
  * Structured dumping ground for links found in markup; flexible enough
  * to represent both `<a>` and `<link>` tags; `context` and  `selector`
@@ -73,7 +77,8 @@ export abstract class SpiderHelper {
     }
   
     return Promise.resolve(results);
-  };      
+  };
+  
   /**
    * @param context A crawler-specific context object; be sure to to specify the correct interface in implementing functions.
    * @param link An object containing `href` and other link properties.
@@ -95,5 +100,159 @@ export abstract class SpiderHelper {
       rq.headers = { referer: url.referer };
     }
     return rq;
+  }
+
+  async downloadResourceFile(
+    context: CheerioCrawlingContext | BrowserCrawlingContext,
+    resource: Resource,
+  ): Promise<string> {
+    const { response, request, sendRequest } = context;
+    const dlStore = await KeyValueStore.open('downloads');
+    const dlBuffer = await sendRequest({ responseType: 'buffer' });
+
+    const suggested = this.fileNameFromHeaders(
+      new URL(request.url),
+      response?.headers,
+      'response',
+    );
+    const filename = `${resource!.key}-${suggested}`;
+
+    return await dlStore.setValue(
+      `${resource!.key}-${filename}`,
+      dlBuffer,
+      { contentType: dlBuffer.readableEncoding?.toString()
+    }).then(() => filename);
+  }
+
+  fileNameFromHeaders(
+    url: URL,
+    headers: HttpHeaders | Http2Headers = {},
+    fallback = 'response',
+  ): string {
+    const filenameRx = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+    let filename: string | undefined;
+
+    if (!is.nonEmptyStringAndNotWhitespace(filename))
+      filename = (filenameRx.exec(headers['content-disposition'] ?? '') ??
+        [])[0];
+
+    if (!is.nonEmptyStringAndNotWhitespace(filename))
+      filename = (headers['content-location'] ?? '').split('/').pop();
+
+    if (!is.nonEmptyStringAndNotWhitespace(filename)) {
+      const parent = url.pathname.split('/').pop();
+      if (is.nonEmptyStringAndNotWhitespace(parent)) {
+        filename = parent;
+      }
+    }
+
+    if (!is.nonEmptyStringAndNotWhitespace(filename)) filename = fallback;
+
+    const mimeExtension = mime.getExtension(headers['content-type'] ?? '');
+    if (mimeExtension !== undefined) {
+      const fileExtension = filename.split('.').pop();
+      if (fileExtension === undefined || fileExtension !== mimeExtension)
+        filename = `${filename}.${mimeExtension ?? 'bin'}`;
+    }
+
+    return filename;
+  }
+
+  fileExtensionFromHeaders(
+    url: URL,
+    headers: HttpHeaders | Http2Headers = {},
+  ): string {
+    const filename = this.fileNameFromHeaders(
+      url,
+      headers
+    );
+    return filename.split('.').shift()!.toString();
+  }
+
+  /**
+   * Convenience grouping of MIMEtypes for opening up the crawler's normally-restricted
+   * focus on HTML. 
+   */
+  static mimeTypes = {
+    html: ['text/html', 'application/xhtml+xml'],
+    pdf: ['application/pdf'],
+    document: [
+      'text/plain',
+      'application/x-abiword',
+      'application/rtf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.oasis.opendocument.text',
+    ],
+    spreadsheet: [
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.oasis.opendocument.spreadsheet',
+    ],
+    presentation: [
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/vnd.oasis.opendocument.presentation',
+    ],
+    audio: [
+      'audio/aac',
+      'audio/midi',
+      'audio/x-midi',
+      'audio/mpeg',
+      'audio/ogg',
+      'audio/wav',
+      'audio/webm',
+    ],
+    video: [
+      'video/mp4',
+      'video/mpeg',
+      'video/ogg',
+      'video/x-msvideo',
+      'video/webm',
+    ],
+    js: ['text/javascript'],
+    css: ['text/css'],
+    font: [
+      'font/otf',
+      'font/ttf',
+      'font/woff',
+      'font/woff2',
+      'application/vnd.ms-fontobject',
+    ],
+    image: [
+      'image/svg+xml',
+      'image/png',
+      'image/jpeg',
+      'image/gif',
+      'image/bmp',
+    ],
+    data: [
+      'text/csv',
+      'application/json',
+      'application/ld+json',
+      'application/xml',
+      'text/xml',
+      'application/atom+xml',
+      'text/rss+xml',
+      'application/rss+xml',
+    ],
+    ebook: [
+      'application/epub+zip',
+      'application/vnd.amazon.ebook',
+    ],
+    archive: [
+      'application/zip',
+      'application/x-bzip',
+      'application/x-bzip2',
+      'application/gzip',
+      'application/vnd.rar',
+      'application/x-freearc',
+      'application/x-7z-compressed',
+    ],
+    misc: [
+      'application/octet-stream',
+      'application/vnd.visio',
+      'text/calendar'
+    ]
   }
 }

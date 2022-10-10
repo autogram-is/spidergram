@@ -40,43 +40,47 @@ export class CheerioSpiderHandlers extends SpiderHandlers {
       spidergram.currentResource = undefined;
       spidergram.currentUniqueUrl = undefined;
       log.info(`${request.url} aborted`);
-    } else {
+      return Promise.resolve();
+    }
       
-      // If the crawl rules say this response should be saved, create a Resource
-      // and a RespondsWith from it, optionally saving the body, and persist them.
-      if (responseRules.save(response, spidergram)) {
-        const { resource, respondsWith } = await this.helpers.buildResource(context, spidergram);
-        if (responseRules.saveBody(response, spidergram)) {
-          resource.body = $.html();
-        }
-        await storage.add([resource, respondsWith]);
-        spidergram.currentResource = resource;
+    // If the crawl rules say this response should be saved, create a Resource
+    // and a RespondsWith from it, optionally saving the body, and persist them.
+    if (responseRules.save(response, spidergram)) {
+      const { resource, respondsWith } = await this.helpers.buildResource(context, spidergram);
+      if (responseRules.download(response, spidergram)) {
+        // Right now we're saving this as the key for a Crawlee KVS. Need something better.
+        resource.payload = await this.helpers.downloadResourceFile(context, resource);
+      } if (responseRules.saveBody(response, spidergram)) {
+        resource.body = $.html();
       }
-    
-      // If the crawl rules say to parse the current response for links,
-      // feed the cheerio instance and selector list to the extractLinks
-      // helper function, then iterate over the results.
-      if (responseRules.parseLinks(response, spidergram)) {
-        const q = await crawler.getRequestQueue();
-        for (let link of await this.helpers.extractLinks($, linkSelectors)) {
-          const { uniqueUrl, linksTo } = await this.helpers.buildLinkTo(context, link, spidergram);
-          if (
-            (uniqueUrl.parsable && urlRules.save(uniqueUrl.parsed!, spidergram))
-            || spidergram.saveUnparsableUrls
-          ) {
-            await storage.add(uniqueUrl);
-            if (linksTo) await storage.add(linksTo);
-          }
-          
-          // if the url qualifies for continued crawling
-          if (uniqueUrl.parsable) {
-            if (urlRules.enqueue(uniqueUrl.parsed!, spidergram)) {
-              await q.addRequest(this.helpers.buildRequest(uniqueUrl));
-            }
+      await storage.add([resource, respondsWith]);
+      spidergram.currentResource = resource;
+    }
+  
+    // If the crawl rules say to parse the current response for links,
+    // feed the cheerio instance and selector list to the extractLinks
+    // helper function, then iterate over the results.
+    if (responseRules.parseLinks(response, spidergram)) {
+      const q = await crawler.getRequestQueue();
+      for (let link of await this.helpers.extractLinks($, linkSelectors)) {
+        const { uniqueUrl, linksTo } = await this.helpers.buildLinkTo(context, link, spidergram);
+        if (
+          (uniqueUrl.parsable && urlRules.save(uniqueUrl.parsed!, spidergram))
+          || spidergram.saveUnparsableUrls
+        ) {
+          await storage.add(uniqueUrl);
+          if (linksTo) await storage.add(linksTo);
+        }
+        
+        // if the url qualifies for continued crawling
+        if (uniqueUrl.parsable) {
+          if (urlRules.enqueue(uniqueUrl.parsed!, spidergram)) {
+            await q.addRequest(this.helpers.buildRequest(uniqueUrl));
           }
         }
       }
     }
+    return Promise.resolve();
   }
 
   async failureHandler(context: CheerioCrawlingContext, error: Error, spidergram: SpiderContext) {
@@ -99,5 +103,6 @@ export class CheerioSpiderHandlers extends SpiderHandlers {
     })
   
     await storage.add([ru, rw]);
+    return Promise.resolve();
   }
 }
