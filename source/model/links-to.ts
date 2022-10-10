@@ -3,19 +3,19 @@ import { Resource } from './resource.js';
 import { Edge, EdgeData } from './edge.js';
 import { Vertice, Reference } from './vertice.js';
 
-export type LinksToData = {
-  resource?: Reference<Resource>;
-  url?: Reference<UniqueUrl>;
-} & EdgeData;
+export type LinksToData<F extends Vertice = Resource, T extends Vertice = UniqueUrl> = EdgeData<F, T> & {
+  resource?: Reference<F>;
+  url?: Reference<T>;
+};
 
-export class LinksTo extends Edge {
+export class LinksTo<F extends Vertice = Resource, T extends Vertice = Resource> extends Edge<F, T> {
   override _collection = 'links_to';
 
-  constructor(data: LinksToData = {}) {
+  constructor(data: LinksToData<F, T> = {}) {
     const { url, resource, ...dataForSuper } = data;
     
-    dataForSuper.from ??= resource;
     dataForSuper.to ??= url;
+    dataForSuper.from ??= resource;
 
     super(dataForSuper);
   }
