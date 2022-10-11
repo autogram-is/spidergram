@@ -113,4 +113,15 @@ export class LinkSummaries {
         references: length(inlinks)
       }
   `}
+
+  static requestUrlMismatch() {
+    return aql`
+      for u in unique_urls
+      for rw in responds_with
+        FILTER u._id == rw._from
+        for r in resources
+          FILTER rw._to == r._id
+          FILTER r.url != u.url
+          return { requested: u.url, returned: r.url }
+  `}
 }

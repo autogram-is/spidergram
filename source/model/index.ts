@@ -5,3 +5,6 @@ export * from './unique-url.js';
 export * from './resource.js';
 export * from './responds-with.js';
 export * from './links-to.js';
+export * from './is-child-of.js';
+export * from './is-variant-of.js';
+export * from './appears-on.js';
