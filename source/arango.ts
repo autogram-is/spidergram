@@ -1,9 +1,10 @@
 import is from "@sindresorhus/is";
 import { Config } from "arangojs/connection.js";
 import { Database } from 'arangojs';
-import { Vertice, isEdge } from "./model/index.js";
+import { Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn } from "./model/index.js";
 import { DocumentMetadata } from "arangojs/documents.js";
 import { DocumentCollection } from "arangojs/collection.js";
+import { assert } from "console";
 
 export { aql } from 'arangojs';
 
@@ -58,6 +59,9 @@ export class Arango {
   }
 
   async initialize(): Promise<DocumentCollection[]> {
+    const includedTypes = [UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn];
+    assert(includedTypes.length > 0);
+
     const promises: Promise<DocumentCollection>[] = [];
     for (let type of Vertice.types.keys()) {
       this.db.collection(type).exists().then(exists => {
