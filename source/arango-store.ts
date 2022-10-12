@@ -167,4 +167,8 @@ export class ArangoStore {
     }
     return Promise.all(promises);
   }
+
+  // Two quick helpers that eliminate unecessary property traversal
+  query = this.db.query;
+  collection = this.db.collection;
 }

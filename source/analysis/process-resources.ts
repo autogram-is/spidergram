@@ -18,8 +18,8 @@ export async function processResources(
   };
   
   // Pull in all the resources that have body text
-  const resources = storage.db.collection<JsonObject>('resources');
-  const queryResults = await storage.db.query(aql`
+  const resources = storage.collection<JsonObject>('resources');
+  const queryResults = await storage.query(aql`
     FOR resource in ${resources}
       ${filter}
       RETURN resource

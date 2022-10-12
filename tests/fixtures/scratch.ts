@@ -83,7 +83,7 @@ await new Listr<Ctx>([
       };
       const workbook = XLSX.utils.book_new();
       for (let key in queries) {
-        const cursor = await ctx.storage.db.query(queries[key]);
+        const cursor = await ctx.storage.query(queries[key]);
         const result = (await cursor.all()).map(value => value as JsonObject);
         XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(result), key);
       }
