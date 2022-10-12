@@ -29,7 +29,7 @@ export class CheerioSpiderHandlers extends SpiderHandlers {
       spidergram.currentUniqueUrl = UniqueUrl.fromJSON(request.userData);
     } catch {
       const uu = new UniqueUrl({ url: request.url });
-      await storage.add(uu);
+      await storage.push(uu, false);
       request.userData = uu.toJSON();
       spidergram.currentUniqueUrl = uu;
     }
@@ -53,7 +53,7 @@ export class CheerioSpiderHandlers extends SpiderHandlers {
       } if (responseRules.saveBody(response, spidergram)) {
         resource.body = $.html();
       }
-      await storage.add([resource, respondsWith]);
+      await storage.push([resource, respondsWith]);
       spidergram.currentResource = resource;
     }
   
@@ -68,8 +68,8 @@ export class CheerioSpiderHandlers extends SpiderHandlers {
           (uniqueUrl.parsable && urlRules.save(uniqueUrl.parsed!, spidergram))
           || spidergram.saveUnparsableUrls
         ) {
-          await storage.add(uniqueUrl);
-          if (linksTo) await storage.add(linksTo);
+          await storage.push(uniqueUrl, false);
+          if (linksTo) await storage.push(linksTo);
         }
         
         // if the url qualifies for continued crawling
@@ -102,7 +102,7 @@ export class CheerioSpiderHandlers extends SpiderHandlers {
       headers: request.headers ?? {}
     })
   
-    await storage.add([ru, rw]);
+    await storage.push([ru, rw]);
     return Promise.resolve();
   }
 }

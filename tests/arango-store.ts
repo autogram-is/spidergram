@@ -11,7 +11,7 @@ test("insert", async (t) => {
   const ast = await ArangoStore.open('spidergram_inserts');
 
   const uu = new UniqueUrl({ url: 'http://test.com' });
-  await ast.add(uu);
+  await ast.push(uu);
 
   t.assert(await ast.db.exists());
 });

@@ -6,10 +6,6 @@ import { DocumentMetadata } from "arangojs/documents.js";
 import { DocumentCollection } from "arangojs/collection.js";
 import { assert } from "console";
 
-// TODO: Alter to follow Crawlee conventions;
-// await Arango.open() returns an instance of the Arango class
-//   with a particular db loaded;
-// await Arango.add/set/etc operates on the database itself
 export class ArangoStore {
   protected static _systemDb?: Database;
   constructor(protected _activeDb: Database) {}
@@ -123,14 +119,10 @@ export class ArangoStore {
   /*
    * Convenience wrappers for bulk saving and deleting of arbitrary documents
    */
-
-  async add(input: Vertice | Vertice[]): Promise<DocumentMetadata[]> {
-    return this.set(input, false);
-  }
-
-  async set(input: Vertice | Vertice[], overWriteExisting: boolean = true): Promise<DocumentMetadata[]> {
+  
+  async push(input: Vertice | Vertice[], overwrite: boolean = false): Promise<DocumentMetadata[]> {
     const promises: Promise<DocumentMetadata>[] = [];
-    const overwriteMode = (overWriteExisting) ? 'replace' : 'ignore';
+    const overwriteMode = (overwrite) ? 'replace' : 'ignore';
     if (!is.array(input)) input = [input];
     
     // To ensure we don't have any premature reference insertions, we
