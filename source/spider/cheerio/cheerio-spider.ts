@@ -1,4 +1,4 @@
-import { Arango } from '../../arango.js';
+import { Arango } from '../../arango-store.js';
 import { SpiderContext, UrlRules, UrlMutatorWithContext, LinkSelectors, ResponseRules, defaultContext } from '../context.js';
 import { CheerioCrawler, CheerioCrawlerOptions, Configuration } from 'crawlee';
 import { NormalizedUrl } from '@autogram/url-tools';

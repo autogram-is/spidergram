@@ -1,4 +1,4 @@
-import { Arango } from '../source/arango.js';
+import { Arango } from '../source/arango-store.js';
 import { CheerioSpider } from '../source/spider/cheerio/cheerio-spider.js';
 
 // Set up the crawl context

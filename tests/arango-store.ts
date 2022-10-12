@@ -1,5 +1,5 @@
 import test from "ava";
-import { Arango } from "../source/arango.js";
+import { Arango } from "../source/arango-store.js";
 import { UniqueUrl, Resource, RespondsWith, LinksTo } from "../source/model/index.js";
 
 test("spidergraph connection", async (t) => {

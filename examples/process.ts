@@ -1,4 +1,4 @@
-import { Arango, aql } from '../source/arango.js';
+import { Arango, aql } from '../source/arango-store.js';
 import { ProcessOptions, processResources } from '../source/analysis/process-resources.js';
 
 import { getMeta } from '../source/analysis/index.js';

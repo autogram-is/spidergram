@@ -1,5 +1,5 @@
 import { JsonObject } from '../index.js';
-import { ArangoStore } from '../arango.js';
+import { ArangoStore } from '../arango-store.js';
 import { Resource } from '../model/index.js';
 import { Database } from 'arangojs/database.js';
 

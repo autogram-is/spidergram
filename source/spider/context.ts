@@ -3,7 +3,7 @@ import { UniqueUrl } from "../model/unique-url.js";
 import { Resource } from "../model/resource.js";
 import { ParsedUrl, UrlFilters, UrlMutators } from '@autogram/url-tools';
 import { IncomingMessage } from 'http';
-import { ArangoStore } from '../arango.js';
+import { ArangoStore } from '../arango-store.js';
 
 export interface SpiderOptions {
   storage: Database,

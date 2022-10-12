@@ -1,4 +1,4 @@
-import { ArangoStore } from '../../source/arango.js';
+import { ArangoStore } from '../../source/arango-store.js';
 import { CheerioSpider } from '../../source/spider/cheerio/cheerio-spider.js';
 import { ProcessOptions, processResources } from '../../source/analysis/index.js';
 import { JsonObject } from '../../source/types.js';
