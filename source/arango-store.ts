@@ -169,6 +169,11 @@ export class ArangoStore {
   }
 
   // Two quick helpers that eliminate unecessary property traversal
-  query = this.db.query;
-  collection = this.db.collection;
+  get query() {
+    return this.db.query.bind(this.db);
+  }
+  
+  get collection() {
+    return this.db.collection.bind(this.db);
+  }
 }
