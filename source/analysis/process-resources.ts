@@ -33,7 +33,7 @@ export async function processResources(
       for (const property in options) {
         resource.set(property, options[property](resource));
       }
-      results.saved[resource._key] = (await storage.set(resource))[0];
+      results.saved[resource._key] = (await storage.push(resource))[0];
     } catch (error: unknown) {
       if (error instanceof Error) {
         results.errors[resource._key] = error ;
