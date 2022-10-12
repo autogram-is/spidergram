@@ -1,7 +1,6 @@
 import { JsonObject } from '../index.js';
 import { ArangoStore } from '../arango-store.js';
 import { Resource } from '../model/index.js';
-import { Database } from 'arangojs/database.js';
 
 import { GeneratedAqlQuery, aql } from 'arangojs/aql.js';
 import { DocumentMetadata } from 'arangojs/documents.js';
@@ -11,18 +10,16 @@ export type ProcessOptions = Record<string, (r: Resource) => unknown>;
 export async function processResources(
   filter: GeneratedAqlQuery,
   options: ProcessOptions,
-  database: Database,
+  storage: ArangoStore,
 ) {  
   let results = {
     saved: {} as Record<string, DocumentMetadata>,
     errors: {} as Record<string, Error>
   };
-
-  const workingDb = database ?? ArangoStore.db;
   
   // Pull in all the resources that have body text
-  const resources = workingDb.collection<JsonObject>('resources');
-  const queryResults = await workingDb.query(aql`
+  const resources = storage.db.collection<JsonObject>('resources');
+  const queryResults = await storage.db.query(aql`
     FOR resource in ${resources}
       ${filter}
       RETURN resource
@@ -36,7 +33,7 @@ export async function processResources(
       for (const property in options) {
         resource.set(property, options[property](resource));
       }
-      results.saved[resource._key] = (await ArangoStore.set(resource, workingDb))[0];
+      results.saved[resource._key] = (await storage.set(resource))[0];
     } catch (error: unknown) {
       if (error instanceof Error) {
         results.errors[resource._key] = error ;

@@ -1,4 +1,3 @@
-import { Database } from 'arangojs';
 import { UniqueUrl } from "../model/unique-url.js";
 import { Resource } from "../model/resource.js";
 import { ParsedUrl, UrlFilters, UrlMutators } from '@autogram/url-tools';
@@ -6,7 +5,7 @@ import { IncomingMessage } from 'http';
 import { ArangoStore } from '../arango-store.js';
 
 export interface SpiderOptions {
-  storage: Database,
+  storage: ArangoStore,
   linkSelectors: LinkSelectors,
   urlNormalizer: UrlMutatorWithContext,
   saveUnparsableUrls: boolean,
@@ -35,7 +34,7 @@ export const defaultContext: SpiderContext = {
 }
 
 export interface SpiderContext extends Record<string, unknown>  {
-  storage: Database,
+  storage: ArangoStore,
   urlRules: UrlRules,
   linkSelectors: LinkSelectors,
   urlNormalizer: UrlMutatorWithContext,

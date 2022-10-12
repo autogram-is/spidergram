@@ -8,17 +8,17 @@ test("spidergraph connection", async (t) => {
 });
 
 test("insert", async (t) => {
-  const db = await ArangoStore.open('spidergram_inserts');
+  const ast = await ArangoStore.open('spidergram_inserts');
 
   const uu = new UniqueUrl({ url: 'http://test.com' });
-  await ArangoStore.add(uu, db);
+  await ast.add(uu);
 
-  t.assert(await ArangoStore.db.exists());
+  t.assert(await ast.db.exists());
 });
 
 
 test("edges", async (t) => {
-  const db = await ArangoStore.open('spidergram_inserts');
+  const ast = await ArangoStore.open('spidergram_inserts');
 
   const uu = new UniqueUrl({ url: 'http://test.com' });
   const re = new Resource({
@@ -36,6 +36,6 @@ test("edges", async (t) => {
     resource: re,
     href: 'http://test.com',
   });
-  const results = await ArangoStore.add([uu, re, rw, lt], db);
+  const results = await ast.add([uu, re, rw, lt]);
   t.assert(results.length > 0);
 });

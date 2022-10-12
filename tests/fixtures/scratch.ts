@@ -17,13 +17,12 @@ import { Readable } from 'stream';
 XLSX.stream.set_readable(Readable);
 import { LinkSummaries } from '../../source/reports/link-summaries.js';
 import { AqlQuery, aql } from 'arangojs/aql.js';
-import { Database } from 'arangojs/database.js';
 import { Listr } from 'listr2';
 
 interface Ctx {
   project: string;
   targetDomain: string;
-  storage: Database;
+  storage: ArangoStore;
 }
 
 await new Listr<Ctx>([
@@ -84,7 +83,7 @@ await new Listr<Ctx>([
       };
       const workbook = XLSX.utils.book_new();
       for (let key in queries) {
-        const cursor = await ctx.storage.query(queries[key]);
+        const cursor = await ctx.storage.db.query(queries[key]);
         const result = (await cursor.all()).map(value => value as JsonObject);
         XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(result), key);
       }

@@ -1,11 +1,11 @@
-import { Arango } from '../../arango-store.js';
+import { ArangoStore } from '../../arango-store.js';
 import { SpiderContext, UrlRules, UrlMutatorWithContext, LinkSelectors, ResponseRules, defaultContext } from '../context.js';
 import { CheerioCrawler, CheerioCrawlerOptions, Configuration } from 'crawlee';
 import { NormalizedUrl } from '@autogram/url-tools';
 import { CheerioSpiderHandlers } from './cheerio-spider-handlers.js';
 
 export interface CheerioSpiderOptions {
-  storage: Arango,
+  storage: ArangoStore,
   linkSelectors: LinkSelectors,
   urlNormalizer: UrlMutatorWithContext,
   saveUnparsableUrls: boolean,
