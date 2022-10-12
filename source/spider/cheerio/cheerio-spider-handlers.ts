@@ -1,6 +1,6 @@
 import { SpiderContext } from '../context.js';
 import { CheerioCrawlingContext } from 'crawlee';
-import { UniqueUrl, RespondsWith, Resource } from '../../index.js';
+import { UniqueUrl, RespondsWith, Resource, ArangoStore } from '../../index.js';
 import { SpiderHandlers } from '../spider-handlers.js';
 import { CheerioSpiderHelper } from './cheerio-spider-helper.js';
 
@@ -29,7 +29,7 @@ export class CheerioSpiderHandlers extends SpiderHandlers {
       spidergram.currentUniqueUrl = UniqueUrl.fromJSON(request.userData);
     } catch {
       const uu = new UniqueUrl({ url: request.url });
-      await storage.add(uu);
+      await ArangoStore.add(uu, storage);
       request.userData = uu.toJSON();
       spidergram.currentUniqueUrl = uu;
     }
@@ -53,7 +53,7 @@ export class CheerioSpiderHandlers extends SpiderHandlers {
       } if (responseRules.saveBody(response, spidergram)) {
         resource.body = $.html();
       }
-      await storage.add([resource, respondsWith]);
+      await ArangoStore.add([resource, respondsWith], storage);
       spidergram.currentResource = resource;
     }
   
@@ -68,8 +68,8 @@ export class CheerioSpiderHandlers extends SpiderHandlers {
           (uniqueUrl.parsable && urlRules.save(uniqueUrl.parsed!, spidergram))
           || spidergram.saveUnparsableUrls
         ) {
-          await storage.add(uniqueUrl);
-          if (linksTo) await storage.add(linksTo);
+          await ArangoStore.add(uniqueUrl, storage);
+          if (linksTo) await ArangoStore.add(linksTo, storage);
         }
         
         // if the url qualifies for continued crawling
@@ -102,7 +102,7 @@ export class CheerioSpiderHandlers extends SpiderHandlers {
       headers: request.headers ?? {}
     })
   
-    await storage.add([ru, rw]);
+    await ArangoStore.add([ru, rw], storage);
     return Promise.resolve();
   }
 }
