@@ -44,14 +44,21 @@ export class UniqueUrl extends Vertice {
     if (url === undefined) {
       return ['unparsable', this.url];
     } else {
-      return [
+      let components = [
         url.protocol.replace(':', ''),
         url.subdomain,
-        url.domain,
-        ...url.pathname.split('/'),
-        url.search,
-        url.hash
+        url.domain.replace('/', ''),
       ];
+      if (is.nonEmptyArray(url.path)) {
+        components = [...components, ...url.path];
+      }
+      if (is.nonEmptyStringAndNotWhitespace(url.search)) {
+        components.push(url.search);
+      }
+      if (is.nonEmptyStringAndNotWhitespace(url.hash)) {
+        components.push(url.hash);
+      }
+      return components;
     }
   }
   
