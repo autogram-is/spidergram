@@ -36,6 +36,6 @@ test("edges", async (t) => {
     resource: re,
     href: 'http://test.com',
   });
-  const results = await ast.add([uu, re, rw, lt]);
+  const results = await ast.push([uu, re, rw, lt]);
   t.assert(results.length > 0);
 });
