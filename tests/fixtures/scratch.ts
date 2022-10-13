@@ -31,7 +31,7 @@ await new Listr<Ctx>([
     task: async (ctx, task) => {
       ctx.targetDomain = await task.prompt({
         type: 'Text',
-        message: 'Domains to crawl):',
+        message: 'Domain to crawl:',
         initial: 'example.com'
       });
       ctx.project = ctx.targetDomain.replace('.', '_')
