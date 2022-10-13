@@ -39,6 +39,26 @@ export class UniqueUrl extends Vertice {
     return { url: this.url }
   }
 
+  get sortableComponents(): string[] {
+    const url = this.parsed;
+    if (url === undefined) {
+      return ['unparsable', this.url];
+    } else {
+      return [
+        url.protocol.replace(':', ''),
+        url.subdomain,
+        url.domain,
+        ...url.pathname.split('/'),
+        url.search,
+        url.hash
+      ];
+    }
+  }
+  
+  get sortableString(): string {
+    return this.sortableComponents.join('/');
+  }
+
   get parsable(): boolean {
     return this.parsed !== undefined;
   }
