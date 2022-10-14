@@ -5,14 +5,24 @@ import { Vertice, VerticeData, Transform } from './vertice.js';
 
 export type UniqueUrlData = {
   url?: string | NormalizedUrl;
+  source?: UrlSource;
   base?: string | URL;
   normalizer?: UrlMutator;
   referer?: string;
   depth?: number;
 } & VerticeData;
 
+export enum UrlSource {
+  Page = 'page',
+  Sitemap = 'sitemap',
+  Import = 'import',
+  Path = 'path'
+}
+
 export class UniqueUrl extends Vertice {
   override _collection = 'unique_urls';
+  private _sortableComponents?: string[];
+
   url!: string;
 
   @Transform((transformation) => {
@@ -31,8 +41,10 @@ export class UniqueUrl extends Vertice {
       return transformation.value;
     }
   })
+
   parsed?: NormalizedUrl;
   referer?: string;
+  source?: UrlSource;
   depth!: number;
 
   protected override keySeed(): unknown {
@@ -40,26 +52,26 @@ export class UniqueUrl extends Vertice {
   }
 
   get sortableComponents(): string[] {
-    const url = this.parsed;
-    if (url === undefined) {
-      return ['unparsable', this.url];
-    } else {
-      let components = [
-        url.protocol.replace(':', ''),
-        url.subdomain,
-        url.domain.replace('/', ''),
-      ];
-      if (is.nonEmptyArray(url.path)) {
-        components = [...components, ...url.path];
+    if (is.undefined(this._sortableComponents)) {
+      const url = this.parsed;
+      if (url === undefined) {
+        return ['unparsable', this.url];
+      } else {
+        let components = [
+          url.protocol.replace(':', ''),
+          url.subdomain,
+          url.domain.replace('/', ''),
+        ];
+        if (is.nonEmptyArray(url.path)) {
+          components = [...components, ...url.path];
+        }
+        if (is.nonEmptyStringAndNotWhitespace(url.search)) {
+          components.push(url.search);
+        }
+        this._sortableComponents = components;
       }
-      if (is.nonEmptyStringAndNotWhitespace(url.search)) {
-        components.push(url.search);
-      }
-      if (is.nonEmptyStringAndNotWhitespace(url.hash)) {
-        components.push(url.hash);
-      }
-      return components;
     }
+    return this._sortableComponents;
   }
   
   get sortableString(): string {

@@ -21,6 +21,12 @@ export class IsChildOf<F extends Vertice = Resource, T extends Vertice = Resourc
     super(dataForSuper);
 
     this.context = context ?? 'url';
+    this.assignKey();
+  }
+
+  // Only one parent/child relationship per context.
+  protected override keySeed(): unknown {
+    return { from: this._from, to: this._to, context: this.context };
   }
 }
 
