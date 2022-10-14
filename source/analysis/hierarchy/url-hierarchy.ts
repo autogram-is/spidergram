@@ -1,10 +1,10 @@
-import { UniqueUrl, IsChildOf } from '../model/index.js';
+import { UniqueUrl, IsChildOf } from '../../model/index.js';
 import { UrlFilters } from '@autogram/url-tools';
-import { ArangoStore } from '../arango-store.js';
+import { ArangoStore } from '../../arango-store.js';
 import { GeneratedAqlQuery } from 'arangojs/aql';
 import { aql } from 'arangojs';
 import is from '@sindresorhus/is';
-import { JsonObject } from '../types.js';
+import { JsonObject } from '../../types.js';
 
 interface UrlHierarchyData {
   urls: UniqueUrl[];

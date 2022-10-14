@@ -1,5 +1,5 @@
 import { ArangoStore } from '../../source/arango-store.js';
-import { UrlHierarchy } from '../../source/analysis/url-hierarchy.js';
+import { UrlHierarchy } from '../../source/analysis/hierarchy/url-hierarchy.js';
 import { aql } from 'arangojs/aql.js';
 
 const storage = await ArangoStore.open('karenmcgrane_com');
