@@ -5,14 +5,15 @@ import { GeneratedAqlQuery } from 'arangojs/aql';
 import { aql } from 'arangojs';
 import is from '@sindresorhus/is';
 import { JsonObject } from '../../types.js';
-import { NormalizedUrl } from '@autogram/url-tools';
+import { ParsedUrl } from '@autogram/url-tools';
 
 
 interface UrlHierarchyOptions {
-  createMissingParents: boolean,
-  createMasterParent: boolean,
+  fillGaps: boolean,
   maxParentDistance: number,
   keepOrphans: boolean,
+  urlToSortable?: (url: ParsedUrl) => string[],
+  createParent?: (child: ParsedUrl) => ParsedUrl | false,
 }
 
 export class UrlHierarchy implements HierarchyBuilder<UniqueUrl, IsChildOf> {
@@ -60,24 +61,28 @@ export class UrlHierarchy implements HierarchyBuilder<UniqueUrl, IsChildOf> {
   // leaf nodes possible.
   protected sort() {
     this.pool.sort((a: UniqueUrl, b: UniqueUrl): number => {
-      return a.sortableString.localeCompare(b.sortableString);
+      return this.sortKey(a.parsed!).localeCompare(this.sortKey(b.parsed!));
     });
   }
 
   async buildRelationships(customOptions: Partial<UrlHierarchyOptions> = {}) {
+    let { urlToSortable, createParent, ...config } = customOptions;
+
     const options = {
-      createMissingParents: true,
-      createMasterParent: false,
+      fillGaps: true,
       maxParentDistance: Infinity,
       keepOrphans: false,
-      ...customOptions
+      ...config
     };
+
+    if (urlToSortable) this.urlToSortable = urlToSortable;
+    if (createParent) this.createParent = createParent;
 
     this.sort();
 
     let url: UniqueUrl | undefined;
     while (url = this.pool.pop()) {
-      const parent = this.findParent(url, options);
+      const parent = this.findParent(url.parsed!, options);
   
       if (is.undefined(parent)) {
         this.data.orphans.push(url);
@@ -99,14 +104,13 @@ export class UrlHierarchy implements HierarchyBuilder<UniqueUrl, IsChildOf> {
   }
 
   private findParent(
-    url: UniqueUrl,
+    url: ParsedUrl,
     options: UrlHierarchyOptions,
     distance = 1
   ): UniqueUrl | undefined {
-    const maxDistance = options.createMissingParents ? Math.min(options.maxParentDistance, url.sortableComponents.length) : 1;
-    const potentialParent = url.sortableComponents.slice(0, -distance).join('/');
+    const maxDistance = options.fillGaps ? Math.min(options.maxParentDistance, this.urlToSortable(url).length) : 1;    
+    let parent = this.pool.find(candidate => this.isDirectParent(url, candidate.parsed!));
 
-    let parent = this.pool.find(candidate => candidate.sortableString === potentialParent);
     if (is.undefined(parent)) {
       if (distance >= maxDistance) {
         return undefined;
@@ -114,22 +118,23 @@ export class UrlHierarchy implements HierarchyBuilder<UniqueUrl, IsChildOf> {
         return this.findParent(url, options, ++distance);
       }
     } else {
-      if (options.createMissingParents && distance > 1) {
-        parent = this.createMissingParents(url.parsed!, parent.parsed!);
+      if (options.fillGaps && distance > 1) {
+        parent = this.connectToAncestor(url, parent.parsed!);
       }
       return parent;
     }
   }
 
-  private createMissingParents(child: NormalizedUrl, ancestor: NormalizedUrl): UniqueUrl | undefined {
+  private connectToAncestor(child: ParsedUrl, ancestor: ParsedUrl): UniqueUrl | undefined {
     const newUrls: UniqueUrl[] = [];
+    
     for (
-      let path = child.path.slice(0,-1);
-      (path.length > 0) && (path.length > ancestor.path.length);
-      path.pop()
+      let parent = this.createParent(child);
+      (parent && this.urlCompare(parent, ancestor) > 0);
+      parent = this.createParent(child)
     ) {
       newUrls.push(new UniqueUrl({
-        url: `${child.protocol}//${child.host}/${path.join('/')}`,
+        url: parent.href,
         source: UrlSource.Path,
         normalizer: url => url
       }));
@@ -148,5 +153,55 @@ export class UrlHierarchy implements HierarchyBuilder<UniqueUrl, IsChildOf> {
       ...this.data.relationships
     ]);
   }
-}
 
+
+
+  urlCompare(a: ParsedUrl, b: ParsedUrl): number {
+    return this.sortKey(a).localeCompare(this.sortKey(b));
+  }
+  
+  isDirectParent(child: ParsedUrl, candidate: ParsedUrl): boolean {
+    const expectedParent = this.createParent(child);
+    if (expectedParent && (this.urlCompare(expectedParent, candidate) === 0)) {
+      return true;
+    }
+    return false;
+  }
+  
+  createParent(child: ParsedUrl): ParsedUrl | false {
+    const parent = new ParsedUrl(child.href);
+
+    // We'll ignore search params here.
+    parent.hash = '';
+    parent.search = '';
+    if (parent.path.length > 0) {
+      parent.pathname = parent.path.slice(0,-1).join('/');
+    } else if (parent.subdomain) {
+      // Assume that foo.example.com/ is the child of example.com/
+      parent.subdomain = '';
+    }
+  
+    if (parent.href == child.href) return false;
+    return parent;
+  }
+  
+  sortKey(url: ParsedUrl): string {
+    return this.urlToSortable(url).join('/');
+  }
+  
+  urlToSortable(url: ParsedUrl): string[] {
+    let components = [
+      url.domain.replace('/', ''),
+    ];
+    if (is.nonEmptyStringAndNotWhitespace(url.subdomain)) {
+      components.push(url.subdomain);
+    }
+    if (is.nonEmptyArray(url.path)) {
+      components = [...components, ...url.path];
+    }
+    if (is.nonEmptyStringAndNotWhitespace(url.search)) {
+      components.push(url.search);
+    }
+    return components;
+  }
+}

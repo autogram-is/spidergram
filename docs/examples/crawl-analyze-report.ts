@@ -25,6 +25,8 @@ interface Ctx {
   storage: ArangoStore;
 }
 
+log.setLevel(log.LEVELS.OFF);
+
 await new Listr<Ctx>([
   {
     title: 'Setup',
@@ -42,7 +44,6 @@ await new Listr<Ctx>([
   {
     title: 'Site crawl',
     task: async (ctx, task) => {
-      log.setLevel(log.LEVELS.OFF);
       const spider = new CheerioSpider({
         storage: ctx.storage,
         autoscaledPoolOptions: {
@@ -62,7 +63,7 @@ await new Listr<Ctx>([
       const options:ProcessOptions = {
         metadata: resource => (resource.body) ? getMeta(resource.body) : undefined,
         text: resource => (resource.body) ? htmlToText(resource.body, { 
-          baseElements: { selectors: ['main'] }
+          baseElements: { selectors: ['section#content'] }
         }) : undefined,
         readability: resource => (resource.text) ? readability(resource.text as string) : undefined,
       }

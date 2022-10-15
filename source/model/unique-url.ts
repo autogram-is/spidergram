@@ -51,33 +51,6 @@ export class UniqueUrl extends Vertice {
     return { url: this.url }
   }
 
-  get sortableComponents(): string[] {
-    if (is.undefined(this._sortableComponents)) {
-      const url = this.parsed;
-      if (url === undefined) {
-        return ['unparsable', this.url];
-      } else {
-        let components = [
-          url.protocol.replace(':', ''),
-          url.subdomain,
-          url.domain.replace('/', ''),
-        ];
-        if (is.nonEmptyArray(url.path)) {
-          components = [...components, ...url.path];
-        }
-        if (is.nonEmptyStringAndNotWhitespace(url.search)) {
-          components.push(url.search);
-        }
-        this._sortableComponents = components;
-      }
-    }
-    return this._sortableComponents;
-  }
-  
-  get sortableString(): string {
-    return this.sortableComponents.join('/');
-  }
-
   get parsable(): boolean {
     return this.parsed !== undefined;
   }

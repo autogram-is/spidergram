@@ -27,7 +27,7 @@ export function getMeta(input: cheerio.Root | string): Properties {
   results.body = $('body').attr();
   const bodyClasses = $('body').attr('class');
   if (bodyClasses) {
-    results.body.class = bodyClasses.replace(/s+/, ' ').split(' ');
+    results.body.class = bodyClasses.replace(/\s+/, ' ').split(' ');
   }
 
   results.title = getProperty(
