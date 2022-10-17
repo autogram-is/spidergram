@@ -1,4 +1,4 @@
-import { Vertice, isVertice, VerticeData, Reference } from './vertice.js';
+import { Vertice, isVertice, VerticeData, Reference } from '../vertices/vertice.js';
 
 export function isEdge(value: unknown): value is Edge {
   return (

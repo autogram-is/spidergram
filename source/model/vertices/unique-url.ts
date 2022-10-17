@@ -21,7 +21,6 @@ export enum UrlSource {
 
 export class UniqueUrl extends Vertice {
   override _collection = 'unique_urls';
-  private _sortableComponents?: string[];
 
   url!: string;
 

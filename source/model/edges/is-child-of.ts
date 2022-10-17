@@ -1,6 +1,6 @@
-import { Resource } from './resource.js';
+import { Resource } from '../index.js';
 import { Edge, EdgeData } from './edge.js';
-import { Vertice, Reference } from './vertice.js';
+import { Vertice, Reference } from '../vertices/vertice.js';
 
 export type IsChildOfType<F extends Vertice = Resource, T extends Vertice = Resource> = EdgeData<F, T> & {
   child?: Reference<F>

@@ -1,7 +1,7 @@
 /* eslint-disable import/no-unassigned-import */
 import 'reflect-metadata';
 import is from '@sindresorhus/is';
-import { Uuid, UuidFactory } from './uuid.js';
+import { Uuid, UuidFactory } from '../helpers/uuid.js';
 import { getProperty, setProperty, hasProperty, deleteProperty, deepKeys } from 'dot-prop';
 import {
   Exclude,
@@ -11,7 +11,7 @@ import {
   ClassTransformOptions,
   TargetMap,
 } from 'class-transformer';
-import { JsonObject } from '../types.js';
+import { JsonObject } from '../../types.js';
 
 export { Transform, Exclude } from 'class-transformer';
 export type Reference<T extends Vertice = Vertice> = T | [ string, Uuid ] | string;

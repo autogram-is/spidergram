@@ -1,8 +1,4 @@
-import { UniqueUrl } from './unique-url.js';
-import { Resource } from './resource.js';
-import { Edge, EdgeData } from './edge.js';
-import { Vertice, Reference } from './vertice.js';
-
+import { Edge, EdgeData, Vertice, Reference, UniqueUrl, Resource } from '../index.js';
 export type RespondsWithData<F extends Vertice = UniqueUrl, T extends Vertice = Resource> = EdgeData<F, T> & {
   url?: Reference<F>;
   resource?: Reference<T>;

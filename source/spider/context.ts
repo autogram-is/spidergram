@@ -1,4 +1,4 @@
-import { UniqueUrl } from "../model/unique-url.js";
+import { UniqueUrl } from "../model/vertices/unique-url.js";
 import { Resource } from "../model/resource.js";
 import { ParsedUrl, UrlFilters, UrlMutators } from '@autogram/url-tools';
 import { IncomingMessage } from 'http';
