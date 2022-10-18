@@ -1,1 +1,2 @@
-export * from './cheerio/cheerio-spider.js';
+export { CheerioSpider } from './cheerio-spider.js';
+export { PlaywrightSpider } from './playwright-spider.js';

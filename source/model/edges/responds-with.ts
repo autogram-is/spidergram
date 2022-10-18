@@ -2,6 +2,7 @@ import { Edge, EdgeData, Vertice, Reference, UniqueUrl, Resource } from '../inde
 export type RespondsWithData<F extends Vertice = UniqueUrl, T extends Vertice = Resource> = EdgeData<F, T> & {
   url?: Reference<F>;
   resource?: Reference<T>;
+  redirects?: URL[] | string[];
   method?: string;
   headers?: Record<string, string | string[] | undefined>;
 };
@@ -10,9 +11,10 @@ export class RespondsWith<F extends Vertice = UniqueUrl, T extends Vertice = Res
   override _collection = 'responds_with';
   method!: string;
   headers!: Record<string, string | string[] | undefined>;
+  redirects!: string[];
 
   constructor(data: RespondsWithData<F, T> = {}) {
-    const { url, resource, method, headers, ...dataForSuper } = data;
+    const { url, resource, method, redirects, headers, ...dataForSuper } = data;
     
     dataForSuper.from ??= url;
     dataForSuper.to ??= resource;
@@ -21,6 +23,7 @@ export class RespondsWith<F extends Vertice = UniqueUrl, T extends Vertice = Res
 
     this.method = method ?? 'GET';
     this.headers = headers ?? {};
+    this.redirects = redirects?.map(url => url.toString()) ?? [];
   }
 }
 

@@ -1,6 +1,4 @@
-import { Resource } from './resource.js';
-import { Edge, EdgeData } from './edge.js';
-import { Vertice, Reference } from './vertice.js';
+import { Edge, EdgeData, Vertice, Reference, Resource } from '../index.js';
 
 export type AppearsOnData<F extends Vertice = Vertice, T extends Vertice = Resource> = EdgeData<F, T> & {
   item?: Reference<F>
