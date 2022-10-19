@@ -1,7 +1,4 @@
-import { UniqueUrl } from './unique-url.js';
-import { Resource } from './resource.js';
-import { Edge, EdgeData } from './edge.js';
-import { Vertice, Reference } from './vertice.js';
+import { Edge, EdgeData, Vertice, Reference, UniqueUrl, Resource } from '../index.js';
 
 export type LinksToData<F extends Vertice = Resource, T extends Vertice = UniqueUrl> = EdgeData<F, T> & {
   resource?: Reference<F>;

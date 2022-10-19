@@ -1,5 +1,5 @@
 import { ArangoStore } from '../../source/arango-store.js';
-import { CheerioSpider } from '../../source/spider/cheerio/cheerio-spider.js';
+import { CheerioSpider } from '../../source/spider/cheerio-spider.js';
 import { ProcessOptions, processResources } from '../../source/analysis/index.js';
 import { JsonObject } from '../../source/types.js';
 import { log } from 'crawlee';

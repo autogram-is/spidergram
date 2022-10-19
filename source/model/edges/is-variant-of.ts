@@ -1,6 +1,4 @@
-import { Resource } from './resource.js';
-import { Edge, EdgeData } from './edge.js';
-import { Vertice, Reference } from './vertice.js';
+import { Edge, EdgeData, Vertice, Reference, Resource } from '../index.js';
 
 export type IsVariantOfData<F extends Vertice = Resource, T extends Vertice = Resource> = EdgeData<F, T> & {
   variant?: Reference<F>

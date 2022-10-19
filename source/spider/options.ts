@@ -1,19 +1,43 @@
-import { UniqueUrl } from "../model/vertices/unique-url.js";
-import { Resource } from "../model/resource.js";
 import { ParsedUrl, UrlFilters, UrlMutators } from '@autogram/url-tools';
-import { IncomingMessage } from 'http';
+import { IncomingHttpHeaders } from 'http';
 import { ArangoStore } from '../arango-store.js';
+import { UniqueUrl, Resource } from '../model/index.js';
+import * as helpers from './spider-helper.js';
+import { Request, PlaywrightCrawlingContext, CheerioCrawlingContext } from 'crawlee';
 
-export interface SpiderOptions {
+export type SupportedContexts = PlaywrightCrawlingContext | CheerioCrawlingContext;
+
+export interface SpiderContext extends Required<SpiderOptions> {
+  urlRules: UrlRules,
+  responseRules: ResponseRules,
+  saveResource: (context: SpiderLocalContext & { request: Request }, properties: Record<string, unknown>) => Promise<Resource>
+  saveLink: (link: helpers.HtmlLink, context: SpiderLocalContext) => Promise<UniqueUrl>
+}
+
+export interface RequestPrecheck {
+  url: string,
+  redirectUrls?: URL[],
+  headers: IncomingHttpHeaders,
+  statusMessage?: string,
+  statusCode: number,
+}
+
+export interface SpiderLocalContext extends SpiderContext {
+  uniqueUrl?: UniqueUrl,
+  resource?: Resource,
+  precheck?: RequestPrecheck,
+}
+
+export interface SpiderOptions extends Record<string, unknown> {
   storage: ArangoStore,
   linkSelectors: LinkSelectors,
   urlNormalizer: UrlMutatorWithContext,
   saveUnparsableUrls: boolean,
-  urlRules: Partial<UrlRules>;
-  responseRules: Partial<ResponseRules>;
+  urlRules: Partial<UrlRules>,
+  responseRules: Partial<ResponseRules>,
 }
 
-export const defaultContext: SpiderContext = {
+export const defaultSpiderOptions: SpiderContext = {
   storage: await ArangoStore.open(),
   linkSelectors: { default: 'body a' },
   urlRules: {
@@ -21,39 +45,26 @@ export const defaultContext: SpiderContext = {
     enqueue: sameDomain,
   },
   responseRules: {
-    abort: () => false,
-    save: () => true,
-    saveBody: () => true,
+    status: () => false,
     download: () => false,
-    parseLinks: () => true,
+    parse: () => true,
   },
   saveUnparsableUrls: true,
   urlNormalizer: (url) => UrlMutators.defaultNormalizer(url),
-  currentUniqueUrl: undefined,
-  currentResource: undefined
-}
-
-export interface SpiderContext extends Record<string, unknown>  {
-  storage: ArangoStore,
-  urlRules: UrlRules,
-  linkSelectors: LinkSelectors,
-  urlNormalizer: UrlMutatorWithContext,
-  responseRules: ResponseRules,
-  saveUnparsableUrls: boolean,
-  currentUniqueUrl?: UniqueUrl,
-  currentResource?: Resource,
+  saveResource: helpers.saveResource,
+  saveLink: helpers.saveLink,
 }
 
 export type UrlMutatorWithContext<T = unknown> = (
   found: ParsedUrl,
   current?: ParsedUrl,
   referer?: ParsedUrl,
-  context?: SpiderContext
+  context?: SpiderLocalContext
 ) => ParsedUrl;
 
 export type UrlFilterWithContext = (
   found: ParsedUrl,
-  context?: SpiderContext
+  context?: SpiderLocalContext
 ) => boolean;
 
 export interface LinkSelectors extends Record<string, string> {
@@ -98,29 +109,13 @@ export interface LinkSelectors extends Record<string, string> {
  * 5. 
  */
 
- type ResponseFilterWithContext = (response: IncomingMessage, context?: SpiderContext) => boolean;
+ type ResponseFilterWithContext = (response: RequestPrecheck, context?: SpiderLocalContext) => boolean;
  export interface ResponseRules extends Record<string, ResponseFilterWithContext | unknown> {
   /**
-   * Responses that match this filter will discarded; the requests are marked
-   * as processed, but the requestHandler isn't fired, no new data should 
-   * be saved to the graph, and no subsequent filters are checked.
+   * Responses that match this filter will be pinged to retrieve headers,
+   * but no other processing should be performed.
    */
-  abort: ResponseFilterWithContext;
-
-  /**
-   * Responses that match this filter should be saved to the graph. TRUE
-   * by default, but can be overridden to ignore cases like 40x errors,
-   * uninteresting MIMEtypes, etc.
-   */
-  save: ResponseFilterWithContext;
-
-  /**
-   * Responses that match this filter should be fully retrieved and their
-   * payload saved as the 'body' property of the resulting Resource entity.
-   * By default, the response's MIME type is checked and only HTML/XML are
-   * saved.
-   */
-  saveBody: ResponseFilterWithContext;
+  status: ResponseFilterWithContext;
 
   /**
    * Responses that match this filter should be fully retrieved and their
@@ -136,22 +131,22 @@ export interface LinkSelectors extends Record<string, string> {
    * The spider's LinkSelectors option, if populated, will control how
    * how links are located and tagged. TRUE by default.
    */
-  parseLinks: ResponseFilterWithContext;
+  parse: ResponseFilterWithContext;
 }
 
-export function sameDomain(foundUrl: ParsedUrl, context?: SpiderContext): boolean {
+export function sameDomain(foundUrl: ParsedUrl, context?: SpiderLocalContext): boolean {
   if (!UrlFilters.isWebProtocol(foundUrl)) return false
 
-  const currentUrl = context?.currentUniqueUrl?.parsed;
+  const currentUrl = context?.uniqueUrl?.parsed;
   if (currentUrl === undefined) return false;
 
   return (foundUrl.domain.toLowerCase() === currentUrl.domain.toLowerCase())
 }
 
-export function sameHostname(foundUrl: ParsedUrl, context?: SpiderContext): boolean {
+export function sameHostname(foundUrl: ParsedUrl, context?: SpiderLocalContext): boolean {
   if (!UrlFilters.isWebProtocol(foundUrl)) return false
 
-  const currentUrl = context?.currentUniqueUrl?.parsed;
+  const currentUrl = context?.uniqueUrl?.parsed;
   if (currentUrl === undefined) return false;
 
   return (foundUrl.hostname.toLowerCase() === currentUrl.hostname.toLowerCase())

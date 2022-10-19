@@ -117,10 +117,10 @@ export class ArangoStore {
   }
 
   /*
-   * Convenience wrappers for bulk saving and deleting of arbitrary documents
+   * Convenience wrappers for saving and deleting Spidergram Entities; these
    */
-  
-  async push(input: Vertice | Vertice[], overwrite: boolean = false): Promise<DocumentMetadata[]> {
+
+  async push(input: Vertice | Vertice[], overwrite: boolean = true): Promise<DocumentMetadata[]> {
     const promises: Promise<DocumentMetadata>[] = [];
     const overwriteMode = (overwrite) ? 'replace' : 'ignore';
     if (!is.array(input)) input = [input];
