@@ -3,7 +3,9 @@ import { IncomingHttpHeaders } from 'http';
 import { ArangoStore } from '../arango-store.js';
 import { UniqueUrl, Resource } from '../model/index.js';
 import * as helpers from './spider-helper.js';
-import { Request } from 'crawlee';
+import { Request, PlaywrightCrawlingContext, CheerioCrawlingContext } from 'crawlee';
+
+export type SupportedContexts = PlaywrightCrawlingContext | CheerioCrawlingContext;
 
 export interface SpiderContext extends Required<SpiderOptions> {
   urlRules: UrlRules,

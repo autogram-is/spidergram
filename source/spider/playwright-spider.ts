@@ -1,5 +1,5 @@
 import { SpiderContext, SpiderLocalContext, SpiderOptions, defaultSpiderOptions } from './options.js';
-import { PlaywrightCrawler, PlaywrightCrawlerOptions, PlaywrightCrawlingContext, Configuration, createPlaywrightRouter, Awaitable, playwrightUtils } from "crawlee";
+import { PlaywrightCrawler, PlaywrightCrawlerOptions, PlaywrightCrawlingContext, Configuration, createPlaywrightRouter, playwrightUtils } from "crawlee";
 import { NormalizedUrl } from '@autogram/url-tools';
 import * as handlers from './handlers/index.js';
 import * as helpers from './spider-helper.js';
@@ -32,38 +32,27 @@ export class PlaywrightSpider extends PlaywrightCrawler {
       ...crawlerOptions
     } = options;
 
-    // Create the Crawlee routers, handlers, and hooks. As with the constructor, 
-    // we merge SpiderContext into the CrawlingContext. In theory we could let
-    // handlers look up the static property themselves, but this mirrors the
-    // standard Crawlee interface and keeps the handlers themselves a bit tidier.
-
     const router = createPlaywrightRouter();
+    router.addDefaultHandler(context => (requestHandler ?? defaultHandler)(context as PlaywrightSpiderContext));
+    router.addHandler('download', context => handlers.download(context as PlaywrightSpiderContext));
+    router.addHandler('status', context => handlers.status(context as PlaywrightSpiderContext));
     crawlerOptions.requestHandler = router;
 
-    crawlerOptions.failedRequestHandler =
-      (inputs: PlaywrightCrawlingContext, error: Error) => 
-        handlers.failure({ ...inputs, ...PlaywrightSpider.context}, error);
-
-    crawlerOptions.errorHandler =
-      (inputs: PlaywrightCrawlingContext, error: Error) => 
-        handlers.retry(inputs as PlaywrightSpiderContext, error);
-
+    // Ensure our prenavigation hook gets in first
     crawlerOptions.preNavigationHooks = [
-      (context: PlaywrightCrawlingContext) => handlers.setup(context, PlaywrightSpider.context)
+      (context: PlaywrightCrawlingContext) => handlers.setup(context, PlaywrightSpider.context),
+      ...preNavigationHooks ?? []
     ];
 
+    crawlerOptions.failedRequestHandler =
+      failedRequestHandler ??
+      ((inputs: PlaywrightCrawlingContext, error: Error) => (failedRequestHandler ?? handlers.failure)(inputs as PlaywrightSpiderContext, error));
+
+    crawlerOptions.errorHandler =
+      errorHandler ?? 
+      ((inputs: PlaywrightCrawlingContext, error: Error) => (errorHandler ?? handlers.retry)(inputs as PlaywrightSpiderContext, error));
+
     super(crawlerOptions, config);
-
-    if (requestHandler !== undefined) {
-      this.addDefaultHandler(requestHandler);
-    } else {
-      this.addDefaultHandler(defaultHandler);
-    }
-
-    this.addHandler('download', handlers.download);
-    this.addHandler('status', handlers.status);
-
-    if (preNavigationHooks) this.preNavigationHooks.push(...preNavigationHooks)
 
     PlaywrightSpider.context = {
       storage: storage ?? defaultSpiderOptions.storage,
@@ -82,22 +71,6 @@ export class PlaywrightSpider extends PlaywrightCrawler {
       saveLink: defaultSpiderOptions.saveLink,
     };
     NormalizedUrl.normalizer = PlaywrightSpider.context.urlNormalizer;
-  }
-
-  addHandler(label: string | symbol, handler: (ctx: PlaywrightSpiderContext) => Awaitable<void>) {
-    if (this.router) {
-      this.router.addHandler(label, (context) => handler(context as PlaywrightSpiderContext));
-    } else {
-      throw new Error('No router available');
-    }
-  }
-
-  addDefaultHandler(handler: (ctx: PlaywrightSpiderContext) => Awaitable<void>) {
-    if (this.router) {
-      this.router.addDefaultHandler((context) => handler(context as PlaywrightSpiderContext));
-    } else {
-      throw new Error('No router available');
-    }
   }
 }
 

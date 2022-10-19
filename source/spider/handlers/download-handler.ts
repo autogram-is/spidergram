@@ -1,10 +1,10 @@
-import { BrowserCrawlingContext, InternalHttpCrawlingContext, KeyValueStore } from "crawlee";
+import {CheerioCrawlingContext, KeyValueStore, PlaywrightCrawlingContext } from "crawlee";
 import { SpiderLocalContext } from "../options.js";
 import { fileNameFromHeaders } from "../mime.js";
 import { URL } from 'node:url';
 import * as helpers from '../spider-helper.js';
 
-export async function download<C extends InternalHttpCrawlingContext | BrowserCrawlingContext>(context: SpiderLocalContext & C): Promise<void> {
+export async function download(context: SpiderLocalContext & (CheerioCrawlingContext | PlaywrightCrawlingContext)): Promise<void> {
   const { sendRequest, storage } = context;
   context.resource = await helpers.saveResource(context);
 

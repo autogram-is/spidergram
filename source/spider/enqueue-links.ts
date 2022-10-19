@@ -12,14 +12,9 @@
 //    to Crawlee Request objects; use SpiderContext UrlFilters to
 //    determine which ones are ignored, saved or enqueued.
 
-import { BrowserCrawlerEnqueueLinksOptions, CheerioCrawlerEnqueueLinksOptions } from 'crawlee';
+import { EnqueueLinksOptions } from "crawlee";
 
-export interface SpiderEnqueueLinksOptions {
 
-}
-export interface BrowserSpiderEnqueueLinksOptions extends BrowserCrawlerEnqueueLinksOptions, SpiderEnqueueLinksOptions {}
-export interface CheerioSpiderEnqueueLinksOptions extends CheerioCrawlerEnqueueLinksOptions, SpiderEnqueueLinksOptions {}
-
-export function playwrightSpiderEnqueueLinks(options: BrowserSpiderEnqueueLinksOptions) {
+export function playwrightSpiderEnqueueLinks(options: EnqueueLinksOptions) {
 
 }

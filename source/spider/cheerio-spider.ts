@@ -1,5 +1,5 @@
 import { SpiderContext, SpiderLocalContext, SpiderOptions, defaultSpiderOptions } from './options.js';
-import { CheerioCrawler, CheerioCrawlerOptions, CheerioCrawlingContext, Configuration, Awaitable, createCheerioRouter } from 'crawlee';
+import { CheerioCrawler, CheerioCrawlerOptions, CheerioCrawlingContext, Configuration, createCheerioRouter } from 'crawlee';
 import { NormalizedUrl } from '@autogram/url-tools';
 import * as handlers from './handlers/index.js';
 import * as helpers from './spider-helper.js';
@@ -33,33 +33,27 @@ export class CheerioSpider extends CheerioCrawler {
     } = options;
 
     const router = createCheerioRouter();
+    router.addDefaultHandler(context => (requestHandler ?? defaultHandler)(context as CheerioSpiderContext));
+    router.addHandler('download', context => handlers.download(context as CheerioSpiderContext));
+    router.addHandler('status', context => handlers.status(context as CheerioSpiderContext));
     crawlerOptions.requestHandler = router;
 
     // Ensure our prenavigation hook gets in first
     crawlerOptions.preNavigationHooks = [
-      (context: CheerioCrawlingContext) => handlers.setup<CheerioCrawlingContext>(context, CheerioSpider.context),
+      (context: CheerioCrawlingContext) => handlers.setup(context, CheerioSpider.context),
       ...preNavigationHooks ?? []
     ];
 
     crawlerOptions.failedRequestHandler =
       failedRequestHandler ??
-      ((inputs: CheerioCrawlingContext, error: Error) => handlers.failure(inputs as CheerioSpiderContext, error));
+      ((inputs: CheerioCrawlingContext, error: Error) => (failedRequestHandler ?? handlers.failure)(inputs as CheerioSpiderContext, error));
 
     crawlerOptions.errorHandler =
       errorHandler ?? 
-      ((inputs: CheerioCrawlingContext, error: Error) => handlers.retry(inputs as CheerioSpiderContext, error));
+      ((inputs: CheerioCrawlingContext, error: Error) => (errorHandler ?? handlers.retry)(inputs as CheerioSpiderContext, error));
 
     super(crawlerOptions, config);
     
-    if (requestHandler !== undefined) {
-      this.addDefaultHandler(requestHandler);
-    } else {
-      this.addDefaultHandler(defaultHandler);
-    }
-
-    this.addHandler('download', handlers.download);
-    this.addHandler('status', handlers.status);
-
     CheerioSpider.context = {
       storage: storage ?? defaultSpiderOptions.storage,
       linkSelectors: linkSelectors ?? defaultSpiderOptions.linkSelectors,
@@ -77,23 +71,6 @@ export class CheerioSpider extends CheerioCrawler {
       saveLink: defaultSpiderOptions.saveLink,
     };
     NormalizedUrl.normalizer = CheerioSpider.context.urlNormalizer;
-  }
-
-  // Handlers are a little funky; in a perfect world we
-  addHandler(label: string | symbol, handler: (ctx: CheerioSpiderContext) => Awaitable<void>) {
-    if (this.router) {
-      this.router.addHandler(label, (context) => handler(context as CheerioSpiderContext));
-    } else {
-      throw new Error('No router available');
-    }
-  }
-
-  addDefaultHandler(handler: (ctx: CheerioSpiderContext) => Awaitable<void>) {
-    if (this.router) {
-      this.router.addDefaultHandler((context) => handler(context as CheerioSpiderContext));
-    } else {
-      throw new Error('No router available');
-    }
   }
 }
 

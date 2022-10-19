@@ -1,5 +1,5 @@
 import { ArangoStore } from '../../source/arango-store.js';
-import { CheerioSpider } from '../../source/spider/cheerio-spider.js';
+import { PlaywrightSpider } from '../../source/spider/index.js';
 import { log } from 'crawlee';
 import { ProcessOptions, processResources } from '../../source/analysis/index.js';
 import { JsonObject } from '../../source/types.js';
@@ -46,7 +46,7 @@ await new Listr<Ctx>([
     title: 'Site crawl',
     enabled: true,
     task: async (ctx, task) => {
-      const spider = new CheerioSpider({
+      const spider = new PlaywrightSpider({
         storage: ctx.storage,
         autoscaledPoolOptions: {
           maxConcurrency: 5,
