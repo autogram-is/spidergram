@@ -54,7 +54,7 @@ export class Spreadsheet  {
     }
   }
 
-  async save(filename: string, customOptions: Partial<SpreadsheetSaveOptions> = {}): Promise<void> {
+  async save(filename: string, customOptions: Partial<SpreadsheetSaveOptions> = {}): Promise<string> {
 
     const options: SpreadsheetSaveOptions = {
       format: 'xlsx',
@@ -64,8 +64,11 @@ export class Spreadsheet  {
 
     return new Promise((resolve, reject) => {
       try {
+        if (!filename.endsWith(options.format)) {
+          filename = `${filename}.${options.format}`;
+        }
         XLSX.writeFile(this.workbook, filename, options);
-        resolve();
+        resolve(filename);
       } catch (error: unknown) {
         reject(error);
       }

@@ -2,7 +2,7 @@ import { ArangoStore } from '../../source/arango-store.js';
 import { PlaywrightSpider } from '../../source/spider/index.js';
 import { log } from 'crawlee';
 import { ProcessOptions, processResources } from '../../source/analysis/index.js';
-import { Spreadsheet, SpreadsheetData, RowData } from '../../source/spreadsheet.js';
+import { Spreadsheet, RowData } from '../../source/spreadsheet.js';
 
 // Assorted parsing helpers
 import { getMeta } from '../../source/analysis/index.js';
@@ -107,16 +107,15 @@ await new Listr<Ctx>([
         'Non-Web URLs': LinkSummaries.excludeProtocol(),
         'External Links': LinkSummaries.outlinks([ctx.targetDomain])
       };
-      const data: SpreadsheetData = {};
-      for (let key in queries) {
-        const result = await ctx.storage.query<RowData>(queries[key])
-          .then(cursor => cursor.all());
-        data[key] = result;
+
+      const report = new Spreadsheet();
+      for (let name in queries) {
+        ctx.storage.query<RowData>(queries[name])
+          .then(cursor => cursor.all())
+          .then(result => report.addSheet(result, name));
       }
-      
-      await new Spreadsheet(data).save(`storage/${ctx.targetDomain}.xlsx`);
-      task.title = `${ctx.targetDomain}.xlsx generated.`;
-      return Promise.resolve();
+      return report.save(`storage/${ctx.targetDomain}`)
+        .then(fileName => { task.title = `${fileName} generated.` })
     }
   }
 ]).run();
