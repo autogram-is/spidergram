@@ -75,7 +75,7 @@ export class PlaywrightSpider extends PlaywrightCrawler {
 }
 
 async function defaultHandler(context: PlaywrightSpiderContext): Promise<void> {
-  const {crawler, page, saveLink, saveResource, urlRules, linkSelectors} = context;
+  const {crawler, page, saveLink, saveResource, urlRules, linkSelectors } = context;
 
   const $ = await playwrightUtils.parseWithCheerio(page);
   context.resource = await saveResource(context, { body: $.html() });
