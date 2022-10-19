@@ -2,7 +2,7 @@ import { ArangoStore } from '../../source/arango-store.js';
 import { PlaywrightSpider } from '../../source/spider/index.js';
 import { log } from 'crawlee';
 import { ProcessOptions, processResources } from '../../source/analysis/index.js';
-import { JsonObject } from '../../source/types.js';
+import { Spreadsheet, SpreadsheetData, RowData } from '../../source/spreadsheet.js';
 
 // Assorted parsing helpers
 import { getMeta } from '../../source/analysis/index.js';
@@ -10,12 +10,6 @@ import { htmlToText } from 'html-to-text';
 import readability from 'readability-scores';
 import { UrlHierarchy } from '../../source/analysis/hierarchy/url-hierarchy.js';
 
-// Sheets.js setup
-import * as XLSX from 'xlsx';
-import * as fs from 'fs';
-XLSX.set_fs(fs);
-import { Readable } from 'stream';
-XLSX.stream.set_readable(Readable);
 import { LinkSummaries } from '../../source/reports/link-summaries.js';
 import { AqlQuery, aql } from 'arangojs/aql.js';
 import { Listr } from 'listr2';
@@ -113,13 +107,14 @@ await new Listr<Ctx>([
         'Non-Web URLs': LinkSummaries.excludeProtocol(),
         'External Links': LinkSummaries.outlinks([ctx.targetDomain])
       };
-      const workbook = XLSX.utils.book_new();
+      const data: SpreadsheetData = {};
       for (let key in queries) {
-        const cursor = await ctx.storage.query(queries[key]);
-        const result = (await cursor.all()).map(value => value as JsonObject);
-        XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(result), key);
+        const result = await ctx.storage.query<RowData>(queries[key])
+          .then(cursor => cursor.all());
+        data[key] = result;
       }
-      XLSX.writeFileXLSX(workbook, `storage/${ctx.targetDomain}.xlsx`);
+      
+      await new Spreadsheet(data).save(`storage/${ctx.targetDomain}.xlsx`);
       task.title = `${ctx.targetDomain}.xlsx generated.`;
       return Promise.resolve();
     }
