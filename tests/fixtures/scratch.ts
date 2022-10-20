@@ -110,7 +110,7 @@ await new Listr<Ctx>([
 
       const report = new Spreadsheet();
       for (let name in queries) {
-        ctx.storage.query<RowData>(queries[name])
+        await ctx.storage.query<RowData>(queries[name])
           .then(cursor => cursor.all())
           .then(result => report.addSheet(result, name));
       }
