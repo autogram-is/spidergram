@@ -8,13 +8,25 @@ import { JsonPrimitive } from './types';
 XLSX.set_fs(fs);
 XLSX.stream.set_readable(Readable);
 
+
+/**
+ * TODO: Support the following structures…
+ * 
+ * Workbook
+ * Named Records: { sheet1: sheetData1, sheet2: sheetData2 }
+ * Array of Sheets: [sheetData1, sheetData2]
+ * 
+ * Sheet
+ * Object with meta: { name: 'Sheet 1', data: [ rowData1, rowData2 ], headers: [...] }
+ * Array of Rows: [ rowData1, rowData2 ]
+ * 
+ * Row
+ * Named columns: { col1: 'some data', col2: 123, ... }
+ * Array of values: [ 'some data', 123 ]
+ */
 export type SpreadsheetData = Record<string, SheetData> | SheetData[];
-export type SheetData = {
-  name?: string,
-  headers?: string[],
-  rows: RowData[]
-} | RowData[];
-export type RowData = Record<string, CellValue> | CellValue[];
+export type SheetData = RowData[];
+export type RowData = Record<string, CellValue>;
 export type CellValue = JsonPrimitive;
 
 type SpreadsheetSaveOptions = {
@@ -33,7 +45,7 @@ export class Spreadsheet  {
     if (!is.undefined(data)) {
       if (is.array(data)) {
         for(let sheet of data) {
-          this.addSheet(sheet, ('name' in sheet) ? sheet.name : undefined);
+          this.addSheet(sheet);
         }
       } else {
         for(let name in data) {
@@ -45,12 +57,7 @@ export class Spreadsheet  {
 
   addSheet(data: SheetData, name?: string) {
     if (is.array(data)) {
-      Spreadsheet.utils.book_append_sheet(this.workbook, XLSX.utils.aoa_to_sheet([data]), name);
-    } else {
-      const key = Spreadsheet.utils.book_append_sheet(this.workbook, XLSX.utils.json_to_sheet(data.rows), name ?? data.name);      
-      if (data.headers) {
-        Spreadsheet.utils.sheet_add_aoa(this.workbook.Sheets[key], [data.headers], { origin: "A1" });
-      }
+      name = Spreadsheet.utils.book_append_sheet(this.workbook, XLSX.utils.json_to_sheet(data), name);
     }
   }
 
