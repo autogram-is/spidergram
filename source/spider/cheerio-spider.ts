@@ -86,7 +86,7 @@ async function defaultHandler(context: CheerioSpiderContext): Promise<void> {
       const newUnique = await helpers.saveLink(link, context);
       
       if (newUnique.parsable && urlRules.enqueue(newUnique.parsed!, context)) {
-        await q.addRequest(helpers.buildRequest(newUnique));
+        await q.addRequest(helpers.uniqueUrlRequest(newUnique));
       }
     }
   }

@@ -85,7 +85,7 @@ async function defaultHandler(context: PlaywrightSpiderContext): Promise<void> {
     const newUnique = await saveLink(link, context);
     
     if (newUnique.parsable && urlRules.enqueue(newUnique.parsed!, context)) {
-      await q.addRequest(helpers.buildRequest(newUnique));
+      await q.addRequest(helpers.uniqueUrlRequest(newUnique));
     }
   }
 
