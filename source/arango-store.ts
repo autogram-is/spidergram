@@ -23,7 +23,7 @@ export class ArangoStore {
   
   /**
    * Connects to the Arango server and stores a connection to the system database.
-   * Should be followed by `ArangoStore.load()` in most situations.
+   * Should be followed by `ArangoStore.open()` in most situations.
    */
   static connect(connection: Partial<Config> = {}): Database {
     connection.url ??= 'http://127.0.0.1:8529';
@@ -117,7 +117,7 @@ export class ArangoStore {
   }
 
   /*
-   * Convenience wrappers for saving and deleting Spidergram Entities; these
+   * Convenience wrappers for saving and deleting Spidergram Entities
    */
 
   async push(input: Vertice | Vertice[], overwrite: boolean = true): Promise<DocumentMetadata[]> {

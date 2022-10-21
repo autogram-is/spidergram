@@ -5,7 +5,7 @@ import { UniqueUrl, Resource } from '../model/index.js';
 import * as helpers from './spider-helper.js';
 import { Request, PlaywrightCrawlingContext, CheerioCrawlingContext } from 'crawlee';
 
-export type SupportedContexts = PlaywrightCrawlingContext | CheerioCrawlingContext;
+export type SupportedCrawlingContext = PlaywrightCrawlingContext | CheerioCrawlingContext;
 
 export interface SpiderContext extends Required<SpiderOptions> {
   urlRules: UrlRules,
