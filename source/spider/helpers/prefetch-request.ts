@@ -1,6 +1,6 @@
-import { CombinedSpiderContext } from '../context.js';
+import { CombinedContext } from '../context.js';
 
-export async function prefetchRequest(context: CombinedSpiderContext) {
+export async function prefetchRequest(context: CombinedContext) {
   return context.sendRequest({ method: 'head', allowGetBody: false })
     .then(response => {
       context.requestMeta = {

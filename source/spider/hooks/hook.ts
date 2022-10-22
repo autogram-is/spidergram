@@ -1,5 +1,5 @@
-import { CombinedSpiderContext } from '../context.js';
+import { CombinedContext } from '../context.js';
 
 export interface SpiderHook {
-  (context: CombinedSpiderContext, ...args: any[]): Promise<void>
+  (context: CombinedContext, ...args: any[]): Promise<void>
 }

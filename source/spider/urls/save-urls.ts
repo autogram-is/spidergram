@@ -1,11 +1,10 @@
-import { UrlDiscoveryOptions, buildUrlDiscoveryOptions } from "./enqueue-urls.js";
-import { HtmlLink } from "./find-urls.js";
-import { CombinedSpiderContext } from '../context.js';
+import { CombinedContext } from '../context.js';
 import { UniqueUrl, LinksTo } from "../../model/index.js";
+import { HtmlLink, UrlDiscoveryOptions, buildUrlDiscoveryOptions } from "./index.js";
 
 export async function saveUrl(
   link: HtmlLink,
-  context: CombinedSpiderContext,
+  context: CombinedContext,
   customOptions: Partial<UrlDiscoveryOptions> = {},
 ) {
   const { storage, uniqueUrl, resource } = context;
@@ -44,13 +43,13 @@ export async function saveUrl(
 
 export async function saveUrls(
   links: HtmlLink[],
-  context: CombinedSpiderContext,
+  context: CombinedContext,
   customOptions: Partial<UrlDiscoveryOptions> = {},
 ) {
   return Promise.all(links.map(link => saveUrl(link, context, customOptions))) 
 }
 
-export async function saveCurrentUrl(context: CombinedSpiderContext) {
+export async function saveCurrentUrl(context: CombinedContext) {
   if ('fromUniqueUrl' in context.request.userData) {
     context.uniqueUrl = new UniqueUrl({
       url: context.request.url,

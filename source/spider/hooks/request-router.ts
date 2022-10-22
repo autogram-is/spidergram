@@ -1,7 +1,7 @@
-import { CombinedSpiderContext } from '../context.js';
+import { CombinedContext } from '../context.js';
 import { helpers } from '../index.js';
 
-export async function requestRouter(context: CombinedSpiderContext) {
+export async function requestRouter(context: CombinedContext) {
   const { request, prefetchRequest, downloadMimeTypes, parseMimeTypes } = context;
   const requestMeta = await prefetchRequest();
   

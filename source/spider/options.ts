@@ -1,10 +1,9 @@
-import { ParsedUrl, UrlMutators } from '@autogram/url-tools';
+import { UrlMutators } from '@autogram/url-tools';
 import { ArangoStore } from '../arango-store.js';
-import { UrlDiscoveryOptions } from './helpers/index.js';
-import { SpiderContext } from './context.js';
 import { SpiderHook, requestRouter} from './hooks/index.js';
 import { SpiderRequestHandler } from './handlers/handler.js';
 import { helpers } from '../index.js';
+import { UrlDiscoveryOptions, UrlMutatorWithContext } from './urls/index.js'
 
 export interface SpiderOptions extends Record<string, unknown> {
   storage: ArangoStore,
@@ -36,13 +35,3 @@ const defaultSpiderOptions: SpiderOptions = {
   parseMimeTypes: helpers.mimeGroups.page,
   downloadMimeTypes: helpers.mimeGroups.data,
 }
-
-export type UrlMutatorWithContext<T = unknown> = (
-  found: ParsedUrl,
-  context?: SpiderContext
-) => ParsedUrl;
-
-export type UrlFilterWithContext = (
-  found: ParsedUrl,
-  context?: SpiderContext
-) => boolean;

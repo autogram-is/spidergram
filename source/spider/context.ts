@@ -1,12 +1,12 @@
 
 import { UniqueUrl, Resource } from '../model/index.js';
 import { IncomingHttpHeaders } from 'http';
-import { UrlDiscoveryOptions, HtmlLink } from './helpers/index.js';
+import { UrlDiscoveryOptions, HtmlLink } from './urls/index.js';
 import { PlaywrightCrawlingContext, CheerioCrawlingContext, Request, CheerioRoot } from 'crawlee';
 import { SpiderOptions } from './options.js';
 
-export type SupportedCrawlingContext = PlaywrightCrawlingContext | CheerioCrawlingContext;
-export type CombinedSpiderContext = SpiderContext & SupportedCrawlingContext;
+export type SupportedContext = PlaywrightCrawlingContext | CheerioCrawlingContext;
+export type CombinedContext = SpiderContext & SupportedContext;
 
 export interface SpiderContext extends SpiderOptions {
   // Data that's passed around during a single crawl request

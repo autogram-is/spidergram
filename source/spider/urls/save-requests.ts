@@ -1,11 +1,11 @@
 import { UniqueUrl } from "../../model/index.js";
 import { Request } from 'crawlee';
-import { CombinedSpiderContext } from '../context.js';
-import { UrlDiscoveryOptions, buildUrlDiscoveryOptions } from "./enqueue-urls.js";
+import { CombinedContext } from '../context.js';
+import { UrlDiscoveryOptions, buildUrlDiscoveryOptions } from "./index.js";
 
 export async function saveRequests (
   urls: UniqueUrl[],
-  context: CombinedSpiderContext,
+  context: CombinedContext,
   customOptions: Partial<UrlDiscoveryOptions> = {},
 ) {
   const options = await buildUrlDiscoveryOptions(context, customOptions);
