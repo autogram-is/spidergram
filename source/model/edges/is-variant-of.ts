@@ -7,7 +7,7 @@ export type IsVariantOfData<F extends Vertice = Resource, T extends Vertice = Re
 };
 
 export class IsVariantOf<F extends Vertice = Resource, T extends Vertice = Resource> extends Edge<F, T> {
-  overide readonly = 'is_variant_of';
+  readonly = 'is_variant_of';
   context!: string;
 
   constructor(data: IsVariantOfData<F, T> = {}) {

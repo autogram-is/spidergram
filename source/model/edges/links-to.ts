@@ -6,7 +6,7 @@ export type LinksToData<F extends Vertice = Resource, T extends Vertice = Unique
 };
 
 export class LinksTo<F extends Vertice = Resource, T extends Vertice = Resource> extends Edge<F, T> {
-  overide readonly = 'links_to';
+  override readonly _collection  ='links_to';
 
   constructor(data: LinksToData<F, T> = {}) {
     const {url, resource, ...dataForSuper} = data;

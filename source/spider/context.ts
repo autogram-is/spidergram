@@ -4,11 +4,12 @@ import {PlaywrightCrawlingContext, CheerioCrawlingContext, Request, CheerioRoot}
 import {UniqueUrl, Resource} from '../model/index.js';
 import {UrlDiscoveryOptions, HtmlLink} from './urls/index.js';
 import {SpiderOptions} from './options.js';
+import { Awaitable } from 'crawlee';
 
 export type SupportedContext = PlaywrightCrawlingContext | CheerioCrawlingContext;
 export type CombinedContext = SpiderContext & SupportedContext;
 
-export interface SpiderContext extends SpiderOptions {
+export interface SpiderContext<Context extends SupportedContext = SupportedContext> extends SpiderOptions<Context> {
   // Data that's passed around during a single crawl request
   uniqueUrl?: UniqueUrl;
   resource?: Resource;
@@ -30,4 +31,12 @@ export interface RequestMeta {
   headers: IncomingHttpHeaders;
   statusMessage?: string;
   statusCode: number;
+}
+
+export function contextualizeHook<C extends SupportedContext = SupportedContext>(hook: Function) {
+  return (ctx: C, ...args: any[]): Awaitable<void> => hook(ctx as SpiderContext & C, ...args);
+}
+
+export function contextualizeHandler<C extends SupportedContext = SupportedContext>(handler: Function) {
+  return (ctx: C, ...args: any[]): Awaitable<void> => handler(ctx as SpiderContext & C, ...args);
 }

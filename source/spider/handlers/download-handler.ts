@@ -2,7 +2,7 @@ import {KeyValueStore} from 'crawlee';
 import {fileNameFromHeaders} from '../helpers/mime.js';
 import {CombinedContext} from '../context.js';
 
-export async function downloadHandler(context: CombinedContext & {sendRequest: Function}): Promise<void> {
+export async function downloadHandler(context: CombinedContext): Promise<void> {
   const {sendRequest, saveResource, storage} = context;
   context.resource = await saveResource();
 

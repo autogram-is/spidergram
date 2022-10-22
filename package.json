@@ -83,6 +83,7 @@
     "playwright": "^1.27.1",
     "readability-scores": "^1.0.8",
     "reflect-metadata": "^0.1.13",
+    "type-fest": "^3.1.0",
     "uuid": "^9.0.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.18.12/xlsx-0.18.12.tgz"
   }

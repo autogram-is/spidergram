@@ -11,63 +11,54 @@ import {
   SpiderContext,
   buildSpiderOptions,
   hooks,
-  helpers,
   handlers,
+  helpers,
+  contextualizeHandler,
+  contextualizeHook,
 } from './index.js';
 
 type PlaywrightSpiderOptions = PlaywrightCrawlerOptions & SpiderOptions;
 type PlaywrightSpiderContext = PlaywrightCrawlingContext & SpiderContext;
 
 export class PlaywrightSpider extends PlaywrightCrawler {
-  options: SpiderOptions;
+  spiderOptions: SpiderOptions;
+  crawlerOptions: PlaywrightCrawlerOptions;
 
   constructor(
     options: Partial<PlaywrightSpiderOptions> = {},
     config?: Configuration,
   ) {
-    let {
-      storage,
-      requestRouter,
-      requestHandlers,
-      urlDiscoveryOptions,
-      urlNormalizer,
+    const { crawler, spider } = helpers.splitOptions<PlaywrightCrawlerOptions, PlaywrightCrawlingContext>(options);
 
-      requestHandler,
-      preNavigationHooks,
-      postNavigationHooks,
-
-      ...crawlerOptions
-    } = options;
-
-    requestHandlers = {
+    spider.requestHandlers = {
       download: handlers.downloadHandler,
       status: handlers.statusHandler,
       page: handlers.defaultHandler,
-      ...requestHandlers,
+      ...spider.requestHandlers,
     };
 
     const router = createPlaywrightRouter();
-    router.addDefaultHandler(helpers.wrapHandler<PlaywrightCrawlingContext>(requestHandlers.page));
-    for (const h in requestHandlers) {
-      router.addHandler(h, helpers.wrapHandler<PlaywrightCrawlingContext>(requestHandlers[h]));
+    router.addDefaultHandler(contextualizeHandler<PlaywrightCrawlingContext>(spider.requestHandlers.page));
+    for (const h in spider.requestHandlers) {
+      router.addHandler(h, contextualizeHandler<PlaywrightCrawlingContext>(spider.requestHandlers[h]));
     }
+    crawler.requestHandler = router;
 
-    crawlerOptions.requestHandler = router;
-
-    crawlerOptions.preNavigationHooks = [
-      hooks.contextBuilder,
-      hooks.requestRouter,
-      ...(preNavigationHooks ?? []).map(hook => helpers.wrapHook(hook)),
+    crawler.preNavigationHooks = [
+      contextualizeHook<PlaywrightCrawlingContext>(hooks.contextBuilder),
+      contextualizeHook<PlaywrightCrawlingContext>(hooks.requestRouter),
+      ...(crawler.preNavigationHooks ?? []).map(hook => contextualizeHook<PlaywrightCrawlingContext>(hook)),
     ];
 
-    crawlerOptions.postNavigationHooks = [
-      helpers.wrapHook<PlaywrightCrawlingContext>(playwrightPostNavigate),
-      ...(postNavigationHooks ?? []).map(hook => helpers.wrapHook<PlaywrightCrawlingContext>(hook)),
+    crawler.postNavigationHooks = [
+      contextualizeHook<PlaywrightCrawlingContext>(playwrightPostNavigate),
+      ...(crawler.postNavigationHooks ?? []).map(hook => contextualizeHook<PlaywrightCrawlingContext>(hook)),
     ];
 
-    super(crawlerOptions, config);
+    super(crawler, config);
 
-    this.options = buildSpiderOptions(options);
+    this.spiderOptions = buildSpiderOptions(spider);
+    this.crawlerOptions = crawler;
   }
 }
 

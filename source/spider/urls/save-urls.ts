@@ -49,7 +49,7 @@ export async function saveUrls(
   return Promise.all(links.map(async link => saveUrl(link, context, customOptions)));
 }
 
-export async function saveCurrentUrl(context: CombinedContext) {
+export async function saveCurrentUrl(context: CombinedContext): Promise<void> {
   if ('fromUniqueUrl' in context.request.userData) {
     context.uniqueUrl = new UniqueUrl({
       url: context.request.url,
@@ -60,4 +60,6 @@ export async function saveCurrentUrl(context: CombinedContext) {
     context.uniqueUrl = new UniqueUrl({url: context.request.url});
     await context.storage.push(context.uniqueUrl, false);
   }
+
+  return Promise.resolve();
 }

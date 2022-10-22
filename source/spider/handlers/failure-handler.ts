@@ -1,8 +1,7 @@
-import {Request} from 'crawlee';
 import {RespondsWith, Resource} from '../../index.js';
-import {SpiderContext} from '../context.js';
+import {CombinedContext} from '../context.js';
 
-export async function failure(context: SpiderContext & {request: Request}, error: Error) {
+export async function failure(context: CombinedContext, error: Error) {
   const {storage, request, uniqueUrl} = context;
 
   const rs = new Resource({

@@ -1,7 +1,7 @@
 import {CombinedContext} from '../context.js';
 import {helpers} from '../index.js';
 
-export async function requestRouter(context: CombinedContext) {
+export async function requestRouter(context: CombinedContext): Promise<void> {
   const {request, prefetchRequest, downloadMimeTypes, parseMimeTypes} = context;
   const requestMeta = await prefetchRequest();
 
@@ -18,4 +18,6 @@ export async function requestRouter(context: CombinedContext) {
   } else {
     request.label = 'status';
   }
+  
+  return Promise.resolve();
 }

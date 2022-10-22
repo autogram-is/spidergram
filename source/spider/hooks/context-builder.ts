@@ -27,8 +27,8 @@ export async function contextBuilder(context: CombinedContext): Promise<void> {
     saveRequests: (input: UniqueUrl[], options?: urls.UrlDiscoveryOptions) =>
       urls.saveRequests(input, context, options),
 
-    ...crawler.options,
+    ...crawler.spiderOptions,
   });
 
-  urls.saveCurrentUrl(context);
+  return urls.saveCurrentUrl(context);
 }

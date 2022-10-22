@@ -9,7 +9,7 @@ export type IsChildOfType<F extends Vertice = Resource, T extends Vertice = Reso
 };
 
 export class IsChildOf<F extends Vertice = Resource, T extends Vertice = Resource> extends Edge<F, T> {
-  overide readonly = 'is_child_of';
+  override readonly _collection = 'is_child_of';
   context: string;
 
   constructor(data: IsChildOfType<F, T> = {}) {

@@ -7,67 +7,58 @@ import {
 } from 'crawlee';
 import {
   SpiderOptions,
-  buildSpiderOptions,
   hooks,
-  helpers,
   handlers,
+  helpers,
+  contextualizeHook,
+  contextualizeHandler,
 } from './index.js';
 
-type CheerioSpiderOptions = CheerioCrawlerOptions & SpiderOptions;
+export type Cheeriospider = CheerioCrawlerOptions & SpiderOptions;
 
 export class CheerioSpider extends CheerioCrawler {
-  options: SpiderOptions;
+  spiderOptions: SpiderOptions;
   crawlerOptions: CheerioCrawlerOptions;
 
   constructor(
-    options: Partial<CheerioSpiderOptions> = {},
-    config?: Configuration,
+    options: Partial<Cheeriospider> = {},
+    config?: Configuration
   ) {
-    let {
-      storage,
-      requestRouter,
-      requestHandlers,
-      urlDiscoveryOptions,
-      urlNormalizer,
-      downloadMimeTypes,
-      parseMimeTypes,
 
-      requestHandler,
-      preNavigationHooks,
+    const { crawler, spider } = helpers.splitOptions<CheerioCrawlerOptions, CheerioCrawlingContext>(options);
 
-      ...crawlerOptions
-    } = options;
-
-    requestHandlers = {
+    spider.requestHandlers = {
       download: handlers.downloadHandler,
       status: handlers.statusHandler,
       page: handlers.defaultHandler,
-      ...requestHandlers,
+      ...spider.requestHandlers,
     };
 
-    crawlerOptions.additionalMimeTypes = [
-      ...crawlerOptions.additionalMimeTypes ?? [],
-      ...downloadMimeTypes ?? [],
-      ...parseMimeTypes ?? [],
+    crawler.additionalMimeTypes = [
+      ...crawler.additionalMimeTypes ?? [],
+      ...spider.downloadMimeTypes ?? [],
+      ...spider.parseMimeTypes ?? [],
     ];
 
     const router = createCheerioRouter();
-    router.addDefaultHandler(helpers.wrapHandler<CheerioCrawlingContext>(requestHandlers.page));
-    for (const h in requestHandlers) {
-      router.addHandler(h, helpers.wrapHandler<CheerioCrawlingContext>(requestHandlers[h]));
+    router.addDefaultHandler(contextualizeHandler<CheerioCrawlingContext>(spider.requestHandlers.page));
+    for (const h in spider.requestHandlers) {
+      router.addHandler(h, contextualizeHandler<CheerioCrawlingContext>(spider.requestHandlers[h]));
     }
+    crawler.requestHandler = router;
 
-    crawlerOptions.requestHandler = router;
-
-    crawlerOptions.preNavigationHooks = [
-      hooks.contextBuilder,
-      hooks.requestRouter,
-      ...(preNavigationHooks ?? []).map(hook => helpers.wrapHook(hook)),
+    crawler.preNavigationHooks = [
+      contextualizeHook<CheerioCrawlingContext>(hooks.contextBuilder),
+      contextualizeHook<CheerioCrawlingContext>(hooks.requestRouter),
+      ...(crawler.preNavigationHooks ?? []).map(hook => contextualizeHook<CheerioCrawlingContext>(hook)),
     ];
 
-    super(crawlerOptions, config);
+    crawler.postNavigationHooks = (crawler.postNavigationHooks ?? [])
+      .map(hook => contextualizeHook<CheerioCrawlingContext>(hook));
 
-    this.options = buildSpiderOptions(options);
-    this.crawlerOptions = crawlerOptions;
+    super(crawler, config);
+
+    this.spiderOptions = spider;
+    this.crawlerOptions = crawler;
   }
 }

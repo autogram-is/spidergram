@@ -2,33 +2,38 @@ import {UrlMutators} from '@autogram/url-tools';
 import {ArangoStore} from '../arango-store.js';
 import {helpers} from '../index.js';
 import {SpiderHook, requestRouter} from './hooks/index.js';
-import {SpiderRequestHandler} from './handlers/handler.js';
+import {SpiderRequestHandler} from './handlers/index.js';
 import {UrlDiscoveryOptions, UrlMutatorWithContext} from './urls/index.js';
+import {Dictionary, CheerioCrawlerOptions, PlaywrightCrawlerOptions} from 'crawlee';
+import { SupportedContext } from '../index.js';
 
-export interface SpiderOptions extends Record<string, unknown> {
+export type SupportedOptions = CheerioCrawlerOptions | PlaywrightCrawlerOptions;
+export type CombinedOptions = SupportedOptions & SpiderOptions;
+
+export interface SpiderOptions<Context extends SupportedContext = SupportedContext> extends Dictionary {
   storage: ArangoStore;
-  requestRouter: SpiderHook;
-  requestHandlers: Record<string, SpiderRequestHandler>;
+  requestRouter: SpiderHook<Context>;
+  requestHandlers: Record<string, SpiderRequestHandler<Context>>;
   urlDiscoveryOptions: Partial<UrlDiscoveryOptions>;
   urlNormalizer: UrlMutatorWithContext;
   parseMimeTypes: string[];
   downloadMimeTypes: string[];
 }
 
-export function buildSpiderOptions(
-  options: Partial<SpiderOptions>,
-  internalOverides: Partial<SpiderOptions> = {},
-): SpiderOptions {
+export function buildSpiderOptions<Context extends SupportedContext = SupportedContext>(
+  options: Partial<SpiderOptions<Context>>,
+  internaloverrides: Partial<SpiderOptions<Context>> = {},
+): SpiderOptions<Context> {
   return {
     ...defaultSpiderOptions,
     ...options,
-    ...internalOverides,
+    ...internaloverrides,
   };
 }
 
 const defaultSpiderOptions: SpiderOptions = {
   storage: await ArangoStore.open(),
-  requestRouter,
+  requestRouter: requestRouter,
   requestHandlers: {},
   urlDiscoveryOptions: {},
   urlNormalizer: url => UrlMutators.defaultNormalizer(url),
