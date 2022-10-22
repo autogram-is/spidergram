@@ -1,93 +1,69 @@
-import { SpiderContext, SpiderLocalContext, SpiderOptions, defaultSpiderOptions } from './options.js';
+import { SpiderOptions, buildSpiderOptions } from './options.js';
+import { SpiderContext } from './context.js';
 import { PlaywrightCrawler, PlaywrightCrawlerOptions, PlaywrightCrawlingContext, Configuration, createPlaywrightRouter, playwrightUtils } from "crawlee";
-import { NormalizedUrl } from '@autogram/url-tools';
 import * as handlers from './handlers/index.js';
-import * as helpers from './spider-helper.js';
+import * as helpers from './helpers/index.js';
+import * as hooks from './hooks/index.js';
 
-export interface PlaywrightSpiderOptions extends PlaywrightCrawlerOptions, SpiderOptions {}
-export interface PlaywrightSpiderContext extends PlaywrightCrawlingContext, SpiderContext, SpiderLocalContext {}
+type PlaywrightSpiderOptions = PlaywrightCrawlerOptions & SpiderOptions;
+type PlaywrightSpiderContext = PlaywrightCrawlingContext & SpiderContext {}
 
 export class PlaywrightSpider extends PlaywrightCrawler {
-  static context: SpiderContext;
+  options: SpiderOptions;
 
   constructor(
     options: Partial<PlaywrightSpiderOptions> = {},
     config?: Configuration
   ) {
-    // Unpack SpiderOptions from PlaywrightCrawlerOptions; this is important,
-    // because Crawlee errors on unknown options options instead of ignoring.
-    const {
+    let {
       storage,
       linkSelectors,
       urlRules,
       responseRules,
       urlNormalizer,
-      saveUnparsableUrls,
+      skipUnparsableLinks,
 
       requestHandler,
+      requestHandlers,
       failedRequestHandler,
       errorHandler,
       preNavigationHooks,
+      postNavigationHooks,
       
       ...crawlerOptions
     } = options;
 
+
+    requestHandlers = {
+      download: handlers.downloadHandler,
+      status: handlers.statusHandler,
+      ...requestHandlers ?? {}
+    }
+
     const router = createPlaywrightRouter();
-    router.addDefaultHandler(context => (requestHandler ?? defaultHandler)(context as PlaywrightSpiderContext));
-    router.addHandler('download', context => handlers.download(context as PlaywrightSpiderContext));
-    router.addHandler('status', context => handlers.status(context as PlaywrightSpiderContext));
+    router.addDefaultHandler(helpers.wrapHandler<PlaywrightCrawlingContext>(requestHandler ?? defaultHandler));
+    for (let h in requestHandlers) {
+      router.addHandler(h, helpers.wrapHandler<PlaywrightCrawlingContext>(requestHandlers[h]));
+    }
     crawlerOptions.requestHandler = router;
 
-    // Ensure our prenavigation hook gets in first
     crawlerOptions.preNavigationHooks = [
-      (context: PlaywrightCrawlingContext) => handlers.setup(context, PlaywrightSpider.context),
-      ...preNavigationHooks ?? []
+      hooks.contextualizeHelpers,
+      hooks.requestRouter,
+      ...(preNavigationHooks ?? []).map(hook => helpers.wrapHook(hook))
     ];
 
-    crawlerOptions.failedRequestHandler =
-      failedRequestHandler ??
-      ((inputs: PlaywrightCrawlingContext, error: Error) => (failedRequestHandler ?? handlers.failure)(inputs as PlaywrightSpiderContext, error));
-
-    crawlerOptions.errorHandler =
-      errorHandler ?? 
-      ((inputs: PlaywrightCrawlingContext, error: Error) => (errorHandler ?? handlers.retry)(inputs as PlaywrightSpiderContext, error));
+    crawlerOptions.postNavigationHooks = [
+      helpers.wrapHook<PlaywrightCrawlingContext>(playwrightPostNavigate),
+      ...(postNavigationHooks ?? []).map(hook => helpers.wrapHook<PlaywrightCrawlingContext>(hook))
+    ];
 
     super(crawlerOptions, config);
 
-    PlaywrightSpider.context = {
-      storage: storage ?? defaultSpiderOptions.storage,
-      linkSelectors: linkSelectors ?? defaultSpiderOptions.linkSelectors,
-      urlNormalizer: urlNormalizer ?? defaultSpiderOptions.urlNormalizer,
-      responseRules: {
-        ...defaultSpiderOptions.responseRules,
-        ...responseRules  
-      },
-      urlRules: {
-        ...defaultSpiderOptions.urlRules,
-        ...urlRules  
-      },
-      saveUnparsableUrls: saveUnparsableUrls ?? defaultSpiderOptions.saveUnparsableUrls,
-      saveResource: defaultSpiderOptions.saveResource,
-      saveLink: defaultSpiderOptions.saveLink,
-    };
-    NormalizedUrl.normalizer = PlaywrightSpider.context.urlNormalizer;
+    this.options = buildSpiderOptions(options);
   }
 }
 
-async function defaultHandler(context: PlaywrightSpiderContext): Promise<void> {
-  const {crawler, page, saveLink, saveResource, urlRules, linkSelectors } = context;
-
-  const $ = await playwrightUtils.parseWithCheerio(page);
-  context.resource = await saveResource(context, { body: $.html() });
-
-  const q = await crawler.getRequestQueue();
-  for (let link of await helpers.extractLinks($, linkSelectors)) {
-    const newUnique = await saveLink(link, context);
-    
-    if (newUnique.parsable && urlRules.enqueue(newUnique.parsed!, context)) {
-      await q.addRequest(helpers.uniqueUrlRequest(newUnique));
-    }
-  }
-
-  return Promise.resolve();
+async function playwrightPostNavigate(context: PlaywrightSpiderContext) {
+  context.$ = await playwrightUtils.parseWithCheerio(context.page);
 }

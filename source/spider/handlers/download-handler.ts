@@ -1,13 +1,13 @@
-import {CheerioCrawlingContext, KeyValueStore, PlaywrightCrawlingContext } from "crawlee";
-import { SpiderLocalContext } from "../options.js";
-import { fileNameFromHeaders } from "../mime.js";
-import { URL } from 'node:url';
-import * as helpers from '../spider-helper.js';
+import { KeyValueStore } from "crawlee";
+import { fileNameFromHeaders } from "../helpers/mime.js";
+import { CombinedSpiderContext } from "../context.js";
 
-export async function download(context: SpiderLocalContext & (CheerioCrawlingContext | PlaywrightCrawlingContext)): Promise<void> {
-  const { sendRequest, storage } = context;
-  context.resource = await helpers.saveResource(context);
+export async function downloadHandler(context: CombinedSpiderContext & { sendRequest: Function }): Promise<void> {
+  const { sendRequest, saveResource, storage } = context;
+  context.resource = await saveResource();
 
+  // This should be replaced by something that isn't dependent on
+  // Crawlee's relatively generic KVS implementation
   const downloadStore = await KeyValueStore.open('downloads');
   const buffer = await sendRequest({ responseType: 'buffer' });
   const fileName = context.resource.key + '-' + fileNameFromHeaders(new URL(buffer.url), buffer.headers);

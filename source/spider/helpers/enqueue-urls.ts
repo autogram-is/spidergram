@@ -1,78 +1,64 @@
-// Drop-in replacement for the enqueueLinks function included
-// in Crawlee's global context. Ours has a few additional options
-// and handles Spidergram-specific grunt work:
-//
-// 1. An additional 'same directory' discovery strategy
-// 2. Allow UrlFilter and UrlFilterWithContext functions for more
-//    complex link filtering logic
-// 3. Allow dictionaries of selectors/globs/filters in addition to
-//    arrays; the key is saved on SpiderGram's link record, for
-//    later use categorizing internal links.  
-// 4. Build UniqueUrl and LinkTo entities for Spidergram in addition
-//    to Crawlee Request objects; use SpiderContext UrlFilters to
-//    determine which ones are ignored, saved or enqueued.
+import { NormalizedUrl } from "@autogram/url-tools";
+import { EnqueueLinksOptions, EnqueueStrategy, RequestQueue } from "crawlee";
+import { UrlFilterWithContext, UrlMutatorWithContext } from "../options.js";
+import { CombinedSpiderContext } from '../context.js';
+import * as helpers from './index.js';
 
-import { EnqueueLinksOptions, CrawlingContext } from "crawlee";
-import { SpiderLocalContext, UrlFilterWithContext } from "../options.js";
-import { RequestInspector } from "../inspectors/inspector.js";
-import { RequestHandler } from "../handlers/handler.js";
+export async function enqueueUrls(
+  context: CombinedSpiderContext,
+  customOptions: Partial<UrlDiscoveryOptions> = {}
+) {
+  const options = await buildUrlDiscoveryOptions(context, customOptions);
+  return helpers.findUrls(context, options)
+    .then(links => helpers.saveUrls(links, context, options))
+    .then(urls => helpers.saveRequests(urls, context, options));
+}
 
-type SupportedCrawleeOptions = Partial<Pick<EnqueueLinksOptions,
+type SupportedCrawleeOptions = Pick<EnqueueLinksOptions,
   'limit' |
   'selector' |
   'userData' |
-  'label' |
   'baseUrl' |
   'globs' |
   'regexps' |
-  'pseudoUrls' |
-  'transformRequestFunction' |
   'strategy'
->>;
+>;
 
-/**
- * Structured dumping ground for links found in markup; flexible enough
- * to represent both `<a>` and `<link>` tags; `context` and  `selector`
- * should be used to store information about where the link was found
- * that can't be intuited from the data/attributes/etc.
- */
- export type HtmlLink = {
-  href: string;
-  selector?: string;
-  context?: string;
-  rel?: string;
-  title?: string;
-  attributes?: Record<string, string>;
-  data?: string | Record<string, string>;
-};
-
-export interface EnqueueUrlsOptions<Context extends CrawlingContext = CrawlingContext> extends SupportedCrawleeOptions {
-  inspector: RequestInspector,
-  requestHandler: RequestHandler<Context>,
+export interface UrlDiscoveryOptions extends SupportedCrawleeOptions {
   filters: UrlFilterWithContext[],
+  requestQueue: RequestQueue,
+  skipUnparsableLinks: boolean,
   skipEmptyLinks: boolean,
   skipAnchors: boolean,
-  label: string,
+  label?: string,
+  normalizer: UrlMutatorWithContext,
 }
 
-/**
- * Finds URLs matching the criteria specified in `options`, saves them
- * to Spidergram's storage database as UniqueUrls found on the current
- * Resource, then creates and enqueues Request objects for them.
- * @param options 
- */
-export function enqueueUrls<Context extends CrawlingContext = CrawlingContext>(options: EnqueueUrlsOptions<Context>, context: SpiderLocalContext<Context>) {
-
+export async function buildUrlDiscoveryOptions(
+  context: CombinedSpiderContext,
+  options: Partial<UrlDiscoveryOptions> = {},
+  internalOverrides: Partial<UrlDiscoveryOptions> = {},
+): Promise<UrlDiscoveryOptions> {
+  return {
+    requestQueue: await context.crawler.getRequestQueue(),
+    ...urlDiscoveryDefaultOptions,
+    ...context.urlDiscoveryOptions ?? {},
+    ...options,
+    ...internalOverrides,
+  }
 }
 
-export function findUrls<Context extends CrawlingContext = CrawlingContext>(context: SpiderLocalContext, options: EnqueueUrlsOptions<Context>) {
-
-}
-
-export function saveUrls<Context extends CrawlingContext = CrawlingContext>(options: EnqueueUrlsOptions<Context>) {
-
-}
-
-export function enqueueRequests<Context extends CrawlingContext = CrawlingContext>(options: EnqueueUrlsOptions<Context>) {
-
+const urlDiscoveryDefaultOptions: Omit<UrlDiscoveryOptions, 'requestQueue'> = {
+  selector: 'a',
+  limit: Infinity,
+  filters: [],
+  globs: [],
+  regexps: [],
+  skipUnparsableLinks: false,
+  skipEmptyLinks: true,
+  skipAnchors: true,
+  userData: {},
+  baseUrl: '',
+  strategy: EnqueueStrategy.SameDomain,
+  normalizer: NormalizedUrl.normalizer,
 }

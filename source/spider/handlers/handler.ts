@@ -1,6 +1,5 @@
-import { CrawlingContext } from "crawlee";
-import { SpiderLocalContext } from "../options";
+import { CombinedSpiderContext } from "../context.js";
 
-export interface RequestHandler<Context extends CrawlingContext = CrawlingContext> {
-  (context: SpiderLocalContext & Context): Promise<void>;
+export interface SpiderRequestHandler {
+  (context: CombinedSpiderContext, ...args: any[]): Promise<void>;
 }
