@@ -73,5 +73,5 @@ export type HtmlLink = {
   label?: string;
   text?: string;
   attributes?: Record<string, string>;
-  data?: string | Record<string, unknown>;
+  data?: unknown;
 };

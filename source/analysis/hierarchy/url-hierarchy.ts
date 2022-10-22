@@ -185,7 +185,7 @@ export class UrlHierarchy implements HierarchyBuilder<UniqueUrl, IsChildOf> {
       parent.subdomain = '';
     }
 
-    if (parent.href == child.href) {
+    if (parent.href === child.href) {
       return false;
     }
 

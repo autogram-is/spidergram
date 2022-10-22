@@ -5,7 +5,7 @@ import * as urls from '../urls/index.js';
 import {PlaywrightSpider} from '../playwright-spider.js';
 import {CheerioSpider} from '../cheerio-spider.js';
 
-export async function contextBuilder(context: CombinedContext) {
+export async function contextBuilder(context: CombinedContext): Promise<void> {
   const crawler = context.crawler as PlaywrightSpider | CheerioSpider;
 
   // Map our 'contextualized' functions to the context object
@@ -13,19 +13,19 @@ export async function contextBuilder(context: CombinedContext) {
     prefetchRequest: async () => helpers.prefetchRequest(context),
 
     saveResource: async (data?: Record<string, unknown>) =>
-    helpers.saveResource(context, data),
+      helpers.saveResource(context, data),
 
     enqueueLinks: (options?: urls.UrlDiscoveryOptions) =>
-    urls.enqueue(context, options),
+      urls.enqueue(context, options),
 
     findUrls: (options?: urls.UrlDiscoveryOptions) =>
-    urls.findUrls(context, options),
+      urls.findUrls(context, options),
 
     saveUrls: (input: urls.HtmlLink[], options?: urls.UrlDiscoveryOptions) =>
-    urls.saveUrls(input, context, options),
+      urls.saveUrls(input, context, options),
 
     saveRequests: (input: UniqueUrl[], options?: urls.UrlDiscoveryOptions) =>
-    urls.saveRequests(input, context, options),
+      urls.saveRequests(input, context, options),
 
     ...crawler.options,
   });

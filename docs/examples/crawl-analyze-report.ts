@@ -8,11 +8,10 @@ import {AqlQuery, aql} from 'arangojs/aql.js';
 import {Listr} from 'listr2';
 import {ArangoStore} from '../../source/arango-store.js';
 import {CheerioSpider} from '../../source/spider/cheerio-spider.js';
-import {ProcessOptions, processResources} from '../../source/analysis/index.js';
 import {JsonObject} from '../../source/types.js';
 
 // Assorted parsing helpers
-import {getMeta} from '../../source/analysis/index.js';
+import {ProcessOptions, processResources, getMeta} from '../../source/analysis/index.js';
 
 // Sheets.js setup
 import {LinkSummaries} from '../../source/reports/link-summaries.js';
@@ -75,8 +74,8 @@ await new Listr<Ctx>([
     title: 'Report generation',
     async task(ctx, task) {
       const queries: Record<string, AqlQuery> = {
-        Pages: LinkSummaries.pages(),
-        Errors: LinkSummaries.errors(),
+        'Pages': LinkSummaries.pages(),
+        'Errors': LinkSummaries.errors(),
         'Malformed URLs': LinkSummaries.malformed(),
         'Non-Web URLs': LinkSummaries.excludeProtocol(),
         'External Links': LinkSummaries.outlinks([ctx.targetDomain]),
