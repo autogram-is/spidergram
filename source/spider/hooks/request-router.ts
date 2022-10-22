@@ -1,19 +1,21 @@
 import { CombinedSpiderContext } from '../context.js';
+import { helpers } from '../index.js';
 
 export async function requestRouter(context: CombinedSpiderContext) {
-  const { request, prefetchRequest } = context;
+  const { request, prefetchRequest, downloadMimeTypes, parseMimeTypes } = context;
   const requestMeta = await prefetchRequest();
-
+  
+  const { type } = helpers.parseContentType(requestMeta);
   request.skipNavigation = true;
 
-  if (requestMeta.statusCode < 199 || requestMeta.statusCode > 299) {
+  if (requestMeta.statusCode < 199 || requestMeta.statusCode > 399) {
     request.label = 'status';
   }
-  else if (context.htmlMimeTypes) {
+  else if (parseMimeTypes.includes(type)) {
     request.label = 'page';
     request.skipNavigation = false;
   }
-  else if (context.downloadableMimeTypes) {
+  else if (downloadMimeTypes.includes(type)) {
     request.label = 'download';
   }
   else {

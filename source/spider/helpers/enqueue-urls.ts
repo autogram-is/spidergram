@@ -14,7 +14,7 @@ export async function enqueueUrls(
     .then(urls => helpers.saveRequests(urls, context, options));
 }
 
-type SupportedCrawleeOptions = Pick<EnqueueLinksOptions,
+type SupportedEnqueueOptions = Pick<EnqueueLinksOptions,
   'limit' |
   'selector' |
   'userData' |
@@ -24,7 +24,7 @@ type SupportedCrawleeOptions = Pick<EnqueueLinksOptions,
   'strategy'
 >;
 
-export interface UrlDiscoveryOptions extends SupportedCrawleeOptions {
+export interface UrlDiscoveryOptions extends SupportedEnqueueOptions {
   filters: UrlFilterWithContext[],
   requestQueue: RequestQueue,
   skipUnparsableLinks: boolean,

@@ -64,7 +64,7 @@ export class UniqueUrl extends Vertice {
         this.parsed = new NormalizedUrl(url, base, normalizer);
         this.url = this.parsed.href;
       } catch (error: unknown) {
-        console.log(`${url} not parsable`);
+        // Not parsable, but we're okay with that.
       }
     } else if (url instanceof NormalizedUrl) {
       this.parsed = url;

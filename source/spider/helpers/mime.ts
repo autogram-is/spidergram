@@ -1,6 +1,7 @@
 import { IncomingHttpHeaders } from "http";
 import is from '@sindresorhus/is';
 import mime from "mime";
+export { parse as parseContentType } from 'content-type';
 
 export function fileNameFromHeaders(
   url: URL,
@@ -48,7 +49,7 @@ export function fileExtensionFromHeaders(
 }
 
 export const mimeGroups = {
-  html: ['text/html', 'application/xhtml+xml'],
+  page: ['text/html', 'application/xhtml+xml'],
   pdf: ['application/pdf'],
   document: [
     'text/plain',

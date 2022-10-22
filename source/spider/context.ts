@@ -13,7 +13,7 @@ export interface SpiderContext extends SpiderOptions {
   uniqueUrl?: UniqueUrl,
   resource?: Resource,
   requestMeta?: RequestMeta,
-  $?: cheerio.CheerioAPI | CheerioRoot,
+  $?: CheerioRoot,
 
   // Helper functions each spider implementation 'contextualizes'
   prefetchRequest: () => Promise<RequestMeta>,

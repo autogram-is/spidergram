@@ -25,7 +25,7 @@ export async function contextBuilder(context: CombinedSpiderContext) {
     buildRequests: (urls: UniqueUrl[], options?: helpers.UrlDiscoveryOptions) =>
       helpers.saveRequests(urls, context as CombinedSpiderContext, options),
     
-    ...crawler.options
+    ...crawler.options,
   });
 
   helpers.saveCurrentUrl(context);

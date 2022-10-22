@@ -17,6 +17,7 @@ type CheerioSpiderOptions = CheerioCrawlerOptions & SpiderOptions;
 
 export class CheerioSpider extends CheerioCrawler {
   options: SpiderOptions;
+  crawlerOptions: CheerioCrawlerOptions
 
   constructor(
     options: Partial<CheerioSpiderOptions> = {},
@@ -28,6 +29,8 @@ export class CheerioSpider extends CheerioCrawler {
       requestHandlers,
       urlDiscoveryOptions,
       urlNormalizer,
+      downloadMimeTypes,
+      parseMimeTypes,
     
       requestHandler,
       preNavigationHooks,
@@ -41,6 +44,12 @@ export class CheerioSpider extends CheerioCrawler {
       page: handlers.defaultHandler,
       ...requestHandlers ?? {}
     }
+
+    crawlerOptions.additionalMimeTypes = [
+      ...crawlerOptions.additionalMimeTypes ?? [],
+      ...downloadMimeTypes ?? [],
+      ...parseMimeTypes ?? [],
+    ];
 
     const router = createCheerioRouter();
     router.addDefaultHandler(helpers.wrapHandler<CheerioCrawlingContext>(requestHandlers.page));
@@ -56,6 +65,8 @@ export class CheerioSpider extends CheerioCrawler {
     ];
 
     super(crawlerOptions, config);
+
     this.options = buildSpiderOptions(options);
+    this.crawlerOptions = crawlerOptions;
   }
 }

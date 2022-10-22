@@ -4,6 +4,7 @@ import { UrlDiscoveryOptions } from './helpers/index.js';
 import { SpiderContext } from './context.js';
 import { SpiderHook, requestRouter} from './hooks/index.js';
 import { SpiderRequestHandler } from './handlers/handler.js';
+import { helpers } from '../index.js';
 
 export interface SpiderOptions extends Record<string, unknown> {
   storage: ArangoStore,
@@ -11,6 +12,8 @@ export interface SpiderOptions extends Record<string, unknown> {
   requestHandlers: Record<string, SpiderRequestHandler>,
   urlDiscoveryOptions: Partial<UrlDiscoveryOptions>,
   urlNormalizer: UrlMutatorWithContext,
+  parseMimeTypes: string[],
+  downloadMimeTypes: string[],
 }
 
 export function buildSpiderOptions(
@@ -30,6 +33,8 @@ const defaultSpiderOptions: SpiderOptions = {
   requestHandlers: {},
   urlDiscoveryOptions: {},
   urlNormalizer: url => UrlMutators.defaultNormalizer(url),
+  parseMimeTypes: helpers.mimeGroups.page,
+  downloadMimeTypes: helpers.mimeGroups.data,
 }
 
 export type UrlMutatorWithContext<T = unknown> = (

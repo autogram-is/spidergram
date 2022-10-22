@@ -42,6 +42,7 @@ await new Listr<Ctx>([
     task: async (ctx, task) => {
       const spider = new PlaywrightSpider({
         storage: ctx.storage,
+        errorHandler: (ctx, err) => console.log(err),
         autoscaledPoolOptions: {
           maxConcurrency: 5,
           maxTasksPerMinute: 360

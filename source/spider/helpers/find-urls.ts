@@ -38,8 +38,8 @@ export async function findUrls(
       const { href, title, rel, ...attributes } = $(element).attr();
 
       if (
-        !(is.emptyStringOrWhitespace(href) && skipEmptyLinks) &&
-        !(href!.startsWith('#') && skipAnchors)
+        !((is.undefined(href) || is.emptyStringOrWhitespace(href)) && skipEmptyLinks) &&
+        !(href.startsWith('#') && skipAnchors)
       ) {
         results.push({
           href: href!,

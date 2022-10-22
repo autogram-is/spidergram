@@ -1,7 +1,7 @@
 import { CombinedSpiderContext } from '../context.js';
 
 export async function prefetchRequest(context: CombinedSpiderContext) {
-  return context.sendRequest({ method: 'head' })
+  return context.sendRequest({ method: 'head', allowGetBody: false })
     .then(response => {
       context.requestMeta = {
         url: response.url,
