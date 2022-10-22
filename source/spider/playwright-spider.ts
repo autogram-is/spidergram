@@ -34,6 +34,7 @@ export class PlaywrightSpider extends PlaywrightCrawler {
     
       requestHandler,
       preNavigationHooks,
+      postNavigationHooks,
       
       ...crawlerOptions
     } = options;
@@ -56,6 +57,11 @@ export class PlaywrightSpider extends PlaywrightCrawler {
       hooks.contextBuilder,
       hooks.requestRouter,
       ...(preNavigationHooks ?? []).map(hook => helpers.wrapHook(hook))
+    ];
+
+    crawlerOptions.postNavigationHooks = [
+      helpers.wrapHook<PlaywrightCrawlingContext>(playwrightPostNavigate),
+      ...(postNavigationHooks ?? []).map(hook => helpers.wrapHook<PlaywrightCrawlingContext>(hook))
     ];
 
     super(crawlerOptions, config);

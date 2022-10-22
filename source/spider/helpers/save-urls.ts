@@ -22,7 +22,7 @@ export async function saveUrl(
   // 'save this URL' filter, OR `skipUnparsableLinks` is set in
   // the options, we plow on forward. Otherwise, we'll return
   // the UniqueUrl unpersisted.
-  if ((uu.parsable || !options.skipUnparsableLinks) {
+  if (uu.parsable || !options.skipUnparsableLinks) {
     await storage.push(uu, false);
 
     // If there's no active Resource, we don't bother creating

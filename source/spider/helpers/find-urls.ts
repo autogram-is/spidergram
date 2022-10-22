@@ -43,7 +43,7 @@ export async function findUrls(
       ) {
         results.push({
           href: href!,
-          context: label,
+          label: label,
           selector: selector,
           rel: rel,
           title: title,

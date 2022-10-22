@@ -26,12 +26,11 @@ export class CheerioSpider extends CheerioCrawler {
       storage,
       requestRouter,
       requestHandlers,
-      urlDiscoveryOptions,,
+      urlDiscoveryOptions,
       urlNormalizer,
     
       requestHandler,
       preNavigationHooks,
-      postNavigationHooks,
       
       ...crawlerOptions
     } = options;
@@ -54,10 +53,6 @@ export class CheerioSpider extends CheerioCrawler {
       hooks.contextBuilder,
       hooks.requestRouter,
       ...(preNavigationHooks ?? []).map(hook => helpers.wrapHook(hook))
-    ];
-
-    crawlerOptions.postNavigationHooks = [
-      ...(postNavigationHooks ?? []).map(hook => helpers.wrapHook<CheerioCrawlingContext>(hook))
     ];
 
     super(crawlerOptions, config);
