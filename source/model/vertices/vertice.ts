@@ -1,8 +1,7 @@
 /* eslint-disable import/no-unassigned-import */
 import 'reflect-metadata';
 import is from '@sindresorhus/is';
-import { Uuid, UuidFactory } from '../helpers/uuid.js';
-import { getProperty, setProperty, hasProperty, deleteProperty, deepKeys } from 'dot-prop';
+import {getProperty, setProperty, hasProperty, deleteProperty, deepKeys} from 'dot-prop';
 import {
   Exclude,
   plainToInstance,
@@ -11,9 +10,10 @@ import {
   ClassTransformOptions,
   TargetMap,
 } from 'class-transformer';
-import { JsonObject } from '../../types.js';
+import {Uuid, UuidFactory} from '../helpers/uuid.js';
+import {JsonObject} from '../../types.js';
 
-export { Transform, Exclude } from 'class-transformer';
+export {Transform, Exclude} from 'class-transformer';
 export type Reference<T extends Vertice = Vertice> = T | [ string, Uuid ] | string;
 export type VerticeData = Record<string, unknown>;
 
@@ -24,8 +24,8 @@ export interface CollectionMeta {
 
 export function isVertice(value: unknown): value is Vertice {
   return (
-    is.object(value) &&
-    ('_collection' in value)
+    is.object(value)
+    && ('_collection' in value)
   );
 }
 
@@ -34,20 +34,23 @@ export abstract class Vertice {
   _key: Uuid = UuidFactory.nil;
 
   @Exclude({ toPlainOnly: true, toClassOnly: false })
-  _id!: string;
+    _id!: string;
 
   @Exclude({ toPlainOnly: false, toClassOnly: true })
   readonly _collection!: string;
 
   @Exclude({ toPlainOnly: true, toClassOnly: false })
-  _rev?: string;
+    _rev?: string;
 
   static readonly types = new Map<string, CollectionMeta>();
 
   static idFromReference(r: Reference): string {
     if (is.string(r)) {
-      if (r.includes('/')) return r;
-      else throw new TypeError('Vertice ID must include collection');
+      if (r.includes('/')) {
+        return r;
+      }
+
+      throw new TypeError('Vertice ID must include collection');
     } else if (is.array(r)) {
       return r.join('/');
     } else {
@@ -68,6 +71,7 @@ export abstract class Vertice {
       for (const k in data) {
         this[k] = data[k];
       }
+
       this.assignKey();
     }
   }
@@ -75,7 +79,7 @@ export abstract class Vertice {
   /*
    * Hydration/dehydration and serializer code. This is used
    * to ensure that incoming JSON blobs become actual class
-   * instances, and that serializing class instances maps 
+   * instances, and that serializing class instances maps
    * everything to the proper Arango properties.
    */
 
@@ -102,7 +106,7 @@ export abstract class Vertice {
 
     if (isVertice(object)) {
       const ctor = Vertice.types.get(object._collection)?.constructor;
-      if (ctor) { 
+      if (ctor) {
         return plainToInstance(
           ctor,
           object,
@@ -125,7 +129,7 @@ export abstract class Vertice {
   /**
    * Key and ID management; child classes can override keySeed()
    * if they need to ensure uniqueness based on other properties.
-   * Leave it as for a random Uuid key; return a dictionary of 
+   * Leave it as for a random Uuid key; return a dictionary of
    * prop names and values for a Uuid-shaped hash.
    */
 
@@ -136,11 +140,12 @@ export abstract class Vertice {
   protected keySeed(): unknown {
     return null;
   }
-  
+
   get key(): string {
     if (this._key === UuidFactory.nil) {
       this.assignKey();
     }
+
     return this._key;
   }
 
@@ -148,10 +153,11 @@ export abstract class Vertice {
     if (is.undefined(this._id)) {
       return [this._collection, this.key].join('/');
     }
+
     return this._id;
   }
 
-  /* 
+  /*
    * Blind property access; these are used to get, set, and check
    * arbitarily deep property values by path, useful for making
    * deep property references in reporting scripts.
@@ -162,7 +168,7 @@ export abstract class Vertice {
 
   set(
     path: string,
-    value: unknown
+    value: unknown,
   ) {
     return setProperty(this, path, value);
   }

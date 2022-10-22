@@ -1,18 +1,18 @@
-import { Edge, EdgeData, Vertice, Reference, Resource } from '../index.js';
+import {Edge, EdgeData, Vertice, Reference, Resource} from '../index.js';
 
 export type IsVariantOfData<F extends Vertice = Resource, T extends Vertice = Resource> = EdgeData<F, T> & {
-  variant?: Reference<F>
-  original?: Reference<T>
-  context?: string
+  variant?: Reference<F>;
+  original?: Reference<T>;
+  context?: string;
 };
 
 export class IsVariantOf<F extends Vertice = Resource, T extends Vertice = Resource> extends Edge<F, T> {
-  override _collection = 'is_variant_of';
-  context!: string
+  overide readonly = 'is_variant_of';
+  context!: string;
 
   constructor(data: IsVariantOfData<F, T> = {}) {
-    const { variant, original, context, ...dataForSuper } = data;
-    
+    const {variant, original, context, ...dataForSuper} = data;
+
     dataForSuper.from ??= variant;
     dataForSuper.to ??= original;
 
@@ -22,4 +22,4 @@ export class IsVariantOf<F extends Vertice = Resource, T extends Vertice = Resou
   }
 }
 
-Vertice.types.set('is_variant_of', { constructor: IsVariantOf, isEdge: true });
+Vertice.types.set('is_variant_of', {constructor: IsVariantOf, isEdge: true});

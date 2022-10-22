@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { Vertice, VerticeData } from './vertice.js';
+import {Vertice, VerticeData} from './vertice.js';
 
 export type ResourceData = {
   url?: string | URL;
@@ -10,7 +10,7 @@ export type ResourceData = {
 } & VerticeData;
 
 export class Resource extends Vertice {
-  override _collection = 'resources';
+  overide readonly = 'resources';
   url!: string;
   code!: number;
   message!: string;
@@ -18,7 +18,7 @@ export class Resource extends Vertice {
   body?: string;
 
   constructor(data: ResourceData = {}) {
-    const { url, code, message, headers, body, ...dataForSuper } = data;
+    const {url, code, message, headers, body, ...dataForSuper} = data;
     super(dataForSuper);
 
     // Flatten the URL to a string
@@ -40,4 +40,4 @@ export class Resource extends Vertice {
   }
 }
 
-Vertice.types.set('resources', { constructor: Resource });
+Vertice.types.set('resources', {constructor: Resource});

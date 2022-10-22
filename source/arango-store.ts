@@ -1,10 +1,10 @@
-import is from "@sindresorhus/is";
-import { Config } from "arangojs/connection.js";
-import { Database } from 'arangojs';
-import { Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn } from "./model/index.js";
-import { DocumentMetadata } from "arangojs/documents.js";
-import { DocumentCollection } from "arangojs/collection.js";
-import { assert } from "console";
+import {assert} from 'node:console';
+import is from '@sindresorhus/is';
+import {Config} from 'arangojs/connection.js';
+import {Database} from 'arangojs';
+import {DocumentMetadata} from 'arangojs/documents.js';
+import {DocumentCollection} from 'arangojs/collection.js';
+import {Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn} from './model/index.js';
 
 export class ArangoStore {
   protected static _systemDb?: Database;
@@ -13,14 +13,14 @@ export class ArangoStore {
   /**
    * Arango system information database; acts as a proxy for the current Arango server connection.
    */
-   static get system(): Database {
+  static get system(): Database {
     if (is.undefined(ArangoStore._systemDb)) {
       throw new Error('No arango connection');
     } else {
-      return ArangoStore._systemDb!;
+      return ArangoStore._systemDb;
     }
   }
-  
+
   /**
    * Connects to the Arango server and stores a connection to the system database.
    * Should be followed by `ArangoStore.open()` in most situations.
@@ -30,50 +30,49 @@ export class ArangoStore {
     ArangoStore._systemDb = new Database(connection);
     return ArangoStore.system;
   }
-  
+
   /**
    * Connects to the Arango server (if necessary) and returns a database instance ready to use
    * with Spidergram data.
-   *  
-   * @param databaseName 
-   * @param connection 
-   * @returns 
+   *
+   * @param databaseName
+   * @param connection
+   * @returns
    */
-  static async open(databaseName: string = 'spidergram', connection: Partial<Config> = {}): Promise<ArangoStore> {
+  static async open(databaseName = 'spidergram', connection: Partial<Config> = {}): Promise<ArangoStore> {
     if (is.undefined(ArangoStore._systemDb)) {
       ArangoStore.connect(connection);
     }
 
     return new ArangoStore(
-      await ArangoStore.load(databaseName, true)
+      await ArangoStore.load(databaseName, true),
     );
   }
 
   /**
    * Load an Arango database and (optionally) initialize it with collections
    * for all Spidergram entities. Requires an existing connection to Arango.
-   * 
-   * @param databaseName 
-   * @param initialize 
-   * @returns 
+   *
+   * @param databaseName
+   * @param initialize
+   * @returns
    */
   protected static async load(databaseName: string, initialize = true): Promise<Database> {
-    const system = ArangoStore.system;
+    const {system} = ArangoStore;
 
     if (is.emptyStringOrWhitespace(databaseName)) {
-      return Promise.reject(new Error(`Invalid databaseName '${databaseName}'`));
+      throw new Error(`Invalid databaseName '${databaseName}'`);
     }
+
     return ArangoStore.system.listDatabases()
       .then(databases => {
         if (databases.includes(databaseName)) {
           return system.database(databaseName);
-        } else {
-          return system.createDatabase(databaseName);
         }
+
+        return system.createDatabase(databaseName);
       })
-      .then(database => {
-        return ArangoStore.initialize(database)
-      });
+      .then(async database => ArangoStore.initialize(database));
   }
 
   /**
@@ -83,10 +82,9 @@ export class ArangoStore {
     if (is.undefined(this._activeDb)) {
       throw new Error('No working database loaded');
     } else {
-      return this._activeDb!;
+      return this._activeDb;
     }
   }
-
 
   /*
    * Load, save, and access working databases
@@ -97,8 +95,8 @@ export class ArangoStore {
     const includedTypes = [UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn];
     assert(includedTypes.length > 0);
 
-    const promises: Promise<DocumentCollection>[] = [];
-    for (let type of Vertice.types.keys()) {
+    const promises: Array<Promise<DocumentCollection>> = [];
+    for (const type of Vertice.types.keys()) {
       database.collection(type).exists().then(exists => {
         if (!exists) {
           if (Vertice.types.get(type)?.isEdge) {
@@ -106,8 +104,7 @@ export class ArangoStore {
           } else {
             promises.push(database.createCollection(type));
           }
-        }
-        else if (erase) {
+        } else if (erase) {
           database.collection(type).truncate();
         }
       });
@@ -120,43 +117,51 @@ export class ArangoStore {
    * Convenience wrappers for saving and deleting Spidergram Entities
    */
 
-  async push(input: Vertice | Vertice[], overwrite: boolean = true): Promise<DocumentMetadata[]> {
-    const promises: Promise<DocumentMetadata>[] = [];
+  async push(input: Vertice | Vertice[], overwrite = true): Promise<DocumentMetadata[]> {
+    const promises: Array<Promise<DocumentMetadata>> = [];
     const overwriteMode = (overwrite) ? 'replace' : 'ignore';
-    if (!is.array(input)) input = [input];
-    
+    if (!is.array(input)) {
+      input = [input];
+    }
+
     // To ensure we don't have any premature reference insertions, we
     // save all vertices before saving edges.
     for (const vertice of input) {
       if (!isEdge(vertice)) {
         promises.push(this.db.collection(vertice._collection)
-          .save(vertice.toJSON(), { overwriteMode: overwriteMode }));
+          .save(vertice.toJSON(), {overwriteMode}));
       }
     }
+
     for (const edge of input) {
       if (isEdge(edge)) {
         promises.push(this.db.collection(edge._collection)
-          .save(edge.toJSON(), { overwriteMode: overwriteMode }));
+          .save(edge.toJSON(), {overwriteMode}));
       }
     }
+
     return Promise.all(promises);
   }
 
   async delete(input: Vertice | Vertice[]) {
-    const promises: Promise<DocumentMetadata>[] = [];
-    if (!is.array(input)) input = [input];
-    
+    const promises: Array<Promise<DocumentMetadata>> = [];
+    if (!is.array(input)) {
+      input = [input];
+    }
+
     // When bulk deleting, remove edges first.
     for (const edge of input) {
       if (isEdge(edge)) {
         promises.push(this.db.collection(edge._collection).remove(edge.id));
       }
     }
+
     for (const vertice of input) {
       if (!isEdge(vertice)) {
         promises.push(this.db.collection(vertice._collection).remove(vertice.id));
       }
     }
+
     return Promise.all(promises);
   }
 
@@ -164,7 +169,7 @@ export class ArangoStore {
   get query() {
     return this.db.query.bind(this.db);
   }
-  
+
   get collection() {
     return this.db.collection.bind(this.db);
   }

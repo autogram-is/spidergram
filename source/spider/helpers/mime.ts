@@ -1,7 +1,8 @@
-import { IncomingHttpHeaders } from "http";
+import {IncomingHttpHeaders} from 'node:http';
 import is from '@sindresorhus/is';
-import mime from "mime";
-export { parse as parseContentType } from 'content-type';
+import mime from 'mime';
+
+export {parse as parseContentType} from 'content-type';
 
 export function fileNameFromHeaders(
   url: URL,
@@ -11,12 +12,14 @@ export function fileNameFromHeaders(
   const filenameRx = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
   let filename: string | undefined;
 
-  if (!is.nonEmptyStringAndNotWhitespace(filename))
-    filename = (filenameRx.exec(headers['content-disposition'] ?? '') ??
-      [])[0];
+  if (!is.nonEmptyStringAndNotWhitespace(filename)) {
+    filename = (filenameRx.exec(headers['content-disposition'] ?? '')
+      ?? [])[0];
+  }
 
-  if (!is.nonEmptyStringAndNotWhitespace(filename))
+  if (!is.nonEmptyStringAndNotWhitespace(filename)) {
     filename = (headers['content-location'] ?? '').split('/').pop();
+  }
 
   if (!is.nonEmptyStringAndNotWhitespace(filename)) {
     const parent = url.pathname.split('/').pop();
@@ -25,13 +28,16 @@ export function fileNameFromHeaders(
     }
   }
 
-  if (!is.nonEmptyStringAndNotWhitespace(filename)) filename = fallback;
+  if (!is.nonEmptyStringAndNotWhitespace(filename)) {
+    filename = fallback;
+  }
 
   const mimeExtension = mime.getExtension(headers['content-type'] ?? '');
   if (mimeExtension !== undefined) {
     const fileExtension = filename.split('.').pop();
-    if (fileExtension === undefined || fileExtension !== mimeExtension)
+    if (fileExtension === undefined || fileExtension !== mimeExtension) {
       filename = `${filename}.${mimeExtension ?? 'bin'}`;
+    }
   }
 
   return filename;
@@ -43,7 +49,7 @@ export function fileExtensionFromHeaders(
 ): string {
   const filename = fileNameFromHeaders(
     url,
-    headers
+    headers,
   );
   return filename.split('.').shift()!.toString();
 }
@@ -127,6 +133,6 @@ export const mimeGroups = {
   misc: [
     'application/octet-stream',
     'application/vnd.visio',
-    'text/calendar'
-  ]
-}
+    'text/calendar',
+  ],
+};

@@ -1,13 +1,13 @@
-import { CombinedContext } from '../context.js';
-import { UniqueUrl, LinksTo } from "../../model/index.js";
-import { HtmlLink, UrlDiscoveryOptions, buildUrlDiscoveryOptions } from "./index.js";
+import {CombinedContext} from '../context.js';
+import {UniqueUrl, LinksTo} from '../../model/index.js';
+import {HtmlLink, UrlDiscoveryOptions, buildUrlDiscoveryOptions} from './index.js';
 
 export async function saveUrl(
   link: HtmlLink,
   context: CombinedContext,
   customOptions: Partial<UrlDiscoveryOptions> = {},
 ) {
-  const { storage, uniqueUrl, resource } = context;
+  const {storage, uniqueUrl, resource} = context;
   const options = await buildUrlDiscoveryOptions(context, customOptions);
 
   const uu = new UniqueUrl({
@@ -31,14 +31,14 @@ export async function saveUrl(
     if (resource !== undefined) {
       const lt = new LinksTo({
         url: uu,
-        resource: resource,
-        ...link
+        resource,
+        ...link,
       });
-      await storage.push(lt)
+      await storage.push(lt);
     }
   }
 
-  return Promise.resolve(uu);
+  return uu;
 }
 
 export async function saveUrls(
@@ -46,7 +46,7 @@ export async function saveUrls(
   context: CombinedContext,
   customOptions: Partial<UrlDiscoveryOptions> = {},
 ) {
-  return Promise.all(links.map(link => saveUrl(link, context, customOptions))) 
+  return Promise.all(links.map(async link => saveUrl(link, context, customOptions)));
 }
 
 export async function saveCurrentUrl(context: CombinedContext) {
@@ -54,10 +54,10 @@ export async function saveCurrentUrl(context: CombinedContext) {
     context.uniqueUrl = new UniqueUrl({
       url: context.request.url,
       normalizer: url => url,
-      referer: context.request.headers ? context.request.headers['referer'] : ''
-    })
+      referer: context.request.headers ? context.request.headers.referer : '',
+    });
   } else {
-    context.uniqueUrl = new UniqueUrl({ url: context.request.url });
-    await context.storage.push(context.uniqueUrl!, false);
+    context.uniqueUrl = new UniqueUrl({url: context.request.url});
+    await context.storage.push(context.uniqueUrl, false);
   }
 }

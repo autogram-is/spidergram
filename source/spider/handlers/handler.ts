@@ -1,5 +1,3 @@
-import { CombinedContext } from "../context.js";
+import {CombinedContext} from '../context.js';
 
-export interface SpiderRequestHandler {
-  (context: CombinedContext, ...args: any[]): Promise<void>;
-}
+export type SpiderRequestHandler = (context: CombinedContext, ...args: any[]) => Promise<void>;

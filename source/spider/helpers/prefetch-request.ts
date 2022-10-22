@@ -1,7 +1,7 @@
-import { CombinedContext } from '../context.js';
+import {CombinedContext} from '../context.js';
 
 export async function prefetchRequest(context: CombinedContext) {
-  return context.sendRequest({ method: 'head', allowGetBody: false })
+  return context.sendRequest({method: 'head', allowGetBody: false})
     .then(response => {
       context.requestMeta = {
         url: response.url,
@@ -12,5 +12,5 @@ export async function prefetchRequest(context: CombinedContext) {
       };
       response.destroy();
       return context.requestMeta;
-    })
+    });
 }

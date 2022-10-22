@@ -1,10 +1,10 @@
-import { Vertice, isVertice, VerticeData, Reference } from '../vertices/vertice.js';
+import {Vertice, isVertice, VerticeData, Reference} from '../vertices/vertice.js';
 
 export function isEdge(value: unknown): value is Edge {
   return (
-    isVertice(value) &&
-    ('_from' in value) &&
-    ('_to' in value)
+    isVertice(value)
+    && ('_from' in value)
+    && ('_to' in value)
   );
 }
 
@@ -17,14 +17,15 @@ export abstract class Edge<F extends Vertice = Vertice, T extends Vertice = Vert
   _from!: string;
   _to!: string;
 
-  // We accept a special-purpose 
+  // We accept a special-purpose
   constructor(data: EdgeData<F, T> = {}) {
-    const { from, to, ...dataForSuper } = data;
+    const {from, to, ...dataForSuper} = data;
     super(dataForSuper);
 
     if (from) {
       this._from = Vertice.idFromReference(from);
     }
+
     if (to) {
       this._to = Vertice.idFromReference(to);
     }

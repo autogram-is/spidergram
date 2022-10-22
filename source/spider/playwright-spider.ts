@@ -4,15 +4,15 @@ import {
   PlaywrightCrawlingContext,
   Configuration,
   createPlaywrightRouter,
-  playwrightUtils
-} from "crawlee";
+  playwrightUtils,
+} from 'crawlee';
 import {
   SpiderOptions,
   SpiderContext,
   buildSpiderOptions,
   hooks,
   helpers,
-  handlers
+  handlers,
 } from './index.js';
 
 type PlaywrightSpiderOptions = PlaywrightCrawlerOptions & SpiderOptions;
@@ -23,7 +23,7 @@ export class PlaywrightSpider extends PlaywrightCrawler {
 
   constructor(
     options: Partial<PlaywrightSpiderOptions> = {},
-    config?: Configuration
+    config?: Configuration,
   ) {
     let {
       storage,
@@ -31,11 +31,11 @@ export class PlaywrightSpider extends PlaywrightCrawler {
       requestHandlers,
       urlDiscoveryOptions,
       urlNormalizer,
-    
+
       requestHandler,
       preNavigationHooks,
       postNavigationHooks,
-      
+
       ...crawlerOptions
     } = options;
 
@@ -43,25 +43,26 @@ export class PlaywrightSpider extends PlaywrightCrawler {
       download: handlers.downloadHandler,
       status: handlers.statusHandler,
       page: handlers.defaultHandler,
-      ...requestHandlers ?? {}
-    }
+      ...requestHandlers,
+    };
 
     const router = createPlaywrightRouter();
     router.addDefaultHandler(helpers.wrapHandler<PlaywrightCrawlingContext>(requestHandlers.page));
-    for (let h in requestHandlers) {
+    for (const h in requestHandlers) {
       router.addHandler(h, helpers.wrapHandler<PlaywrightCrawlingContext>(requestHandlers[h]));
     }
+
     crawlerOptions.requestHandler = router;
 
     crawlerOptions.preNavigationHooks = [
       hooks.contextBuilder,
       hooks.requestRouter,
-      ...(preNavigationHooks ?? []).map(hook => helpers.wrapHook(hook))
+      ...(preNavigationHooks ?? []).map(hook => helpers.wrapHook(hook)),
     ];
 
     crawlerOptions.postNavigationHooks = [
       helpers.wrapHook<PlaywrightCrawlingContext>(playwrightPostNavigate),
-      ...(postNavigationHooks ?? []).map(hook => helpers.wrapHook<PlaywrightCrawlingContext>(hook))
+      ...(postNavigationHooks ?? []).map(hook => helpers.wrapHook<PlaywrightCrawlingContext>(hook)),
     ];
 
     super(crawlerOptions, config);

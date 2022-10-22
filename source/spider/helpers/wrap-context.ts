@@ -1,4 +1,4 @@
-import { SupportedContext, SpiderContext } from "../context.js";
+import {SupportedContext, SpiderContext} from '../context.js';
 
 export function wrapHook<C extends SupportedContext>(hook: Function) {
   return (ctx: C, ...options: any[]) => hook(ctx as SpiderContext & C, options);

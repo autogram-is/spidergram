@@ -1,9 +1,9 @@
-import { UniqueUrl } from "../../model/index.js";
-import { Request } from 'crawlee';
-import { CombinedContext } from '../context.js';
-import { UrlDiscoveryOptions, buildUrlDiscoveryOptions } from "./index.js";
+import {Request} from 'crawlee';
+import {UniqueUrl} from '../../model/index.js';
+import {CombinedContext} from '../context.js';
+import {UrlDiscoveryOptions, buildUrlDiscoveryOptions} from './index.js';
 
-export async function saveRequests (
+export async function saveRequests(
   urls: UniqueUrl[],
   context: CombinedContext,
   customOptions: Partial<UrlDiscoveryOptions> = {},
@@ -11,7 +11,7 @@ export async function saveRequests (
   const options = await buildUrlDiscoveryOptions(context, customOptions);
 
   const requests: Request[] = [];
-  for (let uu of urls) {
+  for (const uu of urls) {
     if (uu.parsable) {
       requests.push(new Request({
         url: uu.url,
@@ -20,7 +20,7 @@ export async function saveRequests (
           fromUniqueUrl: true,
           ...options.userData,
         },
-        headers: { referer: uu.referer ?? '' }
+        headers: {referer: uu.referer ?? ''},
       }));
     }
   }

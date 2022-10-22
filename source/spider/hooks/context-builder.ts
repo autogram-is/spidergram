@@ -1,32 +1,34 @@
-import { CombinedContext } from "../context.js";
-import { UniqueUrl } from "../../model/index.js";
+import {CombinedContext} from '../context.js';
+import {UniqueUrl} from '../../model/index.js';
 import * as helpers from '../helpers/index.js';
-import { PlaywrightSpider } from "../playwright-spider.js";
-import { CheerioSpider } from "../cheerio-spider.js";
+import * as urls from '../urls/index.js';
+import {PlaywrightSpider} from '../playwright-spider.js';
+import {CheerioSpider} from '../cheerio-spider.js';
 
 export async function contextBuilder(context: CombinedContext) {
   const crawler = context.crawler as PlaywrightSpider | CheerioSpider;
-  
+
   // Map our 'contextualized' functions to the context object
   Object.assign(context, {
-    prefetchRequest: () => helpers.prefetchRequest(context),
-    saveResource: (data?: Record<string, unknown>) => 
-      helpers.saveResource(context as CombinedContext, data),
+    prefetchRequest: async () => helpers.prefetchRequest(context),
 
-    enqueueUrls: (options?: helpers.UrlDiscoveryOptions) =>
-      helpers.enqueueUrls(context as CombinedContext, options),
+    saveResource: async (data?: Record<string, unknown>) =>
+    helpers.saveResource(context, data),
 
-    findUrls: (options?: helpers.UrlDiscoveryOptions) =>
-      helpers.findUrls(context as CombinedContext, options),
+    enqueueLinks: (options?: urls.UrlDiscoveryOptions) =>
+    urls.enqueue(context, options),
 
-    saveUrls: (links: helpers.HtmlLink[], options?: helpers.UrlDiscoveryOptions) =>
-      helpers.saveUrls(links, context as CombinedContext, options),
+    findUrls: (options?: urls.UrlDiscoveryOptions) =>
+    urls.findUrls(context, options),
 
-    buildRequests: (urls: UniqueUrl[], options?: helpers.UrlDiscoveryOptions) =>
-      helpers.saveRequests(urls, context as CombinedContext, options),
-    
+    saveUrls: (input: urls.HtmlLink[], options?: urls.UrlDiscoveryOptions) =>
+    urls.saveUrls(input, context, options),
+
+    saveRequests: (input: UniqueUrl[], options?: urls.UrlDiscoveryOptions) =>
+    urls.saveRequests(input, context, options),
+
     ...crawler.options,
   });
 
-  helpers.saveCurrentUrl(context);
+  urls.saveCurrentUrl(context);
 }

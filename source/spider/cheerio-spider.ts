@@ -3,25 +3,25 @@ import {
   CheerioCrawlerOptions,
   CheerioCrawlingContext,
   Configuration,
-  createCheerioRouter
-} from "crawlee";
+  createCheerioRouter,
+} from 'crawlee';
 import {
   SpiderOptions,
   buildSpiderOptions,
   hooks,
   helpers,
-  handlers
+  handlers,
 } from './index.js';
 
 type CheerioSpiderOptions = CheerioCrawlerOptions & SpiderOptions;
 
 export class CheerioSpider extends CheerioCrawler {
   options: SpiderOptions;
-  crawlerOptions: CheerioCrawlerOptions
+  crawlerOptions: CheerioCrawlerOptions;
 
   constructor(
     options: Partial<CheerioSpiderOptions> = {},
-    config?: Configuration
+    config?: Configuration,
   ) {
     let {
       storage,
@@ -31,10 +31,10 @@ export class CheerioSpider extends CheerioCrawler {
       urlNormalizer,
       downloadMimeTypes,
       parseMimeTypes,
-    
+
       requestHandler,
       preNavigationHooks,
-      
+
       ...crawlerOptions
     } = options;
 
@@ -42,8 +42,8 @@ export class CheerioSpider extends CheerioCrawler {
       download: handlers.downloadHandler,
       status: handlers.statusHandler,
       page: handlers.defaultHandler,
-      ...requestHandlers ?? {}
-    }
+      ...requestHandlers,
+    };
 
     crawlerOptions.additionalMimeTypes = [
       ...crawlerOptions.additionalMimeTypes ?? [],
@@ -53,15 +53,16 @@ export class CheerioSpider extends CheerioCrawler {
 
     const router = createCheerioRouter();
     router.addDefaultHandler(helpers.wrapHandler<CheerioCrawlingContext>(requestHandlers.page));
-    for (let h in requestHandlers) {
+    for (const h in requestHandlers) {
       router.addHandler(h, helpers.wrapHandler<CheerioCrawlingContext>(requestHandlers[h]));
     }
+
     crawlerOptions.requestHandler = router;
 
     crawlerOptions.preNavigationHooks = [
       hooks.contextBuilder,
       hooks.requestRouter,
-      ...(preNavigationHooks ?? []).map(hook => helpers.wrapHook(hook))
+      ...(preNavigationHooks ?? []).map(hook => helpers.wrapHook(hook)),
     ];
 
     super(crawlerOptions, config);

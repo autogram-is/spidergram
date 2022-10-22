@@ -1,12 +1,12 @@
-import { RespondsWith, Resource } from "../../model/index.js";
-import { CombinedContext } from "../context.js";
+import {RespondsWith, Resource} from '../../model/index.js';
+import {CombinedContext} from '../context.js';
 
 export async function saveResource(
   context: CombinedContext,
-  properties: Record<string, unknown> = {}
+  properties: Record<string, unknown> = {},
 ) {
-  const { storage, requestMeta, request, uniqueUrl } = context;
-  let results: (Resource | RespondsWith)[] = [];
+  const {storage, requestMeta, request, uniqueUrl} = context;
+  const results: Array<Resource | RespondsWith> = [];
 
   // We pull from the requestMeta, since we perform that step
   // before every single request, even if the full load is
@@ -18,7 +18,7 @@ export async function saveResource(
     code: requestMeta?.statusCode ?? -1,
     message: requestMeta!.statusMessage ?? '',
     headers: requestMeta!.headers ?? {},
-    ...properties
+    ...properties,
   }));
 
   // If a uniqueUrl exists in the global context, link the
@@ -30,7 +30,7 @@ export async function saveResource(
       resource: results[0] as Resource,
       redirects: requestMeta?.redirectUrls ?? [],
       method: request.method,
-      headers: request.headers ?? {}
+      headers: request.headers ?? {},
     }));
   }
 
