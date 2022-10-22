@@ -1,28 +1,22 @@
 import { CombinedSpiderContext } from '../context.js';
-import is from '@sindresorhus/is';
 
-export function requestRouter(context: CombinedSpiderContext) {
-  const { request } = context;
+export async function requestRouter(context: CombinedSpiderContext) {
+  const { request, prefetchRequest } = context;
+  const requestMeta = await prefetchRequest();
 
-  return new Promise<void>((resolve, reject) => {
-    if (is.undefined(requestMeta)) {
-      reject(new Error('Url was not requestMetaed.'));
-    }
-    
-    else if (requestMeta.statusCode < 199 || requestMeta.statusCode > 299) {
-      request.label = 'status';
-      request.skipNavigation = true;
-    }
-    
-    // This absolutely won't work
-    else if (context.htmlMimeTypes) {
-      request.label = 'default';
-    }
-    
-    else if (context.downloadableMimeTypes) {
-      request.label = 'download';
-      request.skipNavigation = true;
-    }
-    resolve();
-  });
+  request.skipNavigation = true;
+
+  if (requestMeta.statusCode < 199 || requestMeta.statusCode > 299) {
+    request.label = 'status';
+  }
+  else if (context.htmlMimeTypes) {
+    request.label = 'page';
+    request.skipNavigation = false;
+  }
+  else if (context.downloadableMimeTypes) {
+    request.label = 'download';
+  }
+  else {
+    request.label = 'status';
+  }
 }

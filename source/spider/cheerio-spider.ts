@@ -1,11 +1,19 @@
-import { SpiderOptions, buildSpiderOptions } from './options.js';
-import { SpiderContext } from './context.js';
-import { CheerioCrawler, CheerioCrawlerOptions, CheerioCrawlingContext, Configuration, createCheerioRouter } from 'crawlee';
-import * as handlers from './handlers/index.js';
-import * as helpers from './helpers/index.js';
+import {
+  CheerioCrawler,
+  CheerioCrawlerOptions,
+  CheerioCrawlingContext,
+  Configuration,
+  createCheerioRouter
+} from "crawlee";
+import {
+  SpiderOptions,
+  buildSpiderOptions,
+  hooks,
+  helpers,
+  handlers
+} from './index.js';
 
-export interface CheerioSpiderOptions extends CheerioCrawlerOptions, SpiderOptions {}
-export interface CheerioSpiderContext extends CheerioCrawlingContext, SpiderContext {}
+type CheerioSpiderOptions = CheerioCrawlerOptions & SpiderOptions;
 
 export class CheerioSpider extends CheerioCrawler {
   options: SpiderOptions;
@@ -14,57 +22,45 @@ export class CheerioSpider extends CheerioCrawler {
     options: Partial<CheerioSpiderOptions> = {},
     config?: Configuration
   ) {
-    // Unpack SpiderOptions from CheerioCrawlerOptions; this is important,
-    // because Crawlee errors on unknown options options instead of ignoring.
-    const {
+    let {
       storage,
-      linkSelectors,
-      urlRules,
-      responseRules,
+      requestRouter,
+      requestHandlers,
+      urlDiscoveryOptions,,
       urlNormalizer,
-      skipUnparsableLinks,
-
+    
       requestHandler,
-      failedRequestHandler,
-      errorHandler,
       preNavigationHooks,
-
+      postNavigationHooks,
+      
       ...crawlerOptions
     } = options;
 
+    requestHandlers = {
+      download: handlers.downloadHandler,
+      status: handlers.statusHandler,
+      page: handlers.defaultHandler,
+      ...requestHandlers ?? {}
+    }
+
     const router = createCheerioRouter();
-    router.addDefaultHandler(context => (requestHandler ?? defaultHandler)(context as CheerioSpiderContext));
-    router.addHandler('download', context => handlers.downloadHandler(context as CheerioSpiderContext));
-    router.addHandler('status', context => handlers.statusHandler(context as CheerioSpiderContext));
+    router.addDefaultHandler(helpers.wrapHandler<CheerioCrawlingContext>(requestHandlers.page));
+    for (let h in requestHandlers) {
+      router.addHandler(h, helpers.wrapHandler<CheerioCrawlingContext>(requestHandlers[h]));
+    }
     crawlerOptions.requestHandler = router;
 
-    // Ensure our prenavigation hook gets in first
     crawlerOptions.preNavigationHooks = [
-      (context: CheerioCrawlingContext) => handlers.setup(context, CheerioSpider.context),
-      ...preNavigationHooks ?? []
+      hooks.contextBuilder,
+      hooks.requestRouter,
+      ...(preNavigationHooks ?? []).map(hook => helpers.wrapHook(hook))
+    ];
+
+    crawlerOptions.postNavigationHooks = [
+      ...(postNavigationHooks ?? []).map(hook => helpers.wrapHook<CheerioCrawlingContext>(hook))
     ];
 
     super(crawlerOptions, config);
     this.options = buildSpiderOptions(options);
   }
-}
-
-async function defaultHandler(context: CheerioSpiderContext): Promise<void> {
-  const {request, crawler, $, urlRules, linkSelectors} = context;
-
-  context.resource = await helpers.saveResource(context, { body: $.html() });
-
-  if (request.label === 'parse') {
-    context.resource = await helpers.saveResource(context, { body: $.html() });
-    const q = await crawler.getRequestQueue();
-    for (let link of await helpers.extractLinks($, linkSelectors)) {
-      const newUnique = await helpers.saveLink(link, context);
-      
-      if (newUnique.parsable && urlRules.enqueue(newUnique.parsed!, context)) {
-        await q.addRequest(helpers.uniqueUrlRequest(newUnique));
-      }
-    }
-  }
-
-  return Promise.resolve();
 }

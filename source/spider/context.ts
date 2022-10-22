@@ -16,6 +16,7 @@ export interface SpiderContext extends SpiderOptions {
   $?: cheerio.CheerioAPI | CheerioRoot,
 
   // Helper functions each spider implementation 'contextualizes'
+  prefetchRequest: () => Promise<RequestMeta>,
   saveResource: (data?: Record<string, unknown>) => Promise<Resource>,
   enqueueUrls: (options?: UrlDiscoveryOptions) => Promise<unknown>,
   findUrls: (options?: UrlDiscoveryOptions) => Promise<HtmlLink[]>,
