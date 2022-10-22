@@ -19,7 +19,7 @@ import { CombinedSpiderContext } from '../context.js';
 };
 
 /**
- * @param $ A crawler-appropriate reference to the string, markup, or page to be parsed for links.
+ * @param $ A Cheerio root instance.
  * @param context The overall Crawling context, including the current request, etc.
  * @param options Options to control link enqueueing. 
  */
