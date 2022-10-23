@@ -2,7 +2,7 @@
 import {IncomingHttpHeaders} from 'node:http';
 import {PlaywrightCrawlingContext, CheerioCrawlingContext, Request, CheerioRoot} from 'crawlee';
 import {UniqueUrl, Resource} from '../model/index.js';
-import {EnqueueUrlOptions, HtmlLink} from './urls/index.js';
+import {EnqueueUrlOptions, HtmlLink} from './url-tools/index.js';
 import {SpiderOptions} from './options.js';
 import { Awaitable } from 'crawlee';
 

@@ -3,7 +3,7 @@ import {ArangoStore} from '../arango-store.js';
 import {helpers} from '../index.js';
 import {SpiderHook, requestRouter} from './hooks/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';
-import {EnqueueUrlOptions, UrlMutatorWithContext} from './urls/index.js';
+import {EnqueueUrlOptions, UrlMutatorWithContext} from './url-tools/index.js';
 import {Dictionary, CheerioCrawlerOptions, PlaywrightCrawlerOptions} from 'crawlee';
 import { SupportedContext } from '../index.js';
 

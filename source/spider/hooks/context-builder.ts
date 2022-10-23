@@ -1,7 +1,7 @@
 import {CombinedContext} from '../context.js';
 import {UniqueUrl} from '../../model/index.js';
 import * as helpers from '../helpers/index.js';
-import * as urls from '../urls/index.js';
+import * as urls from '../url-tools/index.js';
 import {PlaywrightSpider} from '../playwright-spider.js';
 import {CheerioSpider} from '../cheerio-spider.js';
 

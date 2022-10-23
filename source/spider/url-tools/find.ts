@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import {CombinedContext} from '../context.js';
 import {EnqueueUrlOptions, buildEnqueueUrlOptions, HtmlLink} from './index.js';
 
-export async function findUrls(
+export async function find(
   context: CombinedContext,
   customOptions: Partial<EnqueueUrlOptions> = {},
 ) {

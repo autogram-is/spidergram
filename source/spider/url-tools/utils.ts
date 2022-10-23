@@ -1,7 +1,7 @@
-import {RequestQueue, EnqueueStrategy} from 'crawlee';
-import {ParsedUrl, NormalizedUrl} from '@autogram/url-tools';
+import {RequestQueue, EnqueueStrategy, RequestTransform} from 'crawlee';
+import {ParsedUrl} from '@autogram/url-tools';
 import {SpiderContext, CombinedContext} from '../../index.js';
-import { RegExpInput, GlobInput } from 'crawlee';
+import {FilterInput} from './index.js';
 
 export async function buildEnqueueUrlOptions(
   context: CombinedContext,
@@ -17,22 +17,19 @@ export async function buildEnqueueUrlOptions(
   };
 }
 
-export type FilterInput = RegExpInput | GlobInput | UrlFilterWithContext;
-export type MultiFilterInput = RegExpInput[] | GlobInput[] | UrlFilterWithContext[];
-
 export interface EnqueueUrlOptions {
-  limit?: number,
-  selector?: string,
-  baseUrl?: string,
-  strategy?: EnqueueStrategy,
-  save?: FilterInput | MultiFilterInput,
-  enqueue?: FilterInput | MultiFilterInput,
+  limit?: number;
+  selector?: string;
+  baseUrl?: string;
+  strategy?: EnqueueStrategy;
+  filter?: FilterInput;
   requestQueue?: RequestQueue;
   skipUnparsableLinks?: boolean;
   skipEmptyLinks?: boolean;
   skipAnchors?: boolean;
   label?: string;
   normalizer: UrlMutatorWithContext;
+  transformRequestFunction?: RequestTransform;
 }
 
 export type UrlMutatorWithContext<T = unknown> = (
@@ -40,24 +37,17 @@ export type UrlMutatorWithContext<T = unknown> = (
   context?: SpiderContext
 ) => ParsedUrl;
 
-export type UrlFilterWithContext = (
-  found: ParsedUrl,
-  context?: SpiderContext
-) => boolean;
-
 const urlDiscoveryDefaultOptions: Omit<EnqueueUrlOptions, 'requestQueue'> = {
-  selector: 'a',
   limit: Number.POSITIVE_INFINITY,
-  filters: [],
-  globs: [],
-  regexps: [],
+  selector: 'a',
+  baseUrl: undefined,
+  filter: EnqueueStrategy.SameDomain,
   skipUnparsableLinks: false,
   skipEmptyLinks: true,
   skipAnchors: true,
-  userData: {},
-  baseUrl: '',
-  strategy: EnqueueStrategy.SameDomain,
-  normalizer: NormalizedUrl.normalizer,
+  label: undefined,
+  normalizer: (url) => url,
+  transformRequestFunction: undefined,
 };
 
 /**
