@@ -1,18 +1,12 @@
 import is from '@sindresorhus/is';
 import {CombinedContext} from '../context.js';
-import {UrlDiscoveryOptions, buildUrlDiscoveryOptions, HtmlLink} from './index.js';
-
-/**
- * @param $ A Cheerio root instance.
- * @param context The overall Crawling context, including the current request, etc.
- * @param options Options to control link enqueueing.
- */
+import {EnqueueUrlOptions, buildEnqueueUrlOptions, HtmlLink} from './index.js';
 
 export async function findUrls(
   context: CombinedContext,
-  customOptions: Partial<UrlDiscoveryOptions> = {},
+  customOptions: Partial<EnqueueUrlOptions> = {},
 ) {
-  const options = await buildUrlDiscoveryOptions(context, customOptions);
+  const options = await buildEnqueueUrlOptions(context, customOptions);
   const {label, selector, skipAnchors, skipEmptyLinks} = options;
   const {$} = context;
 

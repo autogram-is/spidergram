@@ -1,37 +1,36 @@
-import {EnqueueLinksOptions, RequestQueue, EnqueueStrategy} from 'crawlee';
+import {RequestQueue, EnqueueStrategy} from 'crawlee';
 import {ParsedUrl, NormalizedUrl} from '@autogram/url-tools';
 import {SpiderContext, CombinedContext} from '../../index.js';
+import { RegExpInput, GlobInput } from 'crawlee';
 
-export async function buildUrlDiscoveryOptions(
+export async function buildEnqueueUrlOptions(
   context: CombinedContext,
-  options: Partial<UrlDiscoveryOptions> = {},
-  internalOverrides: Partial<UrlDiscoveryOptions> = {},
-): Promise<UrlDiscoveryOptions> {
+  options: Partial<EnqueueUrlOptions> = {},
+  internalOverrides: Partial<EnqueueUrlOptions> = {},
+): Promise<EnqueueUrlOptions> {
   return {
     requestQueue: await context.crawler.getRequestQueue(),
     ...urlDiscoveryDefaultOptions,
-    ...context.urlDiscoveryOptions,
+    ...context.EnqueueUrlOptions,
     ...options,
     ...internalOverrides,
   };
 }
 
-type SupportedEnqueueOptions = Pick<EnqueueLinksOptions,
-'limit' |
-'selector' |
-'userData' |
-'baseUrl' |
-'globs' |
-'regexps' |
-'strategy'
->;
+export type FilterInput = RegExpInput | GlobInput | UrlFilterWithContext;
+export type MultiFilterInput = RegExpInput[] | GlobInput[] | UrlFilterWithContext[];
 
-export interface UrlDiscoveryOptions extends SupportedEnqueueOptions {
-  filters: UrlFilterWithContext[];
-  requestQueue: RequestQueue;
-  skipUnparsableLinks: boolean;
-  skipEmptyLinks: boolean;
-  skipAnchors: boolean;
+export interface EnqueueUrlOptions {
+  limit?: number,
+  selector?: string,
+  baseUrl?: string,
+  strategy?: EnqueueStrategy,
+  save?: FilterInput | MultiFilterInput,
+  enqueue?: FilterInput | MultiFilterInput,
+  requestQueue?: RequestQueue;
+  skipUnparsableLinks?: boolean;
+  skipEmptyLinks?: boolean;
+  skipAnchors?: boolean;
   label?: string;
   normalizer: UrlMutatorWithContext;
 }
@@ -46,7 +45,7 @@ export type UrlFilterWithContext = (
   context?: SpiderContext
 ) => boolean;
 
-const urlDiscoveryDefaultOptions: Omit<UrlDiscoveryOptions, 'requestQueue'> = {
+const urlDiscoveryDefaultOptions: Omit<EnqueueUrlOptions, 'requestQueue'> = {
   selector: 'a',
   limit: Number.POSITIVE_INFINITY,
   filters: [],

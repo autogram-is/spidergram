@@ -2,7 +2,7 @@
 import {IncomingHttpHeaders} from 'node:http';
 import {PlaywrightCrawlingContext, CheerioCrawlingContext, Request, CheerioRoot} from 'crawlee';
 import {UniqueUrl, Resource} from '../model/index.js';
-import {UrlDiscoveryOptions, HtmlLink} from './urls/index.js';
+import {EnqueueUrlOptions, HtmlLink} from './urls/index.js';
 import {SpiderOptions} from './options.js';
 import { Awaitable } from 'crawlee';
 
@@ -19,10 +19,10 @@ export interface SpiderContext<Context extends SupportedContext = SupportedConte
   // Helper functions each spider implementation 'contextualizes'
   prefetchRequest: () => Promise<RequestMeta>;
   saveResource: (data?: Record<string, unknown>) => Promise<Resource>;
-  enqueueLinks: (options?: UrlDiscoveryOptions) => Promise<unknown>;
-  findUrls: (options?: UrlDiscoveryOptions) => Promise<HtmlLink[]>;
-  saveUrls: (links: HtmlLink[], options?: UrlDiscoveryOptions) => Promise<UniqueUrl[]>;
-  saveRequests: (urls: UniqueUrl[], options?: UrlDiscoveryOptions) => Promise<Request[]>;
+  enqueueLinks: (options?: EnqueueUrlOptions) => Promise<unknown>;
+  findUrls: (options?: EnqueueUrlOptions) => Promise<HtmlLink[]>;
+  saveUrls: (links: HtmlLink[], options?: EnqueueUrlOptions) => Promise<UniqueUrl[]>;
+  saveRequests: (urls: UniqueUrl[], options?: EnqueueUrlOptions) => Promise<Request[]>;
 }
 
 export interface RequestMeta {

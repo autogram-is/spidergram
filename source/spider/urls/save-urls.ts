@@ -1,14 +1,14 @@
 import {CombinedContext} from '../context.js';
 import {UniqueUrl, LinksTo} from '../../model/index.js';
-import {HtmlLink, UrlDiscoveryOptions, buildUrlDiscoveryOptions} from './index.js';
+import {HtmlLink, EnqueueUrlOptions, buildEnqueueUrlOptions} from './index.js';
 
 export async function saveUrl(
   link: HtmlLink,
   context: CombinedContext,
-  customOptions: Partial<UrlDiscoveryOptions> = {},
+  customOptions: Partial<EnqueueUrlOptions> = {},
 ) {
   const {storage, uniqueUrl, resource} = context;
-  const options = await buildUrlDiscoveryOptions(context, customOptions);
+  const options = await buildEnqueueUrlOptions(context, customOptions);
 
   const uu = new UniqueUrl({
     url: link.href,
@@ -44,7 +44,7 @@ export async function saveUrl(
 export async function saveUrls(
   links: HtmlLink[],
   context: CombinedContext,
-  customOptions: Partial<UrlDiscoveryOptions> = {},
+  customOptions: Partial<EnqueueUrlOptions> = {},
 ) {
   return Promise.all(links.map(async link => saveUrl(link, context, customOptions)));
 }

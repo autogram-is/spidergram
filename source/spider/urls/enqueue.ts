@@ -1,11 +1,11 @@
 import {CombinedContext} from '../context.js';
-import {UrlDiscoveryOptions, buildUrlDiscoveryOptions, findUrls, saveUrls, saveRequests} from './index.js';
+import {EnqueueUrlOptions, buildEnqueueUrlOptions, findUrls, saveUrls, saveRequests} from './index.js';
 
 export async function enqueue(
   context: CombinedContext,
-  customOptions: Partial<UrlDiscoveryOptions> = {},
+  customOptions: Partial<EnqueueUrlOptions> = {},
 ) {
-  const options = await buildUrlDiscoveryOptions(context, customOptions);
+  const options = await buildEnqueueUrlOptions(context, customOptions);
   return findUrls(context, options)
     .then(async links => saveUrls(links, context, options))
     .then(async urls => saveRequests(urls, context, options));

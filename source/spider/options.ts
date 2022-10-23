@@ -3,7 +3,7 @@ import {ArangoStore} from '../arango-store.js';
 import {helpers} from '../index.js';
 import {SpiderHook, requestRouter} from './hooks/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';
-import {UrlDiscoveryOptions, UrlMutatorWithContext} from './urls/index.js';
+import {EnqueueUrlOptions, UrlMutatorWithContext} from './urls/index.js';
 import {Dictionary, CheerioCrawlerOptions, PlaywrightCrawlerOptions} from 'crawlee';
 import { SupportedContext } from '../index.js';
 
@@ -14,7 +14,7 @@ export interface SpiderOptions<Context extends SupportedContext = SupportedConte
   storage: ArangoStore;
   requestRouter: SpiderHook<Context>;
   requestHandlers: Record<string, SpiderRequestHandler<Context>>;
-  urlDiscoveryOptions: Partial<UrlDiscoveryOptions>;
+  EnqueueUrlOptions: Partial<EnqueueUrlOptions>;
   urlNormalizer: UrlMutatorWithContext;
   parseMimeTypes: string[];
   downloadMimeTypes: string[];
@@ -35,7 +35,7 @@ const defaultSpiderOptions: SpiderOptions = {
   storage: await ArangoStore.open(),
   requestRouter: requestRouter,
   requestHandlers: {},
-  urlDiscoveryOptions: {},
+  EnqueueUrlOptions: {},
   urlNormalizer: url => UrlMutators.defaultNormalizer(url),
   parseMimeTypes: helpers.mimeGroups.page,
   downloadMimeTypes: helpers.mimeGroups.data,

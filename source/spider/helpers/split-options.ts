@@ -7,7 +7,7 @@ export function splitOptions<CrawlerOptions extends SupportedOptions, Context ex
     storage,
     requestRouter,
     requestHandlers,
-    urlDiscoveryOptions,
+    EnqueueUrlOptions,
     urlNormalizer,
     downloadMimeTypes,
     parseMimeTypes,
