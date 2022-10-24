@@ -74,8 +74,8 @@ await new Listr<Ctx>([
     title: 'Report generation',
     async task(ctx, task) {
       const queries: Record<string, AqlQuery> = {
-        Pages: LinkSummaries.pages(),
-        Errors: LinkSummaries.errors(),
+        'Pages': LinkSummaries.pages(),
+        'Errors': LinkSummaries.errors(),
         'Malformed URLs': LinkSummaries.malformed(),
         'Non-Web URLs': LinkSummaries.excludeProtocol(),
         'External Links': LinkSummaries.outlinks([ctx.targetDomain]),

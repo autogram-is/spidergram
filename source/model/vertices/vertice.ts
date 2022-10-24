@@ -30,18 +30,6 @@ export function isVertice(value: unknown): value is Vertice {
 }
 
 export abstract class Vertice {
-  [property: string]: unknown;
-  _key: Uuid = UuidFactory.nil;
-
-  @Exclude({ toPlainOnly: true, toClassOnly: false })
-    _id!: string;
-
-  @Exclude({ toPlainOnly: false, toClassOnly: true })
-  readonly _collection!: string;
-
-  @Exclude({ toPlainOnly: true, toClassOnly: false })
-    _rev?: string;
-
   static readonly types = new Map<string, CollectionMeta>();
 
   static idFromReference(r: Reference): string {
@@ -57,6 +45,18 @@ export abstract class Vertice {
       return r.id;
     }
   }
+  
+  [property: string]: unknown;
+  _key: Uuid = UuidFactory.nil;
+
+  @Exclude({ toPlainOnly: true, toClassOnly: false })
+    _id!: string;
+
+  @Exclude({ toPlainOnly: false, toClassOnly: true })
+  readonly _collection!: string;
+
+  @Exclude({ toPlainOnly: true, toClassOnly: false })
+    _rev?: string;
 
   // The data passed into Vertice constructors should consist of fully
   // instantiated objects of the correct classes; unlike fromJSON(),

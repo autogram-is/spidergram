@@ -57,13 +57,6 @@ export class UrlHierarchy implements HierarchyBuilder<UniqueUrl, IsChildOf> {
     throw new Error('Not yet implemented.');
   }
 
-  // Sort them by our magic 'sortable key' value; this ensures that
-  // popping the last item will always produce the most distant
-  // leaf nodes possible.
-  protected sort() {
-    this.pool.sort((a: UniqueUrl, b: UniqueUrl): number => this.sortKey(a.parsed!).localeCompare(this.sortKey(b.parsed!)));
-  }
-
   async buildRelationships(customOptions: Partial<UrlHierarchyOptions> = {}) {
     const {urlToSortable, createParent, ...config} = customOptions;
 
@@ -105,51 +98,6 @@ export class UrlHierarchy implements HierarchyBuilder<UniqueUrl, IsChildOf> {
     // load all vertices mentioned in the relationships
     // build them into tree form
     throw new Error('Not yet implemented');
-  }
-
-  private findParent(
-    url: ParsedUrl,
-    options: UrlHierarchyOptions,
-    distance = 1,
-  ): UniqueUrl | undefined {
-    const maxDistance = options.fillGaps ? Math.min(options.maxParentDistance, this.urlToSortable(url).length) : 1;
-    let parent = this.pool.find(candidate => this.isDirectParent(url, candidate.parsed!));
-
-    if (is.undefined(parent)) {
-      if (distance >= maxDistance) {
-        return undefined;
-      }
-
-      return this.findParent(url, options, ++distance);
-    }
-
-    if (options.fillGaps && distance > 1) {
-      parent = this.connectToAncestor(url, parent.parsed!);
-    }
-
-    return parent;
-  }
-
-  private connectToAncestor(child: ParsedUrl, ancestor: ParsedUrl): UniqueUrl | undefined {
-    const newUrls: UniqueUrl[] = [];
-
-    for (
-      let parent = this.createParent(child);
-      (parent && this.urlCompare(parent, ancestor) > 0);
-      parent = this.createParent(child)
-    ) {
-      newUrls.push(new UniqueUrl({
-        url: parent.href,
-        source: UrlSource.Path,
-        normalizer: url => url,
-      }));
-    }
-
-    this.data.new.push(...newUrls);
-    this.pool.push(...newUrls);
-    this.sort();
-
-    return newUrls[0];
   }
 
   async save() {
@@ -213,5 +161,57 @@ export class UrlHierarchy implements HierarchyBuilder<UniqueUrl, IsChildOf> {
     }
 
     return components;
+  }
+
+  // Sort them by our magic 'sortable key' value; this ensures that
+  // popping the last item will always produce the most distant
+  // leaf nodes possible.
+  protected sort() {
+    this.pool.sort((a: UniqueUrl, b: UniqueUrl): number => this.sortKey(a.parsed!).localeCompare(this.sortKey(b.parsed!)));
+  }
+
+  protected findParent(
+    url: ParsedUrl,
+    options: UrlHierarchyOptions,
+    distance = 1,
+  ): UniqueUrl | undefined {
+    const maxDistance = options.fillGaps ? Math.min(options.maxParentDistance, this.urlToSortable(url).length) : 1;
+    let parent = this.pool.find(candidate => this.isDirectParent(url, candidate.parsed!));
+
+    if (is.undefined(parent)) {
+      if (distance >= maxDistance) {
+        return undefined;
+      }
+
+      return this.findParent(url, options, ++distance);
+    }
+
+    if (options.fillGaps && distance > 1) {
+      parent = this.connectToAncestor(url, parent.parsed!);
+    }
+
+    return parent;
+  }
+
+  protected connectToAncestor(child: ParsedUrl, ancestor: ParsedUrl): UniqueUrl | undefined {
+    const newUrls: UniqueUrl[] = [];
+
+    for (
+      let parent = this.createParent(child);
+      (parent && this.urlCompare(parent, ancestor) > 0);
+      parent = this.createParent(child)
+    ) {
+      newUrls.push(new UniqueUrl({
+        url: parent.href,
+        source: UrlSource.Path,
+        normalizer: url => url,
+      }));
+    }
+
+    this.data.new.push(...newUrls);
+    this.pool.push(...newUrls);
+    this.sort();
+
+    return newUrls[0];
   }
 }

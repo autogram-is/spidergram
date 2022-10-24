@@ -18,7 +18,7 @@ export async function save(
       url: link.href,
       base: uniqueUrl?.url,
       referer: uniqueUrl?.url,
-      depth: (uniqueUrl !== undefined) ? uniqueUrl.depth + 1 : 0,
+      depth: (uniqueUrl === undefined) ? 0 : uniqueUrl.depth + 1,
       normalizer: options.normalizer,
     });
 
