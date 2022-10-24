@@ -11,7 +11,13 @@ export async function save(
   const options = await ensureOptions(context, customOptions);
   const input = is.array(links) ? links : [links];
   const {storage, uniqueUrl, resource} = context;
-  const results: UniqueUrl[] = [];
+  const results: {
+    uniques: Array<UniqueUrl>,
+    links: Array<LinksTo>,
+  } = {
+    uniques: [],
+    links: []
+  };
 
   for (const link of input) {
     const uu = new UniqueUrl({
@@ -35,8 +41,7 @@ export async function save(
       continue;
     }
 
-    results.push(uu);
-    await storage.push(uu, false);
+    results.uniques.push(uu);
 
     if (resource !== undefined) {
       const lt = new LinksTo({
@@ -44,11 +49,13 @@ export async function save(
         resource,
         ...link,
       });
-      await storage.push(lt);
+      results.links.push(lt);
     }
   }
 
-  return results;
+  return storage.push(results.uniques, false)
+    .then(() => storage.push(results.links))
+    .then(() => results.uniques)
 }
 
 export async function saveCurrentUrl(context: CombinedContext): Promise<void> {
