@@ -15,17 +15,19 @@ export async function enqueue(
   const queue = options.requestQueue ?? await context.crawler.getRequestQueue();
   const requests: Request[] = [];
   for (const uu of input) {
-    if (uu.parsable && filter(context, uu, options.enqueue)) {
 
-      if ()
+    // Unparsable and non-web URLs can't be crawled; even if they're not
+    // flagged in the URL Discovery Options, we'll toss them as we filter.
+    if (!uu.parsable) continue;
+    if (!['https:', 'https:'].includes(uu.parsed!.protocol.toLowerCase())) continue;
+    if (!filter(context, uu, options.enqueue)) continue;
 
-      requests.push(new Request({
-        url: uu.url,
-        uniqueKey: uu.key,
-        userData: { fromUniqueUrl: true },
-        headers: {referer: uu.referer ?? ''},
-      }));
-    }
+    requests.push(new Request({
+      url: uu.url,
+      uniqueKey: uu.key,
+      userData: { fromUniqueUrl: true },
+      headers: {referer: uu.referer ?? ''},
+    }));
   }
 
   return queue.addRequests(requests);

@@ -21,8 +21,9 @@ export async function find(
       $(selector).each((i, element) => {
         const {href, ...attributes} = $(element).attr();
         if (
-          !((is.undefined(href) || is.emptyStringOrWhitespace(href)) && skipEmptyLinks)
-          && !(href.startsWith('#') && skipAnchors)
+          !(skipEmptyLinks && is.undefined(href)) &&
+          !(skipEmptyLinks && is.emptyStringOrWhitespace(href)) &&
+          !(skipAnchors && href.startsWith('#'))
         ) {
           results.push({
             href,

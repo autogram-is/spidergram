@@ -13,7 +13,6 @@ export async function save(
   const {storage, uniqueUrl, resource} = context;
   const results: UniqueUrl[] = [];
 
-  // filter the urls for acceptability before saving and linking them
   for (let link of input) {
     const uu = new UniqueUrl({
       url: link.href,
@@ -23,10 +22,9 @@ export async function save(
       normalizer: options.normalizer
     });
 
+    // Run each URL through a few gauntlets
     if (options.skipUnparsableLinks && is.undefined(uu.parsed)) continue;
-
-    if (options.skipNonWebLinks && !['https:', 'https:'].includes(uu.parsed!.protocol.toLowerCase()) continue;
-  
+    if (options.skipNonWebLinks && !['https:', 'https:'].includes(uu.parsed!.protocol.toLowerCase())) continue;
     if (!filter(context, uu, options.save)) continue;
 
     results.push(uu);
