@@ -27,6 +27,7 @@ export interface SpiderContext<Context extends SupportedContext = SupportedConte
 
 export interface RequestMeta {
   url: string;
+  method?: string;
   redirectUrls?: URL[];
   headers: IncomingHttpHeaders;
   statusMessage?: string;

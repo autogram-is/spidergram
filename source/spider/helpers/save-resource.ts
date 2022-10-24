@@ -5,7 +5,7 @@ export async function saveResource(
   context: CombinedContext,
   properties: Record<string, unknown> = {},
 ) {
-  const {storage, requestMeta, request, uniqueUrl} = context;
+  const {storage, requestMeta, uniqueUrl, request} = context;
   const results: Array<Resource | RespondsWith> = [];
 
   // We pull from the requestMeta, since we perform that step
@@ -27,10 +27,10 @@ export async function saveResource(
   if (uniqueUrl !== undefined) {
     results.push(new RespondsWith({
       url: context.uniqueUrl,
+      method: request.method,
       resource: results[0] as Resource,
       redirects: requestMeta?.redirectUrls ?? [],
-      method: request.method,
-      headers: request.headers ?? {},
+      headers: requestMeta?.headers ?? {},
     }));
   }
 
