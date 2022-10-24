@@ -3,7 +3,7 @@ import * as fs from 'node:fs';
 import {Readable} from 'node:stream';
 import is from '@sindresorhus/is';
 import * as XLSX from 'xlsx';
-import {JsonPrimitive} from './types';
+import {JsonPrimitive} from 'type-fest';
 
 XLSX.set_fs(fs);
 XLSX.stream.set_readable(Readable);

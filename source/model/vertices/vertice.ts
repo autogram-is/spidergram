@@ -11,7 +11,7 @@ import {
   TargetMap,
 } from 'class-transformer';
 import {Uuid, UuidFactory} from '../helpers/uuid.js';
-import {JsonObject} from '../../types.js';
+import {JsonObject} from 'type-fest';
 
 export {Transform, Exclude} from 'class-transformer';
 export type Reference<T extends Vertice = Vertice> = T | [ string, Uuid ] | string;

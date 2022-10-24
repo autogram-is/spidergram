@@ -2,7 +2,7 @@ import {GeneratedAqlQuery} from 'arangojs/aql';
 import {aql} from 'arangojs';
 import is from '@sindresorhus/is';
 import {ParsedUrl} from '@autogram/url-tools';
-import {JsonObject} from '../../types.js';
+import {JsonObject} from 'type-fest';
 import {ArangoStore} from '../../arango-store.js';
 import {UniqueUrl, IsChildOf, UrlSource} from '../../model/index.js';
 import {HierarchyBuilder, HierarchyData} from './index.js';

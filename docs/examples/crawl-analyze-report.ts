@@ -8,7 +8,7 @@ import {AqlQuery, aql} from 'arangojs/aql.js';
 import {Listr} from 'listr2';
 import {ArangoStore} from '../../source/arango-store.js';
 import {CheerioSpider} from '../../source/spider/cheerio-spider.js';
-import {JsonObject} from '../../source/types.js';
+import {JsonObject} from 'type-fest';
 
 // Assorted parsing helpers
 import {ProcessOptions, processResources, getMeta} from '../../source/analysis/index.js';
