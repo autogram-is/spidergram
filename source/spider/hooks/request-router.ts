@@ -2,12 +2,14 @@ import {CombinedContext} from '../context.js';
 import {helpers} from '../index.js';
 
 export async function requestRouter(context: CombinedContext): Promise<void> {
-  const {request, prefetchRequest, downloadMimeTypes, parseMimeTypes} = context;
+  const {log, request, prefetchRequest, downloadMimeTypes, parseMimeTypes} = context;
   const requestMeta = await prefetchRequest();
 
   // Our big point of differentiation here is content-type; 
   // URL based checks are already performed by the time we enqueue.
   const {type} = helpers.parseContentType(requestMeta);
+
+  log.info(`${request.url}: ${type} (HTTP ${requestMeta.statusCode})`)
 
   // For a lot of cases, we can skip the full load and treat it as
   // a simple status check. 
@@ -31,4 +33,7 @@ export async function requestRouter(context: CombinedContext): Promise<void> {
     // but that would be a fairly rare case.
     request.label = 'download';
   }
+
+  log.info(`${request.url}: ${request.label}`)
+
 }

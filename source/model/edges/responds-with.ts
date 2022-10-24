@@ -9,7 +9,7 @@ export type RespondsWithData<F extends Vertice = UniqueUrl, T extends Vertice = 
 };
 
 export class RespondsWith<F extends Vertice = UniqueUrl, T extends Vertice = Resource> extends Edge<F, T> {
-  override readonly _collection = 'responds_with';
+  readonly _collection = 'responds_with';
   method!: string;
   headers!: Record<string, string | string[] | undefined>;
   redirects!: string[];

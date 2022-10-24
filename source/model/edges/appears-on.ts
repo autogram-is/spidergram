@@ -7,7 +7,7 @@ export type AppearsOnData<F extends Vertice = Vertice, T extends Vertice = Resou
 };
 
 export class AppearsOn<F extends Vertice = Vertice, T extends Vertice = Resource> extends Edge<F, T> {
-  override readonly _collection = 'appears_on';
+  readonly _collection = 'appears_on';
   context!: string;
 
   constructor(data: AppearsOnData<F, T> = {}) {

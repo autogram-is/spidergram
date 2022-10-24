@@ -53,7 +53,7 @@ export abstract class Vertice {
     _id!: string;
 
   @Exclude({ toPlainOnly: false, toClassOnly: true })
-  readonly _collection!: string;
+  abstract readonly _collection: string;
 
   @Exclude({ toPlainOnly: true, toClassOnly: false })
     _rev?: string;

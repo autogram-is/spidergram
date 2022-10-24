@@ -10,7 +10,7 @@ export type ResourceData = {
 } & VerticeData;
 
 export class Resource extends Vertice {
-  override readonly _collection  ='resources';
+  readonly _collection = 'resources';
   url!: string;
   code!: number;
   message!: string;
