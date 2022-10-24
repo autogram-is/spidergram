@@ -9,8 +9,6 @@ export async function requestRouter(context: CombinedContext): Promise<void> {
   // URL based checks are already performed by the time we enqueue.
   const {type} = helpers.parseContentType(requestMeta);
 
-  log.info(`${request.url}: ${type} (HTTP ${requestMeta.statusCode})`)
-
   // For a lot of cases, we can skip the full load and treat it as
   // a simple status check. 
   request.skipNavigation = true;
@@ -28,12 +26,11 @@ export async function requestRouter(context: CombinedContext): Promise<void> {
     request.label = 'page';
     request.skipNavigation = false;
     
-  } else if (downloadMimeTypes.includes(type)) {
+  } else if (downloadMimeTypes.includes(type) && false) {
     // Technically we can't parse AND download with this setup,
     // but that would be a fairly rare case.
     request.label = 'download';
   }
 
-  log.info(`${request.url}: ${request.label}`)
-
+  log.info(`${request.url}: ${request.label} (HTTP ${requestMeta.statusCode}, ${type})`)
 }

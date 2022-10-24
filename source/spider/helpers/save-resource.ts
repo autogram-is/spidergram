@@ -30,7 +30,7 @@ export async function saveResource(
       method: request.method,
       resource: results[0] as Resource,
       redirects: requestMeta?.redirectUrls ?? [],
-      headers: requestMeta?.headers ?? {},
+      headers: request.headers ?? {},
     }));
   }
 

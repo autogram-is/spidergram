@@ -55,7 +55,7 @@ export function fileExtensionFromHeaders(
 }
 
 export const mimeGroups = {
-  page: ['text/html', 'application/xhtml+xml'],
+  page: ['text/html'],
   pdf: ['application/pdf'],
   document: [
     'text/plain',
@@ -116,6 +116,7 @@ export const mimeGroups = {
     'application/atom+xml',
     'text/rss+xml',
     'application/rss+xml',
+    'application/xhtml+xml',
   ],
   ebook: [
     'application/epub+zip',
