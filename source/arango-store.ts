@@ -6,6 +6,8 @@ import {DocumentMetadata} from 'arangojs/documents.js';
 import {DocumentCollection} from 'arangojs/collection.js';
 import {Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn} from './model/index.js';
 
+export {aql, AqlQuery} from 'arangojs/aql';
+
 export class ArangoStore {
   protected static _systemDb?: Database;
   constructor(protected _activeDb: Database) {}
