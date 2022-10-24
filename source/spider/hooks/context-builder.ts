@@ -1,7 +1,7 @@
 import {CombinedContext} from '../context.js';
 import {UniqueUrl} from '../../model/index.js';
 import * as helpers from '../helpers/index.js';
-import * as urls from '../url-tools/index.js';
+import * as urls from '../links/index.js';
 import {PlaywrightSpider} from '../playwright-spider.js';
 import {CheerioSpider} from '../cheerio-spider.js';
 
@@ -16,16 +16,16 @@ export async function contextBuilder(context: CombinedContext): Promise<void> {
       helpers.saveResource(context, data),
 
     enqueueLinks: (options?: urls.EnqueueUrlOptions) =>
-      urls.enqueue(context, options),
+      urls.enqueueLinks(context, options),
 
-    findUrls: (options?: urls.EnqueueUrlOptions) =>
-      urls.findUrls(context, options),
+    findLinks: (options?: urls.EnqueueUrlOptions) =>
+      urls.find(context, options),
 
-    saveUrls: (input: urls.HtmlLink[], options?: urls.EnqueueUrlOptions) =>
-      urls.saveUrls(input, context, options),
+    saveLinks: (input: urls.AnchorTagData[], options?: urls.EnqueueUrlOptions) =>
+      urls.save(context, input, options),
 
     saveRequests: (input: UniqueUrl[], options?: urls.EnqueueUrlOptions) =>
-      urls.saveRequests(input, context, options),
+      urls.enqueue(context, input, options),
 
     ...crawler.spiderOptions,
   });

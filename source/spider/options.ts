@@ -1,9 +1,8 @@
-import {UrlMutators} from '@autogram/url-tools';
 import {ArangoStore} from '../arango-store.js';
 import {helpers} from '../index.js';
 import {SpiderHook, requestRouter} from './hooks/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';
-import {EnqueueUrlOptions, UrlMutatorWithContext} from './url-tools/index.js';
+import {EnqueueUrlOptions} from './links/index.js';
 import {Dictionary, CheerioCrawlerOptions, PlaywrightCrawlerOptions} from 'crawlee';
 import { SupportedContext } from '../index.js';
 
@@ -14,8 +13,7 @@ export interface SpiderOptions<Context extends SupportedContext = SupportedConte
   storage: ArangoStore;
   requestRouter: SpiderHook<Context>;
   requestHandlers: Record<string, SpiderRequestHandler<Context>>;
-  EnqueueUrlOptions: Partial<EnqueueUrlOptions>;
-  urlNormalizer: UrlMutatorWithContext;
+  urlOptions: Partial<EnqueueUrlOptions>;
   parseMimeTypes: string[];
   downloadMimeTypes: string[];
 }
@@ -35,8 +33,7 @@ const defaultSpiderOptions: SpiderOptions = {
   storage: await ArangoStore.open(),
   requestRouter: requestRouter,
   requestHandlers: {},
-  EnqueueUrlOptions: {},
-  urlNormalizer: url => UrlMutators.defaultNormalizer(url),
+  urlOptions: {},
   parseMimeTypes: helpers.mimeGroups.page,
   downloadMimeTypes: helpers.mimeGroups.data,
 };

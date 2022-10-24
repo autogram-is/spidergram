@@ -1,17 +1,22 @@
 import is from '@sindresorhus/is';
 import {CombinedContext} from '../context.js';
-import {EnqueueUrlOptions, buildEnqueueUrlOptions, HtmlLink} from './index.js';
+import {EnqueueUrlOptions, ensureOptions, AnchorTagData} from './index.js';
 
 export async function find(
   context: CombinedContext,
-  customOptions: Partial<EnqueueUrlOptions> = {},
+  customOptions?: Partial<EnqueueUrlOptions>,
 ) {
-  const options = await buildEnqueueUrlOptions(context, customOptions);
-  const {label, selector, skipAnchors, skipEmptyLinks} = options;
+  const options = await ensureOptions(context, customOptions);
+  const {
+    label,
+    selector,
+    skipAnchors,
+    skipEmptyLinks
+  } = options;
   const {$} = context;
 
-  return new Promise<HtmlLink[]>(resolve => {
-    const results: HtmlLink[] = [];
+  return new Promise<AnchorTagData[]>(resolve => {
+    const results: AnchorTagData[] = [];
     if (!is.undefined($)) {
       $(selector).each((i, element) => {
         const {href, ...attributes} = $(element).attr();
