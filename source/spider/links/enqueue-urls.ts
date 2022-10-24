@@ -29,13 +29,17 @@ export async function enqueue(
       continue;
     }
 
-    requests.push(new Request({
-      url: uu.url,
-      uniqueKey: uu.key,
-      userData: {fromUniqueUrl: true},
-      headers: {referer: uu.referer ?? ''},
-    }));
+    requests.push(uniqueUrlToRequest(uu));
   }
 
-  return queue.addRequests(requests);
+  return queue.addRequests(requests.slice(0, options.limit));
+}
+
+export function uniqueUrlToRequest(uu: UniqueUrl): Request {
+  return new Request({
+    url: uu.url,
+    uniqueKey: uu.key,
+    userData: {fromUniqueUrl: true},
+    headers: {referer: uu.referer ?? ''},
+  });
 }

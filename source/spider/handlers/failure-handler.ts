@@ -1,7 +1,7 @@
 import {RespondsWith, Resource} from '../../index.js';
 import {CombinedContext} from '../context.js';
 
-export async function failure(context: CombinedContext, error: Error) {
+export async function failureHandler(context: CombinedContext, error: Error) {
   const {storage, request, uniqueUrl} = context;
 
   const rs = new Resource({

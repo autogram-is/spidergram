@@ -8,3 +8,4 @@ export * from './edges/links-to.js';
 export * from './edges/is-child-of.js';
 export * from './edges/is-variant-of.js';
 export * from './edges/appears-on.js';
+export * from './helpers/index.js';

@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import {
   PlaywrightCrawler,
   PlaywrightCrawlerOptions,
@@ -5,6 +6,9 @@ import {
   Configuration,
   createPlaywrightRouter,
   playwrightUtils,
+  CrawlerAddRequestsOptions,
+  RequestOptions,
+  FinalStatistics
 } from 'crawlee';
 import {
   SpiderOptions,
@@ -15,8 +19,12 @@ import {
   helpers,
   contextualizeHandler,
   contextualizeHook,
+  uniqueUrlToRequest
 } from './index.js';
+import { UniqueUrl, UniqueUrlSet } from '../model/index.js';
+import { NormalizedUrl } from '@autogram/url-tools';
 
+type AddRequestValue = string | Request | RequestOptions | NormalizedUrl | UniqueUrl;
 type PlaywrightSpiderOptions = PlaywrightCrawlerOptions & SpiderOptions;
 type PlaywrightSpiderContext = PlaywrightCrawlingContext & SpiderContext;
 
@@ -56,10 +64,38 @@ export class PlaywrightSpider extends PlaywrightCrawler {
       ...(crawler.postNavigationHooks ?? []).map(hook => contextualizeHook<PlaywrightCrawlingContext>(hook)),
     ];
 
+    crawler.failedRequestHandler ??= contextualizeHandler<PlaywrightCrawlingContext>(handlers.failureHandler);
+
     super(crawler, config);
 
     this.spiderOptions = buildSpiderOptions(spider);
     this.crawlerOptions = crawler;
+  }
+
+  override async run(
+    requests: AddRequestValue | AddRequestValue[] = [],
+    options?: CrawlerAddRequestsOptions
+  ): Promise<FinalStatistics> {
+    // If only a single value came in, turn it into an array.
+    requests = is.array(requests) ? requests : [requests];
+
+    // Normalize and deduplicate any incoming requests.
+    const uniques = new UniqueUrlSet(undefined, undefined, this.spiderOptions.urlOptions.normalizer);
+    for (const value of requests) {
+      if (is.string(value) || is.urlInstance(value) || value instanceof UniqueUrl ) {
+        uniques.add(value);
+      } else if (value instanceof Request) {
+        uniques.add(value.url);
+      } else if ('url' in value && is.string(value.url)) {
+        uniques.add(value.url)
+      }
+    }
+  
+    await this.spiderOptions.storage.push([...uniques])
+    const queue = await this.getRequestQueue();
+    await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)), options);
+  
+    return super.run();
   }
 }
 

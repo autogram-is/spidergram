@@ -165,6 +165,20 @@ export class ArangoStore {
     return Promise.all(promises);
   }
 
+  async erase(targetCollections?: string | string[], eraseAll = false) {
+    return this.db.collections(true)
+      .then(
+        collections => collections.forEach(collection => {
+          if (
+            (is.string(targetCollections) && collection.name === targetCollections)
+            || (is.array<string>(targetCollections) && targetCollections.includes(collection.name))
+            || eraseAll
+          )
+          collection.truncate();
+        })
+      );
+  }
+
   // Two quick helpers that eliminate unecessary property traversal
   get query() {
     return this.db.query.bind(this.db);
