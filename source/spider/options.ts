@@ -1,10 +1,10 @@
+import {Dictionary, CheerioCrawlerOptions, PlaywrightCrawlerOptions} from 'crawlee';
 import {ArangoStore} from '../arango-store.js';
 import {helpers} from '../index.js';
+import {SupportedContext} from '../index.js';
 import {SpiderHook, requestRouter} from './hooks/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';
 import {EnqueueUrlOptions} from './links/index.js';
-import {Dictionary, CheerioCrawlerOptions, PlaywrightCrawlerOptions} from 'crawlee';
-import { SupportedContext } from '../index.js';
 
 export type SupportedOptions = CheerioCrawlerOptions | PlaywrightCrawlerOptions;
 export type CombinedOptions = SupportedOptions & SpiderOptions;
@@ -31,7 +31,7 @@ export function buildSpiderOptions<Context extends SupportedContext = SupportedC
 
 const defaultSpiderOptions: SpiderOptions = {
   storage: await ArangoStore.open(),
-  requestRouter: requestRouter,
+  requestRouter,
   requestHandlers: {},
   urlOptions: {},
   parseMimeTypes: helpers.mimeGroups.page,

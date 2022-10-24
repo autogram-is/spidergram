@@ -28,7 +28,7 @@ export class PlaywrightSpider extends PlaywrightCrawler {
     options: Partial<PlaywrightSpiderOptions> = {},
     config?: Configuration,
   ) {
-    const { crawler, spider } = helpers.splitOptions<PlaywrightCrawlerOptions, PlaywrightCrawlingContext>(options);
+    const {crawler, spider} = helpers.splitOptions<PlaywrightCrawlerOptions, PlaywrightCrawlingContext>(options);
 
     spider.requestHandlers = {
       download: handlers.downloadHandler,
@@ -42,6 +42,7 @@ export class PlaywrightSpider extends PlaywrightCrawler {
     for (const h in spider.requestHandlers) {
       router.addHandler(h, contextualizeHandler<PlaywrightCrawlingContext>(spider.requestHandlers[h]));
     }
+
     crawler.requestHandler = router;
 
     crawler.preNavigationHooks = [

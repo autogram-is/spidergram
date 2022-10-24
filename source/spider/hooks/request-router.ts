@@ -18,6 +18,4 @@ export async function requestRouter(context: CombinedContext): Promise<void> {
   } else {
     request.label = 'status';
   }
-  
-  return Promise.resolve();
 }

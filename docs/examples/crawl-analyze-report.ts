@@ -6,9 +6,9 @@ import readability from 'readability-scores';
 import * as XLSX from 'xlsx';
 import {AqlQuery, aql} from 'arangojs/aql.js';
 import {Listr} from 'listr2';
+import {JsonObject} from 'type-fest';
 import {ArangoStore} from '../../source/arango-store.js';
 import {CheerioSpider} from '../../source/spider/cheerio-spider.js';
-import {JsonObject} from 'type-fest';
 
 // Assorted parsing helpers
 import {ProcessOptions, processResources, getMeta} from '../../source/analysis/index.js';
@@ -74,8 +74,8 @@ await new Listr<Ctx>([
     title: 'Report generation',
     async task(ctx, task) {
       const queries: Record<string, AqlQuery> = {
-        'Pages': LinkSummaries.pages(),
-        'Errors': LinkSummaries.errors(),
+        Pages: LinkSummaries.pages(),
+        Errors: LinkSummaries.errors(),
         'Malformed URLs': LinkSummaries.malformed(),
         'Non-Web URLs': LinkSummaries.excludeProtocol(),
         'External Links': LinkSummaries.outlinks([ctx.targetDomain]),

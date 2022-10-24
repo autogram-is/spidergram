@@ -15,16 +15,16 @@ export async function contextBuilder(context: CombinedContext): Promise<void> {
     saveResource: async (data?: Record<string, unknown>) =>
       helpers.saveResource(context, data),
 
-    enqueueLinks: (options?: urls.EnqueueUrlOptions) =>
+    enqueueLinks: async (options?: urls.EnqueueUrlOptions) =>
       urls.enqueueLinks(context, options),
 
-    findLinks: (options?: urls.EnqueueUrlOptions) =>
+    findLinks: async (options?: urls.EnqueueUrlOptions) =>
       urls.find(context, options),
 
-    saveLinks: (input: urls.AnchorTagData[], options?: urls.EnqueueUrlOptions) =>
+    saveLinks: async (input: urls.AnchorTagData[], options?: urls.EnqueueUrlOptions) =>
       urls.save(context, input, options),
 
-    saveRequests: (input: UniqueUrl[], options?: urls.EnqueueUrlOptions) =>
+    saveRequests: async (input: UniqueUrl[], options?: urls.EnqueueUrlOptions) =>
       urls.enqueue(context, input, options),
 
     ...crawler.spiderOptions,

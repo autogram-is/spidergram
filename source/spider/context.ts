@@ -1,10 +1,10 @@
 
 import {IncomingHttpHeaders} from 'node:http';
 import {PlaywrightCrawlingContext, CheerioCrawlingContext, Request, CheerioRoot} from 'crawlee';
+import {Awaitable} from 'crawlee';
 import {UniqueUrl, Resource} from '../model/index.js';
 import {EnqueueUrlOptions, AnchorTagData} from './links/index.js';
 import {SpiderOptions} from './options.js';
-import { Awaitable } from 'crawlee';
 
 export type SupportedContext = PlaywrightCrawlingContext | CheerioCrawlingContext;
 export type CombinedContext = SpiderContext & SupportedContext;

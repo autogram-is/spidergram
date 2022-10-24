@@ -9,11 +9,11 @@ const targetDomain = 'https://example.com';
 log.setLevel(log.LEVELS.ERROR);
 
 const spider = new PlaywrightSpider({
-  storage: storage,
-  failedRequestHandler: (context, error) => {
+  storage,
+  failedRequestHandler(context, error) {
     log.error(`Failure error: ${error.message}`);
   },
-  errorHandler: (inputs, error) => {
+  errorHandler(inputs, error) {
     log.error(`Retry error: ${error.message}`);
   },
   autoscaledPoolOptions: {

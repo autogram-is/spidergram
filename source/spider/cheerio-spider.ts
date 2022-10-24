@@ -22,10 +22,9 @@ export class CheerioSpider extends CheerioCrawler {
 
   constructor(
     options: Partial<Cheeriospider> = {},
-    config?: Configuration
+    config?: Configuration,
   ) {
-
-    const { crawler, spider } = helpers.splitOptions<CheerioCrawlerOptions, CheerioCrawlingContext>(options);
+    const {crawler, spider} = helpers.splitOptions<CheerioCrawlerOptions, CheerioCrawlingContext>(options);
 
     spider.requestHandlers = {
       download: handlers.downloadHandler,
@@ -45,6 +44,7 @@ export class CheerioSpider extends CheerioCrawler {
     for (const h in spider.requestHandlers) {
       router.addHandler(h, contextualizeHandler<CheerioCrawlingContext>(spider.requestHandlers[h]));
     }
+
     crawler.requestHandler = router;
 
     crawler.preNavigationHooks = [

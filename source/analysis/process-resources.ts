@@ -3,9 +3,9 @@ import * as cheerio from 'cheerio';
 import {GeneratedAqlQuery, aql} from 'arangojs/aql.js';
 import {DocumentMetadata} from 'arangojs/documents.js';
 import is from '@sindresorhus/is';
+import {JsonObject} from 'type-fest';
 import {Resource} from '../model/index.js';
 import {ArangoStore} from '../arango-store.js';
-import {JsonObject} from 'type-fest';
 
 export type ProcessOptions = Record<string, (r: Resource, root?: cheerio.Root) => unknown>;
 

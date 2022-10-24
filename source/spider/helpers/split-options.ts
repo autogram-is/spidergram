@@ -3,7 +3,7 @@ import {SupportedOptions, SpiderOptions, SupportedContext, buildSpiderOptions} f
 export function splitOptions<CrawlerOptions extends SupportedOptions, Context extends SupportedContext>(
   options: Partial<CrawlerOptions & SpiderOptions> = {},
 ) {
-  let {
+  const {
     storage,
     requestRouter,
     requestHandlers,
@@ -18,5 +18,5 @@ export function splitOptions<CrawlerOptions extends SupportedOptions, Context ex
   return {
     spider: buildSpiderOptions(options),
     crawler: crawlerOptions as CrawlerOptions,
-  }
+  };
 }

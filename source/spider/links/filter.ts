@@ -1,23 +1,28 @@
 import is from '@sindresorhus/is';
-import {CombinedContext} from '../index.js';
 import {EnqueueStrategy} from 'crawlee';
 import {ParsedUrl} from '@autogram/url-tools';
-import {UniqueUrl} from '../../model/index.js';
 import minimatch from 'minimatch';
+import {UniqueUrl} from '../../model/index.js';
+import {CombinedContext} from '../index.js';
 
-export function filter (
+export function filter(
   context: CombinedContext,
   input: UniqueUrl | ParsedUrl,
-  filters: Filter | Filter[]
+  filters: Filter | Filter[],
 ): boolean {
   const incomingUrl = (input instanceof UniqueUrl) ? input.parsed : input;
-  if (is.undefined(incomingUrl)) return false;
+  if (is.undefined(incomingUrl)) {
+    return false;
+  }
 
   filters = (is.array(filters)) ? filters : [filters];
 
   for (const filter of filters) {
-    if (!singleFilter(context, incomingUrl, filter)) return false;
+    if (!singleFilter(context, incomingUrl, filter)) {
+      return false;
+    }
   }
+
   return true;
 }
 
@@ -28,28 +33,31 @@ function singleFilter(context: CombinedContext, url: ParsedUrl, filter: Filter):
     // We're much lazier than crawlee, and ignore ugly IP address scenarios.
     switch (filter) {
       case EnqueueStrategy.SameDomain:
-        if (currentUrl === undefined) return false;
+        if (currentUrl === undefined) {
+          return false;
+        }
+
         return url.domain === currentUrl.domain;
       case EnqueueStrategy.SameHostname:
-        if (currentUrl === undefined) return false;
+        if (currentUrl === undefined) {
+          return false;
+        }
+
         return url.hostname === currentUrl.hostname;
       default:
         return true;
     }
-
   } else if (is.string(filter)) {
-    // treat it as a glob to match against the url's href
+    // Treat it as a glob to match against the url's href
     return minimatch(url.href, filter);
-
   } else if (is.regExp(filter)) {
-    // this is extremely naive; we should rip off crawlee's handling, but this will do for now..
+    // This is extremely naive; we should rip off crawlee's handling, but this will do for now..
     return url.href.match(filter) !== null;
-
   } else if (is.function_(filter)) {
-    // this hood old fashioned Spidergram UrlFilter function stuff.
+    // This hood old fashioned Spidergram UrlFilter function stuff.
     return filter(url, context);
   }
-  
+
   return false;
 }
 
@@ -60,9 +68,9 @@ export type FilterableLink = UniqueUrl | ParsedUrl;
 export type FilterInput = Filter | Filter[];
 export type Filter = string | RegExp | UrlFilterWithContext | EnqueueStrategy;
 export type FilterSet = Record<string, FilterInput> & {
-  save?: FilterInput,
-  enqueue?: FilterInput,
-}
+  save?: FilterInput;
+  enqueue?: FilterInput;
+};
 
 export type UrlFilterWithContext = (
   found: ParsedUrl,

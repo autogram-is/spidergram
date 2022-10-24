@@ -5,20 +5,20 @@ import {FilterInput} from './index.js';
 
 export async function ensureOptions(
   context: CombinedContext,
-  options: Partial<EnqueueUrlOptions> = {}
+  options: Partial<EnqueueUrlOptions> = {},
 ): Promise<EnqueueUrlOptions> {
   if (options._built) {
     return options as EnqueueUrlOptions;
-  } else {
-    const results = {
-      requestQueue: await context.crawler.getRequestQueue(),
-      ...urlDiscoveryDefaultOptions,
-      ...context.urlOptions,
-      ...options,
-      _built: true,
-    };
-    return results;
   }
+
+  const results = {
+    requestQueue: await context.crawler.getRequestQueue(),
+    ...urlDiscoveryDefaultOptions,
+    ...context.urlOptions,
+    ...options,
+    _built: true,
+  };
+  return results;
 }
 
 export interface EnqueueUrlOptions {
@@ -29,7 +29,7 @@ export interface EnqueueUrlOptions {
   skipUnparsableLinks: boolean;
   skipEmptyLinks: boolean;
   skipAnchors: boolean;
-  skipNonWebLinks: boolean,
+  skipNonWebLinks: boolean;
   normalizer: UrlMutatorWithContext;
   transformRequestFunction?: RequestTransform;
   baseUrl?: string;
@@ -55,7 +55,7 @@ const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
   normalizer: (url, context) => NormalizedUrl.normalizer(url),
 };
 
- export type AnchorTagData = {
+export type AnchorTagData = {
   href: string;
   selector?: string;
   label?: string;

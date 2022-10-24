@@ -13,19 +13,27 @@ export async function save(
   const {storage, uniqueUrl, resource} = context;
   const results: UniqueUrl[] = [];
 
-  for (let link of input) {
+  for (const link of input) {
     const uu = new UniqueUrl({
       url: link.href,
       base: uniqueUrl?.url,
       referer: uniqueUrl?.url,
       depth: (uniqueUrl !== undefined) ? uniqueUrl.depth + 1 : 0,
-      normalizer: options.normalizer
+      normalizer: options.normalizer,
     });
 
     // Run each URL through a few gauntlets
-    if (options.skipUnparsableLinks && is.undefined(uu.parsed)) continue;
-    if (options.skipNonWebLinks && !['https:', 'https:'].includes(uu.parsed!.protocol.toLowerCase())) continue;
-    if (!filter(context, uu, options.save)) continue;
+    if (options.skipUnparsableLinks && is.undefined(uu.parsed)) {
+      continue;
+    }
+
+    if (options.skipNonWebLinks && !['https:', 'https:'].includes(uu.parsed!.protocol.toLowerCase())) {
+      continue;
+    }
+
+    if (!filter(context, uu, options.save)) {
+      continue;
+    }
 
     results.push(uu);
     await storage.push(uu, false);
@@ -40,7 +48,7 @@ export async function save(
     }
   }
 
-  return Promise.resolve(results);
+  return results;
 }
 
 export async function saveCurrentUrl(context: CombinedContext): Promise<void> {
@@ -54,6 +62,4 @@ export async function saveCurrentUrl(context: CombinedContext): Promise<void> {
     context.uniqueUrl = new UniqueUrl({url: context.request.url});
     await context.storage.push(context.uniqueUrl, false);
   }
-
-  return Promise.resolve();
 }

@@ -8,6 +8,6 @@ export async function enqueueLinks(
 ) {
   const options = await ensureOptions(context, customOptions);
   return find(context, options)
-    .then(links => save(context, links, options))
-    .then(urls => enqueue(context, urls, options));
+    .then(async links => save(context, links, options))
+    .then(async urls => enqueue(context, urls, options));
 }
