@@ -22,7 +22,7 @@ export class RespondsWith<F extends Vertice = UniqueUrl, T extends Vertice = Res
 
     super(dataForSuper);
 
-    this.method = method ?? 'GET';
+    this.method = method ?? 'UNKNOWN';
     this.headers = headers ?? {};
     this.redirects = redirects?.map(url => url.toString()) ?? [];
   }

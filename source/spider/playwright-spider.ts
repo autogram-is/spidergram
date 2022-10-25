@@ -64,7 +64,8 @@ export class PlaywrightSpider extends PlaywrightCrawler {
       ...(crawler.postNavigationHooks ?? []).map(hook => contextualizeHook<PlaywrightCrawlingContext>(hook)),
     ];
 
-    crawler.failedRequestHandler ??= contextualizeHandler<PlaywrightCrawlingContext>(handlers.failureHandler);
+    // This doesn't receive our properly-populated CrawlingContext; deal with that later.
+    // crawler.failedRequestHandler ??= contextualizeHandler<PlaywrightCrawlingContext>(handlers.failureHandler);
 
     super(crawler, config);
 
@@ -91,7 +92,7 @@ export class PlaywrightSpider extends PlaywrightCrawler {
       }
     }
   
-    await this.spiderOptions.storage.push([...uniques])
+    await this.spiderOptions.storage.push([...uniques], false);
     const queue = await this.getRequestQueue();
     await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)), options);
   

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import {Request} from 'crawlee';
+import {Dictionary, Request} from 'crawlee';
 import {UniqueUrl} from '../../model/index.js';
 import {CombinedContext} from '../context.js';
 import {EnqueueUrlOptions, ensureOptions, filter} from './index.js';
@@ -35,11 +35,16 @@ export async function enqueue(
   return queue.addRequests(requests.slice(0, options.limit));
 }
 
-export function uniqueUrlToRequest(uu: UniqueUrl): Request {
-  return new Request({
+export function uniqueUrlToRequest(uu: UniqueUrl, userData: Dictionary = {}): Request {
+  
+  const r = new Request({
     url: uu.url,
     uniqueKey: uu.key,
-    userData: {fromUniqueUrl: true},
-    headers: {referer: uu.referer ?? ''},
+    userData: {
+      ...userData,
+      fromUniqueUrl: true
+    }
   });
+  if (uu.referer) r.headers = {referer: uu.referer};
+  return r;
 }

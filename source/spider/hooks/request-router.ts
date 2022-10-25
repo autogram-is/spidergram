@@ -26,7 +26,7 @@ export async function requestRouter(context: CombinedContext): Promise<void> {
     request.label = 'page';
     request.skipNavigation = false;
     
-  } else if (downloadMimeTypes.includes(type) && false) {
+  } else if (downloadMimeTypes.includes(type)) {
     // Technically we can't parse AND download with this setup,
     // but that would be a fairly rare case.
     request.label = 'download';

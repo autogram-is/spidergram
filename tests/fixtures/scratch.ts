@@ -6,15 +6,11 @@ const project = 'example';
 const storage = await ArangoStore.open(project);
 await storage.erase(undefined, true);
 
-const domains = [
-  'https://karenmcgrane.com',
-  'https://ethanmarcotte.com',
-  'https://eaton.fyi',
-  'https://autogram.is',
-  'https://angrylittletree.com'
+const seedUrls = [
+  'https://angrylittletree.com/atom.xml'
 ];
 
-log.setLevel(log.LEVELS.DEBUG);
+log.setLevel(log.LEVELS.INFO);
 
 const spider = new PlaywrightSpider({
   storage,
@@ -23,6 +19,6 @@ const spider = new PlaywrightSpider({
     maxTasksPerMinute: 60,
   },
 });
-const c = await spider.run(domains);
+const c = await spider.run(seedUrls);
 
 console.log(c);

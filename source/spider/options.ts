@@ -34,5 +34,10 @@ const defaultSpiderOptions: SpiderOptions = {
   requestHandlers: {},
   urlOptions: {},
   parseMimeTypes: helpers.mimeGroups.page,
-  downloadMimeTypes: helpers.mimeGroups.data,
+  downloadMimeTypes: [
+    ...helpers.mimeGroups.data,
+    ...helpers.mimeGroups.document,
+    ...helpers.mimeGroups.spreadsheet,
+    ...helpers.mimeGroups.pdf,
+  ],
 };

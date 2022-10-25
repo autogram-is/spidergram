@@ -27,14 +27,13 @@ export async function saveResource(
   if (uniqueUrl !== undefined) {
     results.push(new RespondsWith({
       url: context.uniqueUrl,
-      method: request.method,
+      method: context.response ? request.method : requestMeta?.method ?? 'UNKNOWN',
       resource: results[0] as Resource,
       redirects: requestMeta?.redirectUrls ?? [],
       headers: request.headers ?? {},
     }));
   }
 
-  // There's probably a better tuple-y way to do this; for
-  // now, it works.
+  // There's probably a better way to do this; for now, it works.
   return storage.push(results).then(() => results[0] as Resource);
 }

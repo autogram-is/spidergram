@@ -6,7 +6,7 @@ import {DocumentMetadata} from 'arangojs/documents.js';
 import {DocumentCollection} from 'arangojs/collection.js';
 import {Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn} from './model/index.js';
 
-export {aql, AqlQuery} from 'arangojs/aql';
+export {aql} from 'arangojs';
 
 export class ArangoStore {
   protected static _systemDb?: Database;
@@ -131,14 +131,14 @@ export class ArangoStore {
     for (const vertice of input) {
       if (!isEdge(vertice)) {
         promises.push(this.db.collection(vertice._collection)
-          .save(vertice.toJSON(), {overwriteMode}));
+          .save(vertice.toJSON(), {overwriteMode: overwriteMode}));
       }
     }
 
     for (const edge of input) {
       if (isEdge(edge)) {
         promises.push(this.db.collection(edge._collection)
-          .save(edge.toJSON(), {overwriteMode}));
+          .save(edge.toJSON(), {overwriteMode: overwriteMode}));
       }
     }
 
