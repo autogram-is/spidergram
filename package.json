@@ -63,6 +63,7 @@
   },
   "dependencies": {
     "@autogram/url-tools": "^2.2.0",
+    "@google-analytics/data": "^3.1.0",
     "@sindresorhus/is": "^5.3.0",
     "@types/content-type": "^1.1.5",
     "@types/jsonfile": "^6.1.0",

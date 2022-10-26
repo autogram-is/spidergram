@@ -119,15 +119,18 @@ export const LinkSummaries = {
   `;
   },
 
-  requestUrlMismatch() {
+  redirects() {
     return aql`
-      for u in unique_urls
-      for rw in responds_with
+    for u in unique_urls
+    for rw in responds_with
         FILTER u._id == rw._from
         for r in resources
-          FILTER rw._to == r._id
-          FILTER r.url != u.url
-          return { requested: u.url, returned: r.url }
-  `;
-  },
+            FILTER rw._to == r._id
+            FILTER r.url != u.url
+            LET redirects = LENGTH(rw.redirects)
+            SORT redirects DESC
+            return { requested: u.url, returned: r.url, redirects: redirects }
+  `},
+
+  
 };
