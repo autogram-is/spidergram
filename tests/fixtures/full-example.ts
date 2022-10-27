@@ -6,7 +6,7 @@ import {Listr} from 'listr2';
 import {ArangoStore} from '../../source/arango-store.js';
 import {PlaywrightSpider} from '../../source/spider/index.js';
 import {ProcessOptions, processResources} from '../../source/analysis/index.js';
-import {Spreadsheet, RowData} from '../../source/spreadsheet.js';
+import {Spreadsheet, RowData} from '../../source/reports/spreadsheet.js';
 
 // Assorted parsing helpers
 import {getMeta} from '../../source/analysis/index.js';
