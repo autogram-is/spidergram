@@ -14,19 +14,19 @@ export interface VisuzlizationOptions {
 
 export class Visualization {
   dom: JSDOM;
-  selector: string;
+  selector?: string;
   document: Document;
-  window: Window & typeof globalThis | null
   element: d3.Selection<HTMLElement, unknown, d3.BaseType, unknown>;
 
   constructor (public options: VisuzlizationOptions = {}) {
     this.dom = new JSDOM(options.html);
     this.document = this.dom.window.document;
     this.element = d3.select(this.document.body);
+    this.selector = options.selector;
     if (options.selector) this.element = this.element.select(options.selector);
   }
 
-  fixXmlCase(text: string) {
+  protected fixXmlCase(text: string) {
     // Fix a jsdom issue where all SVG tagNames are lowercased:
     // https://github.com/tmpvar/jsdom/issues/620
     const tagNames = ['linearGradient', 'radialGradient', 'clipPath', 'textPath'];
@@ -63,12 +63,16 @@ export class Visualization {
     return svg;
   }
 
-  svgString() {
+  toSvg() {
     return this.fixXmlCase(this.element.select<SVGElement>('svg').node()?.outerHTML ?? '');
   }
 
-  html() {
+  toHtml() {
     return this.dom.serialize();
+  }
+
+  toPng() {
+    
   }
 
   chartHTML() {
@@ -78,7 +82,7 @@ export class Visualization {
     return '';
   }
 
-  escapeStyles(styles?: string) {
+  protected escapeStyles(styles?: string) {
     return `<![CDATA[ ${styles} ]]>`;
   }
 }
