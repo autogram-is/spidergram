@@ -3,6 +3,7 @@ export * from './vertices/vertice.js';
 export * from './edges/edge.js';
 export * from './vertices/unique-url.js';
 export * from './vertices/resource.js';
+export * from './vertices/dataset.js';
 export * from './edges/responds-with.js';
 export * from './edges/links-to.js';
 export * from './edges/is-child-of.js';
