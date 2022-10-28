@@ -23,6 +23,7 @@ import {
 } from './index.js';
 import { UniqueUrl, UniqueUrlSet } from '../model/index.js';
 import { NormalizedUrl } from '@autogram/url-tools';
+import arrify from 'arrify';
 
 type AddRequestValue = string | Request | RequestOptions | NormalizedUrl | UniqueUrl;
 type PlaywrightSpiderOptions = PlaywrightCrawlerOptions & SpiderOptions;
@@ -78,7 +79,7 @@ export class PlaywrightSpider extends PlaywrightCrawler {
     options?: CrawlerAddRequestsOptions
   ): Promise<FinalStatistics> {
     // If only a single value came in, turn it into an array.
-    requests = is.array(requests) ? requests : [requests];
+    requests = arrify(requests);
 
     // Normalize and deduplicate any incoming requests.
     const uniques = new UniqueUrlSet(undefined, undefined, this.spiderOptions.urlOptions.normalizer);

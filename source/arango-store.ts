@@ -5,6 +5,7 @@ import {Database} from 'arangojs';
 import {DocumentMetadata} from 'arangojs/documents.js';
 import {DocumentCollection} from 'arangojs/collection.js';
 import {Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn} from './model/index.js';
+import arrify from 'arrify';
 
 export {aql} from 'arangojs';
 
@@ -122,9 +123,7 @@ export class ArangoStore {
   async push(input: Vertice | Vertice[], overwrite = true): Promise<DocumentMetadata[]> {
     const promises: Array<Promise<DocumentMetadata>> = [];
     const overwriteMode = (overwrite) ? 'replace' : 'ignore';
-    if (!is.array(input)) {
-      input = [input];
-    }
+    input = arrify(input);
 
     // To ensure we don't have any premature reference insertions, we
     // save all vertices before saving edges.
@@ -147,9 +146,7 @@ export class ArangoStore {
 
   async delete(input: Vertice | Vertice[]) {
     const promises: Array<Promise<DocumentMetadata>> = [];
-    if (!is.array(input)) {
-      input = [input];
-    }
+    input = arrify(input);
 
     // When bulk deleting, remove edges first.
     for (const edge of input) {
@@ -173,7 +170,7 @@ export class ArangoStore {
         collections => collections.forEach(collection => {
           if (
             (is.string(targetCollections) && collection.name === targetCollections)
-            || (is.array<string>(targetCollections) && targetCollections.includes(collection.name))
+            || (is.array<string>(targetCollections) && arrify(targetCollections).includes(collection.name))
             || eraseAll
           )
           collection.truncate();

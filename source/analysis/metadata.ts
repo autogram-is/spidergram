@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import arrify from 'arrify';
 import * as cheerio from 'cheerio';
 import {
   Property,
@@ -60,13 +61,7 @@ function appendProperty(
 
   if (is.undefined(currentProp)) {
     setProperty(object, path, value);
-  } else if (is.array(currentProp)) {
-    if (is.array(value)) {
-      setProperty(object, path, [...currentProp, ...value]);
-    } else {
-      setProperty(object, path, [...currentProp, value]);
-    }
   } else {
-    setProperty(object, path, [currentProp, value]);
+    setProperty(object, path, [...arrify(currentProp), ...arrify(value)]);
   }
 }

@@ -4,6 +4,7 @@ import {ParsedUrl} from '@autogram/url-tools';
 import minimatch from 'minimatch';
 import {UniqueUrl} from '../../model/index.js';
 import {CombinedContext} from '../index.js';
+import arrify from 'arrify';
 
 export function filter(
   context: CombinedContext,
@@ -15,9 +16,7 @@ export function filter(
     return false;
   }
 
-  filters = (is.array(filters)) ? filters : [filters];
-
-  for (const filter of filters) {
+  for (const filter of arrify(filters)) {
     if (!singleFilter(context, incomingUrl, filter)) {
       return false;
     }

@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import arrify from 'arrify';
 import {CombinedContext} from '../context.js';
 import {UniqueUrl, LinksTo} from '../../model/index.js';
 import {AnchorTagData, EnqueueUrlOptions, filter, ensureOptions} from './index.js';
@@ -9,7 +10,6 @@ export async function save(
   customOptions: Partial<EnqueueUrlOptions> = {},
 ) {
   const options = await ensureOptions(context, customOptions);
-  const input = is.array(links) ? links : [links];
   const {storage, uniqueUrl, resource} = context;
   const results: {
     uniques: Array<UniqueUrl>,
@@ -19,7 +19,7 @@ export async function save(
     links: []
   };
 
-  for (const link of input) {
+  for (const link of arrify(links)) {
     const uu = new UniqueUrl({
       url: link.href,
       base: uniqueUrl?.url,
