@@ -1,5 +1,5 @@
 import {Dictionary, CheerioCrawlerOptions, PlaywrightCrawlerOptions} from 'crawlee';
-import {ArangoStore} from '../arango-store.js';
+import {ArangoStore} from '../services/arango-store.js';
 import {SupportedContext, helpers} from '../index.js';
 import {SpiderHook, requestRouter} from './hooks/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';

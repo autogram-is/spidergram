@@ -1,5 +1,5 @@
 import {log} from 'crawlee';
-import {ArangoStore} from '../../source/arango-store.js';
+import {ArangoStore} from '../../source/services/arango-store.js';
 import {PlaywrightSpider} from '../../source/spider/index.js';
 
 const project = 'example';
