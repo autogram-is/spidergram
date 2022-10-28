@@ -20,7 +20,7 @@ type KeyData = {
   }
 }
 
-export class GoogleAuthWrapper {
+export class SimpleAuth {
   private static async loadJson<T>(file: string) {
     return fs.readFile(file)
       .then(buffer => buffer.toString())
@@ -37,14 +37,14 @@ export class GoogleAuthWrapper {
       const scopes = arrify(scope);
 
       // Load the google key and token files
-      const keys = await GoogleAuthWrapper.loadJson<KeyData>(keyFilePath);
+      const keys = await SimpleAuth.loadJson<KeyData>(keyFilePath);
       const {client_secret, client_id, redirect_uris} = keys.installed;
       const client = new OAuth2Client(
         client_id, client_secret, redirect_uris[0]
       );
 
       const token = await this.loadJson<Credentials>(tokenFilePath)
-        .catch(err => GoogleAuthWrapper.getNewToken(client, keys, scopes));
+        .catch(err => SimpleAuth.getNewToken(client, keys, scopes));
       
       // Write it back out, as the token data might be updated with
       // new expiry dates, etc.
