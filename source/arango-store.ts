@@ -4,7 +4,7 @@ import {Config} from 'arangojs/connection.js';
 import {Database} from 'arangojs';
 import {DocumentMetadata} from 'arangojs/documents.js';
 import {DocumentCollection} from 'arangojs/collection.js';
-import {Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn} from './model/index.js';
+import {Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn, DataSet} from './model/index.js';
 import arrify from 'arrify';
 
 export {aql} from 'arangojs';
@@ -95,7 +95,7 @@ export class ArangoStore {
 
   static async initialize(database: Database, erase = false): Promise<Database> {
     // Ugly shim to ensure all of our entity types are present before initializing.
-    const includedTypes = [UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn];
+    const includedTypes = [UniqueUrl, RespondsWith, Resource, DataSet, LinksTo, IsChildOf, IsVariantOf, AppearsOn];
     assert(includedTypes.length > 0);
 
     const promises: Array<Promise<DocumentCollection>> = [];
