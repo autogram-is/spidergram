@@ -1,1 +1,1 @@
-export * from '../integration/google-auth-wrapper.js';
+export * as Google from './google/index.js';
