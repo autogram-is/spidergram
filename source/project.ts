@@ -1,6 +1,6 @@
 import { ArangoStore } from "./model/arango-store.js";
 import { Config as ArangoConfig } from 'arangojs/connection';
-import { Storage as FileStore, Configuration as FileConfiguration } from 'typefs';
+import { Storage as FileStore, Configuration as FileConfiguration, TDiskDriver } from 'typefs';
 import * as dotenv from 'dotenv'
 dotenv.config()
 
@@ -45,7 +45,7 @@ export class Project {
   private static _instance?: Project;
 
   graph!: ArangoStore;
-  files!: FileStore;
+  files!: TDiskDriver;
 
   private constructor(readonly configuration: ProjectConfig) {}
 
@@ -58,7 +58,7 @@ export class Project {
 
 			project.graph = await ArangoStore.open(config.graph?.databaseName ?? config.name, config.graph);		
 			FileStore.config = configWithDefaults.files;
-			project.files = FileStore.getInstance();
+			project.files = FileStore.disk();
 
 			return project;
 		}
