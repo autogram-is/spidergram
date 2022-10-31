@@ -95,7 +95,7 @@
     "reflect-metadata": "^0.1.13",
     "server-destroy": "^1.0.1",
     "type-fest": "^3.1.0",
-    "typefs": "^1.1.144",
+    "typefs": "^1.1.147",
     "uuid": "^9.0.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.18.12/xlsx-0.18.12.tgz"
   }
