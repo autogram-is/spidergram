@@ -3,7 +3,7 @@ import {aql} from 'arangojs';
 import is from '@sindresorhus/is';
 import {ParsedUrl} from '@autogram/url-tools';
 import {JsonObject} from 'type-fest';
-import {ArangoStore} from '../../services/arango-store.js';
+import {ArangoStore} from '../../model/arango-store.js';
 import {UniqueUrl, IsChildOf, UrlSource} from '../../model/index.js';
 import {HierarchyBuilder, HierarchyData} from './index.js';
 

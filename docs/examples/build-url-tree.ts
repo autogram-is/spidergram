@@ -1,4 +1,4 @@
-import {ArangoStore} from '../../source/services/arango-store.js';
+import {ArangoStore} from '../../source/model/arango-store.js';
 import {UrlHierarchy} from '../../source/analysis/hierarchy/url-hierarchy.js';
 
 const storage = await ArangoStore.open();

@@ -3,7 +3,7 @@ import {htmlToText} from 'html-to-text';
 import readability from 'readability-scores';
 import {AqlQuery, aql} from 'arangojs/aql.js';
 import {Listr} from 'listr2';
-import {ArangoStore} from '../../source/services/arango-store.js';
+import {ArangoStore} from '../../source/model/arango-store.js';
 import {PlaywrightSpider} from '../../source/spider/index.js';
 import {ProcessOptions, processResources} from '../../source/analysis/index.js';
 import {Spreadsheet, RowData} from '../../source/reports/spreadsheet.js';

@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 import {AqlQuery, aql} from 'arangojs/aql.js';
 import {Listr} from 'listr2';
 import {JsonObject} from 'type-fest';
-import {ArangoStore} from '../../source/services/arango-store.js';
+import {ArangoStore} from '../../source/model/arango-store.js';
 import {CheerioSpider} from '../../source/spider/cheerio-spider.js';
 
 // Assorted parsing helpers

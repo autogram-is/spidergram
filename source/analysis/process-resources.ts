@@ -5,7 +5,7 @@ import {DocumentMetadata} from 'arangojs/documents.js';
 import is from '@sindresorhus/is';
 import {JsonObject} from 'type-fest';
 import {Resource} from '../model/index.js';
-import {ArangoStore} from '../services/arango-store.js';
+import {ArangoStore} from '../model/arango-store.js';
 
 export type ProcessOptions = Record<string, (r: Resource, root?: cheerio.Root) => unknown>;
 

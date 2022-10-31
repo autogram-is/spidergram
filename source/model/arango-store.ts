@@ -4,11 +4,11 @@ import {Config} from 'arangojs/connection.js';
 import {Database} from 'arangojs';
 import {DocumentMetadata} from 'arangojs/documents.js';
 import {DocumentCollection} from 'arangojs/collection.js';
-import {Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn, DataSet} from '../model/index.js';
+import {Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn, DataSet} from './index.js';
 import arrify from 'arrify';
 import slugify from '@sindresorhus/slugify';
 
-export {aql, AqlQuery, AqlLiteral} from 'arangojs/aql'
+export { aql } from 'arangojs';
 
 export class ArangoStore {
   protected static _systemDb?: Database;

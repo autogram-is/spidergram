@@ -1,4 +1,4 @@
-import { ArangoStore } from "./arango-store.js";
+import { ArangoStore } from "./model/arango-store.js";
 import { Config as ArangoConfig } from 'arangojs/connection';
 import { Storage as FileStore, Configuration as FileConfiguration } from 'typefs';
 import * as dotenv from 'dotenv'
