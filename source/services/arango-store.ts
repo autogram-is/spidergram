@@ -6,6 +6,7 @@ import {DocumentMetadata} from 'arangojs/documents.js';
 import {DocumentCollection} from 'arangojs/collection.js';
 import {Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn, DataSet} from '../model/index.js';
 import arrify from 'arrify';
+import slugify from '@sindresorhus/slugify';
 
 export {aql, AqlQuery, AqlLiteral} from 'arangojs/aql'
 
@@ -65,6 +66,8 @@ export class ArangoStore {
 
     if (is.emptyStringOrWhitespace(databaseName)) {
       throw new Error(`Invalid databaseName '${databaseName}'`);
+    } else {
+      databaseName = slugify(databaseName);
     }
 
     return ArangoStore.system.listDatabases()

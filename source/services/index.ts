@@ -1,2 +1,2 @@
 export * from './arango-store.js';
-export * from './context.js';
+export * from './project.js';
