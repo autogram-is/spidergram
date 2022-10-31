@@ -4,8 +4,8 @@ import * as http from 'node:http';
 import arrify from 'arrify';
 import destroyer from 'server-destroy';
 import open from 'open';
-
 import * as dotenv from 'dotenv';
+
 dotenv.config();
 
 type KeyData = {
@@ -20,6 +20,12 @@ type KeyData = {
   }
 }
 
+// TODO: read in the key and check if the requested scopes are present in the key.
+// If not, build a superset of the existing scopes and the requestted scopes and
+// authorize it.
+// For the moment, if authentication is requested for different scopes in different
+// code paths, the different scopes will continue to blow each other away, requiring
+// repeated reauthentication.
 export class SimpleAuth {
   private static async loadJson<T>(file: string) {
     return fs.readFile(file)
@@ -28,9 +34,9 @@ export class SimpleAuth {
   }
 
   static async authenticate(
+    scope: string | string[],
     keyFilePath?: string,
     tokenFilePath?: string,
-    scope: string | string[] = []
   ) {
       keyFilePath ??= process.env.GOOGLE_KEYS_PATH ?? './config/google-keys.json';
       tokenFilePath ??= tokenFilePath ?? process.env.GOOGLE_TOKEN_PATH ?? './config/google-token.json';
@@ -76,10 +82,10 @@ export class SimpleAuth {
           }
         });
     
-        server.listen(0, () => {
+        server.listen(3000, () => {
           // open the browser to the authorize url to start the workflow
           const authorizeUrl = client.generateAuthUrl({
-            redirect_uri: keys.installed.redirect_uris[0],
+            redirect_uri: 'http://localhost:3000',
             access_type: 'offline',
             scope: scopes.join(' '),
           });
