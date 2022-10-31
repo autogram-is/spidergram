@@ -5,6 +5,8 @@ import {Awaitable} from 'crawlee';
 import {UniqueUrl, Resource} from '../model/index.js';
 import {EnqueueUrlOptions, AnchorTagData} from './links/index.js';
 import {SpiderOptions} from './options.js';
+import {ArangoStore} from '../model/arango-store.js';
+import { TDiskDriver } from 'typefs';
 
 export type SupportedContext = PlaywrightCrawlingContext | CheerioCrawlingContext;
 export type CombinedContext = SpiderContext & SupportedContext;
@@ -23,6 +25,10 @@ export interface SpiderContext<Context extends SupportedContext = SupportedConte
   findUrls: (options?: EnqueueUrlOptions) => Promise<AnchorTagData[]>;
   saveUrls: (links: AnchorTagData[], options?: EnqueueUrlOptions) => Promise<UniqueUrl[]>;
   saveRequests: (urls: UniqueUrl[], options?: EnqueueUrlOptions) => Promise<Request[]>;
+
+  // Global services and resources
+  graph: ArangoStore;
+  files: TDiskDriver;
 }
 
 export interface RequestMeta {

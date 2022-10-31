@@ -5,7 +5,7 @@ export async function saveResource(
   context: CombinedContext,
   properties: Record<string, unknown> = {},
 ) {
-  const {project, requestMeta, uniqueUrl, request} = context;
+  const {graph, requestMeta, uniqueUrl, request} = context;
   const results: Array<Resource | RespondsWith> = [];
 
   // We pull from the requestMeta, since we perform that step
@@ -35,5 +35,5 @@ export async function saveResource(
   }
 
   // There's probably a better way to do this; for now, it works.
-  return project.graph.push(results).then(() => results[0] as Resource);
+  return graph.push(results).then(() => results[0] as Resource);
 }

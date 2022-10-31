@@ -21,6 +21,7 @@ import {
   contextualizeHook,
   uniqueUrlToRequest
 } from './index.js';
+import { Project } from '../project.js';
 import { UniqueUrl, UniqueUrlSet } from '../model/index.js';
 import { NormalizedUrl } from '@autogram/url-tools';
 import arrify from 'arrify';
@@ -79,6 +80,7 @@ export class PlaywrightSpider extends PlaywrightCrawler {
     options?: CrawlerAddRequestsOptions
   ): Promise<FinalStatistics> {
     // If only a single value came in, turn it into an array.
+    const context = await Project.context(this.spiderOptions.projectConfig);
     requests = arrify(requests);
 
     // Normalize and deduplicate any incoming requests.
@@ -93,7 +95,7 @@ export class PlaywrightSpider extends PlaywrightCrawler {
       }
     }
   
-    await this.spiderOptions.project.graph.push([...uniques], false);
+    await context.graph.push([...uniques], false);
     const queue = await this.getRequestQueue();
     await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)), options);
   

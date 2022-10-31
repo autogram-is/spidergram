@@ -2,6 +2,7 @@ import { ArangoStore } from "./model/arango-store.js";
 import { Config as ArangoConfig } from 'arangojs/connection';
 import { Storage as FileStore, Configuration as FileConfiguration, TDiskDriver } from 'typefs';
 import * as dotenv from 'dotenv'
+
 dotenv.config()
 
 export interface ProjectConfig {
@@ -15,7 +16,7 @@ export interface ProjectConfig {
 	}
 }
 
-const defaultConfig: ProjectConfig = {
+export const projectConfigDefaults: ProjectConfig = {
 	name: 'spidergram',
 	files: {
 		default: 'storage',
@@ -36,8 +37,8 @@ const defaultConfig: ProjectConfig = {
 	},
 	google: {
 		apiKey: process.env.GOOGLE_API_KEY ?? '',
-		credentialPath: process.env.GOOGLE_API_KEY ?? './storage/google-credentials.json',
-		tokenPath: process.env.GOOGLE_API_KEY ?? './storage/google-credentials.json',
+		credentialPath: process.env.GOOGLE_API_KEY ?? './google-credentials.json',
+		tokenPath: process.env.GOOGLE_API_KEY ?? './google-credentials.json',
 	}
 };
 
@@ -53,7 +54,7 @@ export class Project {
 		if (Project._instance !== undefined) {
 			return Project._instance;
 		} else {
-			const configWithDefaults = {...defaultConfig, ...config};
+			const configWithDefaults = {...projectConfigDefaults, ...config};
 			const project = new Project(configWithDefaults);
 
 			project.graph = await ArangoStore.open(config.graph?.databaseName ?? config.name, config.graph);		

@@ -4,9 +4,9 @@ import * as http from 'node:http';
 import arrify from 'arrify';
 import destroyer from 'server-destroy';
 import open from 'open';
-import * as dotenv from 'dotenv';
+import { Project } from '../../project.js';
 
-dotenv.config();
+const context = await Project.context();
 
 type KeyData = {
   installed: {
@@ -38,8 +38,8 @@ export class SimpleAuth {
     keyFilePath?: string,
     tokenFilePath?: string,
   ) {
-      keyFilePath ??= process.env.GOOGLE_KEYS_PATH ?? './config/google-keys.json';
-      tokenFilePath ??= tokenFilePath ?? process.env.GOOGLE_TOKEN_PATH ?? './config/google-token.json';
+      keyFilePath ??= context.configuration.google?.credentialPath ?? '';
+      tokenFilePath ??= tokenFilePath ?? context.configuration.google?.tokenPath ?? '';
       const scopes = arrify(scope);
 
       // Load the google key and token files

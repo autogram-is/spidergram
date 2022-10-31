@@ -1,12 +1,14 @@
-import { Project } from '../../source/index.js';
+import { PlaywrightSpider } from '../../source/spider/index.js';
 
-// Custom configuration options can be passed in here
-const context = await Project.context();
+const spider = new PlaywrightSpider({
+  projectConfig: { name: 'spidergram' },
+  requestHandlers: {
+    page: async (context) => {
+      console.log(context);
+    }
+  }
+});
 
-// The context options set up the db server credentials
-// as well as the name of the specific database to use
-console.log(context.graph.collection('test'));
+const results = await spider.run(['https://example.com']);
 
-// They also set up storage bins for files created/downloaded 
-// during a crawl, configuration information, etc.
-console.log(await context.files.listContents('/', { recursive: true }));
+console.log(results);
