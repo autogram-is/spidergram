@@ -93,7 +93,7 @@ export class PlaywrightSpider extends PlaywrightCrawler {
       }
     }
   
-    await this.spiderOptions.storage.push([...uniques], false);
+    await this.spiderOptions.project.graph.push([...uniques], false);
     const queue = await this.getRequestQueue();
     await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)), options);
   

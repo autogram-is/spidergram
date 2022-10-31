@@ -4,7 +4,7 @@ export function splitOptions<CrawlerOptions extends SupportedOptions, Context ex
   options: Partial<CrawlerOptions & SpiderOptions> = {},
 ) {
   const {
-    storage,
+    project,
     requestRouter,
     requestHandlers,
     urlOptions,

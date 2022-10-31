@@ -10,7 +10,7 @@ export async function save(
   customOptions: Partial<EnqueueUrlOptions> = {},
 ) {
   const options = await ensureOptions(context, customOptions);
-  const {storage, uniqueUrl, resource} = context;
+  const {project, uniqueUrl, resource} = context;
   const results: {
     uniques: Array<UniqueUrl>,
     links: Array<LinksTo>,
@@ -53,8 +53,8 @@ export async function save(
     }
   }
 
-  return storage.push(results.uniques, false)
-    .then(() => storage.push(results.links))
+  return project.graph.push(results.uniques, false)
+    .then(() => project.graph.push(results.links))
     .then(() => results.uniques)
 }
 
@@ -67,6 +67,6 @@ export async function saveCurrentUrl(context: CombinedContext): Promise<void> {
     });
   } else {
     context.uniqueUrl = new UniqueUrl({url: context.request.url});
-    await context.storage.push(context.uniqueUrl, false);
+    await context.project.graph.push(context.uniqueUrl, false);
   }
 }
