@@ -4,7 +4,7 @@ import {UniqueUrl, Resource, RespondsWith, LinksTo} from '../source/model/index.
 export {aql, AqlQuery} from 'arangojs/aql';
 
 test('spidergraph connection', async t => {
-  await ArangoStore.open();
+  await ArangoStore.open('spidergram_test');
   t.assert(ArangoStore.system !== undefined);
 });
 

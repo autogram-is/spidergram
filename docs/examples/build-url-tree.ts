@@ -1,8 +1,7 @@
-import {ArangoStore} from '../../source/model/arango-store.js';
-import {UrlHierarchy} from '../../source/analysis/hierarchy/url-hierarchy.js';
+import {Project, UrlHierarchy} from '../../source/index.js';
 
-const storage = await ArangoStore.open();
-const urlHier = new UrlHierarchy(storage);
+const {graph} = await Project.context();
+const urlHier = new UrlHierarchy(graph);
 
 await urlHier.loadPool()
   .then(async () => urlHier.buildRelationships())

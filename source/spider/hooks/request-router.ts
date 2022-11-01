@@ -2,7 +2,7 @@ import {CombinedContext} from '../context.js';
 import {helpers} from '../index.js';
 
 export async function requestRouter(context: CombinedContext): Promise<void> {
-  const {log, request, prefetchRequest, downloadMimeTypes, parseMimeTypes} = context;
+  const {log, request, uniqueUrl, prefetchRequest, downloadMimeTypes, parseMimeTypes} = context;
   const requestMeta = await prefetchRequest();
 
   // Our big point of differentiation here is content-type; 
@@ -20,6 +20,12 @@ export async function requestRouter(context: CombinedContext): Promise<void> {
     // this might merit overriding.
     request.label = 'status';
 
+  } else if (uniqueUrl?.parsed?.pathname.endsWith('/sitemap.xml')) {
+    // This is a relatively crude approach to detecting sitemaps;
+    // in the future we'll want to check for sitemap indexes, and
+    // custom sitemaps listed in robots.txt
+    request.label = 'sitemap';
+
   } else if (parseMimeTypes.includes(type)) {
     // This is our default case; run the full page request pipeline
     // and set the label to 'page'.
@@ -32,5 +38,5 @@ export async function requestRouter(context: CombinedContext): Promise<void> {
     request.label = 'download';
   }
 
-  log.info(`${request.url}: ${request.label} (HTTP ${requestMeta.statusCode}, ${type})`)
+  log.debug(`Routed ${request.url}: ${request.label} (HTTP ${requestMeta.statusCode}, ${type})`)
 }

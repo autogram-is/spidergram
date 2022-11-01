@@ -3,33 +3,25 @@ import {Project, Vertice, aql} from "../index.js";
 import { AqlQuery } from "arangojs/aql.js";
 import is from '@sindresorhus/is';
 import { JsonObject } from "type-fest";
+import { WorkerStatus } from './index.js';
 
-export interface WorkerTask<T extends Vertice = Vertice> {
+export interface VerticeWorkerTask<T extends Vertice = Vertice> {
   (item: T, context: Project): Promise<void>
 }
 
-export interface WorkerOptions<T extends Vertice = Vertice> {
+export interface VerticeWorkerOptions<T extends Vertice = Vertice> {
   context?: Promise<Project>,
   items?: T[],
   collection?: string,
   filter?: AqlQuery,
-  task: WorkerTask<T>
+  task: VerticeWorkerTask<T>
 }
 
-export interface WorkerStatus {
-  [key: string]: unknown,
-  started: number,
-  finished: number,
-  total: number,
-  processed: number,
-  errors: Record<string, Error>,
-}
-
-export class Worker<T extends Vertice = Vertice> extends EventEmitter {
+export class VerticeWorker<T extends Vertice = Vertice> extends EventEmitter {
   protected status: WorkerStatus;
   protected context: Promise<Project>;
 
-  constructor(protected options: Partial<WorkerOptions<T>> = {}) {
+  constructor(protected options: Partial<VerticeWorkerOptions<T>> = {}) {
     super();
     this.status = {
       started: 0,
@@ -41,7 +33,7 @@ export class Worker<T extends Vertice = Vertice> extends EventEmitter {
     this.context = options.context ?? Project.context();
   }
 
-  async run(options: Partial<WorkerOptions<T>> = {}): Promise<WorkerStatus> {
+  async run(options: Partial<VerticeWorkerOptions<T>> = {}): Promise<WorkerStatus> {
     const context = await this.context;
 
     const workerOptions = {
@@ -88,7 +80,7 @@ export class Worker<T extends Vertice = Vertice> extends EventEmitter {
     }
   }
 
-  async performTask(item: T, task: WorkerTask<T>, context: Project): Promise<void> {
+  async performTask(item: T, task: VerticeWorkerTask<T>, context: Project): Promise<void> {
     return task(item, context).then(() => {
       this.status.processed++;
     })

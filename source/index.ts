@@ -6,6 +6,7 @@ export * from './analysis/index.js';
 export * from './reports/index.js';
 export * from './spider/index.js';
 export * from './integration/index.js';
+export * from './workers/index.js';
 
 export * from './project.js';
 

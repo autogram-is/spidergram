@@ -8,7 +8,7 @@ import {
   setProperty,
 } from '../types.js';
 
-export function getMeta(input: cheerio.Root | string): Properties {
+export function metadata(input: cheerio.Root | string): Properties {
   const $ = is.string(input) ? cheerio.load(input) : input;
   const results: Properties = {};
   const meta = $('head meta');
@@ -25,10 +25,10 @@ export function getMeta(input: cheerio.Root | string): Properties {
     }
   });
 
-  results.body = $('body').attr();
+  results.bodyAttributes = $('body').attr();
   const bodyClasses = $('body').attr('class');
   if (bodyClasses) {
-    results.body.class = bodyClasses.replace(/\s+/, ' ').split(' ');
+    results.bodyAttributes.class = bodyClasses.replace(/\s+/, ' ').split(' ');
   }
 
   results.title = getProperty(

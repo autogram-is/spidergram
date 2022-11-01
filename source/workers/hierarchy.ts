@@ -1,4 +1,4 @@
-import {Vertice, Edge} from '../../model/index.js';
+import {Vertice, Edge} from '../model/index.js';
 
 export interface HierarchyData<V extends Vertice = Vertice, E extends Edge = Edge> {
   participants: V[];
@@ -24,5 +24,3 @@ export interface HierarchyBuilder<V extends Vertice = Vertice, E extends Edge = 
   buildHierarchy(): Promise<void>;
   save(): Promise<void>;
 }
-
-export * from './url-hierarchy.js';

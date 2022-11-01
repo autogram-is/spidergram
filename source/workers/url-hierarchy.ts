@@ -3,9 +3,8 @@ import {aql} from 'arangojs';
 import is from '@sindresorhus/is';
 import {ParsedUrl} from '@autogram/url-tools';
 import {JsonObject} from 'type-fest';
-import {ArangoStore} from '../../model/arango-store.js';
-import {UniqueUrl, IsChildOf, UrlSource} from '../../model/index.js';
-import {HierarchyBuilder, HierarchyData} from './index.js';
+import {UniqueUrl, IsChildOf, UrlSource, ArangoStore} from '../model/index.js';
+import {HierarchyBuilder, HierarchyData} from './hierarchy.js';
 
 interface UrlHierarchyOptions {
   fillGaps: boolean;
