@@ -54,14 +54,15 @@ export class Project {
 		if (Project._instance !== undefined) {
 			return Project._instance;
 		} else {
-			const configWithDefaults = {...projectConfigDefaults, ...config};
+			const configWithDefaults: ProjectConfig = {...projectConfigDefaults, ...config};
 			const project = new Project(configWithDefaults);
 
-			project.graph = await ArangoStore.open(config.graph?.databaseName ?? config.name, config.graph);		
+			project.graph = await ArangoStore.open(configWithDefaults.graph?.databaseName ?? configWithDefaults.name, config.graph);		
 			FileStore.config = configWithDefaults.files;
 			project.files = FileStore.disk();
 
-			return project;
+			Project._instance = project;
+			return Project._instance;
 		}
 	}
 }

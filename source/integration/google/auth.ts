@@ -4,9 +4,7 @@ import * as http from 'node:http';
 import arrify from 'arrify';
 import destroyer from 'server-destroy';
 import open from 'open';
-import { Project } from '../../project.js';
-
-const context = await Project.context();
+import {Project} from '../../index.js';
 
 type KeyData = {
   installed: {
@@ -38,6 +36,7 @@ export class SimpleAuth {
     keyFilePath?: string,
     tokenFilePath?: string,
   ) {
+      const context = await Project.context();
       keyFilePath ??= context.configuration.google?.credentialPath ?? '';
       tokenFilePath ??= tokenFilePath ?? context.configuration.google?.tokenPath ?? '';
       const scopes = arrify(scope);

@@ -1,14 +1,21 @@
-import { PlaywrightSpider } from '../../source/spider/index.js';
+import {Resource, Project, Worker, PlaywrightSpider } from "../../source/index.js";
 
-const spider = new PlaywrightSpider({
-  projectConfig: { name: 'spidergram' },
-  requestHandlers: {
-    page: async (context) => {
-      console.log(context);
-    }
+const context = await Project.context({ name: 'angrylittletree' });
+await context.graph.erase({ eraseAll: true });
+
+const doSpider = false;
+if (doSpider) {
+  await new PlaywrightSpider()
+  .run(['https://angrylittletree.com'])
+  .then(results => console.log);
+}
+
+const worker = new Worker<Resource>({
+  collection: 'resources',
+  task: async (resource, context) => {
+    resource.processed = false;
+    await context.graph.push(resource);
   }
 });
 
-const results = await spider.run(['https://example.com']);
-
-console.log(results);
+console.log(await worker.run());

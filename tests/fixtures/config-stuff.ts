@@ -1,7 +1,7 @@
 import { Project } from '../../source/index.js';
 
 // Custom configuration options can be passed in here
-const context = await Project.context();
+const context = await Project.context({ name: 'demo' });
 
 // The context options set up the db server credentials
 // as well as the name of the specific database to use

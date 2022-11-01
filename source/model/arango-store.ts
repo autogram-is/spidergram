@@ -8,7 +8,7 @@ import {Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, 
 import arrify from 'arrify';
 import slugify from '@sindresorhus/slugify';
 
-export { aql } from 'arangojs';
+export {aql} from 'arangojs';
 
 export class ArangoStore {
   protected static _systemDb?: Database;
@@ -43,7 +43,7 @@ export class ArangoStore {
    * @param connection
    * @returns
    */
-  static async open(databaseName = 'spidergram', connection: Partial<Config> = {}): Promise<ArangoStore> {
+  static async open(databaseName: string, connection: Partial<Config> = {}): Promise<ArangoStore> {
     if (is.undefined(ArangoStore._systemDb)) {
       ArangoStore.connect(connection);
     }
@@ -167,18 +167,14 @@ export class ArangoStore {
     return Promise.all(promises);
   }
 
-  async erase(targetCollections?: string | string[], eraseAll = false) {
-    return this.db.collections(true)
-      .then(
-        collections => collections.forEach(collection => {
-          if (
-            (is.string(targetCollections) && collection.name === targetCollections)
-            || (is.array<string>(targetCollections) && arrify(targetCollections).includes(collection.name))
-            || eraseAll
-          )
-          collection.truncate();
-        })
-      );
+  async erase(options: { collections? : string[], eraseAll?: boolean }) {
+    options.collections ??= [];
+    const collections = await this.db.listCollections(true);
+    for (let collection of collections) {
+      if ((options.collections.includes(collection.name)) || (options.collections.length === 0 && options.eraseAll === true)) {
+        await this.db.collection(collection.name).truncate();
+      }
+    }
   }
 
   // Two quick helpers that eliminate unecessary property traversal

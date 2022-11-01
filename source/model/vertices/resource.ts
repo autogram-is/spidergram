@@ -7,6 +7,7 @@ export type ResourceData = {
   message?: string;
   headers?: Record<string, string | string[] | undefined>;
   body?: string;
+  payload?: string;
 } & VerticeData;
 
 export class Resource extends Vertice {
@@ -16,9 +17,10 @@ export class Resource extends Vertice {
   message!: string;
   headers!: Record<string, string | string[] | undefined>;
   body?: string;
+  payload?: string;
 
   constructor(data: ResourceData = {}) {
-    const {url, code, message, headers, body, ...dataForSuper} = data;
+    const {url, code, message, headers, body, payload, ...dataForSuper} = data;
     super(dataForSuper);
 
     // Flatten the URL to a string
@@ -37,6 +39,7 @@ export class Resource extends Vertice {
     this.message = message ?? '';
     this.headers = headers ?? {};
     this.body = body;
+    this.payload = payload;
   }
 }
 

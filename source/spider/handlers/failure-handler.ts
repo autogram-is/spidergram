@@ -2,7 +2,7 @@ import {RespondsWith, Resource} from '../../index.js';
 import {CombinedContext} from '../context.js';
 
 export async function failureHandler(context: CombinedContext, error: Error) {
-  const {storage, request, uniqueUrl} = context;
+  const {graph, request, uniqueUrl} = context;
 
   const rs = new Resource({
     url: request.loadedUrl ?? request.url,
@@ -18,5 +18,5 @@ export async function failureHandler(context: CombinedContext, error: Error) {
     headers: request.headers ?? {},
   });
 
-  return storage.push([rs, rw]).then(results => {});
+  return graph.push([rs, rw]).then(results => {});
 }
