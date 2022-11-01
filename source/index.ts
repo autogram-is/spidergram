@@ -11,4 +11,6 @@ export * from './workers/index.js';
 export * from './project.js';
 
 export * from '@autogram/url-tools';
-export * from 'arangojs';
+
+export * as arangojs from 'arangojs';
+export * as crawlee from 'crawlee';
