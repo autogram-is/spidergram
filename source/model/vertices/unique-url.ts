@@ -1,7 +1,7 @@
+import {URL} from 'node:url';
 import is from '@sindresorhus/is';
-import { URL } from 'node:url';
-import { NormalizedUrl, UrlMutator } from '@autogram/url-tools';
-import { Vertice, VerticeData, Transform } from './vertice.js';
+import {NormalizedUrl, UrlMutator} from '@autogram/url-tools';
+import {Vertice, VerticeData, Transform} from './vertice.js';
 
 export type UniqueUrlData = {
   url?: string | NormalizedUrl;
@@ -16,38 +16,39 @@ export enum UrlSource {
   Page = 'page',
   Sitemap = 'sitemap',
   Import = 'import',
-  Path = 'path'
+  Path = 'path',
 }
 
 export class UniqueUrl extends Vertice {
-  override _collection = 'unique_urls';
+  readonly _collection = 'unique_urls';
 
   url!: string;
 
   @Transform((transformation) => {
     if (transformation.type === 1) {
-      // Class to plain
-      return transformation.value ? (transformation.value as NormalizedUrl).properties : undefined;
+  // Class to plain
+    return transformation.value ? (transformation.value as NormalizedUrl).properties : undefined;
     } else {
-      // Plain to class
-      if (transformation.value) { 
-        const n = new NormalizedUrl(transformation.value, undefined, (u) => u);
-        if ('original' in transformation.value) {
-          n.original = transformation.value.original as string;
-        }
-        return n;
-      }
-      return transformation.value;
+  // Plain to class
+    if (transformation.value) {
+    const n = new NormalizedUrl(transformation.value, undefined, (u) => u);
+    if ('original' in transformation.value) {
+    n.original = transformation.value.original as string;
     }
-  })
+    return n;
+    }
+    return transformation.value;
+    }
+    })
 
-  parsed?: NormalizedUrl;
+    parsed?: NormalizedUrl;
+
   referer?: string;
   source?: UrlSource;
   depth!: number;
 
   protected override keySeed(): unknown {
-    return { url: this.url }
+    return {url: this.url};
   }
 
   get parsable(): boolean {
@@ -55,16 +56,19 @@ export class UniqueUrl extends Vertice {
   }
 
   constructor(data: UniqueUrlData = {}) {
-    let { url, base, normalizer, referer, depth, ...dataForSuper } = data;
+    let {url, base, normalizer, referer, depth, ...dataForSuper} = data;
     super(dataForSuper);
 
-    if (is.urlInstance(base)) base = base.toString();
+    if (is.urlInstance(base)) {
+      base = base.toString();
+    }
+
     if (is.string(url)) {
       try {
         this.parsed = new NormalizedUrl(url, base, normalizer);
         this.url = this.parsed.href;
-      } catch (error: unknown) {
-        console.log(`${url} not parsable`);
+      } catch {
+        // Not parsable, but we're okay with that.
       }
     } else if (url instanceof NormalizedUrl) {
       this.parsed = url;
@@ -78,4 +82,4 @@ export class UniqueUrl extends Vertice {
   }
 }
 
-Vertice.types.set('unique_urls', { constructor: UniqueUrl });
+Vertice.types.set('unique_urls', {constructor: UniqueUrl});

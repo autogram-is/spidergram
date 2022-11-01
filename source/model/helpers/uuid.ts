@@ -1,8 +1,10 @@
-import { v4 as uuidv4, v5 as uuidv5, NIL as NilUuid, validate } from 'uuid';
+import {v4 as uuidv4, v5 as uuidv5, NIL as NilUuid, validate} from 'uuid';
 import hash from 'object-hash';
 import is from '@sindresorhus/is';
 
-interface Flavoring<FlavorT> { _flavor?: FlavorT; }
+interface Flavoring<FlavorT> {
+  _flavor?: FlavorT;
+}
 type Flavor<T, FlavorT> = T & Flavoring<FlavorT>;
 
 export type Uuid = Flavor<string, 'uuid'>;
@@ -22,10 +24,10 @@ export const UuidFactory = {
   generate(hashValue?: unknown): Uuid {
     if (hashValue) {
       if (!is.object(hashValue)) {
-        hashValue = { data: hashValue };
+        hashValue = {data: hashValue};
       }
 
-      const hashOutput = hash(hashValue as Object, { encoding: 'buffer' });
+      const hashOutput = hash(hashValue as Record<string, unknown>, {encoding: 'buffer'});
       return uuidv5(hashOutput, UuidFactory.namespace) as Uuid;
     }
 

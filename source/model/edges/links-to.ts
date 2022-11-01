@@ -1,7 +1,4 @@
-import { UniqueUrl } from './unique-url.js';
-import { Resource } from './resource.js';
-import { Edge, EdgeData } from './edge.js';
-import { Vertice, Reference } from './vertice.js';
+import {Edge, EdgeData, Vertice, Reference, UniqueUrl, Resource} from '../index.js';
 
 export type LinksToData<F extends Vertice = Resource, T extends Vertice = UniqueUrl> = EdgeData<F, T> & {
   resource?: Reference<F>;
@@ -9,11 +6,11 @@ export type LinksToData<F extends Vertice = Resource, T extends Vertice = Unique
 };
 
 export class LinksTo<F extends Vertice = Resource, T extends Vertice = Resource> extends Edge<F, T> {
-  override _collection = 'links_to';
+  readonly _collection  ='links_to';
 
   constructor(data: LinksToData<F, T> = {}) {
-    const { url, resource, ...dataForSuper } = data;
-    
+    const {url, resource, ...dataForSuper} = data;
+
     dataForSuper.from ??= resource;
     dataForSuper.to ??= url;
 
@@ -21,4 +18,4 @@ export class LinksTo<F extends Vertice = Resource, T extends Vertice = Resource>
   }
 }
 
-Vertice.types.set('links_to', { constructor: LinksTo, isEdge: true });
+Vertice.types.set('links_to', {constructor: LinksTo, isEdge: true});

@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import {
   NormalizedUrl,
 } from '@autogram/url-tools';
-import { UniqueUrl } from '../vertices/unique-url.js';
+import {UniqueUrl} from '../vertices/unique-url.js';
 
 type ValidUniqueUrlInput = UniqueUrl | NormalizedUrl | string;
 export class UniqueUrlSet extends Set<UniqueUrl> {
@@ -15,7 +15,9 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
     public normalizer = NormalizedUrl.normalizer,
   ) {
     super();
-    if (is.nonEmptyArray(input)) this.addItems(input);
+    if (is.nonEmptyArray(input)) {
+      this.addItems(input);
+    }
   }
 
   override add(value: ValidUniqueUrlInput): this {
@@ -44,11 +46,14 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
     if (uu) {
       this.verifier.delete(uu.id);
       for (const u of this) {
-        if (u.id === uu.id) super.delete(u);
+        if (u.id === uu.id) {
+          super.delete(u);
+        }
       }
 
       return true;
     }
+
     return false;
   }
 

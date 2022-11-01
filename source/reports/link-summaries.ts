@@ -1,16 +1,16 @@
-import { aql } from 'arangojs';
+import {aql} from 'arangojs';
 
-export class LinkSummaries {
+export const LinkSummaries = {
 
-  static inboundLinkCount = aql`
+  inboundLinkCount: aql`
     let inlinks = (
       for lt in links_to
         filter lt._to == url._id
       return distinct lt._from
     )
-  `;
+  `,
 
-  static pages() {
+  pages() {
     return aql`
       for resource in resources
         filter resource.code == 200
@@ -30,9 +30,10 @@ export class LinkSummaries {
         references: length(inlinks),
         size: resource.headers.´content-length´,
       }
-  `}
+  `;
+  },
 
-  static downloads() {
+  downloads() {
     return aql`
       for resource in resources
         filter resource.code == 200
@@ -51,9 +52,10 @@ export class LinkSummaries {
         size: resource.headers.´content-length´,
         mime: resource.headers.´content-type´,
       }
-  `}
+  `;
+  },
 
-  static errors() {
+  errors() {
     return aql`
       for resource in resources
         filter resource.code != 200
@@ -71,10 +73,10 @@ export class LinkSummaries {
         message: resource.message,
         references: length(inlinks)
       }
-  `}
+  `;
+  },
 
-
-  static malformed() {
+  malformed() {
     return aql`
       for url in unique_urls
       filter url.parsed == null
@@ -85,9 +87,10 @@ export class LinkSummaries {
         url: url.url,
         references: length(inlinks)
       }
-  `}
+  `;
+  },
 
-  static excludeProtocol(excluded: string[] = ['https:', 'http:']) {
+  excludeProtocol(excluded: string[] = ['https:', 'http:']) {
     return aql`
       for url in unique_urls
       filter url.parsed.protocol NOT IN ${excluded}
@@ -98,9 +101,10 @@ export class LinkSummaries {
         url: url.url,
         references: length(inlinks)
       }
-  `}
+  `;
+  },
 
-  static outlinks(internalDomains: string[]) {
+  outlinks(internalDomains: string[]) {
     return aql`
       for url in unique_urls
       filter url.parsed.domain NOT IN ${internalDomains}
@@ -112,16 +116,21 @@ export class LinkSummaries {
         path: url.parsed.pathname,
         references: length(inlinks)
       }
-  `}
+  `;
+  },
 
-  static requestUrlMismatch() {
+  redirects() {
     return aql`
-      for u in unique_urls
-      for rw in responds_with
+    for u in unique_urls
+    for rw in responds_with
         FILTER u._id == rw._from
         for r in resources
-          FILTER rw._to == r._id
-          FILTER r.url != u.url
-          return { requested: u.url, returned: r.url }
-  `}
-}
+            FILTER rw._to == r._id
+            FILTER r.url != u.url
+            LET redirects = LENGTH(rw.redirects)
+            SORT redirects DESC
+            return { requested: u.url, returned: r.url, redirects: redirects }
+  `},
+
+  
+};

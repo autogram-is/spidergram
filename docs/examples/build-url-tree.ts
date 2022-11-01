@@ -1,12 +1,11 @@
-import { ArangoStore } from '../../source/arango-store.js';
-import { UrlHierarchy } from '../../source/analysis/hierarchy/url-hierarchy.js';
+import {Project, UrlHierarchy} from '../../source/index.js';
 
-const storage = await ArangoStore.open();
-const urlHier = new UrlHierarchy(storage);
+const {graph} = await Project.context();
+const urlHier = new UrlHierarchy(graph);
 
 await urlHier.loadPool()
-  .then(() => urlHier.buildRelationships())
-  .then(() => urlHier.save());
+  .then(async () => urlHier.buildRelationships())
+  .then(async () => urlHier.save());
 
 console.log(`Relationships: ${urlHier.data.relationships.length}`);
 console.log(`Extrapolated URLs: ${urlHier.data.new.length}`);
