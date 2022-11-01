@@ -3,12 +3,9 @@ import {Resource, Project, Worker, PlaywrightSpider } from "../../source/index.j
 const context = await Project.context({ name: 'angrylittletree' });
 await context.graph.erase({ eraseAll: true });
 
-const doSpider = false;
-if (doSpider) {
-  await new PlaywrightSpider()
+await new PlaywrightSpider()
   .run(['https://angrylittletree.com'])
   .then(results => console.log);
-}
 
 const worker = new Worker<Resource>({
   collection: 'resources',
