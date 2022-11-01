@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 import arrify from 'arrify';
-import {CombinedContext} from '../context.js';
+import {CombinedSpiderContext} from '../context.js';
 import {UniqueUrl, LinksTo} from '../../model/index.js';
 import {AnchorTagData, EnqueueUrlOptions, filter, ensureOptions} from './index.js';
 
 export async function save(
-  context: CombinedContext,
+  context: CombinedSpiderContext,
   links: AnchorTagData | AnchorTagData[],
   customOptions: Partial<EnqueueUrlOptions> = {},
 ) {
@@ -58,7 +58,7 @@ export async function save(
     .then(() => results.uniques)
 }
 
-export async function saveCurrentUrl(context: CombinedContext): Promise<void> {
+export async function saveCurrentUrl(context: CombinedSpiderContext): Promise<void> {
   if ('fromUniqueUrl' in context.request.userData) {
     context.uniqueUrl = new UniqueUrl({
       url: context.request.url,

@@ -3,11 +3,11 @@ import {EnqueueStrategy} from 'crawlee';
 import {ParsedUrl} from '@autogram/url-tools';
 import minimatch from 'minimatch';
 import {UniqueUrl} from '../../model/index.js';
-import {CombinedContext} from '../index.js';
+import {CombinedSpiderContext} from '../index.js';
 import arrify from 'arrify';
 
 export function filter(
-  context: CombinedContext,
+  context: CombinedSpiderContext,
   input: UniqueUrl | ParsedUrl,
   filters: Filter | Filter[],
 ): boolean {
@@ -25,7 +25,7 @@ export function filter(
   return true;
 }
 
-function singleFilter(context: CombinedContext, url: ParsedUrl, filter: Filter): boolean {
+function singleFilter(context: CombinedSpiderContext, url: ParsedUrl, filter: Filter): boolean {
   const currentUrl = context.uniqueUrl?.parsed;
 
   if (is.enumCase(filter, EnqueueStrategy)) {
@@ -60,7 +60,7 @@ function singleFilter(context: CombinedContext, url: ParsedUrl, filter: Filter):
   return false;
 }
 
-export type FilterFunction = (link: FilterableLink, context?: CombinedContext) => boolean;
+export type FilterFunction = (link: FilterableLink, context?: CombinedSpiderContext) => boolean;
 export type FilterableLink = UniqueUrl | ParsedUrl;
 
 // We accept a staggering array of filter types. Come, behold our filters.
@@ -73,5 +73,5 @@ export type FilterSet = Record<string, FilterInput> & {
 
 export type UrlFilterWithContext = (
   found: ParsedUrl,
-  context?: CombinedContext
+  context?: CombinedSpiderContext
 ) => boolean;

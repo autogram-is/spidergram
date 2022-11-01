@@ -1,10 +1,10 @@
 import {RequestQueue, EnqueueStrategy, RequestTransform} from 'crawlee';
 import {NormalizedUrl, ParsedUrl} from '@autogram/url-tools';
-import {SpiderContext, CombinedContext} from '../../index.js';
+import {SpiderContext, CombinedSpiderContext} from '../../index.js';
 import {FilterInput} from './index.js';
 
 export async function ensureOptions(
-  context: CombinedContext,
+  context: CombinedSpiderContext,
   options: Partial<EnqueueUrlOptions> = {},
 ): Promise<EnqueueUrlOptions> {
   if (options._built) {

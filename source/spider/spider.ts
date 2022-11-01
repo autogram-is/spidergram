@@ -12,7 +12,7 @@ import {
 import {
   SpiderOptions,
   CombinedOptions,
-  CombinedContext,
+  CombinedSpiderContext,
   buildSpiderOptions,
   hooks,
   handlers,
@@ -56,13 +56,13 @@ export class Spider extends PlaywrightCrawler {
 
     crawler.preNavigationHooks = [
       contextualizeHook(hooks.contextBuilder),
-      contextualizeHook(hooks.requestRouter),
-      ...(crawler.preNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
+      contextualizeHook(hooks.defaultRouter),
+      ...(spider.preNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
     ];
 
     crawler.postNavigationHooks = [
       contextualizeHook(playwrightPostNavigate),
-      ...(crawler.postNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
+      ...(spider.postNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
     ];
 
     // This doesn't receive our properly-populated CrawlingContext; deal with that later.
@@ -102,6 +102,6 @@ export class Spider extends PlaywrightCrawler {
   }
 }
 
-async function playwrightPostNavigate(context: CombinedContext) {
+async function playwrightPostNavigate(context: CombinedSpiderContext) {
   context.$ = await playwrightUtils.parseWithCheerio(context.page);
 }

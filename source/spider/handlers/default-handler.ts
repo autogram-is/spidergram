@@ -1,7 +1,7 @@
-import {CombinedContext} from '../context.js';
+import {CombinedSpiderContext} from '../context.js';
 
-export async function defaultHandler(context: CombinedContext) {
+export async function defaultHandler(context: CombinedSpiderContext) {
   const {$, saveResource, enqueueLinks} = context;
-  context.resource ??= await saveResource({body: $?.html()});
+  await saveResource({body: $?.html()});
   await enqueueLinks();
 }

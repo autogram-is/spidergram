@@ -1,10 +1,10 @@
 import {Dictionary, PlaywrightCrawlerOptions} from 'crawlee';
 import {helpers, ProjectConfig, projectConfigDefaults} from '../index.js';
-import {SpiderHook, requestRouter} from './hooks/index.js';
+import {SpiderHook, defaultRouter} from './hooks/index.js';
 import {EnqueueUrlOptions} from './links/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';
 
-export type CombinedOptions = PlaywrightCrawlerOptions & SpiderOptions;
+export type CombinedOptions = SpiderOptions & Omit<PlaywrightCrawlerOptions, 'preNavigationHooks' | 'postNavigationHooks'>;
 
 export interface SpiderOptions extends Dictionary {
   projectConfig: Partial<ProjectConfig>,
@@ -13,6 +13,8 @@ export interface SpiderOptions extends Dictionary {
   urlOptions: Partial<EnqueueUrlOptions>;
   parseMimeTypes: string[];
   downloadMimeTypes: string[];
+  preNavigationHooks?: SpiderHook[]
+  postNavigationHooks?: SpiderHook[]
 }
 
 export function buildSpiderOptions(
@@ -28,7 +30,9 @@ export function buildSpiderOptions(
 
 const defaultSpiderOptions: SpiderOptions = {
   projectConfig: projectConfigDefaults,
-  requestRouter,
+  requestRouter: defaultRouter,
+  preNavigationHooks: [],
+  postNavigationHooks: [],
   requestHandlers: {},
   urlOptions: {},
   parseMimeTypes: helpers.mimeGroups.page,

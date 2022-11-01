@@ -1,14 +1,15 @@
 
 import {IncomingHttpHeaders} from 'node:http';
-import {PlaywrightCrawlingContext, Request, CheerioRoot} from 'crawlee';
-import {Awaitable} from 'crawlee';
+import {PlaywrightCrawlingContext, Request, CheerioRoot, PlaywrightGotoOptions, PlaywrightRequestHandler, PlaywrightHook} from 'crawlee';
 import {UniqueUrl, Resource} from '../model/index.js';
 import {EnqueueUrlOptions, AnchorTagData} from './links/index.js';
 import {SpiderOptions} from './options.js';
 import {ArangoStore} from '../model/arango-store.js';
 import { TDiskDriver } from 'typefs';
+import { SpiderHook } from './hooks/index.js';
+import { SpiderRequestHandler } from './handlers/index.js';
 
-export type CombinedContext = SpiderContext & PlaywrightCrawlingContext;
+export type CombinedSpiderContext = SpiderContext & PlaywrightCrawlingContext;
 
 export interface SpiderContext extends SpiderOptions {
   // Data that's passed around during a single crawl request
@@ -39,10 +40,13 @@ export interface RequestMeta {
   statusCode: number;
 }
 
-export function contextualizeHook(hook: Function) {
-  return (ctx: PlaywrightCrawlingContext, ...args: any[]): Awaitable<void> => hook(ctx as SpiderContext & C, ...args);
+export function contextualizeHook(hook: SpiderHook): PlaywrightHook {
+  return (
+    ctx: PlaywrightCrawlingContext,
+    options?: PlaywrightGotoOptions
+  ): Promise<void> => hook(ctx as CombinedSpiderContext, options);
 }
 
-export function contextualizeHandler(handler: Function) {
-  return (ctx: PlaywrightCrawlingContext, ...args: any[]): Awaitable<void> => handler(ctx as SpiderContext & C, ...args);
+export function contextualizeHandler(handler: SpiderRequestHandler): PlaywrightRequestHandler {
+  return (ctx: PlaywrightCrawlingContext): Promise<void> => handler(ctx as unknown as CombinedSpiderContext);
 }
