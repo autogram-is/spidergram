@@ -2,7 +2,7 @@ import {
   Resource,
   Project,
   VerticeWorker,
-  PlaywrightSpider,
+  Spider,
   aql,
   UrlHierarchy,
 } from "../../source/index.js";
@@ -17,7 +17,7 @@ import {
 const context = await Project.context({ name: 'ethan' });
 await context.graph.erase({ eraseAll: true });
 
-const spider = new PlaywrightSpider();
+const spider = new Spider();
 await spider.run(['https://ethanmarcotte.com'])
   .then(results => console.log);
 

@@ -1,25 +1,24 @@
-import {Dictionary, CheerioCrawlerOptions, PlaywrightCrawlerOptions} from 'crawlee';
-import {SupportedContext, helpers, ProjectConfig, projectConfigDefaults} from '../index.js';
+import {Dictionary, PlaywrightCrawlerOptions} from 'crawlee';
+import {helpers, ProjectConfig, projectConfigDefaults} from '../index.js';
 import {SpiderHook, requestRouter} from './hooks/index.js';
 import {EnqueueUrlOptions} from './links/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';
 
-export type SupportedOptions = CheerioCrawlerOptions | PlaywrightCrawlerOptions;
-export type CombinedOptions = SupportedOptions & SpiderOptions;
+export type CombinedOptions = PlaywrightCrawlerOptions & SpiderOptions;
 
-export interface SpiderOptions<Context extends SupportedContext = SupportedContext> extends Dictionary {
+export interface SpiderOptions extends Dictionary {
   projectConfig: Partial<ProjectConfig>,
-  requestRouter: SpiderHook<Context>;
-  requestHandlers: Record<string, SpiderRequestHandler<Context>>;
+  requestRouter: SpiderHook;
+  requestHandlers: Record<string, SpiderRequestHandler>;
   urlOptions: Partial<EnqueueUrlOptions>;
   parseMimeTypes: string[];
   downloadMimeTypes: string[];
 }
 
-export function buildSpiderOptions<Context extends SupportedContext = SupportedContext>(
-  options: Partial<SpiderOptions<Context>>,
-  internaloverrides: Partial<SpiderOptions<Context>> = {},
-): SpiderOptions<Context> {
+export function buildSpiderOptions(
+  options: Partial<SpiderOptions>,
+  internaloverrides: Partial<SpiderOptions> = {},
+): SpiderOptions {
   return {
     ...defaultSpiderOptions,
     ...options,
@@ -33,10 +32,5 @@ const defaultSpiderOptions: SpiderOptions = {
   requestHandlers: {},
   urlOptions: {},
   parseMimeTypes: helpers.mimeGroups.page,
-  downloadMimeTypes: [
-    ...helpers.mimeGroups.data,
-    ...helpers.mimeGroups.document,
-    ...helpers.mimeGroups.spreadsheet,
-    ...helpers.mimeGroups.pdf,
-  ],
+  downloadMimeTypes: [],
 };

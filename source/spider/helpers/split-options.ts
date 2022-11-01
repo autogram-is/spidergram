@@ -1,11 +1,12 @@
-import {SupportedOptions, SpiderOptions, SupportedContext, buildSpiderOptions} from '../index.js';
+import {buildSpiderOptions, CombinedOptions} from '../index.js';
 
-export function splitOptions<CrawlerOptions extends SupportedOptions, Context extends SupportedContext>(
-  options: Partial<CrawlerOptions & SpiderOptions> = {},
+export function splitOptions(
+  options: Partial<CombinedOptions> = {},
 ) {
   const {
     projectConfig,
     requestRouter,
+    requestHandler,
     requestHandlers,
     urlOptions,
     parseMimeTypes,
@@ -16,6 +17,6 @@ export function splitOptions<CrawlerOptions extends SupportedOptions, Context ex
 
   return {
     spider: buildSpiderOptions(options),
-    crawler: crawlerOptions as CrawlerOptions,
+    crawler: crawlerOptions as CombinedOptions,
   };
 }

@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import {
   PlaywrightCrawler,
   PlaywrightCrawlerOptions,
-  PlaywrightCrawlingContext,
   Configuration,
   createPlaywrightRouter,
   playwrightUtils,
@@ -12,7 +11,8 @@ import {
 } from 'crawlee';
 import {
   SpiderOptions,
-  SpiderContext,
+  CombinedOptions,
+  CombinedContext,
   buildSpiderOptions,
   hooks,
   handlers,
@@ -21,24 +21,23 @@ import {
   contextualizeHook,
   uniqueUrlToRequest
 } from './index.js';
+
 import { Project } from '../project.js';
 import { UniqueUrl, UniqueUrlSet } from '../model/index.js';
 import { NormalizedUrl } from '@autogram/url-tools';
 import arrify from 'arrify';
 
 type AddRequestValue = string | Request | RequestOptions | NormalizedUrl | UniqueUrl;
-type PlaywrightSpiderOptions = PlaywrightCrawlerOptions & SpiderOptions;
-type PlaywrightSpiderContext = PlaywrightCrawlingContext & SpiderContext;
 
-export class PlaywrightSpider extends PlaywrightCrawler {
+export class Spider extends PlaywrightCrawler {
   spiderOptions: SpiderOptions;
   crawlerOptions: PlaywrightCrawlerOptions;
 
   constructor(
-    options: Partial<PlaywrightSpiderOptions> = {},
+    options: Partial<CombinedOptions> = {},
     config?: Configuration,
   ) {
-    const {crawler, spider} = helpers.splitOptions<PlaywrightCrawlerOptions, PlaywrightCrawlingContext>(options);
+    const {crawler, spider} = helpers.splitOptions(options);
 
     spider.requestHandlers = {
       download: handlers.downloadHandler,
@@ -48,22 +47,22 @@ export class PlaywrightSpider extends PlaywrightCrawler {
     };
 
     const router = createPlaywrightRouter();
-    router.addDefaultHandler(contextualizeHandler<PlaywrightCrawlingContext>(spider.requestHandlers.page));
+    router.addDefaultHandler(contextualizeHandler(spider.requestHandlers.page));
     for (const h in spider.requestHandlers) {
-      router.addHandler(h, contextualizeHandler<PlaywrightCrawlingContext>(spider.requestHandlers[h]));
+      router.addHandler(h, contextualizeHandler(spider.requestHandlers[h]));
     }
 
     crawler.requestHandler = router;
 
     crawler.preNavigationHooks = [
-      contextualizeHook<PlaywrightCrawlingContext>(hooks.contextBuilder),
-      contextualizeHook<PlaywrightCrawlingContext>(hooks.requestRouter),
-      ...(crawler.preNavigationHooks ?? []).map(hook => contextualizeHook<PlaywrightCrawlingContext>(hook)),
+      contextualizeHook(hooks.contextBuilder),
+      contextualizeHook(hooks.requestRouter),
+      ...(crawler.preNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
     ];
 
     crawler.postNavigationHooks = [
-      contextualizeHook<PlaywrightCrawlingContext>(playwrightPostNavigate),
-      ...(crawler.postNavigationHooks ?? []).map(hook => contextualizeHook<PlaywrightCrawlingContext>(hook)),
+      contextualizeHook(playwrightPostNavigate),
+      ...(crawler.postNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
     ];
 
     // This doesn't receive our properly-populated CrawlingContext; deal with that later.
@@ -103,6 +102,6 @@ export class PlaywrightSpider extends PlaywrightCrawler {
   }
 }
 
-async function playwrightPostNavigate(context: PlaywrightSpiderContext) {
+async function playwrightPostNavigate(context: CombinedContext) {
   context.$ = await playwrightUtils.parseWithCheerio(context.page);
 }

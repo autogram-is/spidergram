@@ -1,5 +1,4 @@
-export {CheerioSpider} from './cheerio-spider.js';
-export {PlaywrightSpider} from './playwright-spider.js';
+export {Spider} from './spider.js';
 export * as helpers from './helpers/index.js';
 export * as hooks from './hooks/index.js';
 export * as handlers from './handlers/index.js';
