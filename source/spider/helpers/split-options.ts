@@ -1,8 +1,8 @@
-import {buildSpiderOptions, CombinedOptions} from '../index.js';
+import {buildSpiderOptions, SpiderOptions} from '../index.js';
 import {PlaywrightCrawlerOptions} from 'crawlee';
 
 export function splitOptions(
-  options: Partial<CombinedOptions> = {},
+  options: Partial<SpiderOptions> = {},
 ) {
   const {
     projectConfig,

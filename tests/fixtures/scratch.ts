@@ -30,7 +30,7 @@ const spider = new Spider({
     });
 
     await enqueueLinks();
-  }
+  },
 });
 await spider.run(['https://ethanmarcotte.com'])
   .then(results => console.log);

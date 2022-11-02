@@ -10,9 +10,9 @@ import {
   FinalStatistics
 } from 'crawlee';
 import {
+  InternalSpiderOptions,
   SpiderOptions,
-  CombinedOptions,
-  CombinedSpiderContext,
+  SpiderContext,
   buildSpiderOptions,
   hooks,
   handlers,
@@ -31,11 +31,11 @@ import { SpiderRequestHandler } from './handlers/index.js';
 type AddRequestValue = string | Request | RequestOptions | NormalizedUrl | UniqueUrl;
 
 export class Spider extends PlaywrightCrawler {
-  spiderOptions: SpiderOptions;
+  InternalSpiderOptions: InternalSpiderOptions;
   crawlerOptions: PlaywrightCrawlerOptions;
 
   constructor(
-    options: Partial<CombinedOptions> = {},
+    options: Partial<SpiderOptions> = {},
     config?: Configuration,
   ) {
     const {crawler, spider} = helpers.splitOptions(options);
@@ -71,7 +71,7 @@ export class Spider extends PlaywrightCrawler {
 
     super(crawler, config);
 
-    this.spiderOptions = buildSpiderOptions(spider);
+    this.InternalSpiderOptions = buildSpiderOptions(spider);
     this.crawlerOptions = crawler;
   }
 
@@ -80,11 +80,11 @@ export class Spider extends PlaywrightCrawler {
     options?: CrawlerAddRequestsOptions
   ): Promise<FinalStatistics> {
     // If only a single value came in, turn it into an array.
-    const context = await Project.context(this.spiderOptions.projectConfig);
+    const context = await Project.context(this.InternalSpiderOptions.projectConfig);
     requests = arrify(requests);
 
     // Normalize and deduplicate any incoming requests.
-    const uniques = new UniqueUrlSet(undefined, undefined, this.spiderOptions.urlOptions.normalizer);
+    const uniques = new UniqueUrlSet(undefined, undefined, this.InternalSpiderOptions.urlOptions.normalizer);
     for (const value of requests) {
       if (is.string(value) || is.urlInstance(value) || value instanceof UniqueUrl ) {
         uniques.add(value);
@@ -103,6 +103,6 @@ export class Spider extends PlaywrightCrawler {
   }
 }
 
-async function playwrightPostNavigate(context: CombinedSpiderContext) {
+async function playwrightPostNavigate(context: SpiderContext) {
   context.$ = await playwrightUtils.parseWithCheerio(context.page);
 }

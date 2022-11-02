@@ -1,8 +1,8 @@
-import {CombinedSpiderContext} from '../context.js';
+import {SpiderContext} from '../context.js';
 import { PlaywrightGotoOptions } from 'crawlee';
 import {helpers} from '../index.js';
 
-export async function defaultRouter(context: CombinedSpiderContext, options: PlaywrightGotoOptions): Promise<void> {
+export async function defaultRouter(context: SpiderContext, options: PlaywrightGotoOptions): Promise<void> {
   const {log, request, uniqueUrl, prefetchRequest, downloadMimeTypes, parseMimeTypes} = context;
   const requestMeta = await prefetchRequest();
 

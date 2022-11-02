@@ -9,6 +9,6 @@ console.log(context.graph.collection('test'));
 
 // They also set up storage bins for files created/downloaded 
 // during a crawl, configuration information, etc.
-console.log(await context.files.listContents('/', { recursive: true }));
+console.log(await context.files().listContents('/', { recursive: true }));
 
-console.log(await context.files.exists(context.configuration.google?.credentialPath ?? ''));
+console.log(await context.files().exists(context.configuration.google?.credentialPath ?? ''));

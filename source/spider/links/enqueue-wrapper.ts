@@ -1,9 +1,9 @@
-import {CombinedSpiderContext} from '../context.js';
+import {SpiderContext} from '../context.js';
 import {EnqueueUrlOptions, ensureOptions} from './index.js';
 import {find, save, enqueue} from './index.js';
 
 export async function enqueueLinks(
-  context: CombinedSpiderContext,
+  context: SpiderContext,
   customOptions: Partial<EnqueueUrlOptions> = {},
 ) {
   const options = await ensureOptions(context, customOptions);

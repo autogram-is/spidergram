@@ -1,11 +1,11 @@
 import arrify from 'arrify';
 import {Dictionary, Request} from 'crawlee';
 import {UniqueUrl} from '../../model/index.js';
-import {CombinedSpiderContext} from '../context.js';
+import {SpiderContext} from '../context.js';
 import {EnqueueUrlOptions, ensureOptions, filter} from './index.js';
 
 export async function enqueue(
-  context: CombinedSpiderContext,
+  context: SpiderContext,
   urls: UniqueUrl | UniqueUrl[],
   customOptions: Partial<EnqueueUrlOptions> = {},
 ) {

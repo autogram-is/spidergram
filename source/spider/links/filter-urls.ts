@@ -3,11 +3,11 @@ import {EnqueueStrategy} from 'crawlee';
 import {ParsedUrl} from '@autogram/url-tools';
 import minimatch from 'minimatch';
 import {UniqueUrl} from '../../model/index.js';
-import {CombinedSpiderContext} from '../index.js';
+import {SpiderContext} from '../index.js';
 import arrify from 'arrify';
 
 export function filter(
-  context: CombinedSpiderContext,
+  context: SpiderContext,
   input: UniqueUrl | ParsedUrl,
   filters: Filter | Filter[],
 ): boolean {
@@ -25,7 +25,7 @@ export function filter(
   return true;
 }
 
-function singleFilter(context: CombinedSpiderContext, url: ParsedUrl, filter: Filter): boolean {
+function singleFilter(context: SpiderContext, url: ParsedUrl, filter: Filter): boolean {
   const currentUrl = context.uniqueUrl?.parsed;
 
   if (is.enumCase(filter, EnqueueStrategy)) {
@@ -60,18 +60,14 @@ function singleFilter(context: CombinedSpiderContext, url: ParsedUrl, filter: Fi
   return false;
 }
 
-export type FilterFunction = (link: FilterableLink, context?: CombinedSpiderContext) => boolean;
+export type FilterFunction = (link: FilterableLink, context?: SpiderContext) => boolean;
 export type FilterableLink = UniqueUrl | ParsedUrl;
 
 // We accept a staggering array of filter types. Come, behold our filters.
 export type FilterInput = Filter | Filter[];
 export type Filter = string | RegExp | UrlFilterWithContext | EnqueueStrategy;
-export type FilterSet = Record<string, FilterInput> & {
-  save?: FilterInput;
-  enqueue?: FilterInput;
-};
 
 export type UrlFilterWithContext = (
   found: ParsedUrl,
-  context?: CombinedSpiderContext
+  context?: SpiderContext
 ) => boolean;

@@ -1,6 +1,6 @@
-import {CombinedSpiderContext} from '../context.js';
+import {SpiderContext} from '../context.js';
 
-export async function prefetchRequest(context: CombinedSpiderContext) {
+export async function prefetchRequest(context: SpiderContext) {
   // When using 'head', be sure to turn off decompression and body retrieval,
   // or the crawler's helpful attempts to process the body will fail terribly.
   

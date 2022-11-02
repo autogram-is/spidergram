@@ -1,7 +1,7 @@
-import {CombinedSpiderContext} from '../context.js';
+import {SpiderContext} from '../context.js';
 import {downloadListOfUrls} from 'crawlee';
 
-export async function sitemapHandler(context: CombinedSpiderContext) {
+export async function sitemapHandler(context: SpiderContext) {
   const {request, saveResource, saveUrls, saveRequests} = context;
   await saveResource();
   
