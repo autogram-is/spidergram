@@ -1,6 +1,8 @@
 import { JSDOM } from 'jsdom';
 import * as d3 from 'd3';
 
+export {d3};
+
 // Shamelessly yoinked from https://github.com/d3-node/d3-node
 // and wrapped in some Typescript-friendly-ifying. We'll be 
 // consolidating this and wrapping it in canvas-based image exports
@@ -69,10 +71,6 @@ export class Visualization {
 
   toHtml() {
     return this.dom.serialize();
-  }
-
-  toPng() {
-    
   }
 
   chartHTML() {

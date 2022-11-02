@@ -1,5 +1,5 @@
-import {CombinedContext} from '../context.js';
+import {CombinedSpiderContext} from '../context.js';
 
-export async function statusHandler(context: CombinedContext): Promise<void> {
-  context.resource ??= await context.saveResource();
+export async function statusHandler(context: CombinedSpiderContext): Promise<void> {
+  await context.saveResource();
 }

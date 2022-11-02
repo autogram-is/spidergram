@@ -1,8 +1,8 @@
 import {RespondsWith, Resource} from '../../model/index.js';
-import {CombinedContext} from '../context.js';
+import {CombinedSpiderContext} from '../context.js';
 
 export async function saveResource(
-  context: CombinedContext,
+  context: CombinedSpiderContext,
   properties: Record<string, unknown> = {},
 ) {
   const {graph, requestMeta, uniqueUrl, request} = context;
@@ -35,5 +35,9 @@ export async function saveResource(
   }
 
   // There's probably a better way to do this; for now, it works.
-  return graph.push(results).then(() => results[0] as Resource);
+  return graph.push(results).then(() => results[0] as Resource)
+    .then(resource => {
+      context.resource = resource;
+      return resource;
+    });
 }

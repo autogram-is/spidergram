@@ -1,13 +1,13 @@
-import {CombinedContext} from '../context.js';
+import {CombinedSpiderContext} from '../context.js';
 import {UniqueUrl} from '../../model/index.js';
 import * as helpers from '../helpers/index.js';
 import * as urls from '../links/index.js';
-import {PlaywrightSpider} from '../playwright-spider.js';
-import {CheerioSpider} from '../cheerio-spider.js';
+import {Spider} from '../spider.js';
 import { Project } from '../../project.js';
+import { PlaywrightGotoOptions } from 'crawlee';
 
-export async function contextBuilder(context: CombinedContext): Promise<void> {
-  const crawler = context.crawler as PlaywrightSpider | CheerioSpider;
+export async function contextBuilder(context: CombinedSpiderContext, options?: PlaywrightGotoOptions): Promise<void> {
+  const crawler = context.crawler as Spider;
   const project = await Project.context(context.projectConfig);
 
   // Map our 'contextualized' functions to the context object

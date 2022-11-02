@@ -1,21 +1,25 @@
-import {SupportedOptions, SpiderOptions, SupportedContext, buildSpiderOptions} from '../index.js';
+import {buildSpiderOptions, CombinedOptions} from '../index.js';
+import {PlaywrightCrawlerOptions} from 'crawlee';
 
-export function splitOptions<CrawlerOptions extends SupportedOptions, Context extends SupportedContext>(
-  options: Partial<CrawlerOptions & SpiderOptions> = {},
+export function splitOptions(
+  options: Partial<CombinedOptions> = {},
 ) {
   const {
     projectConfig,
-    requestRouter,
+    defaultRouter,
+    pageHandler,
     requestHandlers,
     urlOptions,
     parseMimeTypes,
     downloadMimeTypes,
+    preNavigationHooks,
+    postNavigationHooks,
 
     ...crawlerOptions
   } = options;
 
   return {
     spider: buildSpiderOptions(options),
-    crawler: crawlerOptions as CrawlerOptions,
+    crawler: crawlerOptions as PlaywrightCrawlerOptions,
   };
 }
