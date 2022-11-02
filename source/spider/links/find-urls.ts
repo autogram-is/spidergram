@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
-import {CombinedContext} from '../context.js';
+import {CombinedSpiderContext} from '../context.js';
 import {EnqueueUrlOptions, ensureOptions, AnchorTagData} from './index.js';
 
 export async function find(
-  context: CombinedContext,
+  context: CombinedSpiderContext,
   customOptions?: Partial<EnqueueUrlOptions>,
 ) {
   const options = await ensureOptions(context, customOptions);

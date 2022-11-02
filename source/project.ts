@@ -3,7 +3,7 @@ import { Config as ArangoConfig } from 'arangojs/connection';
 import { Storage as FileStore, Configuration as FileConfiguration, TDiskDriver } from 'typefs';
 import * as dotenv from 'dotenv'
 
-dotenv.config()
+dotenv.config();
 
 export interface ProjectConfig {
 	name: string,

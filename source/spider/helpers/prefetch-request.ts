@@ -1,8 +1,9 @@
-import {CombinedContext} from '../context.js';
+import {CombinedSpiderContext} from '../context.js';
 
-export async function prefetchRequest(context: CombinedContext) {
+export async function prefetchRequest(context: CombinedSpiderContext) {
   // When using 'head', be sure to turn off decompression and body retrieval,
   // or the crawler's helpful attempts to process the body will fail terribly.
+  
   return context.sendRequest({method: 'HEAD', allowGetBody: false, decompress: false})
     .then(response => {
       context.requestMeta = {

@@ -1,7 +1,7 @@
 import {RespondsWith, Resource} from '../../index.js';
-import {CombinedContext} from '../context.js';
+import {CombinedSpiderContext} from '../context.js';
 
-export async function failureHandler(context: CombinedContext, error: Error) {
+export async function failureHandler(context: CombinedSpiderContext, error: Error) {
   const {graph, request, uniqueUrl} = context;
 
   const rs = new Resource({
