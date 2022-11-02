@@ -26,6 +26,7 @@ import { Project } from '../project.js';
 import { UniqueUrl, UniqueUrlSet } from '../model/index.js';
 import { NormalizedUrl } from '@autogram/url-tools';
 import arrify from 'arrify';
+import { SpiderRequestHandler } from './handlers/index.js';
 
 type AddRequestValue = string | Request | RequestOptions | NormalizedUrl | UniqueUrl;
 
@@ -39,16 +40,17 @@ export class Spider extends PlaywrightCrawler {
   ) {
     const {crawler, spider} = helpers.splitOptions(options);
 
-    spider.requestHandlers = spider.requestHandlers ?? {
+    const requestHandlers: Record<string, SpiderRequestHandler> = {
       page: spider.pageHandler ?? handlers.pageHandler,
       download: handlers.downloadHandler,
       status: handlers.statusHandler,
+      ...spider.requestHandlers
     };
 
     const router = createPlaywrightRouter();
-    router.addDefaultHandler(contextualizeHandler(spider.requestHandlers.page));
-    for (const h in spider.requestHandlers) {
-      router.addHandler(h, contextualizeHandler(spider.requestHandlers[h]));
+    router.addDefaultHandler(contextualizeHandler(requestHandlers.page));
+    for (const h in requestHandlers) {
+      router.addHandler(h, contextualizeHandler(requestHandlers[h]));
     }
 
     crawler.requestHandler = router;
