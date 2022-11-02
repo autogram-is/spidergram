@@ -7,7 +7,7 @@ export function splitOptions(
   const {
     projectConfig,
     defaultRouter,
-    requestHandler,
+    pageHandler,
     requestHandlers,
     urlOptions,
     parseMimeTypes,

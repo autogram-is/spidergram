@@ -39,11 +39,10 @@ export class Spider extends PlaywrightCrawler {
   ) {
     const {crawler, spider} = helpers.splitOptions(options);
 
-    spider.requestHandlers = {
+    spider.requestHandlers = spider.requestHandlers ?? {
+      page: spider.pageHandler ?? handlers.pageHandler,
       download: handlers.downloadHandler,
       status: handlers.statusHandler,
-      page: handlers.defaultHandler,
-      ...spider.requestHandlers,
     };
 
     const router = createPlaywrightRouter();
