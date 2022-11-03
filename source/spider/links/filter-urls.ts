@@ -2,9 +2,9 @@ import is from '@sindresorhus/is';
 import {EnqueueStrategy} from 'crawlee';
 import {ParsedUrl} from '@autogram/url-tools';
 import minimatch from 'minimatch';
+import arrify from 'arrify';
 import {UniqueUrl} from '../../model/index.js';
 import {SpiderContext} from '../index.js';
-import arrify from 'arrify';
 
 export function filter(
   context: SpiderContext,

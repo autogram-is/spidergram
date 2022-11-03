@@ -12,11 +12,11 @@ export async function save(
   const options = await ensureOptions(context, customOptions);
   const {graph, uniqueUrl, resource} = context;
   const results: {
-    uniques: Array<UniqueUrl>,
-    links: Array<LinksTo>,
+    uniques: UniqueUrl[];
+    links: LinksTo[];
   } = {
     uniques: [],
-    links: []
+    links: [],
   };
 
   for (const link of arrify(links)) {
@@ -54,8 +54,8 @@ export async function save(
   }
 
   return graph.push(results.uniques, false)
-    .then(() => graph.push(results.links))
-    .then(() => results.uniques)
+    .then(async () => graph.push(results.links))
+    .then(() => results.uniques);
 }
 
 export async function saveCurrentUrl(context: SpiderContext): Promise<void> {

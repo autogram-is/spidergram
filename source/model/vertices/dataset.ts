@@ -8,7 +8,7 @@ export type DataSetData<DataInterface = unknown> = {
 
 /**
  * General-purpose storage for imported and third-party API data.
- * 
+ *
  *
  * @export
  * @class DataSet
@@ -17,7 +17,10 @@ export type DataSetData<DataInterface = unknown> = {
  * @extends {Vertice}
  */
 export class DataSet<DataInterface = unknown> extends Vertice {
-  readonly _collection = 'datasets';
+  get _collection() {
+    return 'datasets';
+  }
+
   /**
    * Description placeholder
    *

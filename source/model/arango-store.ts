@@ -4,9 +4,9 @@ import {Config} from 'arangojs/connection.js';
 import {Database} from 'arangojs';
 import {DocumentMetadata} from 'arangojs/documents.js';
 import {DocumentCollection} from 'arangojs/collection.js';
-import {Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn, DataSet} from './index.js';
 import arrify from 'arrify';
 import slugify from '@sindresorhus/slugify';
+import {Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn, DataSet} from './index.js';
 
 export {aql} from 'arangojs';
 
@@ -133,14 +133,14 @@ export class ArangoStore {
     for (const vertice of input) {
       if (!isEdge(vertice)) {
         promises.push(this.db.collection(vertice._collection)
-          .save(vertice.toJSON(), {overwriteMode: overwriteMode}));
+          .save(vertice.toJSON(), {overwriteMode}));
       }
     }
 
     for (const edge of input) {
       if (isEdge(edge)) {
         promises.push(this.db.collection(edge._collection)
-          .save(edge.toJSON(), {overwriteMode: overwriteMode}));
+          .save(edge.toJSON(), {overwriteMode}));
       }
     }
 
@@ -167,10 +167,10 @@ export class ArangoStore {
     return Promise.all(promises);
   }
 
-  async erase(options: { collections? : string[], eraseAll?: boolean }) {
+  async erase(options: {collections?: string[]; eraseAll?: boolean}) {
     options.collections ??= [];
     const collections = await this.db.listCollections(true);
-    for (let collection of collections) {
+    for (const collection of collections) {
       if ((options.collections.includes(collection.name)) || (options.collections.length === 0 && options.eraseAll === true)) {
         await this.db.collection(collection.name).truncate();
       }

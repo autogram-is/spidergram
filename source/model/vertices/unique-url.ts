@@ -20,7 +20,9 @@ export enum UrlSource {
 }
 
 export class UniqueUrl extends Vertice {
-  readonly _collection = 'unique_urls';
+  get _collection() {
+    return 'unique_urls';
+  }
 
   url!: string;
 

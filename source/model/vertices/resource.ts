@@ -11,7 +11,10 @@ export type ResourceData = {
 } & VerticeData;
 
 export class Resource extends Vertice {
-  readonly _collection = 'resources';
+  get _collection() {
+    return 'resources';
+  }
+
   url!: string;
   code!: number;
   message!: string;

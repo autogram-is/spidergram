@@ -36,15 +36,17 @@ export async function enqueue(
 }
 
 export function uniqueUrlToRequest(uu: UniqueUrl, userData: Dictionary = {}): Request {
-  
   const r = new Request({
     url: uu.url,
     uniqueKey: uu.key,
     userData: {
       ...userData,
-      fromUniqueUrl: true
-    }
+      fromUniqueUrl: true,
+    },
   });
-  if (uu.referer) r.headers = {referer: uu.referer};
+  if (uu.referer) {
+    r.headers = {referer: uu.referer};
+  }
+
   return r;
 }

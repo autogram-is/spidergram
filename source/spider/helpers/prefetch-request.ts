@@ -3,7 +3,7 @@ import {SpiderContext} from '../context.js';
 export async function prefetchRequest(context: SpiderContext) {
   // When using 'head', be sure to turn off decompression and body retrieval,
   // or the crawler's helpful attempts to process the body will fail terribly.
-  
+
   return context.sendRequest({method: 'HEAD', allowGetBody: false, decompress: false})
     .then(response => {
       context.requestMeta = {
@@ -12,7 +12,7 @@ export async function prefetchRequest(context: SpiderContext) {
         statusCode: response.statusCode,
         statusMessage: response.statusMessage,
         headers: response.headers,
-        method: 'HEAD'
+        method: 'HEAD',
       };
       response.destroy();
       return context.requestMeta;

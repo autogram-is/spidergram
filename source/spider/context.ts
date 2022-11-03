@@ -1,13 +1,13 @@
 
 import {IncomingHttpHeaders} from 'node:http';
 import {PlaywrightCrawlingContext, Request, CheerioRoot, PlaywrightGotoOptions, PlaywrightRequestHandler, PlaywrightHook} from 'crawlee';
+import {TDiskDriver} from 'typefs';
 import {UniqueUrl, Resource} from '../model/index.js';
+import {ArangoStore} from '../model/arango-store.js';
 import {EnqueueUrlOptions, AnchorTagData} from './links/index.js';
 import {InternalSpiderOptions} from './options.js';
-import {ArangoStore} from '../model/arango-store.js';
-import {TDiskDriver} from 'typefs';
 import {SpiderHook} from './hooks/index.js';
-import { SpiderRequestHandler } from './handlers/index.js';
+import {SpiderRequestHandler} from './handlers/index.js';
 
 export type SpiderContext = InternalSpiderContext & PlaywrightCrawlingContext;
 
@@ -18,7 +18,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    *
    * @type {UniqueUrl}
    */
-   uniqueUrl?: UniqueUrl;
+  uniqueUrl?: UniqueUrl;
 
   /**
    * If a {@apilink Resource} object for the current request response
@@ -48,8 +48,8 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
   /**
    * Execute a `HEAD` request for the current URL; used to populate
    * the crawl context's `requestMeta` property.
-   * 
-   * *NOTE:* Only useful when overriding the spider's default requestRouter. 
+   *
+   * *NOTE:* Only useful when overriding the spider's default requestRouter.
    *
    * @type {Function}
    */
@@ -58,15 +58,15 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
   /**
    * Save a {@apilink Resource} for the current request response, and
    * a {@apilink RespondsWith} object linking it to the current {@apilink UniqueUrl}.
-   * 
+   *
    * If no parameters are supplied, the Resource is saved with no body text;
    * this can be useful when saving stub records of HTTP errors or
    * checking for 404s without downloading the full HTTP payload.
-   * 
+   *
    * @example
    * function myCustomHandler({$, saveResource}) {
    *   await saveResource({ body: $.html() })
-   * } 
+   * }
    *
    * @type {Function}
    */
@@ -76,19 +76,19 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * Parses the current HTML page for links, saving them as {@apilink UniqueUrl}
    * objects and enqueing them as crawl requests. @see {@apilink EnqueueUrlOptions}
    * for default options.
-   * 
+   *
    * @example
    * function myCustomHandler({ enqueueLinks }) {
    *   await enqueueLinks({
    *     selector: 'nav a',
    *     label: 'navigation'
    *   });
-   * 
+   *
    *   await enqueueLinks({
    *     selector: 'body main a',
    *     label: 'body'
    *   });
-   * } 
+   * }
    *
    * @type {Function}
    */
@@ -121,7 +121,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * A connection to the project's Arango graph database. Can be used to
    * save objects and data when bypassing helper functions like `saveResource`
    * and `saveUrls`.
-   * 
+   *
    * @type {ArangoStore}
    */
   graph: ArangoStore;
@@ -130,19 +130,19 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * Async function that returns a given file storage bucket, suitable for reading/
    * writing crawl data or reports, based on the project's storage configuration.
    * Storage buckets can point to files on a local disk, Amazon S3 buckets, etc.
-   * 
+   *
    * Calling files() with no parameters returns the project 'default' storage bucket,
    * while passing in the name of a specific bucket will use it, if configured.
-   * 
+   *
    * @see {@apilink Project} for configuration details and defaults.
-   * 
+   *
    * @example
    * function myCustomHandler({ saveResource, files, $ }) {
    *   const filename = `payloads/${request.uniqueKey}.html`;
    *   await saveResource({ files: [ filename ]});
    *   await files().write(filename, $.html());
-   * } 
-   * 
+   * }
+   *
    * @type {Function}
    */
   files: (bucket?: string) => TDiskDriver;
@@ -158,12 +158,12 @@ export interface RequestMeta {
 }
 
 export function contextualizeHook(hook: SpiderHook): PlaywrightHook {
-  return (
+  return async (
     ctx: PlaywrightCrawlingContext,
-    options?: PlaywrightGotoOptions
+    options?: PlaywrightGotoOptions,
   ): Promise<void> => hook(ctx as SpiderContext, options);
 }
 
 export function contextualizeHandler(handler: SpiderRequestHandler): PlaywrightRequestHandler {
-  return (ctx: PlaywrightCrawlingContext): Promise<void> => handler(ctx as unknown as SpiderContext);
+  return async (ctx: PlaywrightCrawlingContext): Promise<void> => handler(ctx as unknown as SpiderContext);
 }

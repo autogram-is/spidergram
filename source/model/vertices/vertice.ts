@@ -10,8 +10,8 @@ import {
   ClassTransformOptions,
   TargetMap,
 } from 'class-transformer';
-import {Uuid, UuidFactory} from '../helpers/uuid.js';
 import {JsonObject} from 'type-fest';
+import {Uuid, UuidFactory} from '../helpers/uuid.js';
 
 export {Transform, Exclude} from 'class-transformer';
 export type Reference<T extends Vertice = Vertice> = T | [ string, Uuid ] | string;
@@ -45,7 +45,7 @@ export abstract class Vertice {
       return r.id;
     }
   }
-  
+
   [property: string]: unknown;
   _key: Uuid = UuidFactory.nil;
 

@@ -7,8 +7,14 @@ import {
   playwrightUtils,
   CrawlerAddRequestsOptions,
   RequestOptions,
-  FinalStatistics
+  FinalStatistics,
 } from 'crawlee';
+
+import {NormalizedUrl} from '@autogram/url-tools';
+import arrify from 'arrify';
+import {Project} from '../project.js';
+import {UniqueUrl, UniqueUrlSet} from '../model/index.js';
+import {SpiderRequestHandler} from './handlers/index.js';
 import {
   InternalSpiderOptions,
   SpiderOptions,
@@ -18,14 +24,8 @@ import {
   handlers,
   contextualizeHandler,
   contextualizeHook,
-  uniqueUrlToRequest
+  uniqueUrlToRequest,
 } from './index.js';
-
-import { Project } from '../project.js';
-import { UniqueUrl, UniqueUrlSet } from '../model/index.js';
-import { NormalizedUrl } from '@autogram/url-tools';
-import arrify from 'arrify';
-import { SpiderRequestHandler } from './handlers/index.js';
 
 type AddRequestValue = string | Request | RequestOptions | NormalizedUrl | UniqueUrl;
 
@@ -43,7 +43,7 @@ export class Spider extends PlaywrightCrawler {
       page: internal.pageHandler ?? handlers.pageHandler,
       download: handlers.downloadHandler,
       status: handlers.statusHandler,
-      ...internal.requestHandlers
+      ...internal.requestHandlers,
     };
 
     const router = createPlaywrightRouter();
@@ -76,7 +76,7 @@ export class Spider extends PlaywrightCrawler {
 
   override async run(
     requests: AddRequestValue | AddRequestValue[] = [],
-    options?: CrawlerAddRequestsOptions
+    options?: CrawlerAddRequestsOptions,
   ): Promise<FinalStatistics> {
     // If only a single value came in, turn it into an array.
     const context = await Project.context(this.InternalSpiderOptions.projectConfig);
@@ -85,19 +85,19 @@ export class Spider extends PlaywrightCrawler {
     // Normalize and deduplicate any incoming requests.
     const uniques = new UniqueUrlSet(undefined, undefined, this.InternalSpiderOptions.urlOptions.normalizer);
     for (const value of requests) {
-      if (is.string(value) || is.urlInstance(value) || value instanceof UniqueUrl ) {
+      if (is.string(value) || is.urlInstance(value) || value instanceof UniqueUrl) {
         uniques.add(value);
       } else if (value instanceof Request) {
         uniques.add(value.url);
       } else if ('url' in value && is.string(value.url)) {
-        uniques.add(value.url)
+        uniques.add(value.url);
       }
     }
-  
+
     await context.graph.push([...uniques], false);
     const queue = await this.getRequestQueue();
     await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)), options);
-  
+
     return super.run();
   }
 }

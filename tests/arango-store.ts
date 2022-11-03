@@ -1,6 +1,7 @@
 import test from 'ava';
 import {ArangoStore} from '../source/model/arango-store.js';
 import {UniqueUrl, Resource, RespondsWith, LinksTo} from '../source/model/index.js';
+
 export {aql, AqlQuery} from 'arangojs/aql';
 
 test('spidergraph connection', async t => {

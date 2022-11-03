@@ -1,4 +1,4 @@
-export * from './types.js';
+export * from './model/helpers/properties.js';
 export * from './model/arango-store.js';
 
 export * from './model/index.js';
