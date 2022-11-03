@@ -84,9 +84,6 @@ export class Spider extends PlaywrightCrawler {
       ...(internal.postNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
     ];
 
-    // This doesn't receive our properly-populated CrawlingContext; deal with that later.
-    // crawler.failedRequestHandler ??= contextualizeHandler(handlers.failureHandler);
-
     super(crawler, config);
 
     this.spiderOptions = internal;
@@ -133,13 +130,13 @@ export class Spider extends PlaywrightCrawler {
     this.progress.requestsByType[type]++;
   }
 
-  // This is meant to be used for cleanup of expensive resources,
-  // but we're going to use it for notifications. Nobody ever said
-  // we do things the right way.
   override async _cleanupContext(context: SpiderContext) {
-    // We only want to trigger this after successful processing.
-    this.updateStats(context);
-    this.emit(SpiderEventType.REQUEST_COMPLETE, { ...this.progress, ...this.stats.calculate() } as SpiderStatistics);
+    // This is pretty sketchy way of capturing a non-error; it's actually the opposite.
+    // We'll look into that later.
+    if (context.request.errorMessages.length === 0) {
+      this.updateStats(context);
+      this.emit(SpiderEventType.REQUEST_COMPLETE, { ...this.progress, ...this.stats.calculate() } as SpiderStatistics);
+    }
   }
 
   /**
