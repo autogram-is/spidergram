@@ -7,10 +7,9 @@ import {
   playwrightUtils,
   CrawlerAddRequestsOptions,
   RequestOptions,
-  FinalStatistics,
 } from 'crawlee';
 
-import {NormalizedUrl} from '@autogram/url-tools';
+import {NormalizedUrl, ParsedUrl} from '@autogram/url-tools';
 import arrify from 'arrify';
 import {Project} from '../project.js';
 import {UniqueUrl, UniqueUrlSet} from '../model/index.js';
@@ -19,19 +18,27 @@ import {
   InternalSpiderOptions,
   SpiderOptions,
   SpiderContext,
+  SpiderStatistics,
   buildSpiderOptions,
   hooks,
   handlers,
   contextualizeHandler,
   contextualizeHook,
   uniqueUrlToRequest,
+  SpiderInternalStatistics,
 } from './index.js';
 
-type AddRequestValue = string | Request | RequestOptions | NormalizedUrl | UniqueUrl;
+type RequestValue = string | Request | RequestOptions | NormalizedUrl | UniqueUrl;
 
 export class Spider extends PlaywrightCrawler {
-  InternalSpiderOptions: InternalSpiderOptions;
+  spiderOptions: InternalSpiderOptions;
   crawlerOptions: PlaywrightCrawlerOptions;
+  progress: SpiderInternalStatistics = {
+    requestsByStatus: {},
+    requestsByType: {},
+    requestsByHost: {},
+    requestsByLabel: {}
+  }
 
   constructor(
     options: Partial<SpiderOptions> = {},
@@ -70,20 +77,41 @@ export class Spider extends PlaywrightCrawler {
 
     super(crawler, config);
 
-    this.InternalSpiderOptions = internal;
+    this.spiderOptions = internal;
     this.crawlerOptions = crawler;
   }
 
+  updateStats({request, requestMeta}: SpiderContext) {
+    const type = requestMeta?.headers['content-type'] ?? 'unknown';
+    const status = requestMeta?.statusCode ?? -1;
+    const host = new ParsedUrl(request.url).hostname;
+    const label = request.label ?? 'none';
+
+    this.progress.requestsByHost[host]++;
+    this.progress.requestsByLabel[label]++;
+    this.progress.requestsByStatus[status]++;
+    this.progress.requestsByType[type]++;
+  }
+
+
+  /**
+   * Description placeholder
+   *
+   * @override
+   * @async
+   * @param {(RequestValue | RequestValue[])} [requests=[]]
+   * @param {?CrawlerAddRequestsOptions} [options]
+   */
   override async run(
-    requests: AddRequestValue | AddRequestValue[] = [],
+    requests: RequestValue | RequestValue[] = [],
     options?: CrawlerAddRequestsOptions,
-  ): Promise<FinalStatistics> {
+  ): Promise<SpiderStatistics> {
     // If only a single value came in, turn it into an array.
-    const context = await Project.context(this.InternalSpiderOptions.projectConfig);
+    const context = await Project.context(this.spiderOptions.projectConfig);
     requests = arrify(requests);
 
     // Normalize and deduplicate any incoming requests.
-    const uniques = new UniqueUrlSet(undefined, undefined, this.InternalSpiderOptions.urlOptions.normalizer);
+    const uniques = new UniqueUrlSet(undefined, undefined, this.spiderOptions.urlOptions.normalizer);
     for (const value of requests) {
       if (is.string(value) || is.urlInstance(value) || value instanceof UniqueUrl) {
         uniques.add(value);
@@ -98,7 +126,8 @@ export class Spider extends PlaywrightCrawler {
     const queue = await this.getRequestQueue();
     await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)), options);
 
-    return super.run();
+    return super.run()
+      .then(stats => ({ ...stats, ...this.progress}));
   }
 }
 

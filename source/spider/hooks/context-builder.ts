@@ -32,8 +32,8 @@ export async function contextBuilder(context: SpiderContext, options?: Playwrigh
     graph: project.graph,
     files: project.files,
 
-    ...crawler.InternalSpiderOptions,
+    ...crawler.spiderOptions,
   });
 
-  return urls.saveCurrentUrl(context);
+  await urls.saveCurrentUrl(context);
 }

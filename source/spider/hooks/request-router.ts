@@ -25,12 +25,12 @@ export async function defaultRouter(context: SpiderContext, options: PlaywrightG
     // in the future we'll want to check for sitemap indexes, and
     // custom sitemaps listed in robots.txt
     request.label = 'sitemap';
-  } else if (parseMimeTypes.includes(type)) {
+  } else if (parseMimeTypes?.includes(type)) {
     // This is our default case; run the full page request pipeline
     // and set the label to 'page'.
     request.label = 'page';
     request.skipNavigation = false;
-  } else if (downloadMimeTypes.includes(type)) {
+  } else if (downloadMimeTypes?.includes(type)) {
     // Technically we can't parse AND download with this setup,
     // but that would be a fairly rare case.
     request.label = 'download';
