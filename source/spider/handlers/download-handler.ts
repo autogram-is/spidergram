@@ -16,7 +16,7 @@ export async function downloadHandler(context: SpiderContext): Promise<void> {
 
   const buffer = await sendRequest({responseType: 'buffer', allowGetBody: true, decompress: true, method: 'GET'});
   const fileName = './downloads/' + resource.key + '-' + fileNameFromHeaders(new URL(buffer.url), buffer.headers);
-  await files().writeStream(fileName, Readable.from(buffer));
+  await files().writeStream(fileName, Readable.from(buffer.rawBody));
 
   resource.payload = fileName;
   await graph.push(resource);
