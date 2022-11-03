@@ -16,7 +16,6 @@ import {
   buildSpiderOptions,
   hooks,
   handlers,
-  helpers,
   contextualizeHandler,
   contextualizeHook,
   uniqueUrlToRequest
@@ -38,13 +37,13 @@ export class Spider extends PlaywrightCrawler {
     options: Partial<SpiderOptions> = {},
     config?: Configuration,
   ) {
-    const {crawler, spider} = helpers.splitOptions(options);
+    const {crawler, internal} = splitOptions(options);
 
     const requestHandlers: Record<string, SpiderRequestHandler> = {
-      page: spider.pageHandler ?? handlers.pageHandler,
+      page: internal.pageHandler ?? handlers.pageHandler,
       download: handlers.downloadHandler,
       status: handlers.statusHandler,
-      ...spider.requestHandlers
+      ...internal.requestHandlers
     };
 
     const router = createPlaywrightRouter();
@@ -58,20 +57,20 @@ export class Spider extends PlaywrightCrawler {
     crawler.preNavigationHooks = [
       contextualizeHook(hooks.contextBuilder),
       contextualizeHook(hooks.defaultRouter),
-      ...(spider.preNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
+      ...(internal.preNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
     ];
 
     crawler.postNavigationHooks = [
       contextualizeHook(playwrightPostNavigate),
-      ...(spider.postNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
+      ...(internal.postNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
     ];
 
     // This doesn't receive our properly-populated CrawlingContext; deal with that later.
-    // crawler.failedRequestHandler ??= contextualizeHandler<PlaywrightCrawlingContext>(handlers.failureHandler);
+    // crawler.failedRequestHandler ??= contextualizeHandler(handlers.failureHandler);
 
     super(crawler, config);
 
-    this.InternalSpiderOptions = buildSpiderOptions(spider);
+    this.InternalSpiderOptions = internal;
     this.crawlerOptions = crawler;
   }
 
@@ -105,4 +104,27 @@ export class Spider extends PlaywrightCrawler {
 
 async function playwrightPostNavigate(context: SpiderContext) {
   context.$ = await playwrightUtils.parseWithCheerio(context.page);
+}
+
+function splitOptions(
+  options: Partial<SpiderOptions> = {},
+) {
+  const {
+    projectConfig,
+    defaultRouter,
+    pageHandler,
+    requestHandlers,
+    urlOptions,
+    parseMimeTypes,
+    downloadMimeTypes,
+    preNavigationHooks,
+    postNavigationHooks,
+
+    ...crawlerOptions
+  } = options;
+
+  return {
+    internal: buildSpiderOptions(options),
+    crawler: crawlerOptions as PlaywrightCrawlerOptions,
+  };
 }

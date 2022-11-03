@@ -5,8 +5,8 @@ import {UniqueUrl, Resource} from '../model/index.js';
 import {EnqueueUrlOptions, AnchorTagData} from './links/index.js';
 import {InternalSpiderOptions} from './options.js';
 import {ArangoStore} from '../model/arango-store.js';
-import { TDiskDriver } from 'typefs';
-import { SpiderHook } from './hooks/index.js';
+import {TDiskDriver} from 'typefs';
+import {SpiderHook} from './hooks/index.js';
 import { SpiderRequestHandler } from './handlers/index.js';
 
 export type SpiderContext = InternalSpiderContext & PlaywrightCrawlingContext;
