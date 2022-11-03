@@ -131,12 +131,19 @@ export class Spider extends PlaywrightCrawler {
   }
 
   override async _cleanupContext(context: SpiderContext) {
-    // This is pretty sketchy way of capturing a non-error; it's actually the opposite.
-    // We'll look into that later.
+    // This is pretty sketchy way of capturing a non-error; we need to verify that
+    // a request that previously failed but then succeeded will still be noticed.
     if (context.request.errorMessages.length === 0) {
       this.updateStats(context);
-      this.emit(SpiderEventType.REQUEST_COMPLETE, { ...this.progress, ...this.stats.calculate() } as SpiderStatistics);
     }
+
+    // Even in the case of an error, we'll fire the event so that progress
+    // indicators can be updated, etc.
+    this.emit(
+      SpiderEventType.REQUEST_COMPLETE,
+      { ...this.progress, ...this.stats.calculate() } as SpiderStatistics,
+      context.request.url
+    );
   }
 
   /**
