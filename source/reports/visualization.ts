@@ -8,7 +8,7 @@ export {d3};
 // consolidating this and wrapping it in canvas-based image exports
 // shortly, as well. Usage is fairly straightforward: 
 
-export interface VisuzlizationOptions {
+export interface VisualizationOptions {
   html?: string,
   selector?: string,
   styles?: string,
@@ -20,7 +20,7 @@ export class Visualization {
   document: Document;
   element: d3.Selection<HTMLElement, unknown, d3.BaseType, unknown>;
 
-  constructor (public options: VisuzlizationOptions = {}) {
+  constructor (public options: VisualizationOptions = {}) {
     this.dom = new JSDOM(options.html);
     this.document = this.dom.window.document;
     this.element = d3.select(this.document.body);
