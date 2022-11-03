@@ -114,9 +114,9 @@ export class Spider extends PlaywrightCrawler {
   }
 
   updateStats({request, requestMeta}: SpiderContext) {
-    const type = requestMeta?.headers['content-type'] ?? 'unknown';
+    const type = requestMeta?.type ?? requestMeta?.headers['content-type'] ?? 'unknown';
     const status = requestMeta?.statusCode ?? -1;
-    const host = new ParsedUrl(request.url).hostname;
+    const host = new ParsedUrl(request.url).hostname.toLocaleLowerCase();
     const label = request.label ?? 'none';
 
     this.progress.requestsByHost[host] ??= 0;

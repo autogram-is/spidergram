@@ -155,6 +155,7 @@ export interface RequestMeta {
   headers: IncomingHttpHeaders;
   statusMessage?: string;
   statusCode: number;
+  type?: string;
 }
 
 /**
