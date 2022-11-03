@@ -157,6 +157,10 @@ export interface RequestMeta {
   statusCode: number;
 }
 
+/**
+ * Wraps a preNavigation or postNavigation hook that expects Spidergram's global context
+ * for use with PlaywrightCrawler
+ */
 export function contextualizeHook(hook: SpiderHook): PlaywrightHook {
   return async (
     ctx: PlaywrightCrawlingContext,
@@ -164,6 +168,9 @@ export function contextualizeHook(hook: SpiderHook): PlaywrightHook {
   ): Promise<void> => hook(ctx as SpiderContext, options);
 }
 
+/**
+ * Wraps a handler that expects Spidergram's global context for use with PlaywrightCrawler
+ */
 export function contextualizeHandler(handler: SpiderRequestHandler): PlaywrightRequestHandler {
   return async (ctx: PlaywrightCrawlingContext): Promise<void> => handler(ctx as unknown as SpiderContext);
 }
