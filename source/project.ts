@@ -14,6 +14,7 @@ import {
   IsVariantOf,
 } from './model/index.js';
 import {ArangoStore} from './model/arango-store.js';
+import process from 'node:process';
 
 dotenv.config();
 

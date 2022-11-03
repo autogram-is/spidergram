@@ -77,19 +77,19 @@ export class SimpleAuth {
               client.setCredentials(response.tokens);
               resolve(response.tokens);
             });
-        } catch (error) {
+        } catch (error: unknown) {
           reject(error);
         }
       });
 
-      server.listen(3000, () => {
+      server.listen(3000, async () => {
         // Open the browser to the authorize url to start the workflow
         const authorizeUrl = client.generateAuthUrl({
           redirect_uri: 'http://localhost:3000',
           access_type: 'offline',
           scope: scopes.join(' '),
         });
-        open(authorizeUrl, {wait: false}).then(cp => {
+        await open(authorizeUrl, {wait: false}).then(cp => {
           cp.unref();
         });
       });

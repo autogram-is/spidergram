@@ -5,5 +5,5 @@ export * from './request-router.js';
 export * from './context-builder.js';
 
 export interface SpiderHook {
-  (context: SpiderContext, options?: PlaywrightGotoOptions): Promise<void>
+  (context: SpiderContext, options?: PlaywrightGotoOptions): Promise<void>;
 }

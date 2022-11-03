@@ -18,5 +18,5 @@ export async function failureHandler(context: SpiderContext, error: Error) {
     headers: request.headers ?? {},
   });
 
-  return graph.push([rs, rw]).then(results => {});
+  return graph.push([rs, rw]).then(results => { return; } );
 }

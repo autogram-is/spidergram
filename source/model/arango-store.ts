@@ -103,7 +103,7 @@ export class ArangoStore {
 
     const promises: Array<Promise<DocumentCollection>> = [];
     for (const type of Vertice.types.keys()) {
-      database.collection(type).exists().then(exists => {
+      await database.collection(type).exists().then(exists => {
         if (!exists) {
           if (Vertice.types.get(type)?.isEdge) {
             promises.push(database.createEdgeCollection(type));

@@ -1,6 +1,5 @@
 import {SpiderContext} from '../context.js';
-import {EnqueueUrlOptions, ensureOptions} from './index.js';
-import {find, save, enqueue} from './index.js';
+import {EnqueueUrlOptions, ensureOptions, find, save, enqueue} from './index.js';
 
 export async function enqueueLinks(
   context: SpiderContext,
