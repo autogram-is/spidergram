@@ -1,4 +1,7 @@
 import is from '@sindresorhus/is';
+import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
+import arrify from 'arrify';
+
 import {
   PlaywrightCrawler,
   PlaywrightCrawlerOptions,
@@ -8,9 +11,7 @@ import {
   CrawlerAddRequestsOptions,
   RequestOptions,
 } from 'crawlee';
-
 import {NormalizedUrl, ParsedUrl} from '@autogram/url-tools';
-import arrify from 'arrify';
 import {Project} from '../project.js';
 import {UniqueUrl, UniqueUrlSet} from '../model/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';
@@ -30,6 +31,16 @@ import {
 
 type RequestValue = string | Request | RequestOptions | NormalizedUrl | UniqueUrl;
 
+export const enum SpiderEventType {
+  SYSTEM_INFO = 'systemInfo',
+  REQUEST_COMPLETE = 'requestComplete',
+  ABORTING = 'aborting',
+  EXIT = 'exit',
+}
+
+export type SpiderEventName = SpiderEventType | 'systemInfo' | 'aborting' | 'exit' | 'requestComplete';
+
+
 export class Spider extends PlaywrightCrawler {
   spiderOptions: InternalSpiderOptions;
   crawlerOptions: PlaywrightCrawlerOptions;
@@ -39,6 +50,7 @@ export class Spider extends PlaywrightCrawler {
     requestsByHost: {},
     requestsByLabel: {}
   }
+  protected _events: AsyncEventEmitter;
 
   constructor(
     options: Partial<SpiderOptions> = {},
@@ -79,6 +91,29 @@ export class Spider extends PlaywrightCrawler {
 
     this.spiderOptions = internal;
     this.crawlerOptions = crawler;
+
+    this.log.setLevel(internal.logLevel);
+
+    this._events = new AsyncEventEmitter();
+    //this.events.on(EventType.ABORTING, ({event, ...args}) => this.emit(event, ...args));
+    //this.events.on(EventType.EXIT, ({event, ...args}) => this.emit(event, ...args));
+    //this.events.on(EventType.SYSTEM_INFO, ({event, ...args}) => this.emit(event, ...args));
+  }
+
+  on(event: SpiderEventName, listener: (...args: any[]) => any): void {
+    this._events.on(event, listener);
+  }
+
+  off(event: SpiderEventName, listener?: (...args: any[]) => any): void {
+    if (listener) {
+      this._events.removeListener(event, listener);
+    } else {
+      this._events.removeAllListeners(event);
+    }
+  } 
+
+  emit(event: SpiderEventName, ...args: any[]): void {
+    this._events.emit(event, ...args);
   }
 
   updateStats({request, requestMeta}: SpiderContext) {
@@ -87,12 +122,25 @@ export class Spider extends PlaywrightCrawler {
     const host = new ParsedUrl(request.url).hostname;
     const label = request.label ?? 'none';
 
+    this.progress.requestsByHost[host] ??= 0;
+    this.progress.requestsByLabel[label] ??= 0;
+    this.progress.requestsByStatus[status] ??= 0;
+    this.progress.requestsByType[type] ??= 0;
+
     this.progress.requestsByHost[host]++;
     this.progress.requestsByLabel[label]++;
     this.progress.requestsByStatus[status]++;
     this.progress.requestsByType[type]++;
   }
 
+  // This is meant to be used for cleanup of expensive resources,
+  // but we're going to use it for notifications. Nobody ever said
+  // we do things the right way.
+  override async _cleanupContext(context: SpiderContext) {
+    // We only want to trigger this after successful processing.
+    this.updateStats(context);
+    this.emit(SpiderEventType.REQUEST_COMPLETE, { ...this.progress, ...this.stats.calculate() } as SpiderStatistics);
+  }
 
   /**
    * Description placeholder

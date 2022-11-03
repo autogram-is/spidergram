@@ -1,4 +1,4 @@
-import {Dictionary, PlaywrightCrawlerOptions} from 'crawlee';
+import {Dictionary, LogLevel, PlaywrightCrawlerOptions} from 'crawlee';
 import {helpers, ProjectConfig, projectConfigDefaults} from '../index.js';
 import {SpiderHook, defaultRouter} from './hooks/index.js';
 import {EnqueueUrlOptions} from './links/index.js';
@@ -21,6 +21,14 @@ export interface InternalSpiderOptions extends Dictionary {
    * @type {Partial<ProjectConfig>}
    */
   projectConfig: Partial<ProjectConfig>;
+
+  /**
+   * Logging level for the spider's internal crawler.
+   * 
+   * @default {LogLevel.OFF}
+   * @type {LogLevel}
+   */
+  logLevel: LogLevel;
 
   /**
    * A function to evaluate and modify request objects before
@@ -153,6 +161,7 @@ export function buildSpiderOptions(
 
 const defaultSpiderOptions: InternalSpiderOptions = {
   projectConfig: projectConfigDefaults,
+  logLevel: LogLevel.OFF,
   requestRouter: defaultRouter,
   preNavigationHooks: [],
   postNavigationHooks: [],

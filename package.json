@@ -74,6 +74,7 @@
     "@types/mime": "^3.0.1",
     "@types/minimatch": "^5.1.2",
     "@types/server-destroy": "^1.0.1",
+    "@vladfrangu/async_event_emitter": "^2.1.2",
     "arangojs": "^8.0.0-rc.1",
     "arrify": "^3.0.0",
     "cheerio": "^1.0.0-rc.12",
