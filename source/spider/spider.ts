@@ -192,6 +192,7 @@ function splitOptions(
 ) {
   const {
     projectConfig,
+    logLevel,
     defaultRouter,
     pageHandler,
     requestHandlers,
