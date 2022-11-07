@@ -1,12 +1,12 @@
-import {CombinedSpiderContext} from '../context.js';
+import {PlaywrightGotoOptions} from 'crawlee';
+import {SpiderContext} from '../context.js';
 import {UniqueUrl} from '../../model/index.js';
 import * as helpers from '../helpers/index.js';
 import * as urls from '../links/index.js';
 import {Spider} from '../spider.js';
-import { Project } from '../../project.js';
-import { PlaywrightGotoOptions } from 'crawlee';
+import {Project} from '../../project.js';
 
-export async function contextBuilder(context: CombinedSpiderContext, options?: PlaywrightGotoOptions): Promise<void> {
+export async function contextBuilder(context: SpiderContext, options?: PlaywrightGotoOptions): Promise<void> {
   const crawler = context.crawler as Spider;
   const project = await Project.context(context.projectConfig);
 
@@ -35,5 +35,5 @@ export async function contextBuilder(context: CombinedSpiderContext, options?: P
     ...crawler.spiderOptions,
   });
 
-  return urls.saveCurrentUrl(context);
+  await urls.saveCurrentUrl(context);
 }

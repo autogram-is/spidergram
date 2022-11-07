@@ -1,22 +1,22 @@
 import is from '@sindresorhus/is';
 import arrify from 'arrify';
-import {CombinedSpiderContext} from '../context.js';
+import {SpiderContext} from '../context.js';
 import {UniqueUrl, LinksTo} from '../../model/index.js';
 import {AnchorTagData, EnqueueUrlOptions, filter, ensureOptions} from './index.js';
 
 export async function save(
-  context: CombinedSpiderContext,
+  context: SpiderContext,
   links: AnchorTagData | AnchorTagData[],
   customOptions: Partial<EnqueueUrlOptions> = {},
 ) {
   const options = await ensureOptions(context, customOptions);
   const {graph, uniqueUrl, resource} = context;
   const results: {
-    uniques: Array<UniqueUrl>,
-    links: Array<LinksTo>,
+    uniques: UniqueUrl[];
+    links: LinksTo[];
   } = {
     uniques: [],
-    links: []
+    links: [],
   };
 
   for (const link of arrify(links)) {
@@ -54,11 +54,11 @@ export async function save(
   }
 
   return graph.push(results.uniques, false)
-    .then(() => graph.push(results.links))
-    .then(() => results.uniques)
+    .then(async () => graph.push(results.links))
+    .then(() => results.uniques);
 }
 
-export async function saveCurrentUrl(context: CombinedSpiderContext): Promise<void> {
+export async function saveCurrentUrl(context: SpiderContext): Promise<void> {
   if ('fromUniqueUrl' in context.request.userData) {
     context.uniqueUrl = new UniqueUrl({
       url: context.request.url,

@@ -1,9 +1,7 @@
-import {CombinedSpiderContext} from '../context.js';
 import {PlaywrightGotoOptions} from 'crawlee';
+import {SpiderContext} from '../context.js';
 
 export * from './request-router.js';
 export * from './context-builder.js';
 
-export interface SpiderHook {
-  (context: CombinedSpiderContext, options?: PlaywrightGotoOptions): Promise<void>
-}
+export type SpiderHook = (context: SpiderContext, options?: PlaywrightGotoOptions) => Promise<void>;

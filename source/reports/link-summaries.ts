@@ -130,7 +130,7 @@ export const LinkSummaries = {
             LET redirects = LENGTH(rw.redirects)
             SORT redirects DESC
             return { requested: u.url, returned: r.url, redirects: redirects }
-  `},
+  `;
+  },
 
-  
 };

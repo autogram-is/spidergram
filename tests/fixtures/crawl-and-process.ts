@@ -1,45 +1,36 @@
 import {
-  Resource,
   Project,
-  VerticeWorker,
   Spider,
-  aql,
-  UrlHierarchy,
-} from "../../source/index.js";
+} from '../../source/index.js';
 
 import {
   metadata,
   htmlToText,
   readabilityScores,
-  cheerio
 } from '../../source/analysis/index.js';
 
-const context = await Project.context({ name: 'ethan' });
-await context.graph.erase({ eraseAll: true });
+const context = await Project.context({name: 'ethan'});
+await context.graph.erase({eraseAll: true});
 
-const spider = new Spider();
+const spider = new Spider({
+  async pageHandler(context) {
+    const {$, saveResource, enqueueLinks} = context;
+
+    const body = $!.html();
+    const meta = metadata($!);
+    const text = htmlToText(body, {
+      baseElements: {selectors: ['section.page-content']},
+    });
+    const readability = readabilityScores(text);
+
+    await saveResource({
+      meta,
+      text,
+      readability,
+    });
+
+    await enqueueLinks();
+  },
+});
 await spider.run(['https://ethanmarcotte.com'])
   .then(results => console.log);
-
-const worker = new VerticeWorker<Resource>({
-  collection: 'resources',
-  filter: aql`FILTER item.body != null`,
-  task: async (resource, context) => {
-    const $ = cheerio.load(resource.body!)
-
-    resource.meta = metadata($);
-    resource.text = htmlToText(resource.body!, {
-      baseElements: {selectors: ['section.page-content', ]},
-    });
-    resource.readability = readabilityScores(resource.text as string);
-
-    await context.graph.push(resource);
-  }
-});
-
-const urlHier = new UrlHierarchy(context.graph);
-await urlHier.loadPool()
-  .then(async () => urlHier.buildRelationships())
-  .then(async () => urlHier.save());
-
-console.log(await worker.run());

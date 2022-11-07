@@ -11,7 +11,10 @@ export type ResourceData = {
 } & VerticeData;
 
 export class Resource extends Vertice {
-  readonly _collection = 'resources';
+  get _collection() {
+    return 'resources';
+  }
+
   url!: string;
   code!: number;
   message!: string;
@@ -28,7 +31,7 @@ export class Resource extends Vertice {
 
     // Ensure there's a statuscode for the resource
     if (is.numericString(code)) {
-      this.code = Number.parseInt(code);
+      this.code = Number.parseInt(code, 10);
     } else if (is.number(code)) {
       this.code = code;
     } else {

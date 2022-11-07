@@ -1,17 +1,15 @@
-import { JSDOM } from 'jsdom';
+import {JSDOM} from 'jsdom';
 import * as d3 from 'd3';
 
-export {d3};
-
 // Shamelessly yoinked from https://github.com/d3-node/d3-node
-// and wrapped in some Typescript-friendly-ifying. We'll be 
+// and wrapped in some Typescript-friendly-ifying. We'll be
 // consolidating this and wrapping it in canvas-based image exports
-// shortly, as well. Usage is fairly straightforward: 
+// shortly, as well. Usage is fairly straightforward:
 
-export interface VisuzlizationOptions {
-  html?: string,
-  selector?: string,
-  styles?: string,
+export interface VisualizationOptions {
+  html?: string;
+  selector?: string;
+  styles?: string;
 }
 
 export class Visualization {
@@ -20,12 +18,14 @@ export class Visualization {
   document: Document;
   element: d3.Selection<HTMLElement, unknown, d3.BaseType, unknown>;
 
-  constructor (public options: VisuzlizationOptions = {}) {
+  constructor(public options: VisualizationOptions = {}) {
     this.dom = new JSDOM(options.html);
     this.document = this.dom.window.document;
     this.element = d3.select(this.document.body);
     this.selector = options.selector;
-    if (options.selector) this.element = this.element.select(options.selector);
+    if (options.selector) {
+      this.element = this.element.select(options.selector);
+    }
   }
 
   protected fixXmlCase(text: string) {
@@ -36,32 +36,34 @@ export class Visualization {
       const tagName = tagNames[i];
       text = text.replace(
         new RegExp('(<|</)' + tagName.toLowerCase() + '\\b', 'g'),
-        (all, start) => { return start + tagName }
+        (all, start) => start + tagName,
       );
     }
+
     return text;
   }
 
   createSVG(width?: number, height?: number, attrs?: Record<string, string | number>) {
     const svg = this.element.append('svg')
       .attr('xmlns', 'http://www.w3.org/2000/svg');
-    
+
     if (width && height) {
       svg.attr('width', width).attr('height', height);
     }
 
     if (attrs) {
-      Object.keys(attrs).forEach(function (key) {
-        svg.attr(key, attrs[key])
-      });
+      for (const key of Object.keys(attrs)) {
+        svg.attr(key, attrs[key]);
+      }
     }
 
     if (this.options.styles) {
       svg.append('defs')
         .append('style')
         .attr('type', 'text/css')
-        .text(this.escapeStyles(this.options.styles))
+        .text(this.escapeStyles(this.options.styles));
     }
+
     return svg;
   }
 
@@ -77,6 +79,7 @@ export class Visualization {
     if (this.options.selector) {
       return this.document.querySelector(this.options.selector)?.outerHTML ?? '';
     }
+
     return '';
   }
 
@@ -84,3 +87,5 @@ export class Visualization {
     return `<![CDATA[ ${styles} ]]>`;
   }
 }
+
+export * as d3 from 'd3';

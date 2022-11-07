@@ -6,7 +6,7 @@ import {
   Properties,
   getProperty,
   setProperty,
-} from '../types.js';
+} from '../model/helpers/properties.js';
 
 export function metadata(input: cheerio.Root | string): Properties {
   const $ = is.string(input) ? cheerio.load(input) : input;

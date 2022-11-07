@@ -1,8 +1,8 @@
 import {RespondsWith, Resource} from '../../model/index.js';
-import {CombinedSpiderContext} from '../context.js';
+import {SpiderContext} from '../context.js';
 
 export async function saveResource(
-  context: CombinedSpiderContext,
+  context: SpiderContext,
   properties: Record<string, unknown> = {},
 ) {
   const {graph, requestMeta, uniqueUrl, request} = context;

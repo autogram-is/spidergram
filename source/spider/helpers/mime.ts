@@ -1,8 +1,20 @@
 import {IncomingHttpHeaders} from 'node:http';
 import is from '@sindresorhus/is';
+import arrify from 'arrify';
+import minimatch from 'minimatch';
 import mime from 'mime';
 
 export {parse as parseContentType} from 'content-type';
+
+export function mimeMatches(candidate: string, match: string | string[]): boolean {
+  const matches = arrify(match);
+  for (const m of matches) {
+    if (minimatch(candidate, m)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 export function fileNameFromHeaders(
   url: URL,
