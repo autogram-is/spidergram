@@ -12,8 +12,8 @@ import {
   IsChildOf,
   AppearsOn,
   IsVariantOf,
-} from './model/index.js';
-import {ArangoStore} from './model/arango-store.js';
+} from '../model/index.js';
+import {ArangoStore} from './arango-store.js';
 import process from 'node:process';
 
 dotenv.config();

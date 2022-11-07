@@ -1,13 +1,9 @@
 import {
   Project,
   Spider,
-} from '../../source/index.js';
-
-import {
-  extractMetadata,
-  htmlToText,
-  readabilityScores,
-} from '../../source/index.js';
+  HtmlTools,
+  TextTools,
+} from '../source/index.js';
 
 const context = await Project.context({name: 'ethan'});
 await context.graph.erase({eraseAll: true});
@@ -17,18 +13,13 @@ const spider = new Spider({
     const {$, saveResource, enqueueLinks} = context;
 
     const body = $!.html();
-    const meta = extractMetadata($!);
-    const text = htmlToText(body, {
+    const meta = HtmlTools.getMetadata($!);
+    const text = HtmlTools.generatePlainText(body, {
       baseElements: {selectors: ['section.page-content']},
     });
-    const readability = readabilityScores(text);
+    const readability = TextTools.calculateReadability(text);
 
-    await saveResource({
-      meta,
-      text,
-      readability,
-    });
-
+    await saveResource({meta, text, readability,});
     await enqueueLinks();
   },
 });

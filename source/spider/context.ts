@@ -3,7 +3,7 @@ import {IncomingHttpHeaders} from 'node:http';
 import {PlaywrightCrawlingContext, Request, CheerioRoot, PlaywrightGotoOptions, PlaywrightRequestHandler, PlaywrightHook} from 'crawlee';
 import {TDiskDriver} from 'typefs';
 import {UniqueUrl, Resource} from '../model/index.js';
-import {ArangoStore} from '../model/arango-store.js';
+import {ArangoStore} from '../services/arango-store.js';
 import {EnqueueUrlOptions, AnchorTagData} from './links/index.js';
 import {InternalSpiderOptions} from './options.js';
 import {SpiderHook} from './hooks/index.js';

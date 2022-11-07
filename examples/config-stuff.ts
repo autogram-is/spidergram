@@ -1,4 +1,4 @@
-import {Project} from '../../source/index.js';
+import {Project} from '../source/index.js';
 
 // Custom configuration options can be passed in here
 const context = await Project.context({name: 'demo'});

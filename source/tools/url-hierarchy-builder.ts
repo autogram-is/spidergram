@@ -1,10 +1,23 @@
-import {GeneratedAqlQuery} from 'arangojs/aql';
-import {aql} from 'arangojs';
 import is from '@sindresorhus/is';
+
+import {GeneratedAqlQuery} from 'arangojs/aql';
+import {Vertice, Edge, UniqueUrl, IsChildOf, UrlSource, ArangoStore, aql} from '../index.js';
 import {ParsedUrl} from '@autogram/url-tools';
 import {JsonObject} from 'type-fest';
-import {UniqueUrl, IsChildOf, UrlSource, ArangoStore} from '../model/index.js';
-import {HierarchyBuilder, HierarchyData} from './hierarchy.js';
+
+
+export interface HierarchyData<V extends Vertice = Vertice, E extends Edge = Edge> {
+  participants: V[];
+  orphans: V[];
+  new: V[];
+  relationships: E[];
+  hierarchy: Array<HierarchyItem<V>>;
+}
+
+export interface HierarchyItem<V extends Vertice = Vertice> {
+  item: V;
+  children: Array<HierarchyItem<V>>;
+}
 
 interface UrlHierarchyOptions {
   fillGaps: boolean;
@@ -14,7 +27,7 @@ interface UrlHierarchyOptions {
   createParent?: (child: ParsedUrl) => ParsedUrl | false;
 }
 
-export class UrlHierarchy implements HierarchyBuilder<UniqueUrl, IsChildOf> {
+export class UrlHierarchyBuilder {
   pool: UniqueUrl[] = [];// Candidate URLs to organize
   data: HierarchyData<UniqueUrl, IsChildOf> = {
     participants: [],

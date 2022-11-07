@@ -3,7 +3,15 @@ import {AqlQuery} from 'arangojs/aql.js';
 import is from '@sindresorhus/is';
 import {JsonObject} from 'type-fest';
 import {Project, Vertice, aql} from '../index.js';
-import {WorkerStatus} from './index.js';
+
+export interface WorkerStatus {
+  [key: string]: unknown;
+  started: number;
+  finished: number;
+  total: number;
+  processed: number;
+  errors: Record<string, Error>;
+}
 
 export type VerticeWorkerTask<T extends Vertice = Vertice> = (item: T, context: Project) => Promise<void>;
 

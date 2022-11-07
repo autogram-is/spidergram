@@ -12,7 +12,7 @@ import {
   RequestOptions,
 } from 'crawlee';
 import {NormalizedUrl, ParsedUrl} from '@autogram/url-tools';
-import {Project} from '../project.js';
+import {Project} from '../services/project.js';
 import {UniqueUrl, UniqueUrlSet} from '../model/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';
 import {

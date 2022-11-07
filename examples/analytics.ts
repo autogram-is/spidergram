@@ -1,5 +1,5 @@
 import {google, analyticsreporting_v4} from 'googleapis';
-import {SimpleAuth} from '../../source/integration/google/index.js';
+import {SimpleAuth} from '../source/tools/google/index.js';
 
 google.options({
   auth: await SimpleAuth.authenticate([

@@ -1,15 +1,19 @@
 import is from '@sindresorhus/is';
 import arrify from 'arrify';
 import * as cheerio from 'cheerio';
+
+export {htmlToText as generatePlainText} from 'html-to-text';
+export const parseWithCheerio = cheerio.load;
+
 import {
   Property,
   Properties,
   getProperty,
   setProperty,
-} from '../../model/helpers/properties.js';
+} from '../model/helpers/properties.js';
 
-export function extractMetadata(input: cheerio.Root | string): Properties {
-  const $ = is.string(input) ? cheerio.load(input) : input;
+export function getMetadata(input: cheerio.Root | string): Properties {
+  const $ = is.string(input) ? parseWithCheerio(input) : input;
   const results: Properties = {};
   const meta = $('head meta');
   meta.each((index, element) => {
