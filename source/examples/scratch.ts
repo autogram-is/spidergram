@@ -3,7 +3,7 @@ import {
   Spider,
   HtmlTools,
   TextTools,
-} from '../source/index.js';
+} from '../index.js';
 
 const context = await Project.context({name: 'ethan'});
 await context.graph.erase({eraseAll: true});

@@ -1,4 +1,4 @@
-import {Project, UrlHierarchyBuilder} from '../source/index.js';
+import {Project, UrlHierarchyBuilder} from '../index.js';
 
 const {graph} = await Project.context();
 const uhb = new UrlHierarchyBuilder(graph);

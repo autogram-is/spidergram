@@ -1,5 +1,6 @@
 import {Dictionary, LogLevel, PlaywrightCrawlerOptions} from 'crawlee';
-import {helpers, ProjectConfig, projectConfigDefaults} from '../index.js';
+import {ProjectConfig, projectConfigDefaults} from '../index.js';
+import { mimeGroups } from './helpers/mime.js';
 import {SpiderHook, defaultRouter} from './hooks/index.js';
 import {EnqueueUrlOptions} from './links/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';
@@ -168,6 +169,6 @@ const defaultSpiderOptions: InternalSpiderOptions = {
   pageHandler: undefined,
   requestHandlers: {},
   urlOptions: {},
-  parseMimeTypes: helpers.mimeGroups.page,
+  parseMimeTypes: mimeGroups.page,
   downloadMimeTypes: [],
 };

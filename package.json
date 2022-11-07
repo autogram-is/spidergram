@@ -15,7 +15,7 @@
     "lint": "xo",
     "fix": "xo --fix",
     "compile": "tsc",
-    "scratch": "ts-node-esm -T tests/fixtures/scratch.ts",
+    "scratch": "ts-node-esm source/examples/scratch.ts",
     "prepare": "npm run clean; npm run compile",
     "pretest": "npm run clean; npm run compile",
     "docs": "rm -rf ./docs/*; typedoc ./source/index.ts --out ./docs"
