@@ -73,12 +73,6 @@ export interface ProjectConfig {
 		 */
     model: Array<Constructor<Vertice>>;
   };
-
-  google: {
-    apiKey: string;
-    credentialPath: string;
-    tokenPath: string;
-  };
 }
 
 export const projectConfigDefaults: ProjectConfig = {
@@ -111,11 +105,6 @@ export const projectConfigDefaults: ProjectConfig = {
       AppearsOn,
       IsVariantOf,
     ],
-  },
-  google: {
-    apiKey: process.env.GOOGLE_API_KEY ?? '',
-    credentialPath: process.env.GOOGLE_API_KEY ?? './google-credentials.json',
-    tokenPath: process.env.GOOGLE_API_KEY ?? './google-credentials.json',
   },
 };
 
@@ -156,10 +145,6 @@ export class Project {
     files: {
       ...options.files,
       ...projectConfigDefaults.files,
-    },
-    google: {
-      ...options.google,
-      ...projectConfigDefaults.google,
     },
   });
 }

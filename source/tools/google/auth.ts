@@ -4,7 +4,6 @@ import {OAuth2Client, Credentials} from 'google-auth-library';
 import arrify from 'arrify';
 import destroyer from 'server-destroy';
 import open from 'open';
-import {Project} from '../../index.js';
 
 type KeyData = {
   installed: {
@@ -21,9 +20,11 @@ type KeyData = {
 // TODO: read in the key and check if the requested scopes are present in the key.
 // If not, build a superset of the existing scopes and the requestted scopes and
 // authorize it.
+
 // For the moment, if authentication is requested for different scopes in different
 // code paths, the different scopes will continue to blow each other away, requiring
 // repeated reauthentication.
+
 export class SimpleAuth {
   private static async loadJson<T>(file: string) {
     return fs.readFile(file)
@@ -33,12 +34,9 @@ export class SimpleAuth {
 
   static async authenticate(
     scope: string | string[],
-    keyFilePath?: string,
-    tokenFilePath?: string,
+    keyFilePath: string,
+    tokenFilePath: string,
   ) {
-    const context = await Project.context();
-    keyFilePath ??= context.configuration.google?.credentialPath ?? '';
-    tokenFilePath ??= tokenFilePath ?? context.configuration.google?.tokenPath ?? '';
     const scopes = arrify(scope);
 
     // Load the google key and token files
