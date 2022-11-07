@@ -4,10 +4,10 @@ import {
 } from '../../source/index.js';
 
 import {
-  metadata,
+  extractMetadata,
   htmlToText,
   readabilityScores,
-} from '../../source/analysis/index.js';
+} from '../../source/index.js';
 
 const context = await Project.context({name: 'ethan'});
 await context.graph.erase({eraseAll: true});
@@ -17,7 +17,7 @@ const spider = new Spider({
     const {$, saveResource, enqueueLinks} = context;
 
     const body = $!.html();
-    const meta = metadata($!);
+    const meta = extractMetadata($!);
     const text = htmlToText(body, {
       baseElements: {selectors: ['section.page-content']},
     });

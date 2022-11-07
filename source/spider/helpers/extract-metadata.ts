@@ -6,9 +6,9 @@ import {
   Properties,
   getProperty,
   setProperty,
-} from '../model/helpers/properties.js';
+} from '../../model/helpers/properties.js';
 
-export function metadata(input: cheerio.Root | string): Properties {
+export function extractMetadata(input: cheerio.Root | string): Properties {
   const $ = is.string(input) ? cheerio.load(input) : input;
   const results: Properties = {};
   const meta = $('head meta');

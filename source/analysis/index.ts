@@ -1,6 +1,6 @@
 // These use CJS exports, and require some extra singing and dancing
 
-export * from './metadata.js';
+export * from '../spider/helpers/extract-metadata.js';
 export * from '../workers/hierarchy.js';
 
 // Third-party data extraction libraries we use frequently
