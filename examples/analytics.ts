@@ -2,11 +2,14 @@ import {google, analyticsreporting_v4} from 'googleapis';
 import {SimpleAuth} from '../source/tools/google/index.js';
 
 google.options({
-  auth: await SimpleAuth.authenticate([
-    'https://www.googleapis.com/auth/analytics.readonly',
-    'https://www.googleapis.com/auth/analytics',
-  ]),
+  auth: await SimpleAuth.authenticate(
+  ['https://www.googleapis.com/auth/analytics.readonly',
+    'https://www.googleapis.com/auth/analytics'],
+  'key',
+  'token'
+  )
 });
+
 const analytics = new analyticsreporting_v4.Analyticsreporting(google);
 const request: analyticsreporting_v4.Schema$ReportRequest = {
   viewId: '148984872',
