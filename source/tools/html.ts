@@ -1,9 +1,16 @@
 import is from '@sindresorhus/is';
 import arrify from 'arrify';
 import * as cheerio from 'cheerio';
+import {JSDOM} from 'jsdom';
 
 export {htmlToText as generatePlainText} from 'html-to-text';
 export const parseWithCheerio = cheerio.load;
+export function parseWithJsDom(
+  html: ConstructorParameters<typeof JSDOM>[0],
+  options?: ConstructorParameters<typeof JSDOM>[1]
+  ): JSDOM {
+  return new JSDOM(html, options);
+}
 
 import {
   Property,
