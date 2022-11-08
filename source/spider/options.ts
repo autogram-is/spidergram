@@ -15,7 +15,9 @@ export type SpiderOptions = InternalSpiderOptions & Omit<PlaywrightCrawlerOption
 export interface InternalSpiderOptions extends Dictionary {
   /**
    * An optional set of {@apilink ProjectConfig} settings to be used
-   * if a global project context doesn't yet exist.
+   * if a global project context doesn't yet exist. This can be useful
+   * for temporarily overriding the Arango database crawl data is saved
+   * to, for example.
    *
    * See {@apilink Project.context()}
    *

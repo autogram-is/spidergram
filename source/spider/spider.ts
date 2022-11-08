@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import arrify from 'arrify';
+import path from 'node:path';
 
 import {
   PlaywrightCrawler,
@@ -39,7 +40,6 @@ export const enum SpiderEventType {
 }
 
 export type SpiderEventName = SpiderEventType | 'systemInfo' | 'aborting' | 'exit' | 'requestComplete';
-
 
 export class Spider extends PlaywrightCrawler {
   spiderOptions: InternalSpiderOptions;
@@ -161,6 +161,10 @@ export class Spider extends PlaywrightCrawler {
     // If only a single value came in, turn it into an array.
     const project = await Project.config(this.spiderOptions.projectConfig);
     requests = arrify(requests);
+
+    this.config.set('storageClientOptions',
+      { optionallocalDataDirectory: path.join(project.root, 'crawler') }
+    );
 
     // Normalize and deduplicate any incoming requests.
     const uniques = new UniqueUrlSet(undefined, undefined, this.spiderOptions.urlOptions.normalizer);

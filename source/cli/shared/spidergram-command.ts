@@ -97,4 +97,24 @@ export abstract class SpidergramCommand<T extends typeof Command> extends Comman
     const args = await this.parse(this.constructor as Interfaces.Command.Class);
     this.project = await Project.config(args.flags.config);
   }
+
+  async stdin(): Promise<string | undefined> {
+    return new Promise(resolve => {
+      const stdin = process.openStdin();
+      stdin.setEncoding('utf-8');
+  
+      let data = '';
+      stdin.on('data', chunk => {
+        data += chunk;
+      })
+  
+      stdin.on('end', () => {
+        resolve(data);
+      })
+  
+      if (stdin.isTTY) {
+        resolve('');
+      }
+    })
+  }
 }
