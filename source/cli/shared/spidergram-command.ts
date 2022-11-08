@@ -1,9 +1,10 @@
 import { Project } from '../../index.js'
-import { CliUx, Command, Errors, Flags } from '@oclif/core';
+import { CliUx, Command, Flags, Interfaces } from '@oclif/core';
 import { Chalk } from 'chalk';
 import logSymbols from 'log-symbols';
-
 const chalk = new Chalk();
+
+export type Flags<T extends typeof Command> = Interfaces.InferredFlags<typeof SpidergramCommand['globalFlags'] & T['flags']>
 
 /**
  * A base command that provided common functionality for all Spidergram commands.
@@ -45,8 +46,8 @@ export const StandardPrefixes = {
   success: logSymbols.success,
 };
 
-export abstract class SpidergramCommand extends Command {
-  public static enableJsonFlag = true
+export abstract class SpidergramCommand<T extends typeof Command> extends Command {
+  static enableJsonFlag = true
   
   /**
    * Throw an error if no project name is given, 
@@ -58,7 +59,7 @@ export abstract class SpidergramCommand extends Command {
    * Project instance.
    *
    */
-  public static requireProject: boolean;
+  static requireProject: boolean;
 
   /**
    * Flags that you can use for manipulating tables.
@@ -74,48 +75,26 @@ export abstract class SpidergramCommand extends Command {
    * }
    * ```
    */
-  public static tableFlags = CliUx.ux.table.flags;
+  static tableFlags = CliUx.ux.table.flags;
 
-  public static _globalFlags = {
-    project: Flags.string({
-      char: 'p',
-      description: 'Project name',
+  static globalFlags = {
+    config: Flags.string({
+      char: 'c',
+      description: 'Path to project configuration file',
     }),
   };
+  
+  protected flags!: Flags<T>
+
+  project!: Project;
 
   protected get statics(): typeof SpidergramCommand {
     return this.constructor as typeof SpidergramCommand;
   }
 
-  public readonly workingDir = process.cwd();
-
-  protected async init(): Promise<any> {
-    return super.init()
-      .then(() => this.parse())
-      .then(parserOutput => parserOutput.flags.project as (string | undefined))
-      .then(projectName => Project.context({ name: projectName })) // We'll need to change this to pull in context
-      .then(project => { this.project = project; })
-      .catch((error: unknown) => {
-        if (this.statics.requireProject) {
-          this.error(`Project couldn't be created`);
-        } else {
-          this.debug(`Project couldn't be created`);
-        }
-      });
-  }
-
-  public project!: Project;
-  
-  // eslint-disable-next-line class-methods-use-this
-  protected async loadProject(): Promise<Project> {
-    try {
-      // We need to actually instantiate the project from contextual data here.
-      return Project.context();
-    } catch (err) {
-      if (err instanceof Error && err.name === 'InvalidProjectWorkspaceError') {
-        throw new Errors.CLIError('Project config required', { exit: 1 });
-      }
-      throw err;
-    }
+  async init(): Promise<void> {
+    await super.init()
+    const args = await this.parse(this.constructor as Interfaces.Command.Class);
+    this.project = await Project.config(args.flags.config);
   }
 }

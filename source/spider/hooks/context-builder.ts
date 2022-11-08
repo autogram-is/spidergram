@@ -6,7 +6,7 @@ import * as urls from '../links/index.js';
 
 export async function contextBuilder(context: SpiderContext, options?: PlaywrightGotoOptions): Promise<void> {
   const crawler = context.crawler as Spider;
-  const project = await Project.context(context.projectConfig);
+  const project = await Project.config(context.projectConfig);
 
   // Map our 'contextualized' functions to the context object
   Object.assign(context, {

@@ -159,7 +159,7 @@ export class Spider extends PlaywrightCrawler {
     options?: CrawlerAddRequestsOptions,
   ): Promise<SpiderStatistics> {
     // If only a single value came in, turn it into an array.
-    const context = await Project.context(this.spiderOptions.projectConfig);
+    const context = await Project.config(this.spiderOptions.projectConfig);
     requests = arrify(requests);
 
     // Normalize and deduplicate any incoming requests.

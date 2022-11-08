@@ -1,6 +1,6 @@
 import {Project, UrlHierarchyBuilder} from '../index.js';
 
-const {graph} = await Project.context();
+const {graph} = await Project.config();
 const uhb = new UrlHierarchyBuilder(graph);
 
 await uhb.loadPool()

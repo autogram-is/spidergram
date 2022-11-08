@@ -36,7 +36,7 @@ export class VerticeWorker<T extends Vertice = Vertice> extends EventEmitter {
       errors: {},
       total: 0,
     };
-    this.context = options.context ?? Project.context();
+    this.context = options.context ?? Project.config();
   }
 
   async run(options: Partial<VerticeWorkerOptions<T>> = {}): Promise<WorkerStatus> {
