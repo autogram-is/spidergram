@@ -1,4 +1,4 @@
-import { Project } from '../../index.js'
+import { Project } from '../index.js'
 import { CliUx, Command, Flags, Interfaces } from '@oclif/core';
 import { Chalk } from 'chalk';
 import logSymbols from 'log-symbols';
@@ -30,7 +30,6 @@ export type Flags<T extends typeof Command> = Interfaces.InferredFlags<typeof Sp
  * See {@link https://github.com/salesforcecli/plugin-template-sf/blob/main/src/commands/hello/world.ts sfCommand implementation}.
  */
 
-
  export const StandardColors = {
   error: chalk.bold.red,
   warning: chalk.bold.yellow,
@@ -48,7 +47,7 @@ export const StandardPrefixes = {
 
 export abstract class SpidergramCommand<T extends typeof Command> extends Command {
   static enableJsonFlag = true
-  
+    
   /**
    * Throw an error if no project name is given, 
    * If set to true the command will throw an error if the command is executed without passing in 
@@ -96,6 +95,7 @@ export abstract class SpidergramCommand<T extends typeof Command> extends Comman
     await super.init()
     const args = await this.parse(this.constructor as Interfaces.Command.Class);
     this.project = await Project.config(args.flags.config);
+    return;
   }
 
   async stdin(): Promise<string | undefined> {
@@ -115,6 +115,6 @@ export abstract class SpidergramCommand<T extends typeof Command> extends Comman
       if (stdin.isTTY) {
         resolve('');
       }
-    })
+    });
   }
 }

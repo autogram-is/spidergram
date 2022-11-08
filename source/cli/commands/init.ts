@@ -1,9 +1,9 @@
-import { SpidergramCommand } from '../../shared/index.js';
+import { SpidergramCommand } from '../index.js';
 import { writeFile } from 'node:fs/promises';
-import { Project } from '../../../services/index.js';
+import { Project } from '../../services/index.js';
 
 export default class Init extends SpidergramCommand<typeof Init> {
-  static description = 'Configure a new project';
+  static description = 'Generate a Spidergram configuration file';
 
   async run() {
     const path = this.project.configuration._configFilePath ?? Project.defaultConfigFilePath;
