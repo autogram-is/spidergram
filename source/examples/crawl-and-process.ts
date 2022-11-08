@@ -5,8 +5,8 @@ import {
   TextTools,
 } from '../index.js';
 
-const context = await Project.config({name: 'ethan'});
-await context.graph.erase({eraseAll: true});
+const project = await Project.config({name: 'ethan'});
+await project.graph.erase({eraseAll: true});
 
 const spider = new Spider({
   async pageHandler(context) {
