@@ -85,6 +85,11 @@ export const projectConfigDefaults: ProjectConfig = {
         root: process.env.SPIDERGRAM_STORAGE_DIR ?? './storage',
         jail: true,
       },
+      config: {
+        driver: 'file',
+        root: process.env.SPIDERGRAM_CONFIG_DIR ?? './config',
+        jail: true,
+      },
     },
   },
   graph: {

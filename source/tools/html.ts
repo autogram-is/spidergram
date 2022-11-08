@@ -2,16 +2,8 @@ import is from '@sindresorhus/is';
 import arrify from 'arrify';
 import * as cheerio from 'cheerio';
 import {JSDOM} from 'jsdom';
-
-export {htmlToText as generatePlainText} from 'html-to-text';
-export const parseWithCheerio = cheerio.load;
-export function parseWithJsDom(
-  html: ConstructorParameters<typeof JSDOM>[0],
-  options?: ConstructorParameters<typeof JSDOM>[1]
-  ): JSDOM {
-  return new JSDOM(html, options);
-}
-
+import * as xpath from 'xpath-ts';
+import { htmlToText, HtmlToTextOptions } from 'html-to-text';
 import {
   Property,
   Properties,
@@ -19,7 +11,35 @@ import {
   setProperty,
 } from '../model/helpers/properties.js';
 
-export function getMetadata(input: cheerio.Root | string): Properties {
+export function getPlainText(html: string, options?: HtmlToTextOptions): string {
+  return htmlToText(html, options);
+}
+
+export function parseWithJsDom(
+  html: string | Buffer,
+  options?: ConstructorParameters<typeof JSDOM>[1]
+  ): JSDOM {
+  return new JSDOM(html, options);
+}
+
+export function parseWithCheerio(
+  html: string | Buffer,
+  options?: Parameters<typeof cheerio.load>[1]
+ ): cheerio.Root {
+  return cheerio.load(html, options);
+}
+
+export function selectWithXPath(input: string | JSDOM, selector: string) {
+  const jsdom = is.string(input) ? parseWithJsDom(input) : input;
+  return xpath.select(selector, jsdom.window.document);
+}
+
+export function selectWithCSS(input: string | cheerio.Root, selector: string) {
+  const $ = is.string(input) ? parseWithCheerio(input) : input;
+  return $(selector);
+}
+
+export function getMetadata(input: string | cheerio.Root): Properties {
   const $ = is.string(input) ? parseWithCheerio(input) : input;
   const results: Properties = {};
   const meta = $('head meta');

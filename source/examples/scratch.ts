@@ -14,7 +14,7 @@ const spider = new Spider({
 
     const body = $!.html();
     const meta = HtmlTools.getMetadata($!);
-    const text = HtmlTools.generatePlainText(body, {
+    const text = HtmlTools.getPlainText(body, {
       baseElements: {selectors: ['section.page-content']},
     });
     const readability = TextTools.calculateReadability(text);
