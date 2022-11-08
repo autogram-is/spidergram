@@ -2,7 +2,7 @@ import {Command} from '@oclif/core'
 import {readStdinPipe} from '../shared/read-stdin-pipe.js'
 
 export default class ReadPipe extends Command {
-  static description = 'describe the command here'
+  static description = 'describe the command here';
 
   static examples = [
     `$ pipe-demo read hello world from read.ts!`,
@@ -16,10 +16,10 @@ export default class ReadPipe extends Command {
     const str = await readStdinPipe();
 
     if (str) {
-      process.stdout.write(str);
+      this.log(str);
     } else {
-      process.stdout.write('Nothing piped in!');
-      process.exit(0);
+      this.log('Nothing piped in!');
+      this.exit(0);
     }
   }
 }
