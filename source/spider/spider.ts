@@ -2,6 +2,12 @@ import is from '@sindresorhus/is';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import arrify from 'arrify';
 import path from 'node:path';
+import { log } from 'crawlee';
+
+// We have a chance to set the log level HIGHER when configuring,
+// but this (hopefully) ensures that sub-logs won't be created
+// at the higher level elsewhere.
+log.setLevel(log.LEVELS.OFF);
 
 import {
   PlaywrightCrawler,
@@ -169,8 +175,12 @@ export class Spider extends PlaywrightCrawler {
     this.config.set('storageClientOptions',
       { optionallocalDataDirectory: path.join(project.root, 'crawler') }
     );
+    
+    // Crawlee has a lot of logs going on.
+    // Long term we want to do something nicer here.
     this.config.set('logLevel', this.spiderOptions.logLevel);
     this.log.setLevel(this.spiderOptions.logLevel);
+    log.setLevel(this.spiderOptions.logLevel);
 
     // Normalize and deduplicate any incoming requests.
     const uniques = new UniqueUrlSet(undefined, undefined, this.spiderOptions.urlOptions.normalizer);
