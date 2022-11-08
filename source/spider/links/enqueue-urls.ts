@@ -45,7 +45,7 @@ export function uniqueUrlToRequest(uu: UniqueUrl, userData: Dictionary = {}): Re
     },
   });
   if (uu.referer) {
-    r.headers = {referer: uu.referer};
+    r.userData.referer = uu.referer;
   }
 
   return r;

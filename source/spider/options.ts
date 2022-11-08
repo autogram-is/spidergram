@@ -28,7 +28,7 @@ export interface InternalSpiderOptions extends Dictionary {
   /**
    * Logging level for the spider's internal crawler.
    * 
-   * @default {LogLevel.OFF}
+   * @default {LogLevel.INFO}
    * @type {LogLevel}
    */
   logLevel: LogLevel;
@@ -164,7 +164,7 @@ export function buildSpiderOptions(
 
 const defaultSpiderOptions: InternalSpiderOptions = {
   projectConfig: projectConfigDefaults,
-  logLevel: LogLevel.OFF,
+  logLevel: LogLevel.INFO,
   requestRouter: defaultRouter,
   preNavigationHooks: [],
   postNavigationHooks: [],

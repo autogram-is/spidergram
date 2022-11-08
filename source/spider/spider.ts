@@ -45,6 +45,8 @@ export class Spider extends PlaywrightCrawler {
   spiderOptions: InternalSpiderOptions;
   crawlerOptions: PlaywrightCrawlerOptions;
   progress: SpiderInternalStatistics = {
+    requestsEnqueued: 0,
+    requestsCompleted: 0,
     requestsByStatus: {},
     requestsByType: {},
     requestsByHost: {},
@@ -84,12 +86,11 @@ export class Spider extends PlaywrightCrawler {
       ...(internal.postNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
     ];
 
+
     super(crawler, config);
 
     this.spiderOptions = internal;
     this.crawlerOptions = crawler;
-
-    this.log.setLevel(internal.logLevel);
 
     this._events = new AsyncEventEmitter();
     //this.events.on(EventType.ABORTING, ({event, ...args}) => this.emit(event, ...args));
@@ -128,6 +129,9 @@ export class Spider extends PlaywrightCrawler {
     this.progress.requestsByLabel[label]++;
     this.progress.requestsByStatus[status]++;
     this.progress.requestsByType[type]++;
+
+    this.progress.requestsEnqueued = this.requestQueue?.assumedTotalCount ?? 0;
+    this.progress.requestsCompleted++;
   }
 
   override async _cleanupContext(context: SpiderContext) {
@@ -165,6 +169,8 @@ export class Spider extends PlaywrightCrawler {
     this.config.set('storageClientOptions',
       { optionallocalDataDirectory: path.join(project.root, 'crawler') }
     );
+    this.config.set('logLevel', this.spiderOptions.logLevel);
+    this.log.setLevel(this.spiderOptions.logLevel);
 
     // Normalize and deduplicate any incoming requests.
     const uniques = new UniqueUrlSet(undefined, undefined, this.spiderOptions.urlOptions.normalizer);

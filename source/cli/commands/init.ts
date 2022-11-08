@@ -2,7 +2,7 @@ import { SpidergramCommand } from '../index.js';
 import { writeFile } from 'node:fs/promises';
 import { Project } from '../../services/index.js';
 
-export default class Init extends SpidergramCommand<typeof Init> {
+export default class Init extends SpidergramCommand {
   static description = 'Generate a project configuration file';
 
   async run() {

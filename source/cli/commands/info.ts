@@ -2,7 +2,7 @@ import { SpidergramCommand } from '../index.js';
 import { CliUx } from '@oclif/core';
 import chalk from 'chalk';
 
-export default class Info extends SpidergramCommand<typeof Info> {
+export default class Info extends SpidergramCommand {
   static description = 'Settings and stats for the current project';
 
   async run() {

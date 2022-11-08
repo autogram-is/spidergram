@@ -1,6 +1,6 @@
 import { SpidergramCommand } from '../index.js';
 
-export default class Generate extends SpidergramCommand<typeof Generate> {
+export default class Generate extends SpidergramCommand {
   static description = 'Create a new project from a spider template';
 
   async run() {
