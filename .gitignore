@@ -113,6 +113,6 @@ dist
 package-lock.json
 
 # Default output for crawl data if nothing's passed in.
-crawl_data
 storage
 docs
+spidergram.json

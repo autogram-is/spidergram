@@ -3,7 +3,7 @@ import { writeFile } from 'node:fs/promises';
 import { Project } from '../../services/index.js';
 
 export default class Init extends SpidergramCommand<typeof Init> {
-  static description = 'Generate a Spidergram configuration file';
+  static description = 'Generate a project configuration file';
 
   async run() {
     const path = this.project.configuration._configFilePath ?? Project.defaultConfigFilePath;

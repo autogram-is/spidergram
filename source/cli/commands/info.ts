@@ -3,7 +3,7 @@ import { CliUx } from '@oclif/core';
 import chalk from 'chalk';
 
 export default class Info extends SpidergramCommand<typeof Info> {
-  static description = 'Settings and stats for the current Spidergram project';
+  static description = 'Settings and stats for the current project';
 
   async run() {
     const config = this.project.configuration;
