@@ -5,8 +5,8 @@ import {
   TextTools,
 } from '../index.js';
 
-const project = await Project.config({name: 'ethan'});
-await (await project.graph).erase({eraseAll: true});
+const graph = await Project.config({name: 'ethan'}).then(project => project.graph());
+await graph.erase({eraseAll: true});
 
 const spider = new Spider({
   logLevel: 0,

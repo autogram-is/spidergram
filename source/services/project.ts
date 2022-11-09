@@ -1,13 +1,16 @@
-import {Config as ArangoConfig} from 'arangojs/connection';
-import {Storage as FileStore, Configuration as FileConfiguration} from 'typefs';
-import * as dotenv from 'dotenv';
-import {PartialDeep} from 'type-fest';
-import {ArangoStore} from './arango-store.js';
 import process from 'node:process';
-import { PathLike } from 'node:fs';
 import path from 'node:path';
-import is from '@sindresorhus/is';
+import { PathLike } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
+
+import {PartialDeep} from 'type-fest';
+import is from '@sindresorhus/is';
+
+import {Storage as FileStore, Configuration as FileConfiguration} from 'typefs';
+import {Config as ArangoConfig} from 'arangojs/connection';
+import * as dotenv from 'dotenv';
+
+import {ArangoStore} from './arango-store.js';
 
 dotenv.config();
 
@@ -153,16 +156,16 @@ export class Project {
   readonly description?: string;
   readonly root: string;
 
+  
   get files() {
     return FileStore.disk.bind(FileStore);
   }
-  get graph(): Promise<ArangoStore> {
-    const dbName = this.configuration.graph.connection.databaseName ?? this.configuration.name;
+
+  async graph(name?: string): Promise<ArangoStore> {
+    const dbName = name ?? this.configuration.graph.connection.databaseName ?? this.configuration.name;
     const dbConn = this.configuration.graph.connection;
-    return ArangoStore.open(dbName, dbConn)
-      .catch((error: unknown) => {
-        throw new Error(`Could not connect to Arango server (${(error as Error).message})`);
-      });
+
+    return ArangoStore.open(dbName, dbConn);
   }
 
   private constructor(

@@ -6,7 +6,7 @@ import {
 } from '../index.js';
 
 await Project.config({name: 'ethan'})
-  .then(project => project.graph)
+  .then(project => project.graph())
   .then(graph => { graph.erase({eraseAll: true}); });
 
 const spider = new Spider({

@@ -7,12 +7,14 @@ import {DocumentCollection} from 'arangojs/collection.js';
 import arrify from 'arrify';
 import slugify from '@sindresorhus/slugify';
 import {Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn, DataSet} from '../model/index.js';
+import { Project } from './project.js';
 
 export {aql} from 'arangojs';
 
 export class ArangoStore {
   protected static _systemDb?: Database;
   constructor(protected _activeDb: Database) {}
+  protected static instances: Record<string, ArangoStore> = {};
 
   /**
    * Arango system information database; acts as a proxy for the current Arango server connection.
@@ -27,9 +29,9 @@ export class ArangoStore {
 
   /**
    * Connects to the Arango server and stores a connection to the system database.
-   * Should be followed by `ArangoStore.open()` in most situations.
+   * Should be followed by `ArangoStore.load()` in most situations.
    */
-  static connect(connection: Partial<Config> = {}): Database {
+  protected static connect(connection: Partial<Config> = {}): Database {
     connection.url ??= 'http://127.0.0.1:8529';
     ArangoStore._systemDb = new Database(connection);
     return ArangoStore.system;
@@ -43,14 +45,27 @@ export class ArangoStore {
    * @param connection
    * @returns
    */
-  static async open(databaseName: string, connection: Partial<Config> = {}): Promise<ArangoStore> {
+  static async open(name?: string, customConnection: Partial<Config> = {}): Promise<ArangoStore> {
+    const project = await Project.config();
+    const { databaseName, ...connection } =  project.configuration.graph.connection;
+
+    const dbName = name ?? databaseName ?? 'spidergram';
+    const dbConn = customConnection ?? connection;
+
     if (is.undefined(ArangoStore._systemDb)) {
-      ArangoStore.connect(connection);
+      ArangoStore.connect(dbConn);
+      await this.system.databases()
+        .catch((error: unknown) => { 
+          if (is.error(error)) throw error;
+          throw new Error('Could not connect to Arango');
+        });
     }
 
-    return new ArangoStore(
-      await ArangoStore.load(databaseName, true),
-    );
+    if (is.undefined(ArangoStore.instances[dbName])) {
+      ArangoStore.instances[dbName] = new ArangoStore(await ArangoStore.load(dbName));
+    }
+
+    return ArangoStore.instances[dbName];
   }
 
   /**
@@ -61,24 +76,30 @@ export class ArangoStore {
    * @param initialize
    * @returns
    */
-  protected static async load(databaseName: string, initialize = true): Promise<Database> {
+  protected static async load(name: string, initialize = true): Promise<Database> {
     const {system} = ArangoStore;
 
-    if (is.emptyStringOrWhitespace(databaseName)) {
-      throw new Error(`Invalid databaseName '${databaseName}'`);
+    if (is.emptyStringOrWhitespace(name)) {
+      throw new Error(`Invalid database '${name}'`);
     } else {
-      databaseName = slugify(databaseName);
+      name = slugify(name);
     }
 
     return ArangoStore.system.listDatabases()
-      .then(databases => {
-        if (databases.includes(databaseName)) {
-          return system.database(databaseName);
-        }
+      .then(databases => 
+        databases.includes(name) ? 
+          system.database(name) : 
+          system.createDatabase(name)
+        )
+      .then(database => ArangoStore.initialize(database));
+  }
 
-        return system.createDatabase(databaseName);
-      })
-      .then(async database => ArangoStore.initialize(database));
+  /**
+   * Closes the connection to Arango for this database.
+   */
+  close(): void {
+    delete ArangoStore.instances[this.db.name];
+    this.db.close();
   }
 
   /**

@@ -169,7 +169,7 @@ export class Spider extends PlaywrightCrawler {
   ): Promise<SpiderStatistics> {
     // If only a single value came in, turn it into an array.
     const project = await Project.config(this.spiderOptions.projectConfig);
-    const graph = await project.graph;
+    const graph = await project.graph();
     requests = arrify(requests);
     
     // Crawlee has a lot of logs going on.

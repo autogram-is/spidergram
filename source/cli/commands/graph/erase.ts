@@ -36,7 +36,7 @@ export default class Erase extends SpidergramCommand {
   async run() {
     let {argv, flags} = await this.parse(Erase);
     const project = await this.project;
-    const graph = await project.graph;
+    const graph = await project.graph();
 
     const dbName = graph.db.name;
     let message = `Empty the collection${argv.length > 1 ? 's' : ''} ${CLI.oxfordJoin(argv)} from ${dbName}?`;

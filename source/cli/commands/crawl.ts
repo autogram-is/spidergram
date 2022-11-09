@@ -53,7 +53,7 @@ export default class Crawl extends SpidergramCommand {
   async run() {
     const {argv, flags} = await this.parse(Crawl);
     const project = await this.project;
-    const graph = await project.graph;
+    const graph = await project.graph();
 
     if (flags.erase) {
       const confirmation = await CLI.confirm(`Erase the ${project.name} database before crawling`);
