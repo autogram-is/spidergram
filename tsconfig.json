@@ -7,7 +7,7 @@
 		"newLine": "lf",
 		"noEmitHelpers": true,
 		"noFallthroughCasesInSwitch": true,
-		"noImplicitOverride": true,
+		"noImplicitOverride": false,  // This plays ugly games with Vertice subclasses, and OCLIF commands.  
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
 		"preserveConstEnums": true,
@@ -29,5 +29,5 @@
     "strict": true,                                      /* Enable all strict type-checking options. */
     "alwaysStrict": false,                               /* Ensure 'use strict' is always emitted. */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
-  }
+  },
 }

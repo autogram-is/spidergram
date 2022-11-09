@@ -59,11 +59,13 @@ export async function save(
 }
 
 export async function saveCurrentUrl(context: SpiderContext): Promise<void> {
-  if ('fromUniqueUrl' in context.request.userData) {
+  const { fromUniqueUrl, referer } = context.request.userData ?? {};
+
+  if (is.boolean(fromUniqueUrl)) {
     context.uniqueUrl = new UniqueUrl({
       url: context.request.url,
       normalizer: url => url,
-      referer: context.request.headers ? context.request.headers.referer : '',
+      referer: is.string(referer) ? referer : undefined
     });
   } else {
     context.uniqueUrl = new UniqueUrl({url: context.request.url});

@@ -1,6 +1,12 @@
 import is from '@sindresorhus/is';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import arrify from 'arrify';
+import { log } from 'crawlee';
+
+// We have a chance to set the log level HIGHER when configuring,
+// but this (hopefully) ensures that sub-logs won't be created
+// at the higher level elsewhere.
+log.setLevel(log.LEVELS.OFF);
 
 import {
   PlaywrightCrawler,
@@ -12,7 +18,7 @@ import {
   RequestOptions,
 } from 'crawlee';
 import {NormalizedUrl, ParsedUrl} from '@autogram/url-tools';
-import {Project} from '../project.js';
+import {Project} from '../services/project.js';
 import {UniqueUrl, UniqueUrlSet} from '../model/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';
 import {
@@ -40,11 +46,12 @@ export const enum SpiderEventType {
 
 export type SpiderEventName = SpiderEventType | 'systemInfo' | 'aborting' | 'exit' | 'requestComplete';
 
-
 export class Spider extends PlaywrightCrawler {
   spiderOptions: InternalSpiderOptions;
   crawlerOptions: PlaywrightCrawlerOptions;
   progress: SpiderInternalStatistics = {
+    requestsEnqueued: 0,
+    requestsCompleted: 0,
     requestsByStatus: {},
     requestsByType: {},
     requestsByHost: {},
@@ -84,12 +91,11 @@ export class Spider extends PlaywrightCrawler {
       ...(internal.postNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
     ];
 
+
     super(crawler, config);
 
     this.spiderOptions = internal;
     this.crawlerOptions = crawler;
-
-    this.log.setLevel(internal.logLevel);
 
     this._events = new AsyncEventEmitter();
     //this.events.on(EventType.ABORTING, ({event, ...args}) => this.emit(event, ...args));
@@ -128,6 +134,9 @@ export class Spider extends PlaywrightCrawler {
     this.progress.requestsByLabel[label]++;
     this.progress.requestsByStatus[status]++;
     this.progress.requestsByType[type]++;
+
+    this.progress.requestsEnqueued = this.requestQueue?.assumedTotalCount ?? 0;
+    this.progress.requestsCompleted++;
   }
 
   override async _cleanupContext(context: SpiderContext) {
@@ -159,8 +168,15 @@ export class Spider extends PlaywrightCrawler {
     options?: CrawlerAddRequestsOptions,
   ): Promise<SpiderStatistics> {
     // If only a single value came in, turn it into an array.
-    const context = await Project.context(this.spiderOptions.projectConfig);
+    const project = await Project.config(this.spiderOptions.projectConfig);
+    const graph = await project.graph();
     requests = arrify(requests);
+    
+    // Crawlee has a lot of logs going on.
+    // Long term we want to do something nicer here.
+    this.config.set('logLevel', this.spiderOptions.logLevel);
+    this.log.setLevel(this.spiderOptions.logLevel);
+    log.setLevel(this.spiderOptions.logLevel);
 
     // Normalize and deduplicate any incoming requests.
     const uniques = new UniqueUrlSet(undefined, undefined, this.spiderOptions.urlOptions.normalizer);
@@ -174,7 +190,7 @@ export class Spider extends PlaywrightCrawler {
       }
     }
 
-    await context.graph.push([...uniques], false);
+    await graph.push([...uniques], false);
     const queue = await this.getRequestQueue();
     await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)), options);
 

@@ -1,5 +1,6 @@
 import {Dictionary, LogLevel, PlaywrightCrawlerOptions} from 'crawlee';
-import {helpers, ProjectConfig, projectConfigDefaults} from '../index.js';
+import {ProjectConfig, projectConfigDefaults} from '../index.js';
+import { mimeGroups } from './helpers/mime.js';
 import {SpiderHook, defaultRouter} from './hooks/index.js';
 import {EnqueueUrlOptions} from './links/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';
@@ -14,7 +15,9 @@ export type SpiderOptions = InternalSpiderOptions & Omit<PlaywrightCrawlerOption
 export interface InternalSpiderOptions extends Dictionary {
   /**
    * An optional set of {@apilink ProjectConfig} settings to be used
-   * if a global project context doesn't yet exist.
+   * if a global project context doesn't yet exist. This can be useful
+   * for temporarily overriding the Arango database crawl data is saved
+   * to, for example.
    *
    * See {@apilink Project.context()}
    *
@@ -25,7 +28,7 @@ export interface InternalSpiderOptions extends Dictionary {
   /**
    * Logging level for the spider's internal crawler.
    * 
-   * @default {LogLevel.OFF}
+   * @default {LogLevel.INFO}
    * @type {LogLevel}
    */
   logLevel: LogLevel;
@@ -161,13 +164,13 @@ export function buildSpiderOptions(
 
 const defaultSpiderOptions: InternalSpiderOptions = {
   projectConfig: projectConfigDefaults,
-  logLevel: LogLevel.OFF,
+  logLevel: LogLevel.INFO,
   requestRouter: defaultRouter,
   preNavigationHooks: [],
   postNavigationHooks: [],
   pageHandler: undefined,
   requestHandlers: {},
   urlOptions: {},
-  parseMimeTypes: helpers.mimeGroups.page,
+  parseMimeTypes: mimeGroups.page,
   downloadMimeTypes: [],
 };

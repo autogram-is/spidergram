@@ -4,6 +4,21 @@ export interface SpiderStatistics extends FinalStatistics, SpiderInternalStatist
 
 export interface SpiderInternalStatistics {
   /**
+   * The approximate number of requests added to the crawl queue,
+   * whether complete or pending.
+   *
+   * @type {number}
+   */
+  requestsEnqueued: number,
+
+  /**
+   * The approximate number of completed requests.
+   *
+   * @type {number}
+   */
+  requestsCompleted: number,
+
+  /**
    * The number of finished requests, grouped by HTTP status code.
    */
   requestsByStatus: Record<number, number>,
