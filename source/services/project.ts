@@ -129,14 +129,7 @@ export class Project {
       }
 
       Project._instance = new Project(populatedConfig, incomingOptions, configFilePath);
-
       FileStore.config = populatedConfig.files;
-      const dbName = populatedConfig.graph.connection.databaseName ?? populatedConfig.name;
-      const dbConn = populatedConfig.graph.connection;
-      Project._instance.graph = await ArangoStore.open(dbName, dbConn)
-        .catch((error: unknown) => {
-          throw new Error(`Could not connect to Arango server (${(error as Error).message})`);
-        });
     }
     return Project!._instance!;
   }
@@ -160,9 +153,16 @@ export class Project {
   readonly description?: string;
   readonly root: string;
 
-  graph!: ArangoStore;
   get files() {
     return FileStore.disk.bind(FileStore);
+  }
+  get graph(): Promise<ArangoStore> {
+    const dbName = this.configuration.graph.connection.databaseName ?? this.configuration.name;
+    const dbConn = this.configuration.graph.connection;
+    return ArangoStore.open(dbName, dbConn)
+      .catch((error: unknown) => {
+        throw new Error(`Could not connect to Arango server (${(error as Error).message})`);
+      });
   }
 
   private constructor(

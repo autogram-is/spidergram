@@ -1,4 +1,4 @@
-import { SpidergramCommand } from '../index.js';
+import { SpidergramCommand } from '../../index.js';
 
 export default class Generate extends SpidergramCommand {
   static description = 'Create a new project from a spider template';

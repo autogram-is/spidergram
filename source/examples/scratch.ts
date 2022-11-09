@@ -6,7 +6,7 @@ import {
 } from '../index.js';
 
 const project = await Project.config({name: 'ethan'});
-await project.graph.erase({eraseAll: true});
+await (await project.graph).erase({eraseAll: true});
 
 const spider = new Spider({
   logLevel: 0,

@@ -61,14 +61,14 @@ export class VerticeWorker<T extends Vertice = Vertice> extends EventEmitter {
       this.status.finished = Date.now();
       return this.status;
     } else if (is.nonEmptyStringAndNotWhitespace(workerOptions.collection)) {
-      const collection = context.graph.collection(workerOptions.collection);
+      const collection = (await context.graph).collection(workerOptions.collection);
       const query = aql`
         FOR item in ${collection}
         ${workerOptions.filter}
         return item
       `;
 
-      return context.graph.query<JsonObject>(query, {count: true})
+      return (await context.graph).query<JsonObject>(query, {count: true})
         .then(async cursor => {
           this.status.total = cursor.count ?? 0;
           for await (const item of cursor) {

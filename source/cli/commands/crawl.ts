@@ -1,4 +1,3 @@
-import { SpidergramCommand } from '../index.js';
 import { Flags } from '@oclif/core';
 import {
   Spider,
@@ -6,7 +5,7 @@ import {
   TextTools,
   SpiderStatistics,
 } from '../../index.js';
-import * as Progress from 'cli-progress';
+import { CLI, SpidergramCommand } from '../index.js';
 
 export default class Crawl extends SpidergramCommand {
   static description = 'Crawl and store a site';
@@ -28,13 +27,15 @@ export default class Crawl extends SpidergramCommand {
     }),
     analyze: Flags.boolean({
       char: 'a',
-      description: 'Extract metadata and page contents'
+      description: 'Extract metadata and page contents',
+      default: false,
+      required: false,
     }),
     body: Flags.string({
       char: 'b',
       description: 'CSS selector for main page text',
       default: ['body'],
-      dependsOn: ['analyze'],
+      required: false,
       multiple: true
     })
   }
@@ -51,21 +52,21 @@ export default class Crawl extends SpidergramCommand {
   
   async run() {
     const {argv, flags} = await this.parse(Crawl);
+    const project = await this.project;
+    const graph = await project.graph;
 
     if (flags.erase) {
-      const confirmation = await this.confirm(`Erase the ${this.project.name} database before crawling`);
+      const confirmation = await CLI.confirm(`Erase the ${project.name} database before crawling`);
       if (confirmation) {
-        await this.project.graph.erase({ eraseAll: true });
-        this.log(`${this.project.name} database cleared for crawl.`)
+        await graph.erase({ eraseAll: true });
+        this.log(`${project.name} database cleared for crawl.`)
       }
     }
 
     this.ux.styledHeader(`Crawling...`);
-    const progress = new Progress.SingleBar({
+    const progress = new CLI.progress.Bar({
       hideCursor: true
-    }, Progress.Presets.shades_grey);
-
-    progress.start(1, 0);
+    }, CLI.progress.Presets.shades_grey);
 
     const spider = new Spider({
       logLevel: 0,
@@ -89,10 +90,14 @@ export default class Crawl extends SpidergramCommand {
     });
 
     spider.on('requestComplete', (stats: SpiderStatistics) => {
-      progress.setTotal(stats.requestsEnqueued);
-      progress.update(stats.requestsCompleted);
+      progress.update({ total: stats.requestsEnqueued, value: stats.requestsCompleted });
     });
     
+    progress.start(
+      (await spider.getRequestQueue()).assumedTotalCount,
+      (await spider.getRequestQueue()).assumedHandledCount,
+    );
+
     await spider.run(this.sanitizeUrls(argv)).then(summary => { 
       progress.stop();
       this.summarizeResults(summary);

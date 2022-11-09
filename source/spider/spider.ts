@@ -170,6 +170,7 @@ export class Spider extends PlaywrightCrawler {
   ): Promise<SpiderStatistics> {
     // If only a single value came in, turn it into an array.
     const project = await Project.config(this.spiderOptions.projectConfig);
+    const graph = await project.graph;
     requests = arrify(requests);
 
     this.config.set('storageClientOptions',
@@ -194,7 +195,7 @@ export class Spider extends PlaywrightCrawler {
       }
     }
 
-    await project.graph.push([...uniques], false);
+    await graph.push([...uniques], false);
     const queue = await this.getRequestQueue();
     await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)), options);
 
