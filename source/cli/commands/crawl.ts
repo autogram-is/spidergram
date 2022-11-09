@@ -90,7 +90,8 @@ export default class Crawl extends SpidergramCommand {
     });
 
     spider.on('requestComplete', (stats: SpiderStatistics) => {
-      progress.update({ total: stats.requestsEnqueued, value: stats.requestsCompleted });
+      progress.setTotal(stats.requestsEnqueued);
+      progress.update(stats.requestsCompleted);
     });
     
     progress.start(
@@ -99,6 +100,7 @@ export default class Crawl extends SpidergramCommand {
     );
 
     await spider.run(this.sanitizeUrls(argv)).then(summary => { 
+      progress.update({ total: summary.requestsEnqueued, value: summary.requestsCompleted });
       progress.stop();
       this.summarizeResults(summary);
     });
@@ -113,8 +115,9 @@ export default class Crawl extends SpidergramCommand {
   }
 
   summarizeResults(stats: SpiderStatistics) {
-    this.ux.styledHeader('Crawl complete.');
+    this.log();
     this.ux.styledJSON(stats);
+    this.ux.styledHeader('Crawl complete.');
   }
 }
 
