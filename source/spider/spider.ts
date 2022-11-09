@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import arrify from 'arrify';
-import path from 'node:path';
 import { log } from 'crawlee';
 
 // We have a chance to set the log level HIGHER when configuring,
@@ -172,10 +171,6 @@ export class Spider extends PlaywrightCrawler {
     const project = await Project.config(this.spiderOptions.projectConfig);
     const graph = await project.graph;
     requests = arrify(requests);
-
-    this.config.set('storageClientOptions',
-      { optionallocalDataDirectory: path.join(project.root, 'crawler') }
-    );
     
     // Crawlee has a lot of logs going on.
     // Long term we want to do something nicer here.

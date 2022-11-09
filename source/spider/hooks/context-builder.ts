@@ -32,7 +32,7 @@ export async function contextBuilder(context: SpiderContext, options?: Playwrigh
     saveRequests: async (input: UniqueUrl[], options?: urls.EnqueueUrlOptions) =>
       urls.enqueue(context, input, options),
 
-    graph: project.graph,
+    graph: await project.graph,
     files: project.files,
 
     ...crawler.spiderOptions,
