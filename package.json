@@ -17,6 +17,7 @@
     "test": "ava",
     "lint": "xo",
     "fix": "xo --fix",
+    "build": "npm run clean; npm run compile",
     "compile": "tsc",
     "scratch": "ts-node-esm source/examples/scratch.ts",
     "prepare": "npm run clean; npm run compile",

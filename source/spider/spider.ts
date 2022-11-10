@@ -98,8 +98,6 @@ export class Spider extends PlaywrightCrawler {
     this.crawlerOptions = crawler;
 
     this._events = new AsyncEventEmitter();
-    //this.events.on(EventType.ABORTING, ({event, ...args}) => this.emit(event, ...args));
-    //this.events.on(EventType.EXIT, ({event, ...args}) => this.emit(event, ...args));
     //this.events.on(EventType.SYSTEM_INFO, ({event, ...args}) => this.emit(event, ...args));
   }
 
