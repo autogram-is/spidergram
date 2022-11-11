@@ -43,6 +43,33 @@ export const globalFlags = {
   }),
 }
 
+export const queryFlags = {
+  limit: Flags.integer({
+    default: 20,
+    summary: 'Max number of results to return',
+    helpGroup: 'QUERY',
+  }),
+  ascending: Flags.string({
+    aliases: ['asc'],
+    summary: 'Sort ascending by a property',
+    multiple: true,
+    helpGroup: 'QUERY',
+  }),
+  descending: Flags.string({
+    aliases: ['desc'],
+    summary: 'Sort descending by a property',
+    multiple: true,
+    helpGroup: 'QUERY',
+  }),
+  property: Flags.string({
+    aliases: ['prop'],
+    summary: 'Document property to be returned',
+    multiple: true,
+    default: ['key:_key'],
+    helpGroup: 'QUERY',
+  })
+}
+
 export const outputFlags = {
   output: Flags.enum<OutputFormats>({
     default: OutputFormats.INTERACTIVE,

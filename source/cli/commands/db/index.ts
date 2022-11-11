@@ -14,11 +14,12 @@ export default class GraphInfo extends SpidergramCommand {
     const dbUrl = new URL(
       arrify(project.configuration.graph.connection.url)[0] ?? 'http://127.0.0.1:8529'
     );
+    dbUrl.pathname = `_db/${graph.db.name}`;
 
     // This is actually very much not true.
     const dbStatus = graph.db.isArangoDatabase;
 
-    this.ux.styledHeader(`Database: ${terminalLink(graph.db.name, dbUrl.href)}`);
+    this.ux.styledHeader(`Database: ${terminalLink(graph.db.name, dbUrl.toString())}`);
     this.ux.styledHeader(`Status: ${dbStatus ? 'online' : 'offline'}`);
     
     if (dbStatus) {

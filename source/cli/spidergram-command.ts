@@ -1,6 +1,5 @@
 import { Project, ArangoStore, CLI } from '../index.js'
 import { CliUx, Command, Interfaces } from '@oclif/core';
-import chalk from 'chalk';
 
 /**
  * A base command that provided common functionality for all Spidergram commands.
@@ -21,7 +20,10 @@ export abstract class SpidergramCommand extends Command {
   static enableJsonFlag = true;
 
   ux = CliUx.ux;
-  chalk = chalk;
+
+  format = CLI.Colors;
+  chalk = CLI.chalk;
+  symbol = CLI.Prefixes;
 
   protected get statics(): typeof SpidergramCommand {
     return this.constructor as typeof SpidergramCommand;
