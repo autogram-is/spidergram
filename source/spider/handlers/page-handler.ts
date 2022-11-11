@@ -1,7 +1,7 @@
 import {SpiderContext} from '../context.js';
 
 export async function pageHandler(context: SpiderContext) {
-  const {$, saveResource, enqueueLinks} = context;
+  const {$, saveResource, enqueueUrls} = context;
   await saveResource({body: $?.html()});
-  await enqueueLinks();
+  await enqueueUrls();
 }

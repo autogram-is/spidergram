@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import arrify from 'arrify';
-import { log } from 'crawlee';
+import { log, PlaywrightCrawlingContext } from 'crawlee';
 
 // We have a chance to set the log level HIGHER when configuring,
 // but this (hopefully) ensures that sub-logs won't be created
@@ -151,6 +151,8 @@ export class Spider extends PlaywrightCrawler {
       { ...this.progress, ...this.stats.calculate() } as SpiderStatistics,
       context.request.url
     );
+
+    super._cleanupContext(context as PlaywrightCrawlingContext);
   }
 
   /**

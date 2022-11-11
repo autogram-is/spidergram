@@ -20,16 +20,16 @@ export async function contextBuilder(context: SpiderContext, options?: Playwrigh
     saveResource: async (data?: Record<string, unknown>) =>
       helpers.saveResource(context, data),
 
-    enqueueLinks: async (options?: urls.EnqueueUrlOptions) =>
-      urls.enqueueLinks(context, options),
+    enqueueUrls: async (options: Partial<urls.EnqueueUrlOptions> = {}) =>
+      urls.enqueueUrls(context, options),
 
-    findLinks: async (options?: urls.EnqueueUrlOptions) =>
+    findLinks: async (options: Partial<urls.EnqueueUrlOptions> = {}) =>
       urls.find(context, options),
 
-    saveLinks: async (input: urls.AnchorTagData[], options?: urls.EnqueueUrlOptions) =>
+    saveLinks: async (input: urls.AnchorTagData[], options: Partial<urls.EnqueueUrlOptions> = {}) =>
       urls.save(context, input, options),
 
-    saveRequests: async (input: UniqueUrl[], options?: urls.EnqueueUrlOptions) =>
+    saveRequests: async (input: UniqueUrl[], options: Partial<urls.EnqueueUrlOptions> = {}) =>
       urls.enqueue(context, input, options),
 
     graph: await project.graph(),

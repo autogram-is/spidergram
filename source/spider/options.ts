@@ -56,14 +56,14 @@ export interface InternalSpiderOptions extends Dictionary {
    *
    * 1. Save a {@apilink Resource} object for the page, including its HTML
    * 2. Save a {@apilink RespondsWith} object linking it to the current {@apilink UniqueUrl}
-   * 3. Run {@apilink enqueueLinks} using the default settings, enqueing any
+   * 3. Run {@apilink enqueueUrls} using the default settings, enqueing any
    *    links that point to the same domain as the resource's URL.
    *
    * @example
    * async function defaultPageHandler(context: SpiderContext) {
-   *   const {$, saveResource, enqueueLinks} = context;
+   *   const {$, saveResource, enqueueUrls} = context;
    *   await saveResource({body: $?.html()});
-   *   await enqueueLinks();
+   *   await enqueueUrls();
    * }
    *
    * @default: {@apilink pageHandler}
@@ -94,7 +94,7 @@ export interface InternalSpiderOptions extends Dictionary {
 
   /**
    * Overrides for the default URL filtering and enqueing options;
-   * these will apply whenever a request handler calls the `enqueueLinks`
+   * these will apply whenever a request handler calls the `enqueueUrls`
    * function without custom options.
    *
    * The default options specify that all URLs on the page will be saved

@@ -78,13 +78,13 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * for default options.
    *
    * @example
-   * function myCustomHandler({ enqueueLinks }) {
-   *   await enqueueLinks({
+   * function myCustomHandler({ enqueueUrls }) {
+   *   await enqueueUrls({
    *     selector: 'nav a',
    *     label: 'navigation'
    *   });
    *
-   *   await enqueueLinks({
+   *   await enqueueUrls({
    *     selector: 'body main a',
    *     label: 'body'
    *   });
@@ -92,14 +92,14 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    *
    * @type {Function}
    */
-  enqueueLinks: (options?: EnqueueUrlOptions) => Promise<unknown>;
+  enqueueUrls: (options?: Partial<EnqueueUrlOptions>) => Promise<unknown>;
 
   /**
    * Finds URLs on the current page matching the criteria specified
    * in the options; but does not save or enqueue them.
    * @type {Function}
    */
-  findUrls: (options?: EnqueueUrlOptions) => Promise<AnchorTagData[]>;
+  findUrls: (options?: Partial<EnqueueUrlOptions>) => Promise<AnchorTagData[]>;
 
   /**
    * Saves a list of found links as {@apilink UniqueUrl} objects, applying
@@ -107,7 +107,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * does not enqueue them.
    * @type {Function}
    */
-  saveUrls: (links: AnchorTagData[], options?: EnqueueUrlOptions) => Promise<UniqueUrl[]>;
+  saveUrls: (links: AnchorTagData[], options?: Partial<EnqueueUrlOptions>) => Promise<UniqueUrl[]>;
 
   /**
    * Accepts a list of {@apilink UniqueUrl} objects, applies any filters
@@ -115,7 +115,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * for the current crawl.
    * @type {Function}
    */
-  saveRequests: (urls: UniqueUrl[], options?: EnqueueUrlOptions) => Promise<Request[]>;
+  saveRequests: (urls: UniqueUrl[], options?: Partial<EnqueueUrlOptions>) => Promise<Request[]>;
 
   /**
    * A connection to the project's Arango graph database. Can be used to

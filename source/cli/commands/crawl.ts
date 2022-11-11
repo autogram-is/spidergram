@@ -10,34 +10,20 @@ import { CLI, SpidergramCommand } from '../index.js';
 export default class Crawl extends SpidergramCommand {
   static description = 'Crawl and store a site';
 
-  static usage = '<%= config.bin %> <%= command.id %> --analyze --body=[css selector] <url>'
+  static usage = '<%= config.bin %> <%= command.id %> <urls>'
 
   static examples = [
     '<%= config.bin %> <%= command.id %> example.com',
-    '<%= config.bin %> <%= command.id %> --config="custom.json" example.com',
-    '<%= config.bin %> <%= command.id %> --analyze https://example.com',
-    '<%= config.bin %> <%= command.id %> --analyze --body="section.main" https://example.com',
+    '<%= config.bin %> <%= command.id %> --body="section.main" --download="application/pdf" https://example.com',
   ];
 
   static flags = {
-    config: SpidergramCommand.globalFlags.config,
+    ...CLI.globalFlags,
     erase: Flags.boolean({
       char: 'e',
       description: 'Erase existing data before crawling'
     }),
-    analyze: Flags.boolean({
-      char: 'a',
-      description: 'Extract metadata and page contents',
-      default: false,
-      required: false,
-    }),
-    body: Flags.string({
-      char: 'b',
-      description: 'CSS selector for main page text',
-      default: ['body'],
-      required: false,
-      multiple: true
-    })
+    ...CLI.crawlFlags
   }
 
   static args = [
@@ -63,18 +49,16 @@ export default class Crawl extends SpidergramCommand {
       }
     }
 
-    this.ux.styledHeader(`Crawling...`);
-    const progress = new CLI.progress.Bar({
-      hideCursor: true
-    }, CLI.progress.Presets.shades_grey);
+    const progress = new CLI.progress.Bar({hideCursor: true}, CLI.progress.Presets.shades_grey);
 
     const spider = new Spider({
       logLevel: 0,
+      downloadMimeTypes: flags.download,
       async pageHandler(context) {
-        const {$, saveResource, enqueueLinks} = context;
+        const {$, saveResource, enqueueUrls} = context;
         const body = $!.html();
 
-        if (flags.analyze) {
+        if (flags.metadata) {
           const meta = HtmlTools.getMetadata($!);
           const text = HtmlTools.getPlainText(body, {
             baseElements: {selectors: flags.body},
@@ -85,7 +69,10 @@ export default class Crawl extends SpidergramCommand {
           await saveResource({body});
         }
         
-        await enqueueLinks();
+        if (flags.discover) {
+          if (flags.enqueue) await enqueueUrls();
+          else await enqueueUrls({ enqueue: () => false });
+        }
       },
     });
 
@@ -99,18 +86,10 @@ export default class Crawl extends SpidergramCommand {
       (await spider.getRequestQueue()).assumedHandledCount,
     );
 
-    await spider.run(this.sanitizeUrls(argv)).then(summary => { 
+    await spider.run(argv).then(summary => { 
       progress.update({ total: summary.requestsEnqueued, value: summary.requestsCompleted });
       progress.stop();
       this.summarizeResults(summary);
-    });
-  }
-
-  // This is suuuuuper ugly, but it properly catches URLs with no protocol.
-  sanitizeUrls(urls: string[]): string[] {
-    return urls.map(url => {
-      if (url.toLowerCase().startsWith('http')) return url;
-      return 'https://' + url;
     });
   }
 
@@ -120,4 +99,3 @@ export default class Crawl extends SpidergramCommand {
     this.ux.styledHeader('Crawl complete.');
   }
 }
-

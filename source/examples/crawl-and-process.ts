@@ -11,7 +11,7 @@ await Project.config({name: 'ethan'})
 
 const spider = new Spider({
   async pageHandler(context) {
-    const {$, saveResource, enqueueLinks} = context;
+    const {$, saveResource, enqueueUrls} = context;
 
     const body = $!.html();
     const meta = HtmlTools.getMetadata($!);
@@ -21,7 +21,7 @@ const spider = new Spider({
     const readability = TextTools.calculateReadability(text);
 
     await saveResource({meta, text, readability,});
-    await enqueueLinks();
+    await enqueueUrls();
   },
 });
 await spider.run(['https://ethanmarcotte.com'])

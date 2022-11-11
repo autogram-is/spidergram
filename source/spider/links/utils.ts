@@ -18,7 +18,7 @@ export interface EnqueueUrlOptions {
   limit: number;
 
   /**
-   * The CSS selector used to find links on the page; {@apilink enqueueLinks}
+   * The CSS selector used to find links on the page; {@apilink enqueueUrls}
    * can be run multiple times with different options on a given page to find
    * and capture different sets of links, e.g. navigation vs footer vs body.
    *
