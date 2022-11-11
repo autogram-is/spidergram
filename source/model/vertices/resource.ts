@@ -1,14 +1,16 @@
 import is from '@sindresorhus/is';
 import {Vertice, VerticeData} from './vertice.js';
 
-export type ResourceData = {
+export interface ResourceData extends VerticeData {
   url?: string | URL;
   code?: number | string;
   message?: string;
   headers?: Record<string, string | string[] | undefined>;
   body?: string;
-  payload?: string;
-} & VerticeData;
+  files?: SavedFile[];
+};
+
+export interface SavedFile { bucket: string, filename: string };
 
 export class Resource extends Vertice {
   get _collection() {
@@ -18,12 +20,12 @@ export class Resource extends Vertice {
   url!: string;
   code!: number;
   message!: string;
-  headers!: Record<string, string | string[] | undefined>;
+  headers: Record<string, string | string[] | undefined>;
   body?: string;
-  payload?: string;
+  files!: SavedFile[];
 
   constructor(data: ResourceData = {}) {
-    const {url, code, message, headers, body, payload, ...dataForSuper} = data;
+    const {url, code, message, headers, body, files, ...dataForSuper} = data;
     super(dataForSuper);
 
     // Flatten the URL to a string
@@ -38,11 +40,16 @@ export class Resource extends Vertice {
       this.code = -1;
     }
 
-    // Default the message and headers
     this.message = message ?? '';
     this.headers = headers ?? {};
     this.body = body;
-    this.payload = payload;
+    this.files = files ?? [];
+
+    this.assignKey();
+  }
+
+  protected override keySeed(): unknown {
+    return {url: this.url, label: this.label};
   }
 }
 

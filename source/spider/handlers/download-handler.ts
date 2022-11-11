@@ -6,18 +6,10 @@ export async function downloadHandler(context: SpiderContext): Promise<void> {
   const {graph, files, saveResource, sendRequest} = context;
   const resource = await saveResource();
 
-  // Ensure there's a downloads directory in our filestore
-  await files().exists('./downloads')
-    .then(exists => {
-      if (!exists) {
-        files().createDirectory('./downloads');
-      }
-    });
-
   const buffer = await sendRequest({responseType: 'buffer', allowGetBody: true, decompress: true, method: 'GET'});
-  const fileName = './downloads/' + resource.key + '-' + fileNameFromHeaders(new URL(buffer.url), buffer.headers);
-  await files().writeStream(fileName, Readable.from(buffer.rawBody));
+  const fileName = resource.key + '-' + fileNameFromHeaders(new URL(buffer.url), buffer.headers);
+  await files('downloads').writeStream(fileName, Readable.from(buffer.rawBody));
 
-  resource.payload = fileName;
+  resource.files.push({ bucket: 'downloads', filename: fileName });
   await graph.push(resource);
 }
