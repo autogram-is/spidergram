@@ -2,6 +2,7 @@
   "name": "spidergram",
   "version": "0.6.0",
   "description": "Structural analysis tools for complex web sites",
+  "main": "./dist/index.js",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",
@@ -20,10 +21,8 @@
     "docs": "rm -rf ./docs/*; typedoc src/index.ts --out ./docs"
   },
   "files": [
-    "/dist/**/*",
-    "/bin",
-    "/npm-shrinkwrap.json",
-    "/oclif.manifest.json"
+    "dist/**/*",
+    "bin"
   ],
   "oclif": {
     "bin": "spidergram",
