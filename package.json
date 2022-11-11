@@ -15,9 +15,8 @@
     "clean": "rm -rf ./dist",
     "nuke": "npm run clean; rm -rf ./node_modules; rm package-lock.json; npm install",
     "build": "npm run clean; npm run compile",
-    "compile": "tsc",
+    "compile": "tsc --build",
     "scratch": "ts-node-esm source/examples/scratch.ts",
-    "prepare": "npm run clean; npm run compile",
     "docs": "rm -rf ./docs/*; typedoc ./source/index.ts --out ./docs"
   },
   "files": [
@@ -100,7 +99,6 @@
   },
   "peerDependencies": {
     "@oclif/core": "^1.19.1",
-    "@oclif/help": "^1.0.3",
     "arangojs": "^8.0.0",
     "cheerio": "^1.0.0-rc.12",
     "compromise": "^14.7.0",

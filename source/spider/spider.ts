@@ -185,7 +185,7 @@ export class Spider extends PlaywrightCrawler {
       if (is.string(value)) {
         // We assume these are at least somewhat web-url-like if they're passed in,
         // but might not have a protocol.
-        prependHttp(value);
+        uniques.add(prependHttp(value));
       } else if (is.urlInstance(value) || value instanceof UniqueUrl) {
         uniques.add(value);
       } else if (value instanceof Request) {
