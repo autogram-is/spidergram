@@ -1,4 +1,5 @@
-export {default as calculateReadability} from 'readability-scores';
+import nlp from 'compromise';
+import readabilityScores from 'readability-scores';
 
 export function oxfordJoin(input: string[], conjunction = 'and'): string {
   if (input.length === 2) {
@@ -11,3 +12,7 @@ export function oxfordJoin(input: string[], conjunction = 'and'): string {
     return input.join(', ');
   }
 }
+
+export const buildSemanticModel = nlp;
+
+export const calculateReadability = readabilityScores;
