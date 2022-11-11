@@ -3,14 +3,14 @@ import is from '@sindresorhus/is';
 import {NormalizedUrl, UrlMutator} from '@autogram/url-tools';
 import {Vertice, VerticeData, Transform} from './vertice.js';
 
-export type UniqueUrlData = {
+export interface UniqueUrlData extends VerticeData {
   url?: string | NormalizedUrl;
   source?: UrlSource;
   base?: string | URL;
   normalizer?: UrlMutator;
   referer?: string;
   depth?: number;
-} & VerticeData;
+};
 
 export enum UrlSource {
   Page = 'page',

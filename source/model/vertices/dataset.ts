@@ -1,10 +1,9 @@
 import {Vertice, VerticeData} from './vertice.js';
 
-export type DataSetData<DataInterface = unknown> = {
-  type: string;
+export interface DataSetData<DataInterface = unknown> extends VerticeData {
   name: string;
   data: DataInterface;
-} & VerticeData;
+};
 
 /**
  * General-purpose storage for imported and third-party API data.
@@ -47,12 +46,11 @@ export class DataSet<DataInterface = unknown> extends Vertice {
    * @param {DataSetData<DataInterface>} input
    */
   constructor(input: DataSetData<DataInterface>) {
-    const {type, data, ...dataForSuper} = input;
+    const {name, data, ...dataForSuper} = input;
     super(dataForSuper);
 
     // Flatten the URL to a string
-    this.type = type;
-    this.name = type;
+    this.name = name;
     this.data = data;
   }
 
@@ -64,7 +62,7 @@ export class DataSet<DataInterface = unknown> extends Vertice {
    * @returns {unknown}
    */
   protected override keySeed(): unknown {
-    return {type: this.type, name: this.name};
+    return {label: this.label, name: this.name};
   }
 }
 

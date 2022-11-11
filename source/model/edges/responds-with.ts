@@ -1,6 +1,6 @@
 import {Edge, EdgeData, Vertice, Reference, UniqueUrl, Resource} from '../index.js';
 
-export type RespondsWithData<F extends Vertice = UniqueUrl, T extends Vertice = Resource> = EdgeData<F, T> & {
+export interface RespondsWithData<F extends Vertice = UniqueUrl, T extends Vertice = Resource> extends EdgeData<F, T> {
   url?: Reference<F>;
   resource?: Reference<T>;
   redirects?: URL[] | string[];

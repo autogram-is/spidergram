@@ -1,6 +1,6 @@
 import {Edge, EdgeData, Vertice, Reference, UniqueUrl, Resource} from '../index.js';
 
-export type LinksToData<F extends Vertice = Resource, T extends Vertice = UniqueUrl> = EdgeData<F, T> & {
+export interface LinksToData<F extends Vertice = Resource, T extends Vertice = UniqueUrl> extends EdgeData<F, T> {
   resource?: Reference<F>;
   url?: Reference<T>;
 };

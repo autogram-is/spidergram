@@ -15,7 +15,10 @@ import {Uuid, UuidFactory} from '../helpers/uuid.js';
 
 export {Transform, Exclude} from 'class-transformer';
 export type Reference<T extends Vertice = Vertice> = T | [ string, Uuid ] | string;
-export type VerticeData = Record<string, unknown>;
+export interface VerticeData {
+  [keyof: string]: unknown,
+  label?: string,
+};
 
 export interface CollectionMeta {
   isEdge?: true;
@@ -58,13 +61,8 @@ export abstract class Vertice {
   @Exclude({ toPlainOnly: true, toClassOnly: false })
     _rev?: string;
 
-  // The data passed into Vertice constructors should consist of fully
-  // instantiated objects of the correct classes; unlike fromJSON(),
-  // the constructor isn't expected to coerce or remap incoming values.
-  //
-  // Subclasses with specific constructor requirements can implement
-  // their own interface/type for incoming data, and transform the
-  // values before passing them along.
+  label?: string;
+
   constructor(data: VerticeData = {}) {
     // Special handling for arbitrary properties.
     if (is.object(data)) {

@@ -8,10 +8,10 @@ export function isEdge(value: unknown): value is Edge {
   );
 }
 
-export type EdgeData<F extends Vertice = Vertice, T extends Vertice = Vertice> = {
+export interface EdgeData<F extends Vertice = Vertice, T extends Vertice = Vertice> extends VerticeData {
   from?: Reference<F>;
   to?: Reference<T>;
-} & VerticeData;
+};
 
 export abstract class Edge<F extends Vertice = Vertice, T extends Vertice = Vertice> extends Vertice {
   _from!: string;

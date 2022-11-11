@@ -39,7 +39,7 @@ export class UrlHierarchyBuilder {
 
   constructor(
     protected readonly storage: ArangoStore,
-    readonly context = 'url',
+    readonly label = 'url',
   ) {}
 
   // Only returns parsable web URLs; additional filter criteria
@@ -63,9 +63,9 @@ export class UrlHierarchyBuilder {
       });
   }
 
-  // Loads in the hierarchy relationships for a given context,
+  // Loads in the hierarchy relationships for a given label,
   // then all child and parent entities.
-  async loadHierarchy(context = 'url'): Promise<void> {
+  async loadHierarchy(label = 'url'): Promise<void> {
     throw new Error('Not yet implemented.');
   }
 
@@ -97,7 +97,7 @@ export class UrlHierarchyBuilder {
         this.data.orphans.push(url);
       } else {
         this.data.relationships.push(
-          new IsChildOf({child: url, parent, context: 'url'}),
+          new IsChildOf({child: url, parent, label: 'url'}),
         );
         this.data.participants.push(url);
       }
