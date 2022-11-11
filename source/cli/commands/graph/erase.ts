@@ -5,16 +5,11 @@ export default class Erase extends SpidergramCommand {
   static description = 'Discard stored crawling data';
 
   static flags = {
-    config: SpidergramCommand.globalFlags.config,
-    force: Flags.boolean({
-      char: 'f',
-      description: 'Bypass confirmation'
-    }),
+    config: CLI.globalFlags.config,
     all: Flags.boolean({
       char: 'a',
       description: 'Delete all collections'
     }),
-
   }
 
   static args = [

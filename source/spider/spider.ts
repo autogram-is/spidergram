@@ -181,7 +181,10 @@ export class Spider extends PlaywrightCrawler {
     // Normalize and deduplicate any incoming requests.
     const uniques = new UniqueUrlSet(undefined, undefined, this.spiderOptions.urlOptions.normalizer);
     for (const value of requests) {
-      if (is.string(value) || is.urlInstance(value) || value instanceof UniqueUrl) {
+      if (is.string(value)) {
+        if (!value.toLowerCase().startsWith('http')) uniques.add(`https://${value}`);
+        else uniques.add(value);
+      } else if (is.urlInstance(value) || value instanceof UniqueUrl) {
         uniques.add(value);
       } else if (value instanceof Request) {
         uniques.add(value.url);

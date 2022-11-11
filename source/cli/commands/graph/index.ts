@@ -1,11 +1,11 @@
-import { SpidergramCommand } from '../../index.js';
+import { SpidergramCommand, CLI } from '../../index.js';
 import chalk from 'chalk';
 
 export default class GraphInfo extends SpidergramCommand {
   static description = 'Settings and stats for the Arango database';
 
   static flags = {
-    config: SpidergramCommand.globalFlags.config
+    config: CLI.globalFlags.config,
   }
 
   async run() {
