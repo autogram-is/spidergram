@@ -14,14 +14,10 @@
   "scripts": {
     "clean": "rm -rf ./dist",
     "nuke": "npm run clean; rm -rf ./node_modules; rm package-lock.json; npm install",
-    "test": "ava",
-    "lint": "xo",
-    "fix": "xo --fix",
     "build": "npm run clean; npm run compile",
     "compile": "tsc",
     "scratch": "ts-node-esm source/examples/scratch.ts",
     "prepare": "npm run clean; npm run compile",
-    "pretest": "npm run clean; npm run compile",
     "docs": "rm -rf ./docs/*; typedoc ./source/index.ts --out ./docs"
   },
   "files": [
@@ -45,19 +41,6 @@
     "topicSeparator": " ",
     "plugins": [
       "@oclif/plugin-help"
-    ]
-  },
-  "xo": {
-    "space": true,
-    "bracketSpacing": true,
-    "semicolon": true,
-    "rules": {
-      "new-cap": "off",
-      "max-params": "off"
-    },
-    "envs": [
-      "es2022",
-      "node"
     ]
   },
   "author": "Jeff Eaton <jeff@autogram.is> (http://eaton.fyi)",
@@ -90,7 +73,6 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@ava/typescript": "^3.0.1",
     "@oclif/test": "^2.2.8",
     "@types/cheerio": "^0.22.31",
     "@types/cli-progress": "^3.11.0",
@@ -105,13 +87,11 @@
     "@types/object-hash": "^2.2.1",
     "@types/server-destroy": "^1.0.1",
     "@types/uuid": "^8.3.4",
-    "ava": "^4.3.3",
     "oclif": "^3",
     "shx": "^0.3.3",
     "ts-node": "^10.8.0",
     "typedoc": "^0.23.19",
-    "typescript": "^4.8.4",
-    "xo": "^0.51.0"
+    "typescript": "^4.8.4"
   },
   "peerDependencies": {
     "@oclif/core": "^1.19.1",
