@@ -10,7 +10,7 @@ export default class ProjectInfo extends SpidergramCommand {
   }
 
   async run() {
-    const project = await this.project;
+    const {project} = await this.getProjectContext();
     if (project.configFilePath !== undefined) {
       this.log(`${chalk.bold('Project:')} ${project.name}`);
       this.log(`${chalk.bold('Config file:')} ${project.configFilePath}`);

@@ -1,14 +1,16 @@
 import { Flags } from '@oclif/core';
+import is from '@sindresorhus/is';
 import {
   Spider,
   HtmlTools,
   TextTools,
   SpiderStatistics,
+  EnqueueUrlOptions,
 } from '../../index.js';
 import { CLI, SpidergramCommand } from '../index.js';
 
 export default class Crawl extends SpidergramCommand {
-  static description = 'Crawl and store a site';
+  static summary = 'Crawl and store a site';
 
   static usage = '<%= config.bin %> <%= command.id %> <urls>'
 
@@ -20,8 +22,7 @@ export default class Crawl extends SpidergramCommand {
   static flags = {
     ...CLI.globalFlags,
     erase: Flags.boolean({
-      char: 'e',
-      description: 'Erase existing data before crawling'
+      description: 'Erase existing database before crawling'
     }),
     ...CLI.crawlFlags
   }
@@ -38,8 +39,26 @@ export default class Crawl extends SpidergramCommand {
   
   async run() {
     const {argv, flags} = await this.parse(Crawl);
-    const project = await this.project;
-    const graph = await project.graph();
+    const {project, graph, errors} = await this.getProjectContext();
+
+    if (errors.length > 0) {
+      for (let error of errors) {
+        if (is.error(error)) this.ux.error(error);
+      }
+    }
+
+    let urls: string[] = [];
+
+    if (is.emptyArray(argv)) {
+      const stdin = await this.stdin();
+      if (is.undefined(stdin)) {
+        this.ux.error('No URLs were provided.');
+      } else {
+        urls = stdin.match(/[\n\s]+/) ?? [];
+      }
+    } else {
+      urls = argv;
+    }
 
     if (flags.erase) {
       const confirmation = await CLI.confirm(`Erase the ${project.name} database before crawling`);
@@ -69,9 +88,11 @@ export default class Crawl extends SpidergramCommand {
           await saveResource({body});
         }
         
-        if (flags.discover) {
-          if (flags.enqueue) await enqueueUrls();
-          else await enqueueUrls({ enqueue: () => false });
+        const urlOptions: Partial<EnqueueUrlOptions> = {};
+        if (flags.discover !== 'none') {
+          urlOptions.save = flags.discover;
+          urlOptions.enqueue = (flags.enqueue === 'none') ? () => false : flags.enqueue;
+          await enqueueUrls(urlOptions);
         }
       },
     });
@@ -86,7 +107,7 @@ export default class Crawl extends SpidergramCommand {
       (await spider.getRequestQueue()).assumedHandledCount,
     );
 
-    await spider.run(argv).then(summary => { 
+    await spider.run(urls).then(summary => { 
       progress.update({ total: summary.requestsEnqueued, value: summary.requestsCompleted });
       progress.stop();
       this.summarizeResults(summary);

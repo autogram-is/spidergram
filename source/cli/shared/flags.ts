@@ -1,4 +1,5 @@
 import { Flags, CliUx } from "@oclif/core"
+import { EnqueueStrategy } from "crawlee";
 
 /**
  * Flags that you can use for manipulating tables.
@@ -17,56 +18,94 @@ import { Flags, CliUx } from "@oclif/core"
 
 export const tableFlags = CliUx.ux.table.flags;
 
+export enum OutputFormats {
+  JSON = 'json',
+  XML = 'xml',
+  CSV = 'csv',
+  TSV = 'tsv',
+  INTERACTIVE = 'interactive',
+};
+
 export const globalFlags = {
   config: Flags.string({
-    char: 'c',
-    description: 'Path to project configuration file',
-  })
-}
-
-export const workflowFlags = {
+    summary: 'Path to project configuration file',
+    helpGroup: 'GLOBAL',
+  }),
+  options: Flags.string({
+    summary: 'Use flags and args from YML or JSON',
+    helpGroup: 'GLOBAL',
+  }),
   force: Flags.boolean({
     char: 'f',
     default: false,
-    description: 'Bypass warnings (dangerous)'
+    summary: 'Bypass warnings (dangerous)',
+    helpGroup: 'OUTPUT',
   }),
-  yes: Flags.boolean({
-    char: 'y',
+}
+
+export const outputFlags = {
+  output: Flags.enum<OutputFormats>({
+    default: OutputFormats.INTERACTIVE,
+    options: [
+      OutputFormats.INTERACTIVE, 
+      OutputFormats.JSON,
+      OutputFormats.CSV,
+      OutputFormats.TSV,
+      OutputFormats.XML,
+    ],
+    summary: 'Control console output format',
+    helpGroup: 'OUTPUT'
+  }),
+  verbose: Flags.boolean({
+    char: 'v',
     default: false,
-    description: 'Bypass confirmation prompts'
+    summary: 'Suppress messages and status updates',
+    exclusive: ['silent'],
+    helpGroup: 'OUTPUT',
   }),
   silent: Flags.boolean({
     char: 's',
     default: false,
-    description: 'Suppress messages and status updates',
-    exclusive: ['debug']
-  })
+    summary: 'Suppress messages and status updates',
+    exclusive: ['silent'],
+    helpGroup: 'OUTPUT',
+  }),
 }
 
 export const crawlFlags = {
   'metadata': Flags.boolean({
     default: true,
     allowNo: true,
-    summary: "Extract HTML page stats and metadata"
+    summary: "Extract HTML page stats and metadata",
   }),
-  'discover': Flags.boolean({
-    default: true,
-    allowNo: true,
-    summary: "Look for links in HTML pages"
+  'discover': Flags.enum<EnqueueStrategy | 'none'>({
+    default: EnqueueStrategy.All,
+    options: [
+      EnqueueStrategy.All,
+      EnqueueStrategy.SameDomain,
+      EnqueueStrategy.SameHostname,
+      'none'
+    ],
+    summary: "Link discovery strategy",
   }),
-  'enqueue': Flags.boolean({
-    default: true,
-    allowNo: true,
-    summary: "Add discovered links to the crawl queue",
-    dependsOn: ['discover']
+  'enqueue': Flags.enum<EnqueueStrategy | 'none'>({
+    default: EnqueueStrategy.SameDomain,
+    options: [
+      EnqueueStrategy.All,
+      EnqueueStrategy.SameDomain,
+      EnqueueStrategy.SameHostname,
+      'none'
+    ],
+    summary: "Link enqueueing strategy",
   }),
   download: Flags.string({
     multiple: true,
-    summary: 'MIME types to download if encountered'
+    summary: 'MIME types to download if encountered',
   }),
   body: Flags.string({
+    char: 'b',
     multiple: true,
     default: ['body'],
-    summary: 'CSS selector for primary page content'
+    summary: 'CSS selector for primary page content',
   }),
 }

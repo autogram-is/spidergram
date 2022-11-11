@@ -1,5 +1,6 @@
-import { Project, CLI } from '../index.js'
+import { Project, ArangoStore, CLI } from '../index.js'
 import { CliUx, Command, Interfaces } from '@oclif/core';
+import chalk from 'chalk';
 
 /**
  * A base command that provided common functionality for all Spidergram commands.
@@ -19,20 +20,40 @@ import { CliUx, Command, Interfaces } from '@oclif/core';
 export abstract class SpidergramCommand extends Command {
   static enableJsonFlag = true;
 
-  get project(): Promise<Project> {
-    return this.parse(this.constructor as Interfaces.Command.Class)
-      .then((args) => Project.config(args?.flags?.config ?? undefined));
-  }
-
   ux = CliUx.ux;
+  chalk = chalk;
 
   protected get statics(): typeof SpidergramCommand {
     return this.constructor as typeof SpidergramCommand;
   }
 
+  // If no flags are set for a Spidergram Command, inherit
+  // the shared global flags.
   static flags = {
     config: CLI.globalFlags.config
-  };
+  }
+
+  async getProjectContext(returnErrors = false) {
+    const promise = this.parse(this.constructor as Interfaces.Command.Class)
+      .then(({flags}) => Project.config(flags?.config ?? undefined));
+
+    const errors: Error[] = [];
+    const project = await promise
+      .catch(error => { errors.push(error); return undefined as unknown as Project; });
+
+    const graph = await project?.graph()
+      .catch(error => { errors.push(error as Error); return undefined as unknown as ArangoStore; });
+
+    if (errors.length > 0 && !returnErrors) {
+      for (let error of errors) this.ux.error(error);
+    }
+    
+    return {
+      project: project,
+      graph: graph,
+      errors
+    }
+  }
 
   async stdin(): Promise<string | undefined> {
     return new Promise(resolve => {

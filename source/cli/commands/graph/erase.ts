@@ -6,6 +6,7 @@ export default class Erase extends SpidergramCommand {
 
   static flags = {
     config: CLI.globalFlags.config,
+    force: CLI.globalFlags.force,
     all: Flags.boolean({
       char: 'a',
       description: 'Delete all collections'
@@ -30,8 +31,7 @@ export default class Erase extends SpidergramCommand {
   
   async run() {
     let {argv, flags} = await this.parse(Erase);
-    const project = await this.project;
-    const graph = await project.graph();
+    const {graph} = await this.getProjectContext();
 
     const dbName = graph.db.name;
     let message = `Empty the collection${argv.length > 1 ? 's' : ''} ${CLI.oxfordJoin(argv)} from ${dbName}?`;

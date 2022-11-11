@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import arrify from 'arrify';
 import { log, PlaywrightCrawlingContext } from 'crawlee';
+import prependHttp from 'prepend-http';
 
 // We have a chance to set the log level HIGHER when configuring,
 // but this (hopefully) ensures that sub-logs won't be created
@@ -182,8 +183,9 @@ export class Spider extends PlaywrightCrawler {
     const uniques = new UniqueUrlSet(undefined, undefined, this.spiderOptions.urlOptions.normalizer);
     for (const value of requests) {
       if (is.string(value)) {
-        if (!value.toLowerCase().startsWith('http')) uniques.add(`https://${value}`);
-        else uniques.add(value);
+        // We assume these are at least somewhat web-url-like if they're passed in,
+        // but might not have a protocol.
+        prependHttp(value);
       } else if (is.urlInstance(value) || value instanceof UniqueUrl) {
         uniques.add(value);
       } else if (value instanceof Request) {

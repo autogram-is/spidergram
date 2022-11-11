@@ -1,5 +1,6 @@
 import { SpidergramCommand, CLI } from '../../index.js';
-import chalk from 'chalk';
+import arrify from 'arrify';
+import terminalLink from 'terminal-link';
 
 export default class GraphInfo extends SpidergramCommand {
   static description = 'Settings and stats for the Arango database';
@@ -9,14 +10,26 @@ export default class GraphInfo extends SpidergramCommand {
   }
 
   async run() {
-    const project = await this.project;
-    const graph = await project.graph();
+    const {project, graph} = await this.getProjectContext();
+    const dbUrl = new URL(
+      arrify(project.configuration.graph.connection.url)[0] ?? 'http://127.0.0.1:8529'
+    );
 
+    this.ux.styledHeader(`Database: ${terminalLink(graph.db.name, dbUrl.href)}`);
+    this.ux.styledHeader(`Status: ${graph.db.isArangoDatabase ? 'online' : 'offline'}`);
+    
     await graph.db.listCollections()
-      .then(collections => {
-        for (let collection of collections) {
-          this.log(chalk.bold('Collection: ') + `${collection.name}: ${collection.type}`);
+      .then(collections => collections.map(collection => {
+        return {
+          name: collection.name,
+          type: (collection.type === 2) ? 'document' : 'edge',
         }
-      });
+      }))
+      .then(collections => {
+        this.ux.table(collections, {
+          name: { header: 'Collection', minWidth: 20 },
+          type: {},
+        });
+      })
   }
 }
