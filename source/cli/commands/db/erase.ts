@@ -9,14 +9,14 @@ export default class Erase extends SpidergramCommand {
     force: CLI.globalFlags.force,
     all: Flags.boolean({
       char: 'a',
-      description: 'Delete all collections'
+      summary: 'Delete all collections'
     }),
   }
 
   static args = [
     {
       name: 'collections',
-      description: 'One or more graph collections',
+      summary: 'One or more graph collections',
       required: false
     },
   ];
@@ -38,7 +38,7 @@ export default class Erase extends SpidergramCommand {
     if (flags.all) {
       message = `Empty ${CLI.chalk.bold.red('all data')} from ${dbName}?`;
     }
-
+    
     const confirmation = flags.force ? true : await CLI.confirm(message);
 
     if (confirmation) {

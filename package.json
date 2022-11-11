@@ -34,7 +34,7 @@
       "project": {
         "description": "Configure crawl projects"
       },
-      "graph": {
+      "db": {
         "description": "Manage and query stored crawl data"
       }
     },
