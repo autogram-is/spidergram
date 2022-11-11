@@ -15,6 +15,7 @@
   "scripts": {
     "clean": "rm -rf ./dist",
     "nuke": "npm run clean; rm -rf ./node_modules; rm package-lock.json; npm install",
+    "prepublish": "npm run build",
     "build": "npm run clean; npm run compile",
     "compile": "tsc",
     "scratch": "ts-node-esm src/examples/scratch.ts",
