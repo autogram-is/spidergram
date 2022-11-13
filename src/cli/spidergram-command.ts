@@ -31,7 +31,7 @@ export abstract class SpidergramCommand extends Command {
 
   // If no flags are set for a Spidergram Command, inherit
   // the shared global flags.
-  static flags = {
+  static flags: Interfaces.FlagInput = {
     config: CLI.globalFlags.config
   }
 
