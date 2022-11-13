@@ -1,8 +1,12 @@
-import {CLI, SpidergramCommand, ScreenshotTool, ScreenshotOptions, Orientation} from "../../index.js";
+import {
+  CLI,
+  SpidergramCommand,
+  ScreenshotTool,
+  ScreenshotOptions,
+  Orientation
+} from "../../index.js";
 import { Flags } from "@oclif/core";
-import is from '@sindresorhus/is';
 import { PlaywrightCrawler } from "crawlee";
-import protocolify from "protocolify";
 
 export default class Screenshot extends SpidergramCommand {
   static summary = 'Save screenshots of pages and page elements';
@@ -19,6 +23,7 @@ export default class Screenshot extends SpidergramCommand {
   static args = [{
     name: 'urls',
     description: 'One or more URLs to capture',
+    required: true,
   }];
 
   static flags = {
@@ -60,24 +65,10 @@ export default class Screenshot extends SpidergramCommand {
 
   async run() {
     const {project} = await this.getProjectContext();
-    const {argv, flags} = await this.parse(Screenshot);
+    const {argv: urls, flags} = await this.parse(Screenshot);
+
     const captureTool = new ScreenshotTool();
-    captureTool.on('capture', filename => this.ux.info(`Captured ${filename}...`));
-
-    // Check stdio in case the user piped in a file full of URLS
-    let urls: string[] = [];
-    if (is.emptyArray(argv)) {
-      const stdin = await this.stdin() ?? '';
-      urls = stdin.match(/[\n\s]+/) ?? [];
-    } else if (is.array<string>(argv)) {
-      urls = argv;
-    }
-
-    if (is.emptyArray(urls)) {
-      this.ux.error('No URLs were provided.');
-    } else {
-      urls = urls.map(url => protocolify(url));
-    }
+    captureTool.on('capture', filename => this.ux.info(`Saved ${filename}...`));
 
     const options:Partial<ScreenshotOptions> = {
       storage: project.files('storage'),

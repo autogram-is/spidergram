@@ -32,37 +32,22 @@ export default class Crawl extends SpidergramCommand {
     verbose: CLI.outputFlags.verbose
   }
 
-  static args = [
-    {
-      name: 'urls',
-      description: 'One or more URLs to crawl',
-      required: true
-    },
-  ];
+  static args = [{
+    name: 'urls',
+    description: 'One or more URLs to crawl',
+    required: true
+  }];
 
   static strict = false
   
   async run() {
-    const {argv, flags} = await this.parse(Crawl);
     const {project, graph, errors} = await this.getProjectContext();
+    const {argv: urls, flags} = await this.parse(Crawl);
 
     if (errors.length > 0) {
       for (let error of errors) {
         if (is.error(error)) this.ux.error(error);
       }
-    }
-
-    let urls: string[] = [];
-
-    if (is.emptyArray(argv)) {
-      const stdin = await this.stdin();
-      if (is.undefined(stdin)) {
-        this.ux.error('No URLs were provided.');
-      } else {
-        urls = stdin.match(/[\n\s]+/) ?? [];
-      }
-    } else {
-      urls = argv;
     }
 
     if (flags.erase) {
