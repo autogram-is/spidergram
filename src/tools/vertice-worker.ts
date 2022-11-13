@@ -24,7 +24,7 @@ export interface VerticeWorkerOptions<T extends Vertice = Vertice> {
 }
 
 export class VerticeWorker<T extends Vertice = Vertice> extends EventEmitter {
-  protected status: WorkerStatus;
+  readonly status: WorkerStatus;
   protected project!: Project;
   protected graph!: ArangoStore;
 
@@ -37,19 +37,6 @@ export class VerticeWorker<T extends Vertice = Vertice> extends EventEmitter {
       errors: {},
       total: 0,
     };
-
-    Project.config(this.options.project)
-      .then(project => {
-        this.project = project;
-        return this.project.graph();
-      })
-      .then(graph => {
-        this.graph = graph;
-      })
-      .catch((error: unknown) => {
-        if (is.error(error)) throw error;
-        throw new Error('Could not load Project defaults');
-      });
   }
 
   async run(options: Partial<VerticeWorkerOptions<T>> = {}): Promise<WorkerStatus> {
@@ -57,6 +44,9 @@ export class VerticeWorker<T extends Vertice = Vertice> extends EventEmitter {
       ...this.options,
       ...options,
     };
+
+    const project = await Project.config(workerOptions.project);
+    const graph = await project.graph();
 
     this.status.started = Date.now();
 
@@ -68,18 +58,18 @@ export class VerticeWorker<T extends Vertice = Vertice> extends EventEmitter {
       for (const v of workerOptions.items) {
         await this.performTask(v, workerOptions.task);
       }
-
+      
       this.status.finished = Date.now();
       return this.status;
     } else if (is.nonEmptyStringAndNotWhitespace(workerOptions.collection)) {
-      const collection = (await this.project.graph()).collection(workerOptions.collection);
+      const collection = graph.collection(workerOptions.collection);
       const query = aql`
         FOR item in ${collection}
         ${workerOptions.filter}
         return item
       `;
 
-      return (await this.project.graph()).query<JsonObject>(query, {count: true})
+      return graph.query<JsonObject>(query, {count: true})
         .then(async cursor => {
           this.status.total = cursor.count ?? 0;
           for await (const item of cursor) {
@@ -97,8 +87,8 @@ export class VerticeWorker<T extends Vertice = Vertice> extends EventEmitter {
 
   async performTask(item: T, task: VerticeWorkerTask<T>): Promise<void> {
     return task(item).then(() => {
-      this.status.processed++;
-    })
+        this.status.processed++;
+      })
       .catch(error => {
         this.status.errors[item.key] = error;
       })

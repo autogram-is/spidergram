@@ -16,10 +16,8 @@ export interface DataSetData<DataInterface = unknown> extends VerticeData {
  * @extends {Vertice}
  */
 export class DataSet<DataInterface = unknown> extends Vertice {
-  get _collection() {
-    return 'datasets';
-  }
-
+  readonly _collection = 'datasets';
+  
   /**
    * Description placeholder
    *

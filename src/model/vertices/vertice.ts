@@ -27,8 +27,7 @@ export interface CollectionMeta {
 
 export function isVertice(value: unknown): value is Vertice {
   return (
-    is.object(value)
-    && ('_collection' in value)
+    is.object(value) && (('_id' in value) || ('_collection' in value && '_key' in value))
   );
 }
 
@@ -51,14 +50,10 @@ export abstract class Vertice {
 
   [property: string]: unknown;
   _key: Uuid = UuidFactory.nil;
+  _collection!: string;
+  _id!: string;
 
-  @Exclude({ toPlainOnly: true, toClassOnly: false })
-    _id!: string;
-
-  @Exclude({ toPlainOnly: false, toClassOnly: true })
-  abstract readonly _collection: string;
-
-  @Exclude({ toPlainOnly: true, toClassOnly: false })
+  @Exclude({ toClassOnly: true })
     _rev?: string;
 
   label?: string;
@@ -85,7 +80,6 @@ export abstract class Vertice {
     const options: ClassTransformOptions = {
       strategy: 'exposeAll',
       excludeExtraneousValues: false,
-      excludePrefixes: [],
       targetMaps: [] as TargetMap[],
       enableImplicitConversion: true,
       exposeDefaultValues: true,

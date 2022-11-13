@@ -86,7 +86,7 @@ export const outputFlags = {
   verbose: Flags.boolean({
     char: 'v',
     default: false,
-    summary: 'Suppress messages and status updates',
+    summary: 'Display detailed status messages',
     exclusive: ['silent'],
     helpGroup: 'OUTPUT',
   }),
@@ -94,18 +94,13 @@ export const outputFlags = {
     char: 's',
     default: false,
     summary: 'Suppress messages and status updates',
-    exclusive: ['silent'],
+    exclusive: ['verbose'],
     helpGroup: 'OUTPUT',
   }),
 }
 
 export const crawlFlags = {
-  'metadata': Flags.boolean({
-    default: true,
-    allowNo: true,
-    summary: "Extract HTML page stats and metadata",
-  }),
-  'discover': Flags.enum<EnqueueStrategy | 'none'>({
+  discover: Flags.enum<EnqueueStrategy | 'none'>({
     default: EnqueueStrategy.All,
     options: [
       EnqueueStrategy.All,
@@ -115,7 +110,7 @@ export const crawlFlags = {
     ],
     summary: "Link discovery strategy",
   }),
-  'enqueue': Flags.enum<EnqueueStrategy | 'none'>({
+  enqueue: Flags.enum<EnqueueStrategy | 'none'>({
     default: EnqueueStrategy.SameDomain,
     options: [
       EnqueueStrategy.All,
@@ -126,13 +121,55 @@ export const crawlFlags = {
     summary: "Link enqueueing strategy",
   }),
   download: Flags.string({
+    aliases: ['dl'],
     multiple: true,
     summary: 'MIME types to download if encountered',
   }),
+  concurrency: Flags.integer({
+    default: 1,
+    summary: 'Max simultaneous requests'
+  }),
+  rate: Flags.integer({
+    default: 300,
+    summary: 'Max requests to process per minute'
+  })
+}
+
+export const analysisFlags = {
   body: Flags.string({
     char: 'b',
     multiple: true,
     default: ['body'],
-    summary: 'CSS selector for primary page content',
+    summary: 'CSS selector for page content',
+  }),
+  text: Flags.boolean({
+    char: 't',
+    default: true,
+    allowNo: true,
+    summary: 'Generate plaintext version of page',
+  }),
+  readability: Flags.boolean({
+    char: 'r',
+    default: true,
+    allowNo: true,
+    summary: 'Calculate page readability',
+  }),
+  topics: Flags.boolean({
+    char: 'w',
+    default: true,
+    allowNo: true,
+    summary: 'Extract topics from page content',
+  }),
+  hierarchy: Flags.boolean({
+    char: 'u',
+    default: true,
+    allowNo: true,
+    summary: 'Calculate hierarchy from URL structure',
+  }),
+  metadata: Flags.boolean({
+    char: 'm',
+    default: true,
+    allowNo: true,
+    summary: "Extract page metadata",
   }),
 }

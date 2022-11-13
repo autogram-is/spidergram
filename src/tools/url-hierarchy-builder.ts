@@ -38,7 +38,7 @@ export class UrlHierarchyBuilder {
   };
 
   constructor(
-    protected readonly storage: ArangoStore,
+    protected readonly graph: ArangoStore,
     readonly label = 'url',
   ) {}
 
@@ -46,13 +46,13 @@ export class UrlHierarchyBuilder {
   // can be passed in, but should use the `aql` template literal
   // function rather than raw strings.
   async loadPool<V>(filter?: GeneratedAqlQuery): Promise<void> {
-    const cursor = await this.storage.query(
+    const cursor = await this.graph.query(
       aql`
-        FOR uu in unique_urls
-          FILTER uu.parsed != null
-          FILTER uu.parsed.protocol IN ['http:', 'https:']
+        FOR item in unique_urls
+          FILTER item.parsed != null
+          FILTER item.parsed.protocol IN ['http:', 'https:']
           ${filter}
-          return uu`,
+          return item`,
     );
     await cursor.map(result => UniqueUrl.fromJSON(result as JsonObject))
       .then(urls => {
@@ -113,7 +113,7 @@ export class UrlHierarchyBuilder {
   }
 
   async save() {
-    await this.storage.push([
+    await this.graph.push([
       ...this.data.new,
       ...this.data.relationships,
     ]);

@@ -13,9 +13,7 @@ export interface ResourceData extends VerticeData {
 export interface SavedFile { bucket: string, filename: string };
 
 export class Resource extends Vertice {
-  get _collection() {
-    return 'resources';
-  }
+  readonly _collection = 'resources';
 
   url!: string;
   code!: number;
