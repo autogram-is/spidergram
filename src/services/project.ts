@@ -11,6 +11,8 @@ import {Config as ArangoConfig} from 'arangojs/connection';
 import * as dotenv from 'dotenv';
 
 import {ArangoStore} from './arango-store.js';
+import { UrlMutatorWithContext } from '../spider/index.js';
+import { NormalizedUrl, UrlMutators } from '@autogram/url-tools';
 
 dotenv.config();
 
@@ -79,6 +81,16 @@ export interface ProjectConfig {
     connection: ArangoConfig;
   };
 
+  /**
+	 * Settings for the project's default URL normalizer. These control
+   * which URLs will be considered duplicates of each other. File-based
+   * configuration of the project allows normalizer features to be turned
+   * on and off, but in code a custom function can be supplied that takes
+   * URL context (the page it appears on, etc) into account.
+	 *
+	 * @type {NormalizerOptions}
+	 */
+  normalizer: NormalizerOptions;
 
   /**
    * The local path of the project's configuration file, if one exists.
@@ -149,6 +161,7 @@ export class Project {
         ...options.files,
         ...projectConfigDefaults.files,
       },
+      normalizer: (options.normalizer ?? projectConfigDefaults.normalizer)
     };
   }
 
@@ -156,7 +169,14 @@ export class Project {
   readonly description?: string;
   readonly root: string;
 
+  get normalizer(): UrlMutatorWithContext {
+    return NormalizedUrl.normalizer;
+  }
   
+  set normalizer(input: UrlMutatorWithContext) {
+    NormalizedUrl.normalizer = input;
+  }
+
   get files() {
     return FileStore.disk.bind(FileStore);
   }
@@ -176,6 +196,8 @@ export class Project {
     this.name = configuration.name;
     this.description = configuration.description;
     this.root = configuration.root;
+  
+    this.normalizer = makeNormalizer(options.normalizer);
   }
 
   async saveConfig(path?: PathLike) {
@@ -219,4 +241,39 @@ export const projectConfigDefaults: ProjectConfig = {
       },
     },
   },
+  normalizer: {
+    forceProtocol: 'https:',
+    forceLowercase: 'host',
+    discardSubdomain: 'ww*',
+    discardAnchor: true,
+    discardAuth: true,
+    discardIndex: '**/{index,default}.{htm,html,aspx,php}',
+    discardSearch: '*',
+    discardTrailingSlash: false,
+  }
+}
+
+export interface NormalizerOptions {
+  forceProtocol?: 'https:' | 'http:' | false;
+  forceLowercase?: 'host' | 'domain' | 'subdomain' | 'href' | false;
+  discardSubdomain?: string | false;
+  discardAnchor?: boolean;
+  discardAuth?: boolean;
+  discardIndex?: string | false;
+  discardSearch?: string;
+  discardTrailingSlash?: boolean;
+}
+
+export function makeNormalizer(options: NormalizerOptions = {}): UrlMutatorWithContext {
+  return (url, context) => {
+    if (options.forceProtocol) url = UrlMutators.forceProtocol(url, options.forceProtocol);
+    if (options.forceLowercase) url[options.forceLowercase] = url[options.forceLowercase].toLocaleLowerCase();
+    if (options.discardSubdomain) url = UrlMutators.stripSubdomains(url, options.discardSubdomain);
+    if (options.discardAnchor) url = UrlMutators.stripAnchor(url);
+    if (options.discardAuth) url = UrlMutators.stripAuthentication(url);
+    if (options.discardIndex) url = UrlMutators.stripIndexPages(url, options.discardIndex);
+    if (options.discardSearch) url = UrlMutators.stripQueryParameters(url, options.discardSearch);
+    if (options.discardTrailingSlash) url = UrlMutators.stripTrailingSlash(url);
+    return url;
+  }
 }
