@@ -64,7 +64,7 @@ export default class Screenshot extends SpidergramCommand {
   async run() {
     const {project} = await this.getProjectContext();
     const {argv, flags} = await this.parse(Screenshot);
-    const storage = project.files(flags.storage);
+    const storage = project.files();
     storage.createDirectory(flags.directory);
 
     // build an array of Viewports to process
