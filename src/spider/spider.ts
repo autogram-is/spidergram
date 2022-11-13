@@ -92,6 +92,9 @@ export class Spider extends PlaywrightCrawler {
       ...(internal.postNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
     ];
 
+    crawler.failedRequestHandler = 
+      async (ctx: PlaywrightCrawlingContext, error: Error): Promise<void> => 
+      handlers.failureHandler(ctx as unknown as SpiderContext, error)
 
     super(crawler, config);
 
