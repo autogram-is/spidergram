@@ -17,13 +17,6 @@ export class IsChildOf<F extends Vertice = Resource, T extends Vertice = Resourc
     dataForSuper.to ??= parent;
 
     super(dataForSuper);
-
-    this.assignKey();
-  }
-
-  // Only one parent/child relationship per label.
-  protected override keySeed(): unknown {
-    return {from: this._from, to: this._to, label: this.label};
   }
 }
 

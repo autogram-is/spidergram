@@ -29,5 +29,14 @@ export abstract class Edge<F extends Vertice = Vertice, T extends Vertice = Vert
     if (to) {
       this._to = Vertice.idFromReference(to);
     }
+    this.assignKey();
+  }
+
+  protected override keySeed(): unknown {
+    return {
+      from: this._from,
+      label: this.label,
+      to: this._to
+    };
   }
 }

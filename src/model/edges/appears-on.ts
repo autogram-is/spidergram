@@ -3,7 +3,6 @@ import {Edge, EdgeData, Vertice, Reference, Resource} from '../index.js';
 export interface AppearsOnData<F extends Vertice = Vertice, T extends Vertice = Resource> extends EdgeData<F, T> {
   item?: Reference<F>;
   location?: Reference<T>;
-  label?: string;
 };
 
 export class AppearsOn<F extends Vertice = Vertice, T extends Vertice = Resource> extends Edge<F, T> {

@@ -9,7 +9,7 @@ export class IsVariantOf<F extends Vertice = Resource, T extends Vertice = Resou
   readonly _collection = 'is_variant_of';
 
   constructor(data: IsVariantOfData<F, T> = {}) {
-    const {variant, original, label, ...dataForSuper} = data;
+    const {variant, original, ...dataForSuper} = data;
 
     dataForSuper.from ??= variant;
     dataForSuper.to ??= original;

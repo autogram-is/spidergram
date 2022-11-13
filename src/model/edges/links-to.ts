@@ -6,7 +6,7 @@ export interface LinksToData<F extends Vertice = Resource, T extends Vertice = U
 };
 
 export class LinksTo<F extends Vertice = Resource, T extends Vertice = Resource> extends Edge<F, T> {
-  readonly _collection  ='links_to';
+  readonly _collection = 'links_to';
 
   constructor(data: LinksToData<F, T> = {}) {
     const {url, resource, ...dataForSuper} = data;
@@ -15,6 +15,11 @@ export class LinksTo<F extends Vertice = Resource, T extends Vertice = Resource>
     dataForSuper.to ??= url;
 
     super(dataForSuper);
+    this.assignKey();
+  }
+
+  protected override keySeed(): unknown {
+    return null;
   }
 }
 
