@@ -1,4 +1,4 @@
-import { Page } from "playwright";
+import { Page, PageScreenshotOptions } from "playwright";
 import { Project } from "../index.js";
 import is from '@sindresorhus/is';
 import filenamify from "filenamify";
@@ -42,37 +42,31 @@ export class ScreenshotTool {
 
   static async capture(page: Page, options: ScreenshotOptions = {}) {
     let { storage, directory, viewports, orientation, selectors, fullPage, type } = options;
-    
-    storage ??= await Project.config().then(project => project.files())
+    storage ??= await Project.config().then(project => project.files());
     directory ??= 'screenshots';
     selectors ??= [];
-    fullPage ??= true;
     type ??= 'jpeg';
+    storage!.createDirectory(directory);
 
-    storage!.createDirectory(directory ?? '');
     const materializedViewports = this.expandViewports(viewports, orientation);
-
     for (let v in materializedViewports) {
       await page.setViewportSize(materializedViewports[v]);
+      let options:PageScreenshotOptions = { type, fullPage, scale: 'css' };
 
       if (is.undefined(selectors) || is.emptyArray(selectors)) {
-        await page.screenshot({
-          fullPage,
-          type,
-          scale: 'css',
-        })
-        .then(buffer => storage!.writeStream(
-          `${directory}/${this.getFilename(page.url(), v)}`,
-          Readable.from(buffer)
-        ));
+        if (!fullPage) {
+          options.clip = { x: 0, y: 0, ...materializedViewports[v] }
+        }
+        await page.screenshot(options)
+          .then(buffer => storage!.writeStream(
+            `${directory}/${this.getFilename(page.url(), v)}`,
+            Readable.from(buffer)
+          ));
       } else {
         for (let selector in selectors) {
           const locator = page.locator(selector);
           await locator.scrollIntoViewIfNeeded();
-          await locator.screenshot({
-            type,
-            scale: 'css',
-          })
+          await locator.screenshot(options)
           .then(buffer => storage!.writeStream(
             `${directory}/${this.getFilename(page.url(), v, selector)}`,
             Readable.from(buffer)
