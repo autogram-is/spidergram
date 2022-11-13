@@ -6,6 +6,7 @@ import humanizeUrl from "humanize-url";
 import {Readable} from 'node:stream';
 import {TDiskDriver} from "typefs";
 import arrify from "arrify";
+import { AsyncEventEmitter } from "@vladfrangu/async_event_emitter";
 
 export interface Viewport {
   width: number,
@@ -28,9 +29,7 @@ export interface ScreenshotOptions {
   fullPage?: boolean,
 }
 
-export class ScreenshotTool {
-  private constructor() {}
-
+export class ScreenshotTool extends AsyncEventEmitter {
   // Since this exists as a global const, new presets can
   // be added and removed at will. Knock yourself out.
   static ViewportPresets: Record<string, Viewport> = {
@@ -40,56 +39,65 @@ export class ScreenshotTool {
     fhd: { width: 1920, height: 1080 }
   }
 
-  static async capture(page: Page, options: ScreenshotOptions = {}) {
+  eventNames(): (string | number | symbol)[] {
+    return ['capture', 'error'];
+  }
+
+  async capture(page: Page, options: ScreenshotOptions = {}) {
     let { storage, directory, viewports, orientation, selectors, fullPage, type } = options;
     storage ??= await Project.config().then(project => project.files());
     directory ??= 'screenshots';
     selectors ??= [];
     type ??= 'jpeg';
-    storage!.createDirectory(directory);
+    
+    const results: string[] = [];
 
     const materializedViewports = this.expandViewports(viewports, orientation);
     for (let v in materializedViewports) {
       await page.setViewportSize(materializedViewports[v]);
       let options:PageScreenshotOptions = { type, fullPage, scale: 'css' };
-
+      
       if (is.undefined(selectors) || is.emptyArray(selectors)) {
+        const filename = `${directory}/${this.getFilename(page.url(), v, undefined, fullPage)}.${type}`;
         if (!fullPage) {
           options.clip = { x: 0, y: 0, ...materializedViewports[v] }
         }
-        await page.screenshot(options)
-          .then(buffer => storage!.writeStream(
-            `${directory}/${this.getFilename(page.url(), v)}`,
-            Readable.from(buffer)
-          ));
+
+        const buffer = await page.screenshot(options);
+        await storage!.writeStream(filename, Readable.from(buffer));
+        this.emit('capture', filename);
+        results.push(filename);
       } else {
         for (let selector in selectors) {
+          const filename = `${directory}/${this.getFilename(page.url(), v, selector, fullPage)}.${type}`;
           const locator = page.locator(selector);
-          await locator.scrollIntoViewIfNeeded();
-          await locator.screenshot(options)
-          .then(buffer => storage!.writeStream(
-            `${directory}/${this.getFilename(page.url(), v, selector)}`,
-            Readable.from(buffer)
-          ));
+          
+          await page.locator(selector).scrollIntoViewIfNeeded();
+          const buffer = await locator.screenshot(options);
+          await storage!.writeStream(filename, Readable.from(buffer));
+          this.emit('capture', filename);
+          results.push(filename);
         }  
       }
     }
+
+    return Promise.resolve(results);
   }
   
-  static presetsToViewports(input: string | string[]): Record<string, Viewport> {
+  presetsToViewports(input: string | string[]): Record<string, Viewport> {
     let results: Record<string, Viewport> = {};
     for (let k of arrify(input)) {
       if (k === 'all') {
         results = {
           ...results,
-          ...this.ViewportPresets
+          ...ScreenshotTool.ViewportPresets
         }
-      } else if (k in this.ViewportPresets) {
-        results[k] = this.ViewportPresets[k];
+      } else if (k in ScreenshotTool.ViewportPresets) {
+        results[k] = ScreenshotTool.ViewportPresets[k];
       } else {
         const components = k.match(/(\d+)[x,](\d+)/);
         if (components === null) {
-          results.hd = this.ViewportPresets.hd;
+          results.hd = ScreenshotTool.ViewportPresets.hd;
         }
         else {
           results[k] = {
@@ -102,31 +110,34 @@ export class ScreenshotTool {
     return results;
   }
   
-  static isPortrait(input: Viewport): boolean {
+  isPortrait(input: Viewport): boolean {
     return (input.height > input.width);
   }
   
-  static rotateViewport(input: Viewport): Viewport {
+  rotateViewport(input: Viewport): Viewport {
     return { width: input.height, height: input.width };
   }
   
-  static forcePortrait(input: Viewport): Viewport {
+  forcePortrait(input: Viewport): Viewport {
     return this.isPortrait(input) ? input : this.rotateViewport(input);
   }
   
-  static forceLandscape(input: Viewport): Viewport {
+  forceLandscape(input: Viewport): Viewport {
     return this.isPortrait(input) ? this.rotateViewport(input) : input;
   }
 
-  static getFilename(url: string, viewport: string, selector?: string) {
-    const components = [humanizeUrl(url), viewport, selector];
-    return filenamify(components.join('.'), { replacement: '-'});
+  // In theory, we could use this for subdirectories in addition to long filenames.
+  getFilename(url: string, viewport: string, selector?: string, infinite = false) {
+    const components = [humanizeUrl(url), viewport];
+    if (selector) components.push(selector);
+    if (infinite) components.push('cropped');
+    return filenamify(components.join('-'), { replacement: '-'}).replace('--', '-');
   }
   
-  static expandViewports(names?: string | string[], orientation?: string): Record<string, Viewport> {
+  expandViewports(names?: string | string[], orientation?: string): Record<string, Viewport> {
     const output:Record<string, Viewport> = {}
     const presets = (is.undefined(names)) ?
-      { hd: this.ViewportPresets.hd } :
+      { hd: ScreenshotTool.ViewportPresets.hd } :
       this.presetsToViewports(names);
   
     for (let p in presets) {
