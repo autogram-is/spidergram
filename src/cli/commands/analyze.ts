@@ -56,6 +56,7 @@ export default class Analyze extends SpidergramCommand {
           }
           if (flags.readability) {
             resource.readability = TextTools.calculateReadability(text);
+            resource.nl = TextTools.getReadingStats(text);
           }
 
           await graph.push(resource);

@@ -1,5 +1,8 @@
-import nlp from 'compromise';
 import readabilityScores from 'readability-scores';
+import winkNLP from 'wink-nlp';
+import model from 'wink-eng-lite-web-model';
+
+let nlp: ReturnType<typeof winkNLP> | undefined;
 
 export function oxfordJoin(input: string[], conjunction = 'and'): string {
   if (input.length === 2) {
@@ -13,6 +16,18 @@ export function oxfordJoin(input: string[], conjunction = 'and'): string {
   }
 }
 
-export const buildSemanticModel = nlp;
+export function getSentiment(input: string) {
+  if (nlp === undefined) {
+    nlp = winkNLP(model);
+  }
+  return nlp.readDoc(input).out(nlp.its.sentiment);
+}
+
+export function getReadingStats(input: string) {
+  if (nlp === undefined) {
+    nlp = winkNLP(model);
+  }
+  return nlp.readDoc(input).out(nlp.its.readabilityStats);
+}
 
 export const calculateReadability = readabilityScores;
