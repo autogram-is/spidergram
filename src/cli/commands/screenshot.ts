@@ -79,7 +79,7 @@ export default class Screenshot extends SpidergramCommand {
       urls = urls.map(url => protocolify(url));
     }
 
-    const options:ScreenshotOptions = {
+    const options:Partial<ScreenshotOptions> = {
       storage: project.files('storage'),
       directory: flags.directory,
       viewports: [flags.viewport],
