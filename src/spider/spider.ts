@@ -183,7 +183,7 @@ export class Spider extends PlaywrightCrawler {
     log.setLevel(this.spiderOptions.logLevel);
 
     // Normalize and deduplicate any incoming requests.
-    const uniques = new UniqueUrlSet(undefined, undefined, this.spiderOptions.urlOptions.normalizer);
+    const uniques = new UniqueUrlSet();
     for (const value of requests) {
       if (is.string(value)) {
         // We assume these are at least somewhat web-url-like if they're passed in,

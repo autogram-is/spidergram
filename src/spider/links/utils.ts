@@ -1,5 +1,5 @@
 import {RequestQueue, EnqueueStrategy, RequestTransform} from 'crawlee';
-import {NormalizedUrl, ParsedUrl} from '@autogram/url-tools';
+import {ParsedUrl} from '@autogram/url-tools';
 import {InternalSpiderContext, SpiderContext} from '../../index.js';
 import {FilterInput} from './index.js';
 
@@ -86,27 +86,6 @@ export interface EnqueueUrlOptions {
   skipNonWebLinks: boolean;
 
   /**
-   * A {@apilink UrlMutatorWithContext} function to modify found URLs before
-   * de-duplication. If none is supplied the default normalizer will:
-   *
-   * 1. Lowercase the URL's hostname (but not its path)
-   * 2. Force 'http' links to 'https'
-   * 3. Strip URL authentication e.g. `https://user@password:example.com`
-   * 4. Strip port numbers e.g `https://example.com:3000`
-   * 5. Strip anchors/url hashes e.g. `https://example.com/about#top`
-   * 6. Strip common index pages (index.html, index.php, default.aspx)
-   * 7. Strip `www` subdomains (www, www1, www2, etc…)
-   * 8. Strip all search/query parameters e.g. `https://example.com/search?s=test`
-   *
-   * *NOTE:* The normalizer controls which URLs are seen as duplicates and thus
-   * ignored when saving and enqueueing; changing the normalizer mid-project may
-   * cause duplication of crawl data.
-   *
-   * @type {UrlMutatorWithContext}
-   */
-  normalizer: UrlMutatorWithContext;
-
-  /**
    * A function to modify the {@apilink Request} object before a link is
    * enqueued for crawling.
    *
@@ -166,7 +145,6 @@ const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
   skipAnchors: true,
   skipNonWebLinks: false,
   skipUnparsableLinks: false,
-  normalizer: NormalizedUrl.normalizer,
 };
 
 export type AnchorTagData = {

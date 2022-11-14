@@ -25,7 +25,6 @@ export async function save(
       base: uniqueUrl?.url,
       referer: uniqueUrl?.url,
       depth: (uniqueUrl === undefined) ? 0 : uniqueUrl.depth + 1,
-      normalizer: options.normalizer,
     });
 
     // Run each URL through a few gauntlets
