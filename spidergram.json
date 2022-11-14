@@ -1,22 +1,22 @@
 {
   "name": "spidergram",
-  "root": "/Users/jeff/Work/spidergram",
+  "root": "./",
   "files": {
     "default": "storage",
     "disks": {
       "config": {
         "driver": "file",
-        "root": "/Users/jeff/Work/spidergram/config",
+        "root": "./config",
         "jail": true
       },
       "storage": {
         "driver": "file",
-        "root": "/Users/jeff/Work/spidergram/storage",
+        "root": "./storage",
         "jail": true
       },
       "output": {
         "driver": "file",
-        "root": "/Users/jeff/Work/spidergram/output",
+        "root": "./output",
         "jail": true
       }
     }
@@ -29,5 +29,15 @@
         "password": ""
       }
     }
+  },
+  "normalizer": {
+    "forceProtocol": "https:",
+    "forceLowercase": "host",
+    "discardSubdomain": "ww*",
+    "discardAnchor": true,
+    "discardAuth": true,
+    "discardIndex": "**/{index,default}.{htm,html,aspx,php}",
+    "discardSearch": "*",
+    "discardTrailingSlash": false
   }
 }

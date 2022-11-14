@@ -166,7 +166,7 @@ const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
   skipAnchors: true,
   skipNonWebLinks: false,
   skipUnparsableLinks: false,
-  normalizer: (url, context) => NormalizedUrl.normalizer(url),
+  normalizer: NormalizedUrl.normalizer,
 };
 
 export type AnchorTagData = {
