@@ -132,6 +132,7 @@ export class Spider extends PlaywrightCrawler {
     this.progress.requestsByStatus[status] ??= 0;
     this.progress.requestsByType[type] ??= 0;
 
+    
     this.progress.requestsByHost[host]++;
     this.progress.requestsByLabel[label]++;
     this.progress.requestsByStatus[status]++;

@@ -1,8 +1,11 @@
-import {RespondsWith, Resource} from '../../index.js';
+import {RespondsWith, Resource, Project} from '../../index.js';
 import {SpiderContext} from '../context.js';
 
 export async function failureHandler(context: SpiderContext, error: Error) {
-  const {graph, request} = context;
+  const {request} = context;
+
+  const graph = await Project.config().then(project => project.graph());
+
   const rs = new Resource({
     url: request.loadedUrl ?? request.url,
     code: -1,
