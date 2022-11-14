@@ -11,8 +11,7 @@ import {Config as ArangoConfig} from 'arangojs/connection';
 import * as dotenv from 'dotenv';
 
 import {ArangoStore} from './arango-store.js';
-import { UrlMutatorWithContext } from '../spider/index.js';
-import { NormalizedUrl, UrlMutators } from '@autogram/url-tools';
+import { NormalizedUrl, ParsedUrl, UrlMutators } from '@autogram/url-tools';
 
 dotenv.config();
 
@@ -104,6 +103,7 @@ export interface ProjectConfig {
 
 export class Project {
   private static _instance?: Project;
+  static normalizerOptions: NormalizerOptions = {};
 
   static get defaultConfigFilePath(): string {
     return process.env.SPIDERGRAM_CONFIG_FILE
@@ -169,14 +169,6 @@ export class Project {
   readonly description?: string;
   readonly root: string;
 
-  get normalizer(): UrlMutatorWithContext {
-    return NormalizedUrl.normalizer;
-  }
-  
-  set normalizer(input: UrlMutatorWithContext) {
-    NormalizedUrl.normalizer = input;
-  }
-
   get files() {
     return FileStore.disk.bind(FileStore);
   }
@@ -197,7 +189,8 @@ export class Project {
     this.description = configuration.description;
     this.root = configuration.root;
   
-    this.normalizer = makeNormalizer(options.normalizer);
+    Project.normalizerOptions = this.configuration.normalizer;
+    NormalizedUrl.normalizer = url => parameterizedNormalizer(url, Project.normalizerOptions);
   }
 
   async saveConfig(path?: PathLike) {
@@ -264,16 +257,17 @@ export interface NormalizerOptions {
   discardTrailingSlash?: boolean;
 }
 
-export function makeNormalizer(options: NormalizerOptions = {}): UrlMutatorWithContext {
-  return (url, context) => {
-    if (options.forceProtocol) url = UrlMutators.forceProtocol(url, options.forceProtocol);
-    if (options.forceLowercase) url[options.forceLowercase] = url[options.forceLowercase].toLocaleLowerCase();
-    if (options.discardSubdomain) url = UrlMutators.stripSubdomains(url, options.discardSubdomain);
-    if (options.discardAnchor) url = UrlMutators.stripAnchor(url);
-    if (options.discardAuth) url = UrlMutators.stripAuthentication(url);
-    if (options.discardIndex) url = UrlMutators.stripIndexPages(url, options.discardIndex);
-    if (options.discardSearch) url = UrlMutators.stripQueryParameters(url, options.discardSearch);
-    if (options.discardTrailingSlash) url = UrlMutators.stripTrailingSlash(url);
+export function parameterizedNormalizer(
+  url: ParsedUrl,
+  opts = Project.normalizerOptions
+): ParsedUrl {
+    if (opts.forceProtocol) UrlMutators.forceProtocol(url, opts.forceProtocol);
+    if (opts.forceLowercase) url[opts.forceLowercase] = url[opts.forceLowercase].toLocaleLowerCase();
+    if (opts.discardSubdomain) UrlMutators.stripSubdomains(url, opts.discardSubdomain);
+    if (opts.discardAnchor) UrlMutators.stripAnchor(url);
+    if (opts.discardAuth) UrlMutators.stripAuthentication(url);
+    if (opts.discardIndex) UrlMutators.stripIndexPages(url, opts.discardIndex);
+    if (opts.discardSearch) UrlMutators.stripQueryParameters(url, opts.discardSearch);
+    if (opts.discardTrailingSlash) UrlMutators.stripTrailingSlash(url);
     return url;
-  }
 }
