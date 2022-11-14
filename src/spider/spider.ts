@@ -28,8 +28,8 @@ import {
   SpiderContext,
   SpiderStatistics,
   buildSpiderOptions,
-  hooks,
   handlers,
+  helpers,
   contextualizeHandler,
   contextualizeHook,
   uniqueUrlToRequest,
@@ -82,8 +82,6 @@ export class Spider extends PlaywrightCrawler {
     crawler.requestHandler = router;
 
     crawler.preNavigationHooks = [
-      contextualizeHook(hooks.contextBuilder),
-      contextualizeHook(hooks.defaultRouter),
       ...(internal.preNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
     ];
 
@@ -104,6 +102,13 @@ export class Spider extends PlaywrightCrawler {
     this._events = new AsyncEventEmitter();
     //this.events.on(EventType.SYSTEM_INFO, ({event, ...args}) => this.emit(event, ...args));
   }
+
+  protected override async _runRequestHandler(context: PlaywrightCrawlingContext) {
+    await helpers.enhanceSpiderContext(context as SpiderContext);
+    await helpers.requestPrecheck(context as SpiderContext);
+    await super._runRequestHandler(context);
+  }
+
 
   on(event: SpiderEventName, listener: (...args: any[]) => any): void {
     this._events.on(event, listener);
@@ -160,14 +165,6 @@ export class Spider extends PlaywrightCrawler {
     super._cleanupContext(context as PlaywrightCrawlingContext);
   }
 
-  /**
-   * Description placeholder
-   *
-   * @override
-   * @async
-   * @param {(RequestValue | RequestValue[])} [requests=[]]
-   * @param {?CrawlerAddRequestsOptions} [options]
-   */
   override async run(
     requests: RequestValue | RequestValue[] = [],
     options?: CrawlerAddRequestsOptions,
@@ -218,7 +215,6 @@ function splitOptions(
   const {
     projectConfig,
     logLevel,
-    defaultRouter,
     pageHandler,
     requestHandlers,
     urlOptions,

@@ -1,18 +1,12 @@
-import {PlaywrightGotoOptions} from 'crawlee';
 import {Spider, SpiderContext} from '../index.js';
 import {Project, UniqueUrl} from '../../index.js';
 import {helpers} from '../index.js';
 import * as urls from '../links/index.js';
-import is from '@sindresorhus/is';
 
-export async function contextBuilder(context: SpiderContext, options?: PlaywrightGotoOptions): Promise<void> {
+export async function enhanceSpiderContext(context: SpiderContext): Promise<void> {
   const crawler = context.crawler as Spider;
   const project = await Project.config(context.projectConfig);
   
-  if (options && is.string(context.request.userData.referer)) {
-    options.referer = context.request.userData.referer;
-  }
-
   // Map our 'contextualized' functions to the context object
   Object.assign(context, {
     prefetchRequest: async () => helpers.prefetchRequest(context),
