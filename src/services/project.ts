@@ -134,7 +134,7 @@ export class Project {
         const loadedOptions = await Project.loadConfig(config);
         if (loadedOptions !== false) {
           configFilePath = config.toString();
-          populatedConfig = Project.mergeDefaults(incomingOptions);
+          populatedConfig = Project.mergeDefaults(loadedOptions);
         } else {
           populatedConfig = projectConfigDefaults;
         }
