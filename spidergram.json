@@ -2,21 +2,21 @@
   "name": "spidergram",
   "root": "./",
   "files": {
-    "default": "storage",
+    "default": "downloads",
     "disks": {
       "config": {
         "driver": "file",
-        "root": "./config",
+        "root": "./storage/config",
         "jail": true
       },
-      "storage": {
+      "downloads": {
         "driver": "file",
-        "root": "./storage",
+        "root": "./storage/downloads",
         "jail": true
       },
       "output": {
         "driver": "file",
-        "root": "./output",
+        "root": "./storage/output",
         "jail": true
       }
     }

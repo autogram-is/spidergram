@@ -4,7 +4,7 @@ import {
   HtmlTools,
   TextTools,
   VerticeWorker,
-  WorkerStatus
+  WorkerStatus,
 } from '../../index.js';
 import { CLI, SpidergramCommand } from '../index.js';
 
@@ -56,7 +56,7 @@ export default class Analyze extends SpidergramCommand {
           }
           if (flags.readability) {
             resource.readability = TextTools.calculateReadability(text);
-            resource.nl = TextTools.getReadingStats(text);
+            //resource.nl = TextTools.getReadingStats(text);
           }
 
           await graph.push(resource);
@@ -65,7 +65,7 @@ export default class Analyze extends SpidergramCommand {
     });
 
     this.ux.info('Analyzing saved pages...');
-    const progress = new CLI.progress.Bar({hideCursor: true}, CLI.progress.Presets.shades_grey);
+    const progress = new CLI.progress.Bar({}, CLI.progress.Presets.shades_grey);
 
     // If we're in 'verbose' mode, we'll be logging to screen rather than summarizing status.
     if (flags.verbose) {

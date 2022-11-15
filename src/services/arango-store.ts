@@ -144,7 +144,7 @@ export class ArangoStore {
    * Convenience wrappers for saving and deleting Spidergram Entities
    */
 
-  async push(input: Vertice | Vertice[], overwrite = true): Promise<DocumentMetadata[]> {
+  async push(input: Vertice | Vertice[], overwrite = true): Promise<PromiseSettledResult<DocumentMetadata>[]> {
     const promises: Array<Promise<DocumentMetadata>> = [];
     const overwriteMode = (overwrite) ? 'replace' : 'ignore';
     input = arrify(input);
@@ -165,7 +165,7 @@ export class ArangoStore {
       }
     }
 
-    return Promise.all(promises);
+    return Promise.allSettled(promises)
   }
 
   async delete(input: Vertice | Vertice[]) {

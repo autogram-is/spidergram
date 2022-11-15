@@ -1,8 +1,7 @@
-import {PlaywrightGotoOptions} from 'crawlee';
 import {SpiderContext} from '../context.js';
 import {helpers} from '../index.js';
 
-export async function defaultRouter(context: SpiderContext, options: PlaywrightGotoOptions): Promise<void> {
+export async function requestPrecheck(context: SpiderContext): Promise<void> {
   const {log, request, uniqueUrl, prefetchRequest, downloadMimeTypes, parseMimeTypes} = context;
   
   // prefetchRequest also sticks requestMeta into the crawl context,

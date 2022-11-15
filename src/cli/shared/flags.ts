@@ -122,8 +122,7 @@ export const crawlFlags = {
   }),
   download: Flags.string({
     aliases: ['dl'],
-    multiple: true,
-    summary: 'MIME types to download if encountered',
+    summary: 'MIME type to download if encountered',
   }),
   concurrency: Flags.integer({
     default: 1,
