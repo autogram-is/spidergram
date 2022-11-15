@@ -1,6 +1,6 @@
 import { ParsedUrl } from '@autogram/url-tools';
 import is from '@sindresorhus/is';
-import {Vertice, VerticeData, Expose} from './vertice.js';
+import {Vertice, VerticeData, Expose, Transform} from './vertice.js';
 
 export interface ResourceData extends VerticeData {
   url?: string | URL;
@@ -48,6 +48,13 @@ export class Resource extends Vertice {
   }
 
   @Expose()
+  @Transform((transformation) => {
+    if (transformation.type === 1) {
+      return transformation.value ? (transformation.value as ParsedUrl).properties : undefined;
+    } else { 
+      return transformation;
+    }
+  })
   get parsed() {
     return new ParsedUrl(this.url);
   }
