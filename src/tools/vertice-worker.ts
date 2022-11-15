@@ -69,11 +69,13 @@ export class VerticeWorker<T extends Vertice = Vertice> extends EventEmitter {
         return item
       `;
 
-      return graph.query<JsonObject>(query, {count: true})
+      return graph.query<JsonObject>(query, {count: true, batchSize: 10})
         .then(async cursor => {
           this.status.total = cursor.count ?? 0;
-          for await (const item of cursor) {
-            await this.performTask(Vertice.fromJSON(item) as T, workerOptions.task!);
+          for await (const batch of cursor.batches) {
+            await Promise.all(batch.map(
+              value => this.performTask(Vertice.fromJSON(value) as T, workerOptions.task!)
+            ));
           }
         })
         .then(() => {
