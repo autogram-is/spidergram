@@ -58,10 +58,10 @@ export default class Crawl extends SpidergramCommand {
     }
 
     const spider = new Spider({
-      logLevel: flags.verbose ? LogLevel.INFO : LogLevel.OFF,
+      logLevel: flags.verbose ? LogLevel.DEBUG : LogLevel.OFF,
       maxConcurrency: flags.concurrency,
       maxRequestsPerMinute: flags.rate,
-      downloadMimeTypes: flags.download,
+      downloadMimeTypes: [flags.download ?? ''],
       async pageHandler(context) {
         const {$, saveResource, enqueueUrls} = context;
 
@@ -82,7 +82,7 @@ export default class Crawl extends SpidergramCommand {
 
 
     this.ux.info('Crawling...');
-    const progress = new CLI.progress.Bar({hideCursor: true}, CLI.progress.Presets.shades_grey);
+    const progress = new CLI.progress.Bar({}, CLI.progress.Presets.shades_grey);
 
     // If we're in 'verbose' mode, we'll be logging to screen rather than summarizing status.
     if (!flags.verbose) {

@@ -206,21 +206,21 @@ export const projectConfigDefaults: ProjectConfig = {
   name: 'spidergram',
   root: process.env.SPIDERGRAM_PROJECT_ROOT ?? process.cwd(),
   files: {
-    default: 'storage',
+    default: 'downloads',
     disks: {
       config: {
         driver: 'file',
-        root: path.join(process.env.SPIDERGRAM_PROJECT_ROOT ?? process.cwd(), 'config'),
+        root: path.join(process.env.SPIDERGRAM_PROJECT_ROOT ?? process.cwd(), './storage/config'),
         jail: true,
       },
-      storage: {
+      downloads: {
         driver: 'file',
-        root: path.join(process.env.SPIDERGRAM_PROJECT_ROOT ?? process.cwd(), 'storage'),
+        root: path.join(process.env.SPIDERGRAM_PROJECT_ROOT ?? process.cwd(), './storage/downloads'),
         jail: true,
       },
       output: {
         driver: 'file',
-        root: path.join(process.env.SPIDERGRAM_PROJECT_ROOT ?? process.cwd(), 'output'),
+        root: path.join(process.env.SPIDERGRAM_PROJECT_ROOT ?? process.cwd(), './storage/output'),
         jail: true,
       },
     },

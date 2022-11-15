@@ -1,7 +1,7 @@
 import {Dictionary, LogLevel, PlaywrightCrawlerOptions} from 'crawlee';
 import {ProjectConfig, projectConfigDefaults} from '../index.js';
 import { mimeGroups } from './helpers/mime.js';
-import {SpiderHook, defaultRouter} from './hooks/index.js';
+import {SpiderHook} from './hooks/index.js';
 import {EnqueueUrlOptions} from './links/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';
 
@@ -33,22 +33,6 @@ export interface InternalSpiderOptions extends Dictionary {
    */
   logLevel: LogLevel;
 
-  /**
-   * A function to evaluate and modify request objects before
-   * they're crawled. The default router prefetches URL headers and
-   * evaluates the resulting MIME type and response code, then applies
-   * one of the following labels to the request:
-   *
-   * `page`: Successful HTML responses
-   * `status`: 4xx and 5xx response codes
-   * `download`: Mime types present in the `downloadMimeTypes` option
-   *
-   * These labels are used to map the request to a given requestHandler;
-   * a custom router can override this behavior and use different labels.
-   *
-   * @type {SpiderHook}
-   */
-  requestRouter?: SpiderHook;
 
   /**
    * A function to process a successfully loaded page view. If none is
@@ -165,7 +149,6 @@ export function buildSpiderOptions(
 const defaultSpiderOptions: InternalSpiderOptions = {
   projectConfig: projectConfigDefaults,
   logLevel: LogLevel.INFO,
-  requestRouter: defaultRouter,
   preNavigationHooks: [],
   postNavigationHooks: [],
   pageHandler: undefined,
