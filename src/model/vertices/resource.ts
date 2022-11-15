@@ -1,5 +1,6 @@
+import { ParsedUrl } from '@autogram/url-tools';
 import is from '@sindresorhus/is';
-import {Vertice, VerticeData} from './vertice.js';
+import {Vertice, VerticeData, Expose} from './vertice.js';
 
 export interface ResourceData extends VerticeData {
   url?: string | URL;
@@ -23,7 +24,7 @@ export class Resource extends Vertice {
   files!: SavedFile[];
 
   constructor(data: ResourceData = {}) {
-    const {url, code, message, headers, body, files, ...dataForSuper} = data;
+    const {url, parsed, code, message, headers, body, files, ...dataForSuper} = data;
     super(dataForSuper);
 
     // Flatten the URL to a string
@@ -44,6 +45,11 @@ export class Resource extends Vertice {
     this.files = files ?? [];
 
     this.assignKey();
+  }
+
+  @Expose()
+  get parsed() {
+    return new ParsedUrl(this.url);
   }
 
   protected override keySeed(): unknown {

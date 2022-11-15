@@ -13,7 +13,7 @@ import {
 import {JsonObject} from 'type-fest';
 import {Uuid, UuidFactory} from '../helpers/uuid.js';
 
-export {Transform, Exclude} from 'class-transformer';
+export {Transform, Exclude, Expose} from 'class-transformer';
 export type Reference<T extends Vertice = Vertice> = T | [ string, Uuid ] | string;
 export interface VerticeData {
   [keyof: string]: unknown,
