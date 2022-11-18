@@ -1,5 +1,6 @@
 import { Project, ArangoStore, CLI } from '../index.js'
 import { CliUx, Command, Interfaces } from '@oclif/core';
+import is from '@sindresorhus/is';
 
 /**
  * A base command that provided common functionality for all Spidergram commands.
@@ -36,23 +37,30 @@ export abstract class SpidergramCommand extends Command {
   }
 
   async getProjectContext(returnErrors = false) {
-    const promise = this.parse(this.constructor as Interfaces.Command.Class)
-      .then(({flags}) => Project.config(flags?.config ?? undefined));
-
     const errors: Error[] = [];
-    const project = await promise
-      .catch(error => { errors.push(error); return undefined as unknown as Project; });
+    let project = {} as unknown as Project;
+    let graph = {} as unknown as ArangoStore;
 
-    const graph = await project?.graph()
-      .catch(error => { errors.push(error as Error); return undefined as unknown as ArangoStore; });
+    try {
+      const {flags, argv} = await this.parse(this.constructor as typeof SpidergramCommand);
+      console.log(argv);
+      console.log(flags);
+      const _configFilePath = is.string(flags.config) ? flags.config : undefined;
+      project = await Project.config({ _configFilePath });
+      graph = await project.graph();
+    } catch(error: unknown) {
+      if (is.error(error)) {
+        errors.push(error);
 
-    if (errors.length > 0 && !returnErrors) {
-      for (let error of errors) this.ux.error(error);
+        if (errors.length > 0 && !returnErrors) {
+          for (let error of errors) this.ux.error(error);
+        }
+      }
     }
     
     return {
-      project: project,
-      graph: graph,
+      project,
+      graph,
       errors
     }
   }

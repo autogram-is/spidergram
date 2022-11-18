@@ -18,7 +18,7 @@ export default class Init extends SpidergramCommand {
 
   async run() {
     const {project} = await this.getProjectContext();
-    const path = project.configuration._configFilePath ?? Project.defaultConfigFilePath;
+    const path = project.configuration._configFilePath ?? Project.defaultConfigPath;
 
     this.ux.styledHeader('Project options:');
 

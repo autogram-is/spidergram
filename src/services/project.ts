@@ -2,9 +2,8 @@ import process from 'node:process';
 import path from 'node:path';
 import { PathLike } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
-
-import {PartialDeep} from 'type-fest';
 import is from '@sindresorhus/is';
+import _ from 'lodash';
 
 import {Storage as FileStore, Configuration as FileConfiguration} from 'typefs';
 import {Config as ArangoConfig} from 'arangojs/connection';
@@ -105,64 +104,41 @@ export class Project {
   private static _instance?: Project;
   static normalizerOptions: NormalizerOptions = {};
 
-  static get defaultConfigFilePath(): string {
+  static get defaultConfigPath(): string {
     return process.env.SPIDERGRAM_CONFIG_FILE
       ?? path.join(process.env.SPIDERGRAM_PROJECT_ROOT ?? process.cwd(), 'spidergram.json');
   }
 
-  static async loadConfig(path: PathLike): Promise<PartialDeep<ProjectConfig> | false> {
+  // This does NOT attempt to validate config data or populate defaults;
+  // If the file was read successfully, its pathname will be saved in the
+  // _configFilePath property and thus that property's absence can be used
+  // as a signal that the config file either doesn't exist or is malformed.
+  static async loadConfigFile(path: PathLike): Promise<Partial<ProjectConfig>> {
     return readFile(path, { flag: 'r' })
       .then(buffer => {
         const results = JSON.parse(buffer.toString());
         results._configFilePath = path.toString();
         return results;
       })
-      .catch((error: unknown) => false);
+      .catch((error: unknown) => {});
   }
 
-  static async config(
-    config?: PathLike | PartialDeep<ProjectConfig>,
-  ): Promise<Project> {
+  // Takes an options object and recursively populates its UNSET options with
+  // default settings. If a key is set but its value is undefined, the default
+  // value WILL NOT overwrite it.
+  static async config(options: Partial<ProjectConfig> = {}): Promise<Project> {
     if (Project._instance === undefined) {
-      config ??= Project.defaultConfigFilePath;
-      let populatedConfig: ProjectConfig | undefined = undefined;
-      let incomingOptions: PartialDeep<ProjectConfig> = {};
-      let configFilePath: string | undefined = undefined;
-
-      // Is it a PathLike? We're getting the location of a config file.
-      if (is.string(config) || is.urlInstance(config) || is.buffer(config)) {
-        const loadedOptions = await Project.loadConfig(config);
-        if (loadedOptions !== false) {
-          configFilePath = config.toString();
-          populatedConfig = Project.mergeDefaults(loadedOptions);
-        } else {
-          populatedConfig = projectConfigDefaults;
-        }
+      let fileConfig: Partial<ProjectConfig> = {};
+      if (is.nonEmptyStringAndNotWhitespace(options._configFilePath)) {
+        fileConfig = await this.loadConfigFile(options._configFilePath);
       } else {
-        incomingOptions = config;
-        populatedConfig = Project.mergeDefaults(config);
+        fileConfig = await this.loadConfigFile(this.defaultConfigPath);
       }
 
-      Project._instance = new Project(populatedConfig, incomingOptions, configFilePath);
-      FileStore.config = populatedConfig.files;
+      const fullConfig = _.defaultsDeep(options, fileConfig, projectConfigDefaults);
+      Project._instance = new Project(fullConfig);
     }
-    return Project!._instance!;
-  }
-
-  private static mergeDefaults(options: PartialDeep<ProjectConfig> = {}): ProjectConfig {
-    return {
-      name: (options.name ?? projectConfigDefaults.name),
-      root: (options.root ?? projectConfigDefaults.root),
-      graph: {
-        ...options.graph,
-        ...projectConfigDefaults.graph,
-      },
-      files: {
-        ...options.files,
-        ...projectConfigDefaults.files,
-      },
-      normalizer: (options.normalizer ?? projectConfigDefaults.normalizer)
-    };
+    return Project._instance!;
   }
 
   readonly name: string;
@@ -174,33 +150,35 @@ export class Project {
   }
 
   async graph(name?: string): Promise<ArangoStore> {
-    const dbName = name ?? this.configuration.graph.connection.databaseName ?? this.configuration.name;
-    const dbConn = this.configuration.graph.connection;
-
-    return ArangoStore.open(dbName, dbConn);
+    return ArangoStore.open(
+      name ?? this.configuration.graph.connection.databaseName ?? this.configuration.name, 
+      this.configuration.graph.connection
+    );
   }
 
-  private constructor(
-    public readonly configuration: ProjectConfig,
-    public readonly options: PartialDeep<ProjectConfig>,
-    public readonly configFilePath?: string
-  ) {
-    this.name = configuration.name;
-    this.description = configuration.description;
-    this.root = configuration.root;
-  
+  // Since we use a static factory to set things up, we can safely expect a
+  // fully popualted configuration object here.
+  private constructor(public readonly configuration: ProjectConfig) {
+    this.configuration = _.defaultsDeep(configuration);
+    this.name = this.configuration.name;
+    this.description = this.configuration.description;
+    this.root = this.configuration.root;
+
+    FileStore.config = this.configuration.files;
     Project.normalizerOptions = this.configuration.normalizer;
     NormalizedUrl.normalizer = url => parameterizedNormalizer(url, Project.normalizerOptions);
   }
 
   async saveConfig(path?: PathLike) {
     return writeFile(
-      path ?? Project.defaultConfigFilePath,
+      path ?? Project.defaultConfigPath,
       JSON.stringify(this.configuration),
       { flag: 'w' }
     );
   }
 }
+
+
 
 export const projectConfigDefaults: ProjectConfig = {
   name: 'spidergram',
@@ -243,18 +221,20 @@ export const projectConfigDefaults: ProjectConfig = {
     discardIndex: '**/{index,default}.{htm,html,aspx,php}',
     discardSearch: '*',
     discardTrailingSlash: false,
+    sortSearchParams: true,
   }
 }
 
 export interface NormalizerOptions {
   forceProtocol?: 'https:' | 'http:' | false;
-  forceLowercase?: 'host' | 'domain' | 'subdomain' | 'href' | false;
+  forceLowercase?: 'host' | 'domain' | 'subdomain' | 'href' | 'pathname' | false;
   discardSubdomain?: string | false;
   discardAnchor?: boolean;
   discardAuth?: boolean;
   discardIndex?: string | false;
   discardSearch?: string;
   discardTrailingSlash?: boolean;
+  sortSearchParams?: boolean;
 }
 
 export function parameterizedNormalizer(
@@ -269,5 +249,6 @@ export function parameterizedNormalizer(
     if (opts.discardIndex) UrlMutators.stripIndexPages(url, opts.discardIndex);
     if (opts.discardSearch) UrlMutators.stripQueryParameters(url, opts.discardSearch);
     if (opts.discardTrailingSlash) UrlMutators.stripTrailingSlash(url);
+    if (opts.sortSearchParams) url.searchParams.sort();
     return url;
 }
