@@ -11,9 +11,9 @@ export default class ProjectInfo extends SpidergramCommand {
 
   async run() {
     const {project} = await this.getProjectContext();
-    if (project.configFilePath !== undefined) {
+    if (project.configuration._configFilePath !== undefined) {
       this.log(`${chalk.bold('Project:')} ${project.name}`);
-      this.log(`${chalk.bold('Config file:')} ${project.configFilePath}`);
+      this.log(`${chalk.bold('Config file:')} ${project.configuration._configFilePath}`);
       this.log(`${chalk.bold('Settings:')}`);
       CliUx.ux.styledJSON(project.configuration);
     } else {
