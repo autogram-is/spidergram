@@ -200,12 +200,17 @@ export class Spider extends PlaywrightCrawler {
       }
     }
 
+    this.status.startTime = Date.now();
+
     await graph.push([...uniques], false);
     const queue = await this.getRequestQueue();
     await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)), options);
 
     return super.run()
-      .then(stats => ({ ...this.status, ...stats}));
+      .then(stats => {
+        this.status.finishTime = Date.now();
+        return { ...this.status, ...stats};
+      });
   }
 }
 
