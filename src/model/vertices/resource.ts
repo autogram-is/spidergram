@@ -1,12 +1,15 @@
 import { ParsedUrl } from '@autogram/url-tools';
 import is from '@sindresorhus/is';
 import {Vertice, VerticeData, Expose, Transform} from './vertice.js';
+import {parse as parseContentType} from 'content-type';
 
 export interface ResourceData extends VerticeData {
   url?: string | URL;
   code?: number | string;
   message?: string;
   headers?: Record<string, string | string[] | undefined>;
+  mime?: string,
+  size?: number,
   body?: string;
   files?: SavedFile[];
 };
@@ -20,11 +23,13 @@ export class Resource extends Vertice {
   code!: number;
   message!: string;
   headers: Record<string, string | string[] | undefined>;
+  mime?: string;
+  size?: number;
   body?: string;
   files!: SavedFile[];
 
   constructor(data: ResourceData = {}) {
-    const {url, parsed, code, message, headers, body, files, ...dataForSuper} = data;
+    const {url, parsed, code, message, headers, mime, size, body, files, ...dataForSuper} = data;
     super(dataForSuper);
 
     // Flatten the URL to a string
@@ -37,6 +42,15 @@ export class Resource extends Vertice {
       this.code = code;
     } else {
       this.code = -1;
+    }
+
+    // Pull out content-length and content-type if they exist
+    if (headers && is.string(headers?.['content-type'])) {
+      this.mime = parseContentType(headers['content-type']).type;
+    }
+
+    if (headers && is.numericString(headers?.['content-length'])) {
+      this.size = Number.parseInt(headers['content-type']?.toString() ?? '');
     }
 
     this.message = message ?? '';
