@@ -15,7 +15,7 @@ export async function prompt<T extends Answers = Answers>(questions: QuestionCol
 // eslint-disable-next-line class-methods-use-this
 export async function timedPrompt<T extends Answers>(
   questions: QuestionCollection<T>,
-  ms = 10000,
+  ms = 20_000,
   initialAnswers?: Partial<T>
 ): Promise<T> {
   let id: NodeJS.Timeout;
@@ -44,9 +44,10 @@ export async function timedPrompt<T extends Answers>(
  * @param ms milliseconds to wait for user input.  Defaults to 10s.
  * @return true if the user confirms, false if they do not.
  */
- export async function confirm(message: string, ms = 10_000): Promise<boolean> {
+ export async function confirm(message: string, ms = 20_000): Promise<boolean> {
   const { confirmed } = await timedPrompt<{ confirmed: boolean }>(
     [ { name: 'confirmed', message, type: 'confirm', }, ], ms
   );
   return confirmed;
 }
+
