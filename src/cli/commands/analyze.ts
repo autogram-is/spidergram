@@ -4,7 +4,7 @@ import {
   HtmlTools,
   TextTools,
   VerticeWorker,
-  WorkerStatus,
+  JobStatus,
 } from '../../index.js';
 import { CLI, SpidergramCommand } from '../index.js';
 
@@ -56,7 +56,6 @@ export default class Analyze extends SpidergramCommand {
           }
           if (flags.readability) {
             resource.readability = TextTools.calculateReadability(text);
-            //resource.nl = TextTools.getReadingStats(text);
           }
 
           await graph.push(resource);
@@ -70,7 +69,7 @@ export default class Analyze extends SpidergramCommand {
     // If we're in 'verbose' mode, we'll be logging to screen rather than summarizing status.
     if (flags.verbose) {
       worker.on('progress', () => {
-        this.ux.info(`Processed ${worker.status.processed} of ${worker.status.total}...`);
+        this.ux.info(`Processed ${worker.status.complete} of ${worker.status.total}...`);
       });
     } else {
       worker.on('progress', () => {
@@ -86,7 +85,7 @@ export default class Analyze extends SpidergramCommand {
     this.summarizeResults(worker.status);
   }
 
-  summarizeResults(stats: WorkerStatus) {
+  summarizeResults(stats: JobStatus) {
     this.log();
     this.ux.styledJSON(stats);
     this.ux.styledHeader('Analysis complete.');
