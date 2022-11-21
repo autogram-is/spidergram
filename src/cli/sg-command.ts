@@ -21,7 +21,6 @@ export abstract class SgCommand extends Command {
   static enableJsonFlag = true;
 
   ux = CliUx.ux;
-
   format = CLI.Colors;
   chalk = CLI.chalk;
   symbol = CLI.Prefixes;

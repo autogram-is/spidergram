@@ -1,6 +1,6 @@
 export * as progress from 'cli-progress';
 
-// Stubbed placeholde for shared utilities. We want:
+// Stubbed placeholder for shared utilities. We want:
 // 1. A default progress bar implementation that accepts a 
 //    spidergram crawl/task/whatever Status object and automatically
 //    self updates from it, without any other wrapper or helper code
