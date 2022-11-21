@@ -1,8 +1,8 @@
 export interface JobStatus extends Record<string, unknown> {
   total: number;
-  complete: number;
-  errors: number;
-  lastError?: Error;
+  finished: number;
+  failed: number;
+  lastError?: string;
   startTime: number;
   finishTime: number;
 }

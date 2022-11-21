@@ -26,8 +26,8 @@ export class VerticeWorker<T extends Vertice = Vertice> extends EventEmitter {
     this.status = {
       startTime: 0,
       finishTime: 0,
-      complete: 0,
-      errors: 0,
+      finished: 0,
+      failed: 0,
       total: 0,
     };
   }
@@ -82,10 +82,10 @@ export class VerticeWorker<T extends Vertice = Vertice> extends EventEmitter {
 
   async performTask(item: T, task: VerticeWorkerTask<T>): Promise<void> {
     return task(item).then(() => {
-        this.status.complete++;
+        this.status.finished++;
       })
       .catch(error => {
-        this.status.errors++;
+        this.status.failed++;
         this.status.lastError = error;
       })
       .finally(() => {

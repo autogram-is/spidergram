@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import { LogLevel } from 'crawlee';
 import {
   Spider,
-  SpiderStatistics,
+  SpiderStatus,
   EnqueueUrlOptions,
 } from '../../index.js';
 import { CLI, SpidergramCommand } from '../index.js';
@@ -87,17 +87,17 @@ export default class Crawl extends SpidergramCommand {
     // If we're in 'verbose' mode, we'll be logging to screen rather than summarizing status.
     if (!flags.verbose) {
       progress.start(1, 0);
-      spider.on('requestComplete', (stats: SpiderStatistics) => {
-        progress.setTotal(stats.requestsEnqueued);
-        progress.update(stats.requestsCompleted)
+      spider.on('requestComplete', (stats: SpiderStatus) => {
+        progress.setTotal(stats.total);
+        progress.update(stats.finished)
       });
     }
 
     await spider.run(urls).then(stats => { 
       if (!flags.silent) {
         if (!flags.verbose) {
-          progress.setTotal(stats.requestsEnqueued);
-          progress.update(stats.requestsCompleted)
+          progress.setTotal(stats.total);
+          progress.update(stats.finished)
           progress.stop();
         }
         this.summarizeResults(stats);
@@ -105,7 +105,7 @@ export default class Crawl extends SpidergramCommand {
     });
   }
 
-  summarizeResults(stats: SpiderStatistics) {
+  summarizeResults(stats: SpiderStatus) {
     this.log();
     this.ux.styledJSON(stats);
     this.ux.styledHeader('Crawl complete.');

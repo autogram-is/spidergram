@@ -3,6 +3,7 @@ import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import arrify from 'arrify';
 import { log, PlaywrightCrawlingContext } from 'crawlee';
 import prependHttp from 'prepend-http';
+import { FinalStatistics } from 'crawlee';
 
 // We have a chance to set the log level HIGHER when configuring,
 // but this (hopefully) ensures that sub-logs won't be created
@@ -26,14 +27,13 @@ import {
   InternalSpiderOptions,
   SpiderOptions,
   SpiderContext,
-  SpiderStatistics,
   buildSpiderOptions,
   handlers,
   helpers,
   contextualizeHandler,
   contextualizeHook,
   uniqueUrlToRequest,
-  SpiderInternalStatistics,
+  SpiderStatus,
 } from './index.js';
 
 type RequestValue = string | Request | RequestOptions | NormalizedUrl | UniqueUrl;
@@ -50,9 +50,12 @@ export type SpiderEventName = SpiderEventType | 'systemInfo' | 'aborting' | 'exi
 export class Spider extends PlaywrightCrawler {
   spiderOptions: InternalSpiderOptions;
   crawlerOptions: PlaywrightCrawlerOptions;
-  progress: SpiderInternalStatistics = {
-    requestsEnqueued: 0,
-    requestsCompleted: 0,
+  status: SpiderStatus = {
+    total: 0,
+    finished: 0,
+    failed: 0,
+    startTime: 0,
+    finishTime: 0,
     requestsByStatus: {},
     requestsByType: {},
     requestsByHost: {},
@@ -132,19 +135,19 @@ export class Spider extends PlaywrightCrawler {
     const host = new ParsedUrl(request.url).hostname.toLocaleLowerCase();
     const label = request.label ?? 'none';
 
-    this.progress.requestsByHost[host] ??= 0;
-    this.progress.requestsByLabel[label] ??= 0;
-    this.progress.requestsByStatus[status] ??= 0;
-    this.progress.requestsByType[type] ??= 0;
+    this.status.requestsByHost[host] ??= 0;
+    this.status.requestsByLabel[label] ??= 0;
+    this.status.requestsByStatus[status] ??= 0;
+    this.status.requestsByType[type] ??= 0;
 
     
-    this.progress.requestsByHost[host]++;
-    this.progress.requestsByLabel[label]++;
-    this.progress.requestsByStatus[status]++;
-    this.progress.requestsByType[type]++;
+    this.status.requestsByHost[host]++;
+    this.status.requestsByLabel[label]++;
+    this.status.requestsByStatus[status]++;
+    this.status.requestsByType[type]++;
 
-    this.progress.requestsEnqueued = this.requestQueue?.assumedTotalCount ?? 0;
-    this.progress.requestsCompleted++;
+    this.status.total = this.requestQueue?.assumedTotalCount ?? 0;
+    this.status.finished++;
   }
 
   override async _cleanupContext(context: SpiderContext) {
@@ -152,14 +155,15 @@ export class Spider extends PlaywrightCrawler {
     // a request that previously failed but then succeeded will still be noticed.
     if (context.request.errorMessages.length === 0) {
       this.updateStats(context);
+    } else {
+      const errors = context.request.errorMessages;
+      this.status.lastError = errors[errors.length];  
     }
 
     // Even in the case of an error, we'll fire the event so that progress
     // indicators can be updated, etc.
     this.emit(
-      SpiderEventType.REQUEST_COMPLETE,
-      { ...this.progress, ...this.stats.calculate() } as SpiderStatistics,
-      context.request.url
+      SpiderEventType.REQUEST_COMPLETE, this.status, context.request.url
     );
 
     super._cleanupContext(context as PlaywrightCrawlingContext);
@@ -168,7 +172,7 @@ export class Spider extends PlaywrightCrawler {
   override async run(
     requests: RequestValue | RequestValue[] = [],
     options?: CrawlerAddRequestsOptions,
-  ): Promise<SpiderStatistics> {
+  ): Promise<SpiderStatus & FinalStatistics> {
     // If only a single value came in, turn it into an array.
     const project = await Project.config(this.spiderOptions.projectConfig);
     const graph = await project.graph();
@@ -201,7 +205,7 @@ export class Spider extends PlaywrightCrawler {
     await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)), options);
 
     return super.run()
-      .then(stats => ({ ...stats, ...this.progress}));
+      .then(stats => ({ ...this.status, ...stats}));
   }
 }
 
