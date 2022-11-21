@@ -50,7 +50,7 @@ export class Resource extends Vertice {
     }
 
     if (headers && is.numericString(headers?.['content-length'])) {
-      this.size = Number.parseInt(headers['content-type']?.toString() ?? '');
+      this.size = Number.parseInt(headers['content-length']?.toString() ?? '');
     }
 
     this.message = message ?? '';
