@@ -6,9 +6,9 @@ import {
   VerticeWorker,
   JobStatus,
 } from '../../index.js';
-import { CLI, SpidergramCommand } from '../index.js';
+import { CLI, SgCommand } from '../index.js';
 
-export default class Analyze extends SpidergramCommand {
+export default class Analyze extends SgCommand {
   static summary = "Analyze the content of all crawled pages";
 
   static usage = '<%= config.bin %> <%= command.id %>'

@@ -1,8 +1,8 @@
-import { SpidergramCommand, CLI } from '../../index.js';
+import { SgCommand, CLI } from '../../index.js';
 import arrify from 'arrify';
 import terminalLink from 'terminal-link';
 
-export default class GraphInfo extends SpidergramCommand {
+export default class GraphInfo extends SgCommand {
   static description = 'Arango settings and status';
 
   static flags = {

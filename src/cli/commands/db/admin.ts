@@ -1,8 +1,8 @@
-import { SpidergramCommand, CLI } from '../../index.js';
+import { SgCommand, CLI } from '../../index.js';
 import arrify from 'arrify';
 import { CliUx } from '@oclif/core';
 
-export default class Admin extends SpidergramCommand {
+export default class Admin extends SgCommand {
   static description = "Launch Arango's web admin interface";
 
   static flags = {

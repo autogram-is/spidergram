@@ -1,6 +1,6 @@
-import { SpidergramCommand } from '../../index.js';
+import { SgCommand } from '../../index.js';
 
-export default class Generate extends SpidergramCommand {
+export default class Generate extends SgCommand {
   static description = 'Create a new project from a spider template';
 
   async run() {

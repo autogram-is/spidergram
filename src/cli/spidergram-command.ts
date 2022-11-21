@@ -17,7 +17,7 @@ import is from '@sindresorhus/is';
  * All implementations of this class need to implement the run() method.
  */
 
-export abstract class SpidergramCommand extends Command {
+export abstract class SgCommand extends Command {
   static enableJsonFlag = true;
 
   ux = CliUx.ux;
@@ -26,8 +26,8 @@ export abstract class SpidergramCommand extends Command {
   chalk = CLI.chalk;
   symbol = CLI.Prefixes;
 
-  protected get statics(): typeof SpidergramCommand {
-    return this.constructor as typeof SpidergramCommand;
+  protected get statics(): typeof SgCommand {
+    return this.constructor as typeof SgCommand;
   }
 
   // If no flags are set for a Spidergram Command, inherit
@@ -42,7 +42,7 @@ export abstract class SpidergramCommand extends Command {
     let graph = {} as unknown as ArangoStore;
 
     try {
-      const {flags, argv} = await this.parse(this.constructor as typeof SpidergramCommand);
+      const {flags, argv} = await this.parse(this.constructor as typeof SgCommand);
       console.log(argv);
       console.log(flags);
       const _configFilePath = is.string(flags.config) ? flags.config : undefined;

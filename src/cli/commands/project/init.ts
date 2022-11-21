@@ -1,5 +1,5 @@
 import { writeFile } from 'node:fs/promises';
-import { SpidergramCommand, CLI } from '../../index.js';
+import { SgCommand, CLI } from '../../index.js';
 import { Project, ProjectConfig, projectConfigDefaults } from '../../../index.js';
 
 type ConfigPromptValues = {
@@ -13,7 +13,7 @@ type ConfigPromptValues = {
   filename: string,
 }
 
-export default class Init extends SpidergramCommand {
+export default class Init extends SgCommand {
   static description = 'Generate a project configuration file';
 
   async run() {

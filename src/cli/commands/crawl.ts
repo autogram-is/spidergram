@@ -6,9 +6,9 @@ import {
   SpiderStatus,
   EnqueueUrlOptions,
 } from '../../index.js';
-import { CLI, SpidergramCommand } from '../index.js';
+import { CLI, SgCommand } from '../index.js';
 
-export default class Crawl extends SpidergramCommand {
+export default class Crawl extends SgCommand {
   static summary = 'Crawl and store a site';
 
   static usage = '<%= config.bin %> <%= command.id %> <urls>'

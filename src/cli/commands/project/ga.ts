@@ -1,8 +1,8 @@
-import { SpidergramCommand, CLI } from '../../index.js';
+import { SgCommand, CLI } from '../../index.js';
 import { GoogleTools } from '../../../index.js';
 import { Flags } from '@oclif/core';
 
-export default class GA extends SpidergramCommand {
+export default class GA extends SgCommand {
   static description = "Test Google analytics credentials";
 
   static flags = {

@@ -1,8 +1,8 @@
-import { SpidergramCommand, CLI } from '../../index.js';
+import { SgCommand, CLI } from '../../index.js';
 import { CliUx } from '@oclif/core';
 import chalk from 'chalk';
 
-export default class ProjectInfo extends SpidergramCommand {
+export default class ProjectInfo extends SgCommand {
   static description = 'Settings and stats for the current project';
 
   static flags = {

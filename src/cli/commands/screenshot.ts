@@ -1,6 +1,6 @@
 import {
   CLI,
-  SpidergramCommand,
+  SgCommand,
   ScreenshotTool,
   ScreenshotOptions,
   Orientation
@@ -8,7 +8,7 @@ import {
 import { Flags } from "@oclif/core";
 import { PlaywrightCrawler } from "crawlee";
 
-export default class Screenshot extends SpidergramCommand {
+export default class Screenshot extends SgCommand {
   static summary = 'Save screenshots of pages and page elements';
 
   static usage = '<%= command.id %> [--viewport=<width,height>] <urls>'

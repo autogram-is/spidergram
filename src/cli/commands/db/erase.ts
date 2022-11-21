@@ -1,7 +1,7 @@
 import { Flags } from '@oclif/core';
-import { CLI, SpidergramCommand } from '../../index.js';
+import { CLI, SgCommand } from '../../index.js';
 
-export default class Erase extends SpidergramCommand {
+export default class Erase extends SgCommand {
   static description = 'Discard stored crawling data';
 
   static flags = {
