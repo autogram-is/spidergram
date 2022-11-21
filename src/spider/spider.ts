@@ -97,6 +97,10 @@ export class Spider extends PlaywrightCrawler {
       async (ctx: PlaywrightCrawlingContext, error: Error): Promise<void> => 
       handlers.failureHandler(ctx as unknown as SpiderContext, error)
 
+    if (internal.userAgent) {
+      crawler.launchContext = { userAgent: internal.userAgent };
+    }
+
     super(crawler, config);
 
     this.spiderOptions = internal;
@@ -231,6 +235,7 @@ function splitOptions(
     downloadMimeTypes,
     preNavigationHooks,
     postNavigationHooks,
+    userAgent,
 
     ...crawlerOptions
   } = options;

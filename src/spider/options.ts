@@ -133,6 +133,15 @@ export interface InternalSpiderOptions extends Dictionary {
    * @type {Array<SpiderHook>}
    */
   postNavigationHooks: SpiderHook[];
+
+
+  /**
+   * User-agent to use when requesting pages; if none is specified, reasonable defaults
+   * for the chosen browser engine will be used. 
+   *
+   * @type {string}
+   */
+  userAgent?: string;
 }
 
 export function buildSpiderOptions(
