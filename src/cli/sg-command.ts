@@ -41,7 +41,7 @@ export abstract class SgCommand extends Command {
     let graph = {} as unknown as ArangoStore;
 
     try {
-      const {flags, argv} = await this.parse(this.constructor as typeof SgCommand);
+      const {flags} = await this.parse(this.constructor as typeof SgCommand);
       const _configFilePath = is.string(flags.config) ? flags.config : undefined;
       project = await Project.config({ _configFilePath });
       graph = await project.graph();
