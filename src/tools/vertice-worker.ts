@@ -72,7 +72,10 @@ export class VerticeWorker<T extends Vertice = Vertice> extends EventEmitter {
           }
         })
         .then(() => {
-          this.status.finished = Date.now();
+          this.status.finishTime = Date.now();
+          const elapsed = this.status.finishTime - this.status.startTime;
+          this.status.elapsed = elapsed;
+          this.status.average = elapsed / this.status.total;
           return this.status;
         });
     } else {
