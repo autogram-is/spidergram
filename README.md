@@ -22,7 +22,7 @@ Spidergram's core goal is provide a toolbox of composable web spidering and scra
   - [TypeFS](https://typefs.io) to manage multiple buckets of files (configuration, web downloads, page and page-element screenshots, etc) locally or in cloud storage.
   - [SheetJS](https://sheetjs.com) to import and export complex spreadsheet data; never settle for a folder full of CSV files again.
   - [Oclif](https://oclif.org) and [Listr2](https://listr2.kilic.dev) for command line configuration, analysis, and crawl monitoring tools that can be extended for specific projects.
-  - [D3](https://d3js.org) to generate visualizations of complex structural relationships and patterns.
+  - [Vega](https://vega.github.io/vega/) to quickly generate visualizations of complex data and relationships.
 
 ## What Spidergram adds to the mix
 
