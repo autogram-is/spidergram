@@ -1,4 +1,4 @@
-import { Project, ArangoStore, CLI } from '../index.js'
+import { Project, ArangoStore, CLI, JobStatus } from '../index.js'
 import { CliUx, Command, Interfaces } from '@oclif/core';
 import is from '@sindresorhus/is';
 
@@ -24,6 +24,7 @@ export abstract class SgCommand extends Command {
   format = CLI.Colors;
   chalk = CLI.chalk;
   symbol = CLI.Prefixes;
+  progress = new CLI.progress.Bar({}, CLI.progress.Presets.shades_grey);
 
   protected get statics(): typeof SgCommand {
     return this.constructor as typeof SgCommand;
@@ -32,7 +33,24 @@ export abstract class SgCommand extends Command {
   // If no flags are set for a Spidergram Command, inherit
   // the shared global flags.
   static flags: Interfaces.FlagInput = {
-    config: CLI.globalFlags.config
+    config: CLI.globalFlags.config,
+    verbose: CLI.outputFlags.verbose
+  }
+
+  protected updateProgress(status: JobStatus, verbose = false) {
+    if (verbose) {
+      this.ux.info(`Processed ${status.finished} of ${status.total}...`);
+    } else {
+      this.progress.update({ value: status.finished, total: status.total });
+    }
+  }
+
+  protected stopProgress() {
+    this.progress.stop();
+  }
+
+  protected startProgress(total?: number) {
+    this.progress.start(total ?? 0, 0);
   }
 
   async getProjectContext(returnErrors = false) {
