@@ -5,6 +5,7 @@ import {
   TextTools,
   VerticeWorker,
   JobStatus,
+  OutputLevel
 } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
 
@@ -36,6 +37,10 @@ export default class Analyze extends SgCommand {
       }
     }
 
+    if (flags.verbose) {
+      this.output = OutputLevel.verbose;
+    }
+
     const worker = new VerticeWorker<Resource>({
       collection: 'resources',
       task: async (resource) => {
@@ -63,25 +68,12 @@ export default class Analyze extends SgCommand {
       }
     });
 
-    this.ux.info('Analyzing saved pages...');
-    const progress = new CLI.progress.Bar({}, CLI.progress.Presets.shades_grey);
+    worker.on('progress', status => this.updateProgress(status) );
+    this.startProgress('Analyzing saved pages...');
 
-    // If we're in 'verbose' mode, we'll be logging to screen rather than summarizing status.
-    if (flags.verbose) {
-      worker.on('progress', () => {
-        this.ux.info(`Processed ${worker.status.complete} of ${worker.status.total}...`);
-      });
-    } else {
-      worker.on('progress', () => {
-        progress.setTotal(worker.status.total);
-        progress.increment();
-      });
-      progress.start(worker.status.total, 0);
-    }
-    
     await worker.run();
-    
-    if (!flags.verbose) progress.stop();
+
+    this.stopProgress();
     this.summarizeResults(worker.status);
   }
 

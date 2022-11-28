@@ -6,7 +6,7 @@ import {
   SpiderStatus,
   EnqueueUrlOptions,
 } from '../../index.js';
-import { CLI, SgCommand } from '../index.js';
+import { CLI, OutputLevel, SgCommand } from '../index.js';
 
 export default class Crawl extends SgCommand {
   static summary = 'Crawl and store a site';
@@ -50,6 +50,10 @@ export default class Crawl extends SgCommand {
       }
     }
 
+    if (flags.verbose) {
+      this.output = OutputLevel.verbose;
+    }
+
     if (flags.erase) {
       const confirmation = await CLI.confirm(`Erase the ${project.name} database before crawling`);
       if (confirmation) {
@@ -80,29 +84,15 @@ export default class Crawl extends SgCommand {
       },
     });
 
-
-    this.ux.info('Crawling...');
-    const progress = new CLI.progress.Bar({}, CLI.progress.Presets.shades_grey);
-
-    // If we're in 'verbose' mode, we'll be logging to screen rather than summarizing status.
-    if (!flags.verbose) {
-      progress.start(1, 0);
-      spider.on('requestComplete', (stats: SpiderStatus) => {
-        progress.setTotal(stats.total);
-        progress.update(stats.finished)
-      });
-    }
-
-    await spider.run(urls).then(stats => { 
-      if (!flags.silent) {
-        if (!flags.verbose) {
-          progress.setTotal(stats.total);
-          progress.update(stats.finished)
-          progress.stop();
-        }
-        this.summarizeResults(stats);
+    spider.on('requestComplete', status => this.updateProgress(status));
+    this.startProgress('Crawling...');
+    
+    await spider.run(urls).then(
+      status => {
+        this.stopProgress();
+        this.summarizeResults(status);
       }
-    });
+    );
   }
 
   summarizeResults(stats: SpiderStatus) {

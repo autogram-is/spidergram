@@ -51,7 +51,8 @@ export abstract class SgCommand extends Command {
         break;
       };
       case OutputLevel.interactive: {
-        this.progress.update({ value: status.finished, total: status.total });
+        this.progress.setTotal(status.total);
+        this.progress.update(status.finished);
         break;
       };
     }
@@ -68,7 +69,10 @@ export abstract class SgCommand extends Command {
     if (is.nonEmptyStringAndNotWhitespace(msg) && this.output !== OutputLevel.silent) {
       this.ux.info(msg);
     }
-    this.progress.start(total, 0);
+    if (this.output == OutputLevel.interactive) {
+      this.progress = new CLI.progress.Bar({}, CLI.progress.Presets.shades_grey);
+      this.progress.start(total, 0);
+    }
   }
 
   async getProjectContext(returnErrors = false) {
