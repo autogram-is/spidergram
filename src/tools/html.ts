@@ -10,6 +10,8 @@ import {
   getProperty,
   setProperty,
 } from '../model/helpers/properties.js';
+export { social as getSocialLinks, parseOpenGraph as getOpenGraph } from 'crawlee';
+import { Thing, Graph as SchemaGraph } from "schema-dts";
 
 export function getPlainText(html: string, options?: HtmlToTextOptions): string {
   return htmlToText(html, options);
@@ -39,28 +41,19 @@ export function selectWithCSS(input: string | cheerio.Root, selector: string) {
   return $(selector);
 }
 
-export function getMetadata(input: string | cheerio.Root): Properties {
+export function getMetaTags(input: string | cheerio.Root): Properties {
   const $ = is.string(input) ? parseWithCheerio(input) : input;
+  const keyNames = ['name', 'property', 'itemprop', 'http-equiv'];
   const results: Properties = {};
-  const meta = $('head meta');
-  meta.each((index, element) => {
-    const key
-      = $(element).attr('name')?.trim() ?? $(element).attr('property')?.trim();
-    const value = $(element).attr('content')?.trim();
+
+  $('head meta').each((index, element) => {
+    const key = Object.keys($(element).attr()).find(value => keyNames.indexOf(value) !== -1);
     if (key) {
-      if (key === 'description') {
-        setProp(results, key, value);
-      } else {
-        appendProperty(results, key, value);
-      }
+      const value = $(element).attr('content')?.trim();
+      if (key === 'description') setProp(results, key, value);
+      else appendProperty(results, key, value);
     }
   });
-
-  results.bodyAttributes = $('body').attr();
-  const bodyClasses = $('body').attr('class');
-  if (bodyClasses) {
-    results.bodyAttributes.class = bodyClasses.replace(/\s+/, ' ').split(' ');
-  }
 
   results.title = getProperty(
     results,
@@ -68,6 +61,34 @@ export function getMetadata(input: string | cheerio.Root): Properties {
     $('head title').text().toString(),
   );
 
+  return results;
+}
+
+
+// Right now this only works with a single @graph element. Later we'll want to graph
+// any JSON-LD chunks and turn them into an array.
+export function getSchemaOrg(input: string | cheerio.Root): readonly Thing[] {
+  const $ = is.string(input) ? parseWithCheerio(input) : input;
+  let results: readonly Thing[] = [];
+  try {
+    $('script[type=application/ld+json]').each((index, element) => {
+      const json = JSON.parse($(element).text()) as SchemaGraph;
+      if ('@context' in json && json["@context"] == 'https://schema.org') {
+        results = json["@graph"];
+      }  
+    })
+  } catch {
+    results = [];
+  }
+  return results;
+}
+
+export function getBodyAttributes(input: string | cheerio.Root): Properties {
+  const $ = is.string(input) ? parseWithCheerio(input) : input;
+  let results: Properties = { ...$('body').attr() };
+  if ('class' in results) {
+    results.class = results.class?.toString().replace(/\s+/, ' ').split(' ');
+  }
   return results;
 }
 
@@ -96,3 +117,4 @@ function appendProperty(
     setProperty(object, path, [...arrify(currentProp), ...arrify(value)]);
   }
 }
+
