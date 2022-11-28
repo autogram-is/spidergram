@@ -17,6 +17,12 @@ import is from '@sindresorhus/is';
  * All implementations of this class need to implement the run() method.
  */
 
+export enum OutputLevel {
+  silent = 0,
+  interactive = 1,
+  verbose = 2,
+}
+
 export abstract class SgCommand extends Command {
   static enableJsonFlag = true;
 
@@ -24,6 +30,7 @@ export abstract class SgCommand extends Command {
   format = CLI.Colors;
   chalk = CLI.chalk;
   symbol = CLI.Prefixes;
+  output = OutputLevel.interactive;
   progress = new CLI.progress.Bar({}, CLI.progress.Presets.shades_grey);
 
   protected get statics(): typeof SgCommand {
@@ -37,20 +44,31 @@ export abstract class SgCommand extends Command {
     verbose: CLI.outputFlags.verbose
   }
 
-  protected updateProgress(status: JobStatus, verbose = false) {
-    if (verbose) {
-      this.ux.info(`Processed ${status.finished} of ${status.total}...`);
-    } else {
-      this.progress.update({ value: status.finished, total: status.total });
+  protected updateProgress(status: JobStatus) {
+    switch (this.output) {
+      case OutputLevel.verbose: {
+        this.ux.info(`Processed ${status.finished} of ${status.total}...`);
+        break;
+      };
+      case OutputLevel.interactive: {
+        this.progress.update({ value: status.finished, total: status.total });
+        break;
+      };
     }
   }
 
-  protected stopProgress() {
+  protected stopProgress(msg?: string) {
+    if (is.nonEmptyStringAndNotWhitespace(msg) && this.output !== OutputLevel.silent) {
+      this.ux.info(msg);
+    }
     this.progress.stop();
   }
 
-  protected startProgress(total?: number) {
-    this.progress.start(total ?? 0, 0);
+  protected startProgress(msg?: string, total = 0) {
+    if (is.nonEmptyStringAndNotWhitespace(msg) && this.output !== OutputLevel.silent) {
+      this.ux.info(msg);
+    }
+    this.progress.start(total, 0);
   }
 
   async getProjectContext(returnErrors = false) {
