@@ -3,7 +3,6 @@ export * as crawlee from 'crawlee';
 export * as arangojs from 'arangojs';
 import lodash from 'lodash';
 export const _ = lodash;
-export * as luxon from 'luxon';
 
 export * from './cli/index.js';
 
