@@ -5,3 +5,11 @@ export const analyticsScopes = ['https://www.googleapis.com/auth/analytics.reado
 
 // See https://developers.google.com/analytics/devguides/reporting/core/v4
 // and https://ga-dev-tools.web.app/request-composer/metric-expression/
+
+type DateUnit = 'day' | 'week' | 'month' | 'year';
+
+export interface AnalyticsOptions {
+  viewId: string,
+  pageSize?: number,
+  dateRange?: { range: number, unit: DateUnit, granularity?: DateUnit },
+}

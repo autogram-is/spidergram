@@ -90,12 +90,12 @@ export default class Crawl extends SgCommand {
     await spider.run(urls).then(
       status => {
         this.stopProgress();
-        this.summarizeResults(status);
+        this.summarizeStatus(status);
       }
     );
   }
 
-  summarizeResults(stats: SpiderStatus) {
+  override summarizeStatus(stats: SpiderStatus) {
     this.log();
     this.ux.styledJSON(stats);
     this.ux.styledHeader('Crawl complete.');

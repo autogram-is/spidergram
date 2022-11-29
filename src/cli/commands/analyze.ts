@@ -4,7 +4,6 @@ import {
   HtmlTools,
   TextTools,
   VerticeWorker,
-  JobStatus,
   OutputLevel
 } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
@@ -74,12 +73,6 @@ export default class Analyze extends SgCommand {
     await worker.run();
 
     this.stopProgress();
-    this.summarizeResults(worker.status);
-  }
-
-  summarizeResults(stats: JobStatus) {
-    this.log();
-    this.ux.styledJSON(stats);
-    this.ux.styledHeader('Analysis complete.');
+    this.summarizeStatus(worker.status);
   }
 }
