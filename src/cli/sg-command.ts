@@ -1,5 +1,6 @@
 import { Project, ArangoStore, CLI, JobStatus } from '../index.js'
 import { CliUx, Command, Interfaces } from '@oclif/core';
+import { Duration } from 'luxon';
 import is from '@sindresorhus/is';
 
 /**
@@ -72,6 +73,14 @@ export abstract class SgCommand extends Command {
     if (this.output == OutputLevel.interactive) {
       this.progress = new CLI.progress.Bar({}, CLI.progress.Presets.shades_grey);
       this.progress.start(total, 0);
+    }
+  }
+
+  protected summarizeStatus(status: JobStatus) {
+    const elapsed = status.finishTime - status.startTime;
+    this.ux.info(`${status.finished.toLocaleString()} of ${status.total.toLocaleString()} items processed in ${Duration.fromMillis(elapsed).toHuman()}`);
+    if (status.failed > 0) {
+      this.ux.info(`${status.failed.toLocaleString()} items failed; the last error was '${status.lastError}'`);
     }
   }
 
