@@ -76,13 +76,20 @@ export abstract class SgCommand extends Command {
     }
   }
 
-  protected summarizeStatus(status: JobStatus) {
+  protected summarizeStatus(status: JobStatus, listFailures = true) {
     this.stopProgress();
     if (this.output !== OutputLevel.silent) {
-      const elapsed = status.finishTime - status.startTime;
-      this.ux.info(`${status.finished.toLocaleString()} of ${status.total.toLocaleString()} items processed in ${Duration.fromMillis(elapsed).toHuman()}`);
-      if (status.failed > 0) {
-        this.ux.info(`${status.failed.toLocaleString()} items failed; the last error was '${status.lastError}'`);
+      const { finished, failed, total, startTime, finishTime } = status;
+      const elapsed = Duration.fromMillis(finishTime - startTime).normalize().toHuman();
+
+      if (total > finished) {
+        this.ux.info(`${finished.toLocaleString()} of ${total.toLocaleString()} items processed in ${elapsed}`);
+      } else {
+        this.ux.info(`${finished.toLocaleString()} items processed in ${elapsed}`);
+      }
+
+      if (listFailures && failed > 0) {
+        this.ux.info(`${failed.toLocaleString()} items failed; the last error was '${status.lastError}'`);
       }
     }
   }
