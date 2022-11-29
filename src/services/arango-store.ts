@@ -6,7 +6,7 @@ import {DocumentMetadata} from 'arangojs/documents.js';
 import {DocumentCollection} from 'arangojs/collection.js';
 import arrify from 'arrify';
 import slugify from '@sindresorhus/slugify';
-import {Vertice, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn, DataSet} from '../model/index.js';
+import {Vertice, VerticeData, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn, DataSet, Fragment} from '../model/index.js';
 import { Project } from './project.js';
 
 export {aql} from 'arangojs';
@@ -119,7 +119,7 @@ export class ArangoStore {
 
   static async initialize(database: Database, erase = false): Promise<Database> {
     // Ugly shim to ensure all of our entity types are present before initializing.
-    const includedTypes = [UniqueUrl, RespondsWith, Resource, DataSet, LinksTo, IsChildOf, IsVariantOf, AppearsOn];
+    const includedTypes = [UniqueUrl, RespondsWith, Resource, DataSet, LinksTo, IsChildOf, IsVariantOf, AppearsOn, Fragment];
     assert(includedTypes.length > 0);
 
     const promises: Array<Promise<DocumentCollection>> = [];
@@ -143,6 +143,13 @@ export class ArangoStore {
   /*
    * Convenience wrappers for saving and deleting Spidergram Entities
    */
+
+  async get<T extends Vertice = Vertice>(id: string): Promise<T | undefined> {
+    const [collection, key] = id.split('/');
+    return this.db.collection<VerticeData>(collection).document(key)
+      .then(json => Vertice.fromJSON(json) as T)
+      .catch(() => undefined);
+  }
 
   async push(input: Vertice | Vertice[], overwrite = true): Promise<PromiseSettledResult<DocumentMetadata>[]> {
     const promises: Array<Promise<DocumentMetadata>> = [];
