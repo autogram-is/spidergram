@@ -17,7 +17,7 @@ export default class Init extends SgCommand {
   static description = 'Generate a project configuration file';
 
   async run() {
-    const {project} = await this.getProjectContext();
+    const {project} = await this.getProjectContext(true);
     const path = project.configuration._configFilePath ?? Project.defaultConfigPath;
 
     this.ux.styledHeader('Project options:');

@@ -80,7 +80,7 @@ export abstract class SgCommand extends Command {
     this.stopProgress();
     if (this.output !== OutputLevel.silent) {
       const { finished, failed, total, startTime, finishTime } = status;
-      const elapsed = Duration.fromMillis(finishTime - startTime).normalize().toHuman();
+      const elapsed = Duration.fromMillis(finishTime - startTime).rescale().toHuman();
 
       if (total > finished) {
         this.ux.info(`${finished.toLocaleString()} of ${total.toLocaleString()} items processed in ${elapsed}`);

@@ -53,7 +53,6 @@ export function getMetaTags(input: string | cheerio.Root): Properties<string> {
   return results;
 }
 
-
 // Right now this only works with a single @graph element. Later we'll want to graph
 // any JSON-LD chunks and turn them into an array.
 export function getSchemaOrg(input: string | cheerio.Root): readonly Thing[] {
