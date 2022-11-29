@@ -1,14 +1,10 @@
 import is from '@sindresorhus/is';
-import arrify from 'arrify';
 import * as cheerio from 'cheerio';
 import {JSDOM} from 'jsdom';
 import * as xpath from 'xpath-ts';
 import { htmlToText, HtmlToTextOptions } from 'html-to-text';
 import {
-  Property,
   Properties,
-  getProperty,
-  setProperty,
 } from '../model/helpers/properties.js';
 export { social as getSocialLinks, parseOpenGraph as getOpenGraph } from 'crawlee';
 import { Thing, Graph as SchemaGraph } from "schema-dts";
@@ -41,28 +37,18 @@ export function selectWithCSS(input: string | cheerio.Root, selector: string) {
   return $(selector);
 }
 
-export function getMetaTags(input: string | cheerio.Root): Properties {
+export function getMetaTags(input: string | cheerio.Root): Properties<string> {
   const $ = is.string(input) ? parseWithCheerio(input) : input;
-  const keyNames = ['name', 'property', 'itemprop', 'http-equiv'];
-  const results: Properties = {};
+  const results: Record<string, string> = {};
 
-  $('head meta').each((index, element) => {
-    const keyName = Object.keys($(element).attr()).find(value => keyNames.indexOf(value) !== -1);
-    if (keyName) {
-      const key = $(element).attr(keyName);
-        if (key) {
-          const value = $(element).attr('content')?.trim();
-          if (key === 'description') setProp(results, key, value);
-          else appendProperty(results, key, value);
-        }
-      }
-    });
+  $('head meta').each((index, tag) => {
+    const k = $(tag).attr('name') || $(tag).attr('property') || $(tag).attr('itemprop')
+    const v = $(tag).attr('content')  
+    if (k && v) results[k] = v;
+  });
 
-  results.title = getProperty(
-    results,
-    'og.title',
-    $('head title').text().toString(),
-  );
+  const title = $('head title').text().toString();
+  if (title) results.title = title;
 
   return results;
 }
@@ -86,38 +72,12 @@ export function getSchemaOrg(input: string | cheerio.Root): readonly Thing[] {
   return results;
 }
 
-export function getBodyAttributes(input: string | cheerio.Root): Properties {
+export function getBodyAttributes(input: string | cheerio.Root): Properties<string> {
   const $ = is.string(input) ? parseWithCheerio(input) : input;
-  let results: Properties = { ...$('body').attr() };
+  let results: Properties<string> = { ...$('body').attr() };
   if ('class' in results) {
     results.class = results.class?.toString().replace(/\s+/, ' ').split(' ');
   }
   return results;
-}
-
-function setProp(
-  object: Properties,
-  key: string,
-  value: Property,
-  keyDelimiter = ':',
-) {
-  const path = key.replace(keyDelimiter, '.');
-  setProperty(object, path, value);
-}
-
-function appendProperty(
-  object: Properties,
-  key: string,
-  value: Property,
-  keyDelimiter = ':',
-) {
-  const path = key.replace(keyDelimiter, '.');
-  const currentProp = getProperty(object, path);
-
-  if (is.undefined(currentProp)) {
-    setProperty(object, path, value);
-  } else {
-    setProperty(object, path, [...arrify(currentProp), ...arrify(value)]);
-  }
 }
 
