@@ -47,13 +47,16 @@ export function getMetaTags(input: string | cheerio.Root): Properties {
   const results: Properties = {};
 
   $('head meta').each((index, element) => {
-    const key = Object.keys($(element).attr()).find(value => keyNames.indexOf(value) !== -1);
-    if (key) {
-      const value = $(element).attr('content')?.trim();
-      if (key === 'description') setProp(results, key, value);
-      else appendProperty(results, key, value);
-    }
-  });
+    const keyName = Object.keys($(element).attr()).find(value => keyNames.indexOf(value) !== -1);
+    if (keyName) {
+      const key = $(element).attr(keyName);
+        if (key) {
+          const value = $(element).attr('content')?.trim();
+          if (key === 'description') setProp(results, key, value);
+          else appendProperty(results, key, value);
+        }
+      }
+    });
 
   results.title = getProperty(
     results,
