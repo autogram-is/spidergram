@@ -3,7 +3,7 @@ import {
   Resource,
   HtmlTools,
   TextTools,
-  VerticeWorker,
+  GraphWorker,
   OutputLevel
 } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
@@ -40,7 +40,7 @@ export default class Analyze extends SgCommand {
       this.output = OutputLevel.verbose;
     }
 
-    const worker = new VerticeWorker<Resource>({
+    const worker = new GraphWorker<Resource>({
       collection: 'resources',
       task: async (resource) => {
         if (is.nonEmptyStringAndNotWhitespace(resource.body)) {

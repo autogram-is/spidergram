@@ -4,24 +4,24 @@ import is from '@sindresorhus/is';
 import {JsonObject} from 'type-fest';
 import {Project, Vertice, aql, ProjectConfig, ArangoStore, JobStatus} from '../index.js';
 
-export type VerticeWorkerTask<T extends Vertice = Vertice> = (item: T) => Promise<void>;
+export type GraphWorkerTask<T extends Vertice = Vertice> = (item: T) => Promise<void>;
 
-export interface VerticeWorkerOptions<T extends Vertice = Vertice> {
+export interface GraphWorkerOptions<T extends Vertice = Vertice> {
   project?: Partial<ProjectConfig>;
   items?: T[];
   collection?: string;
   filter?: AqlQuery;
   limit?: number;
   batchSize?: number;
-  task: VerticeWorkerTask<T>;
+  task: GraphWorkerTask<T>;
 }
 
-export class VerticeWorker<T extends Vertice = Vertice> extends EventEmitter {
+export class GraphWorker<T extends Vertice = Vertice> extends EventEmitter {
   readonly status: JobStatus;
   protected project!: Project;
   protected graph!: ArangoStore;
 
-  constructor(protected options: Partial<VerticeWorkerOptions<T>> = {}) {
+  constructor(protected options: Partial<GraphWorkerOptions<T>> = {}) {
     super();
     this.status = {
       startTime: 0,
@@ -32,7 +32,7 @@ export class VerticeWorker<T extends Vertice = Vertice> extends EventEmitter {
     };
   }
 
-  async run(options: Partial<VerticeWorkerOptions<T>> = {}): Promise<JobStatus> {
+  async run(options: Partial<GraphWorkerOptions<T>> = {}): Promise<JobStatus> {
     const workerOptions = {
       ...this.options,
       ...options,
@@ -83,7 +83,7 @@ export class VerticeWorker<T extends Vertice = Vertice> extends EventEmitter {
     }
   }
 
-  async performTask(item: T, task: VerticeWorkerTask<T>): Promise<void> {
+  async performTask(item: T, task: GraphWorkerTask<T>): Promise<void> {
     return task(item).then(() => {
         this.status.finished++;
       })
