@@ -88,6 +88,14 @@ export interface ScreenshotOptions {
    * @type {('jpeg' | 'png')}
    */
   type: 'jpeg' | 'png',
+
+  /**
+   * Maximium number of images to capture when multiple elements match the given selector.
+   * 
+   * @defaultValue Infinity
+   * @type {Number}
+   */
+  limit: number,
 }
 
 export class ScreenshotTool extends AsyncEventEmitter {
@@ -111,6 +119,7 @@ export class ScreenshotTool extends AsyncEventEmitter {
     selectors: [],
     type: 'png',
     fullPage: false,
+    limit: Infinity
   }
 
   async capture(page: Page, options: Partial<ScreenshotOptions> = {}) {
@@ -119,7 +128,7 @@ export class ScreenshotTool extends AsyncEventEmitter {
       storage: await Project.config().then(project => project.files()),
       ...options
     }
-    const {storage, directory, viewports, orientation, selectors, type, fullPage } = settings;
+    const {storage, directory, viewports, orientation, selectors, type, fullPage, limit } = settings;
 
     const results: string[] = [];
 
@@ -128,7 +137,7 @@ export class ScreenshotTool extends AsyncEventEmitter {
       await page.setViewportSize(materializedViewports[v]);
       let pwOptions:PageScreenshotOptions = { type, fullPage, scale: 'css' };
       
-      if (is.emptyArray(selectors)) {
+      if (is.undefined(selectors) || is.emptyArray(selectors)) {
         const filename = `${directory}/${this.getFilename(page.url(), v, undefined, fullPage)}.${type}`;
         if (fullPage === false) {
           pwOptions.clip = { x: 0, y: 0, ...materializedViewports[v] }
@@ -139,15 +148,23 @@ export class ScreenshotTool extends AsyncEventEmitter {
         this.emit('capture', filename);
         results.push(filename);
       } else {
-        for (let selector in selectors) {
-          const filename = `${directory}/${this.getFilename(page.url(), v, selector, fullPage)}.${type}`;
-          const locator = page.locator(selector);
-          
-          await page.locator(selector).scrollIntoViewIfNeeded();
-          const buffer = await locator.screenshot(pwOptions);
-          await storage.writeStream(filename, Readable.from(buffer));
-          this.emit('capture', filename);
-          results.push(filename);
+        for (let selector of selectors) {
+          let filename = `${directory}/${this.getFilename(page.url(), v, selector, fullPage)}.${type}`;
+          const max = Math.min(limit, await page.locator(selector).count());
+
+          if (max === 0) continue;
+
+          for (let l = 0; l < max; l++) {
+            let locator = page.locator(selector).nth(l);
+            await locator.scrollIntoViewIfNeeded();
+            if (l > 0) {
+              filename = `${directory}/${this.getFilename(page.url(), v, selector, fullPage)}-${l}.${type}`;
+            }
+            const buffer = await locator.screenshot(pwOptions);
+            await storage.writeStream(filename, Readable.from(buffer));
+            this.emit('capture', filename);
+            results.push(filename);
+          }
         }  
       }
     }
