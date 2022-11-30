@@ -1,129 +1,135 @@
 {
   "name": "spidergram",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Structural analysis tools for complex web sites",
+  "main": "./dist/index.js",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",
   "engines": {
-    "node": ">=18.11.0"
+    "node": "^18.0.0"
   },
   "bin": {
-    "spidergram": "./bin/run"
+    "spidergram": "./bin/run.js"
   },
   "scripts": {
     "clean": "rm -rf ./dist",
     "nuke": "npm run clean; rm -rf ./node_modules; rm package-lock.json; npm install",
-    "test": "ava",
-    "lint": "xo",
-    "fix": "xo --fix",
+    "prepublish": "npm run build",
     "build": "npm run clean; npm run compile",
     "compile": "tsc",
-    "scratch": "ts-node-esm source/examples/scratch.ts",
-    "prepare": "npm run clean; npm run compile",
-    "pretest": "npm run clean; npm run compile",
-    "docs": "rm -rf ./docs/*; typedoc ./source/index.ts --out ./docs"
+    "scratch": "ts-node-esm src/examples/scratch.ts",
+    "docs": "rm -rf ./docs/*; typedoc src/index.ts --out ./docs"
   },
   "files": [
-    "/dist/**/*",
-    "/bin",
-    "/npm-shrinkwrap.json",
-    "/oclif.manifest.json"
+    "dist/**/*",
+    "bin"
   ],
+  "author": {
+    "name": "Autogram",
+    "email": "team@autogram.is",
+    "url": "https://autogram.is"
+  },
+  "contributors": [
+      "Jeff Eaton <jeff@autogram.is> (http://eaton.fyi)",
+      "Ethan Marcotte <karen@autogram.is> (https://ethanmarcotte.com)",
+      "Karen McGrane <karen@autogram.is> (https://karenmcgrane.com)"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/autogram-is/spidergram"
+  },
+  "bugs": {
+    "url": "https://github.com/autogram-is/spidergram/issues"
+  },
+  "homepage": "https://spidergram.autogram.is",
   "oclif": {
     "bin": "spidergram",
     "dirname": "spidergram",
     "commands": "./dist/cli/commands",
     "topics": {
-      "project": { "description": "Configure crawl projects" },
-      "graph": { "description": "Manage and query stored crawl data" }
+      "project": {
+        "description": "Configure crawl projects"
+      },
+      "db": {
+        "description": "Manage and query stored crawl data"
+      }
     },
     "topicSeparator": " ",
     "plugins": [
       "@oclif/plugin-help"
     ]
   },
-  "xo": {
-    "space": true,
-    "bracketSpacing": true,
-    "semicolon": true,
-    "rules": {
-      "new-cap": "off",
-      "max-params": "off"
-    },
-    "envs": [
-      "es2022",
-      "node"
-    ]
-  },
-  "author": "Jeff Eaton <jeff@autogram.is> (http://eaton.fyi)",
-  "license": "MIT",
   "dependencies": {
-    "@autogram/url-tools": "^2.2.0",
-    "@oclif/core": "^1.19.1",
-    "@oclif/help": "^1.0.3",
+    "@autogram/url-tools": "^2.5.2",
     "@oclif/plugin-help": "^5",
     "@oclif/plugin-plugins": "^2.1.6",
     "@sindresorhus/is": "^5.3.0",
     "@sindresorhus/slugify": "^2.1.1",
-    "@types/cli-progress": "^3.11.0",
-    "@types/content-type": "^1.1.5",
-    "@types/d3": "^7.4.0",
-    "@types/inquirer": "^9.0.3",
-    "@types/jsdom": "^20.0.0",
-    "@types/jsonfile": "^6.1.0",
-    "@types/mime": "^3.0.1",
-    "@types/minimatch": "^5.1.2",
-    "@types/server-destroy": "^1.0.1",
+    "@types/jsonld": "^1.5.8",
     "@vladfrangu/async_event_emitter": "^2.1.2",
-    "arangojs": "^8.0.0-rc.1",
     "arrify": "^3.0.0",
     "chalk": "^5.1.2",
-    "cheerio": "^1.0.0-rc.12",
     "class-transformer": "^0.5.1",
     "cli-progress": "^3.11.2",
+    "cli-table3": "^0.6.3",
     "content-type": "^1.0.4",
-    "crawlee": "^3.1.0",
-    "d3": "^7.6.1",
     "dot-prop": "^7.2.0",
     "dotenv": "^16.0.3",
     "filenamify": "^5.1.1",
-    "google-auth-library": "^8.6.0",
-    "googleapis": "^108.0.1",
-    "html-to-text": "^8.2.1",
+    "humanize-url": "^3.0.0",
     "inquirer": "^9.1.4",
-    "jsdom": "^20.0.1",
-    "jsonfile": "^6.1.0",
-    "listr2": "^5.0.5",
+    "jsonld": "^8.1.0",
+    "lodash": "^4.17.21",
     "log-symbols": "^5.1.0",
+    "luxon": "^3.1.0",
     "mime": "^3.0.0",
     "minimatch": "^5.1.0",
     "object-hash": "^3.0.0",
     "open": "^8.4.0",
-    "playwright": "^1.27.1",
-    "readability-scores": "^1.0.8",
+    "prepend-http": "^4.0.0",
+    "protocolify": "^4.0.0",
     "reflect-metadata": "^0.1.13",
-    "server-destroy": "^1.0.1",
+    "schema-dts": "^1.1.0",
+    "terminal-link": "^3.0.0",
     "type-fest": "^3.1.0",
     "typefs": "^1.1.147",
-    "uuid": "^9.0.0",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.18.12/xlsx-0.18.12.tgz",
-    "xpath-ts": "^1.3.13"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@ava/typescript": "^3.0.1",
     "@oclif/test": "^2.2.8",
     "@types/cheerio": "^0.22.31",
+    "@types/cli-progress": "^3.11.0",
+    "@types/content-type": "^1.1.5",
     "@types/html-to-text": "^8.1.1",
+    "@types/inquirer": "^9.0.3",
+    "@types/jsdom": "^20.0.0",
+    "@types/lodash": "^4.14.189",
+    "@types/luxon": "^3.1.0",
+    "@types/mime": "^3.0.1",
+    "@types/minimatch": "^5.1.2",
     "@types/node": "^18.11.0",
     "@types/object-hash": "^2.2.1",
     "@types/uuid": "^8.3.4",
-    "ava": "^4.3.3",
     "oclif": "^3",
     "shx": "^0.3.3",
     "ts-node": "^10.8.0",
     "typedoc": "^0.23.19",
-    "typescript": "^4.8.4",
-    "xo": "^0.51.0"
+    "typescript": "^4.8.4"
+  },
+  "peerDependencies": {
+    "@oclif/core": "^1.19.1",
+    "arangojs": "^8.0.0",
+    "cheerio": "^1.0.0-rc.12",
+    "crawlee": "^3.1.0",
+    "googleapis": "^108.0.1",
+    "html-to-text": "^8.2.1",
+    "jsdom": "^20.0.1",
+    "listr2": "^5.0.5",
+    "playwright": "^1.27.1",
+    "readability-scores": "^1.0.8",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.18.12/xlsx-0.18.12.tgz",
+    "xpath-ts": "^1.3.13"
   }
 }

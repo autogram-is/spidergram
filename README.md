@@ -1,8 +1,12 @@
 # Spidergram: Structural analysis tools for complex web sites
 
-Large-scale inventory and analysis of web content is kind of hellish. Most automated tools are focused on SEO, and assume that a spreadsheet of URLs is the desired endgame. On the other hand, most programmer-friendly web scraping toolkits are built to automate web APIs or extract specific bits of data from others' web sites. (Grabbing a list of every product in an Amazon category, for ex.)
+Spidergram is a toolbox for exploring, auditing, and analyzing complicated web sites — particularly ones that use multiple CMSs, span more than one domain, and are maintained by multiple teams inside an organization. Although it works well for smaller projects, Autogram built it to overcome the roadblocks we hit when using existing crawling and inventory tools on our clients' complex, multi-site web properties.
 
-Autogram often works with companies that are trying to get a handle on their own huge content ecosystems. We need:
+## Why this thing?
+
+Large-scale inventory and analysis of web content is kind of hellish. Most automated tools are focused on SEO, and assume that a spreadsheet of URLs is the desired endgame. On the other hand, most programmer-friendly web scraping toolkits are built to automate web APIs or extract specific bits of data from others' web sites. (Grabbing a list of every product in an Amazon category, extracting job listings, etc.)
+
+Autogram often works with companies that are trying to get a handle on their own huge content ecosystems. We needed:
 
 - Simple exploratory spidering, *and* complex conditional rules for normalizing and traversing large multi-site content ecosystems.
 - The ability to preserve the complex relationships between each page, *and* layer on additional information from other sources like internal client spreadsheets and CMS inventories, analytics APIs, etc.
@@ -10,25 +14,55 @@ Autogram often works with companies that are trying to get a handle on their own
 
 There are tons of useful programs, hosted services, and open source projects that do *some* of that, but finding anything that supported it all was a nightmare. Unforatunately, we're huge nerds, so we had to go build it.
 
-## Why this thing?
+## Installation
 
-Spidergram's core goal is provide a toolbox of composable web spidering and scraping tools, with sensible defaults for common content inventory and analysis tasks. Inspired by the 11ty project, quite a bit of customization is possible by passing new settings into its classes, but full control can be achieved by composing new crawl processes and analysis pipelines out of the individual components. Although most can be ignored if you're using pre-built processes, customizing them will be easier if you understand how the pieces fit together.
+1. Make sure you're running NodeJS 18 or higher
+2. Install [ArangoDB community edition](https://www.arangodb.com/download-major/) server
+3. `npm install spidergram`
 
-## What Spidergram is built with
+## Usage
 
-- [Crawlee](): Apify's excellent Crawlee project handles the meat and potatoes work of recursively crawling and parsing url responses using a variety of technologies. Spidergram's core `Spider` class is built on top of Crawlee's PlaywrightCrawler.
-- [ArangoDB](): Arango is a free/open source database engine that can store large, semi-structured documents *and* complex graph data, exposing them both with a single query/reporting language. Although Spidergram's underlying data entities can be stored anywhere serialized JSON is supported, its workflow and reporting tools are built to leverage Arango's capabilities.
-- Utility helpers
-  - [TypeFS](https://typefs.io) to manage multiple buckets of files (configuration, web downloads, page and page-element screenshots, etc) locally or in cloud storage.
-  - [SheetJS](https://sheetjs.com) to import and export complex spreadsheet data; never settle for a folder full of CSV files again.
-  - [Oclif](https://oclif.org) and [Listr2](https://listr2.kilic.dev) for command line configuration, analysis, and crawl monitoring tools that can be extended for specific projects.
-  - [D3](https://d3js.org) to generate visualizations of complex structural relationships and patterns.
+```
+import { Spider } from 'spidergram';
+await new Spider().run('https://example.com');
+```
 
-## What Spidergram adds to the mix
+Import the 'Spider' class to your script, create an instance, and call the 'run' method. Without any other options, Spidergram will hit the URL you give it, save the contents to the database, search for other links *within the same domain*, and follow them until it's visited and saved everything it can find.
 
-- A pre-built, easy-to-extend data model that preserves the complexity of multi-site web data
-  - **UniqueUrls**, and **Resources**: The core domain entities in Spidergram's default graph. They represent discovered URLs (either from your configuration or discovered by parsing other pages), and the data retrieved from those URLs.
-  - **RespondsWith** and **LinksTo**: The two key relationships populated during a default Spidergram crawl. They represent the relationship between a UniqueUrl and the Resource that it generates when visited; and the relationship between a Resource and *any* UniqueUrl that it links *to*.
-  - **IsChildOf**, **IsVariantOf**, and **AppearsOn**: Three additional relationship types that aren't populated during a default crawl, but can be used by post-crawl analysis tools to represent things like URL hierarchies, navigation hierarchies, alternate-language versions of a page, and sub-page components that are reused across many pages.
-  - **Plugins** can add additional document and relationship types to the graph. A *Business Department* entity that connects to Resources via an *IsResponsibleFor* relationship, for example, might allow ownership information to be grafted onto the pool of Resources. A *Content* entity might track recurring instances of CMS entities that don't correspond 1:1 with a single page. Knock yourself out.
-- Maximum preserveration of crawl data. Spidergram uses a lot of memory and disk space, because it remembers everything it sees. You can pare it down if you don't need it, but you'll never be left wondering where the number in a summary report came from: the data is all there to query, slice, and dice.
+An Options object can be passed into the Spider when it's created to override its default behavior.
+
+```
+const spider = new Spider({
+  maxConcurrency: 2,                      // Run two headless browsers in parallel
+  maxRequestsPerMinute: 60,               // Limit them to 1 request per second
+  downloadMimeTypes: ['application/pdf'], // Download any PDF files encountered
+
+  pageHandler: ({ page, saveResource, enqueueUrls }) => {
+    // 'page' is the Playwright page object; you can use it to control
+    // the browser, grab HTML snippets, take screenshots, and more.
+    const html = await page.content();
+
+    // Save metadata about the current page to the database, with the raw
+    // page markup in the resource's "body" property
+    await saveResource({ body: html })
+
+    // Find URLs on the page, record them all in the database, and visit
+    // any that match our target domain.
+    await enqueueUrls();
+  }
+});
+
+await spider.run('https://example.com');
+```
+
+## The Spidergram CLI
+
+Installing Spidergram globally (`npm install -g spidergram`) will give you access to its command line interface; `spidergram --help` will list the available commands. Kicking off a new crawl, exporting simple reports, and checking on the status of the database can all be done from the CLI, and custom projects that use Spidergram can add their own commands to the mix.
+
+## Analyzing the results
+
+Spidergram comes with a handful of canned queries and reports that can be run against most crawls (HTTP errors, lists of downloadable files vs HTML pages, etc); the `spidergram-boilerplate` project is a quick, customizable starting point for experimentation with examples of custom crawl rules and spreadsheet-based reports. We'll be adding a tool to automatically generate a new Spidergram-based project shortly: once that's in place, `npx spidergram generate mySpiderProject` will automate the initial steps.
+
+## All the other stuff
+
+Spidergram provides a pile of helper methods to extract structured data from pages, capture organizational relationships like navigation hierarchy, and record subtle connections like "page A is a french translation of page B." Documentation and more examples are coming shortly.

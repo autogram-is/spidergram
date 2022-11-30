@@ -1,33 +1,43 @@
 {
-  "name": "spidergram",
-  "root": "/Users/jeff/Work/spidergram",
+  "name": "test",
+  "root": "./",
   "files": {
-    "default": "storage",
+    "default": "downloads",
     "disks": {
       "config": {
         "driver": "file",
-        "root": "/Users/jeff/Work/spidergram/config",
+        "root": "./storage/config",
         "jail": true
       },
-      "storage": {
+      "downloads": {
         "driver": "file",
-        "root": "/Users/jeff/Work/spidergram/storage",
+        "root": "./storage/downloads",
         "jail": true
       },
       "output": {
         "driver": "file",
-        "root": "/Users/jeff/Work/spidergram/output",
+        "root": "./storage/output",
         "jail": true
       }
     }
   },
   "graph": {
     "connection": {
-      "url": "http://127.0.0.1:8529",
+      "url": "http://192.168.88.126:8529",
       "auth": {
         "username": "root",
         "password": ""
       }
     }
+  },
+  "normalizer": {
+    "forceProtocol": "https:",
+    "forceLowercase": "host",
+    "discardSubdomain": "ww*",
+    "discardAnchor": true,
+    "discardAuth": true,
+    "discardIndex": "**/{index,default}.{htm,html,aspx,php}",
+    "discardSearch": "*",
+    "discardTrailingSlash": false
   }
 }
