@@ -10,14 +10,17 @@ Spidergram is a toolbox for exploring, auditing, and analyzing complicated web s
 
 ## Usage
 
-```import { Spider } from 'spidergram';
-await new Spider().run('https://example.com');```
+```
+import { Spider } from 'spidergram';
+await new Spider().run('https://example.com');
+```
 
 Import the 'Spider' class to your script, create an instance, and call the 'run' method. Without any other options, Spidergram will hit the URL you give it, save the contents to the database, search for other links *within the same domain*, and follow them until it's visited and saved everything it can find.
 
 An Options object can be passed into the Spider when it's created to override its default behavior.
 
-```const spider = new Spider({
+```
+const spider = new Spider({
   maxConcurrency: 2,                      // Run two headless browsers in parallel
   maxRequestsPerMinute: 60,               // Limit them to 1 request per second
   downloadMimeTypes: ['application/pdf'], // Download any PDF files encountered
@@ -37,7 +40,8 @@ An Options object can be passed into the Spider when it's created to override it
   }
 });
 
-await spider.run('https://example.com');```
+await spider.run('https://example.com');
+```
 
 ## The Spidergram CLI
 
