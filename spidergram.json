@@ -1,5 +1,5 @@
 {
-  "name": "test",
+  "name": "spidergram",
   "root": "./",
   "files": {
     "default": "downloads",
@@ -23,7 +23,7 @@
   },
   "graph": {
     "connection": {
-      "url": "http://192.168.88.126:8529",
+      "url": "http://127.0.0.1:8529",
       "auth": {
         "username": "root",
         "password": ""
