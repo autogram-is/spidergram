@@ -24,16 +24,24 @@ export default class GraphInfo extends SgCommand {
     
     if (dbStatus) {
       await graph.db.listCollections()
-        .then(collections => collections.map(collection => {
-          return {
-            name: collection.name,
-            type: (collection.type === 2) ? 'document' : 'edge',
-          }
-        }))
+        .then(async metadata => {
+            const data: Record<string, unknown>[] = [];
+            for (let coll of metadata) {
+              const collection = graph.db.collection(coll.name);
+              const count = (await collection.count()).count;
+              data.push({
+                name: coll.name,
+                type: (coll.type === 2) ? 'document' : 'edge',
+                records: count
+              });
+            }
+            return data;
+        })
         .then(collections => {
           this.ux.table(collections, {
             name: { header: 'Collection', minWidth: 20 },
             type: {},
+            records: {}
           });
         })
     }
