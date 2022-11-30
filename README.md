@@ -2,6 +2,18 @@
 
 Spidergram is a toolbox for exploring, auditing, and analyzing complicated web sites — particularly ones that use multiple CMSs, span more than one domain, and are maintained by multiple teams inside an organization. Although it works well for smaller projects, Autogram built it to overcome the roadblocks we hit when using existing crawling and inventory tools on our clients' complex, multi-site web properties.
 
+## Why this thing?
+
+Large-scale inventory and analysis of web content is kind of hellish. Most automated tools are focused on SEO, and assume that a spreadsheet of URLs is the desired endgame. On the other hand, most programmer-friendly web scraping toolkits are built to automate web APIs or extract specific bits of data from others' web sites. (Grabbing a list of every product in an Amazon category, extracting job listings, etc.)
+
+Autogram often works with companies that are trying to get a handle on their own huge content ecosystems. We needed:
+
+- Simple exploratory spidering, *and* complex conditional rules for normalizing and traversing large multi-site content ecosystems.
+- The ability to preserve the complex relationships between each page, *and* layer on additional information from other sources like internal client spreadsheets and CMS inventories, analytics APIs, etc.
+- A solid framework for iterative analysis of that multi-layered data, not just a million-row spreadsheet and two weeks with Excel.
+
+There are tons of useful programs, hosted services, and open source projects that do *some* of that, but finding anything that supported it all was a nightmare. Unforatunately, we're huge nerds, so we had to go build it.
+
 ## Installation
 
 1. Make sure you're running NodeJS 18 or higher
