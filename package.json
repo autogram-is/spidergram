@@ -25,6 +25,25 @@
     "dist/**/*",
     "bin"
   ],
+  "author": {
+    "name": "Autogram",
+    "email": "team@autogram.is",
+    "url": "https://autogram.is"
+  },
+  "contributors": [
+      "Jeff Eaton <jeff@autogram.is> (http://eaton.fyi)",
+      "Ethan Marcotte <karen@autogram.is> (https://ethanmarcotte.com)",
+      "Karen McGrane <karen@autogram.is> (https://karenmcgrane.com)"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/autogram-is/spidergram"
+  },
+  "bugs": {
+    "url": "https://github.com/autogram-is/spidergram/issues"
+  },
+  "homepage": "https://spidergram.autogram.is",
   "oclif": {
     "bin": "spidergram",
     "dirname": "spidergram",
@@ -42,8 +61,6 @@
       "@oclif/plugin-help"
     ]
   },
-  "author": "Jeff Eaton <jeff@autogram.is> (http://eaton.fyi)",
-  "license": "MIT",
   "dependencies": {
     "@autogram/url-tools": "^2.5.2",
     "@oclif/plugin-help": "^5",
