@@ -19,15 +19,14 @@ export default class GA extends SgCommand {
     // Obtain user credentials to use for the request
     await GoogleTools.authenticate();
 
-    const res = await GoogleTools.analyticsReporting4.reports.batchGet({
-      requestBody: {
-        reportRequests: [{
-          viewId: flags.view,
-          dateRanges: [ { startDate: '14daysAgo', endDate: '7daysAgo' } ],
-          metrics: [ { expression: 'ga:users', } ],
-        }],
-      },
+    const request = GoogleTools.buildUaRequest(flags.view, {
+      dateWindow: 'month',
+      dimension: 'page',
+      pageSize: 10,
     });
-    console.log(res.data.reports?.pop()?.data);
+
+    const results = await GoogleTools.fetchUaReport(request);
+
+    this.ux.styledObject(results.data?.rows?.map(value => value.metrics));
   }
 }
