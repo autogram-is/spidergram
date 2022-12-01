@@ -28,11 +28,12 @@ export default class GraphInfo extends SgCommand {
             const data: Record<string, unknown>[] = [];
             for (let coll of metadata) {
               const collection = graph.db.collection(coll.name);
-              const count = (await collection.count()).count;
+              const details = await collection.figures();
               data.push({
                 name: coll.name,
                 type: (coll.type === 2) ? 'document' : 'edge',
-                records: count
+                records: details.count.toLocaleString(),
+                bytes: Number.parseInt(details.figures['documentsSize']).toLocaleString()
               });
             }
             return data;
@@ -41,8 +42,9 @@ export default class GraphInfo extends SgCommand {
           this.ux.table(collections, {
             name: { header: 'Collection', minWidth: 20 },
             type: {},
-            records: {}
-          });
+            records: {},
+            bytes: {}
+          }, { sort: 'type' });
         })
     }
   }
