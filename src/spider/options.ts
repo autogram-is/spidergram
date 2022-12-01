@@ -4,6 +4,9 @@ import { mimeGroups } from './helpers/mime.js';
 import {SpiderHook} from './hooks/index.js';
 import {EnqueueUrlOptions} from './links/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';
+import {readPackageUp} from 'read-pkg-up';
+
+const pkgData = await readPackageUp();
 
 export type SpiderOptions = InternalSpiderOptions & Omit<PlaywrightCrawlerOptions,
 'preNavigationHooks' |
@@ -165,4 +168,5 @@ const defaultSpiderOptions: InternalSpiderOptions = {
   urlOptions: {},
   parseMimeTypes: mimeGroups.page,
   downloadMimeTypes: [],
+  userAgent: `Spidergram ${pkgData?.packageJson.version}`
 };
