@@ -19,7 +19,7 @@ export default class GA extends SgCommand {
     // Obtain user credentials to use for the request
     await GoogleTools.authenticate();
 
-    const res = await GoogleTools.analyticsReporting.reports.batchGet({
+    const res = await GoogleTools.analyticsReporting4.reports.batchGet({
       requestBody: {
         reportRequests: [{
           viewId: flags.view,
