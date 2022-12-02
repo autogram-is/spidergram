@@ -44,7 +44,7 @@ export abstract class Vertice {
     } else if (is.array(r)) {
       return r.join('/');
     } else {
-      return r.id;
+      return r.documentId;
     }
   }
 
@@ -141,7 +141,7 @@ export abstract class Vertice {
     return this._key;
   }
 
-  get id(): string {
+  get documentId(): string {
     if (is.undefined(this._id)) {
       return [this._collection, this.key].join('/');
     }

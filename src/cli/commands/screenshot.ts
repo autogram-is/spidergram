@@ -31,6 +31,9 @@ export default class Screenshot extends SgCommand {
     selector: Flags.string({
       summary: 'CSS selector for element to capture',
     }),
+    limit: Flags.integer({
+      summary: 'Max number of matching elements to capture',
+    }),
     viewport: Flags.string({
       summary: 'Page viewport size',
       description: "Viewport can be a resolution in 'width,height' format; a preset name (iphone, ipad, hd, or fhd); or the preset 'all', which generates one screenshot for each defined preset.'",
@@ -64,20 +67,19 @@ export default class Screenshot extends SgCommand {
   }
 
   async run() {
-    const {project} = await this.getProjectContext();
     const {argv: urls, flags} = await this.parse(Screenshot);
 
     const captureTool = new ScreenshotTool();
     captureTool.on('capture', filename => this.ux.info(`Saved ${filename}...`));
 
     const options:Partial<ScreenshotOptions> = {
-      storage: project.files('storage'),
       directory: flags.directory,
       viewports: [flags.viewport],
       orientation: flags.orientation,
       selectors: flags.selector ? [flags.selector] : undefined,
       type: flags.format,
       fullPage: flags.fullpage,
+      limit: flags.limit ?? Infinity
     }
 
     const crawler = new PlaywrightCrawler({

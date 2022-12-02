@@ -101,8 +101,8 @@ export abstract class SgCommand extends Command {
 
     try {
       const {flags} = await this.parse(this.constructor as typeof SgCommand);
-      const _configFilePath = is.string(flags.config) ? flags.config : undefined;
-      project = await Project.config({ _configFilePath });
+      const options = is.string(flags.config) ? { _configFilePath: flags.config } : undefined;
+      project = await Project.config(options);
       graph = await project.graph();
     } catch(error: unknown) {
       if (is.error(error)) {

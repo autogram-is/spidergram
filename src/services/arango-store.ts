@@ -182,13 +182,13 @@ export class ArangoStore {
     // When bulk deleting, remove edges first.
     for (const edge of input) {
       if (isEdge(edge)) {
-        promises.push(this.db.collection(edge._collection).remove(edge.id));
+        promises.push(this.db.collection(edge._collection).remove(edge.documentId));
       }
     }
 
     for (const vertice of input) {
       if (!isEdge(vertice)) {
-        promises.push(this.db.collection(vertice._collection).remove(vertice.id));
+        promises.push(this.db.collection(vertice._collection).remove(vertice.documentId));
       }
     }
 

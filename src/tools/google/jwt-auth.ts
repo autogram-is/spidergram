@@ -1,11 +1,7 @@
 import is from '@sindresorhus/is';
 import arrify from 'arrify';
-import dotenv from 'dotenv';
 import {google} from 'googleapis';
-import { Project } from '../../index.js';
-
-dotenv.config();
-
+import {Project} from '../../index.js';
 
 export interface GoogleKeyJson {
   "type": string,
