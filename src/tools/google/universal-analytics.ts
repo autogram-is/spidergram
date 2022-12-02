@@ -1,10 +1,12 @@
 import { google, analyticsreporting_v4 } from 'googleapis'
 import { authenticate } from './jwt-auth.js';
 import _ from 'lodash';
+import { DateTime } from 'luxon';
 
-export const UniversalAnalytics = google.analyticsreporting('v4');
 export type UaRequest = analyticsreporting_v4.Schema$ReportRequest;
 export type UaReport = analyticsreporting_v4.Schema$Report;
+
+type DateWindow = 'day' | 'week' | 'month' | 'year';
 
 /**
  * Simplified reporting options for Google Universal Analytics.
@@ -33,19 +35,19 @@ export interface UaRequestOptions {
 
 
   /**
-   * The time span the report will cover.
+   * The unit of time covered by the report.
    *
-   * @defaultValue {'year'}
-   * @type {('day' | 'week' | 'month' | 'year')}
+   * @defaultValue {'month'}
+   * @type {DateWindow}
    */
-  dateWindow: 'day' | 'week' | 'month' | 'year',
+  dateWindow: DateWindow,
 
   /**
    * Used in conjunction with `dateWindow` to calculate the report's start
    * and end date.
    * 
    * A dateOffset of -1 will generate a range starting one dateWindow ago, and
-   * ending yesterday. (e.g., on November 10th a window of 'month' and and
+   * ending yesterday. (e.g., on November 10th a window of 'month' and an
    * offset of '-1' would generate a report for Oct9-Nov9.)
    * 
    * A dateOffset of 0 will generate a range covering the most recent complete
@@ -61,7 +63,7 @@ export interface UaRequestOptions {
   dateOffset: number
   
   /**
-   * The dimension used to subdivide site traffic data.
+   * The dimension used to subdivide traffic data.
    * 
    * 'page': Stats for individual URLs
    * 'host': Aggregate stats for each hostname
@@ -152,7 +154,8 @@ const defaultOptions: UaRequestOptions = {
 // report rather than a batched one.
 export async function fetchUaReport(request: UaRequest) {
   await authenticate('https://www.googleapis.com/auth/analytics.readonly');
-  return UniversalAnalytics.reports.batchGet({ requestBody: { reportRequests: [ request ] } })
+  const ua = google.analyticsreporting('v4');
+  return ua.reports.batchGet({ requestBody: { reportRequests: [ request ] } })
     .then(value => value.data.reports?.pop() ?? {});
 }
 
@@ -183,8 +186,8 @@ export function buildUaRequest(viewId: string, customOptions: Partial<UaRequestO
       break;
   }
   
-  // TODO: generate date range
-  request.dateRanges = [ { startDate: '365daysAgo', endDate: 'yesterday' } ];
+  // Use our helper function to generate a windowed date range of 1 day, week, month, or year
+  request.dateRanges = [buildDateRange(options.dateWindow, options.dateOffset)];
 
   // Generate metrics
   request.metrics = buildMetrics(options.metrics);
@@ -207,6 +210,60 @@ export function buildUaRequest(viewId: string, customOptions: Partial<UaRequestO
   }
 
   return request;
+}
+
+export function buildDateRange(window: DateWindow = 'month', offset = -1, today = DateTime.local()) {
+  // Prep the starting points
+  let start = today.minus({ days: 1 });
+  let end = today.minus({ days: 1 });
+
+  // If the offset is non-negative, we want to 'snap' to a week, month, or year boundary.
+  if (offset >= 0) {
+    switch (window) {
+      case 'day':
+        start = start.minus({ day: offset });
+        end = start;
+        break;
+
+      case 'week':
+        start = DateTime.fromObject({ weekYear: start.year, weekNumber: start.weekNumber })
+          .minus({ week: offset + 1 }).startOf('week');
+        end = start.endOf('week');
+        break;
+
+      case 'month':
+        start = DateTime.fromObject({ year: start.year, month: start.month })
+          .minus({ month: offset + 1 }).startOf('month');
+        end = start.endOf('month');
+        break;
+
+      case 'year':
+        start = DateTime.fromObject({ year: start.year })
+          .minus({ year: offset + 1 }).startOf('year');
+        end = start.endOf('year');
+        break;
+    }
+  } else {
+    // 'end' will always be yesterday; it's a rolling window.
+    switch (window) {
+      case 'week':
+        start = end.minus({ week: 1, day: -1 });
+        break;
+
+      case 'month':
+        start = end.minus({ month: 1, day: -1});
+        break;
+
+      case 'year':
+        start = end.minus({ year: 1, day: -1 });
+        break;
+    }
+  }
+
+  return {
+    startDate: start.toISODate(),
+    endDate: end.toISODate(),
+  }
 }
 
 function buildMetrics(input: string[] | Record<string, string>) {

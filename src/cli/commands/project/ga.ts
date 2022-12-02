@@ -17,16 +17,14 @@ export default class GA extends SgCommand {
     const {flags} = await this.parse(GA);
 
     // Obtain user credentials to use for the request
-    await GoogleTools.authenticate();
+    await GoogleTools.ServiceAccount.authenticate();
 
-    const request = GoogleTools.buildUaRequest(flags.view, {
-      dateWindow: 'month',
+    const request = GoogleTools.UniversalAnalytics.buildUaRequest(flags.view, {
       dimension: 'page',
       pageSize: 10,
     });
 
-    const results = await GoogleTools.fetchUaReport(request);
-
+    const results = await GoogleTools.UniversalAnalytics.fetchUaReport(request);
     this.ux.styledObject(results.data?.rows?.map(value => value.metrics));
   }
 }
