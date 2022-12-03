@@ -220,9 +220,9 @@ export function buildUaRequest(viewId: string, customOptions: Partial<UaRequestO
  * specified dateWindow, much like the 'page' of a paged result set.
  *
  * @export
- * @param {DateWindow} [window='month'] The span of time the range should cover.
- * @param {number} [offset=-1] The span's offset from the current day.
- * @param {today} [DateTime.local()] Optional override for the 'current day'; useful for testing.
+ * @param window The span of time the range should cover.
+ * @param offset The span's offset from the current day.
+ * @param today Optional override for the 'current day'; primarily intended for testing.
  */
 export function buildDateRange(window: DateWindow = 'month', offset = -1, today = DateTime.local()): { startDate: string, endDate: string} {
   // Prep the starting points
