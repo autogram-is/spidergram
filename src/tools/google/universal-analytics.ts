@@ -36,6 +36,8 @@ export interface UaRequestOptions {
 
   /**
    * The unit of time covered by the report.
+   * 
+   * @see {@link buildDateRange}
    *
    * @defaultValue {'month'}
    * @type {DateWindow}
@@ -46,16 +48,7 @@ export interface UaRequestOptions {
    * Used in conjunction with `dateWindow` to calculate the report's start
    * and end date.
    * 
-   * A dateOffset of -1 will generate a range starting one dateWindow ago, and
-   * ending yesterday. (e.g., on November 10th a window of 'month' and an
-   * offset of '-1' would generate a report for Oct9-Nov9.)
-   * 
-   * A dateOffset of 0 will generate a range covering the most recent complete
-   * dateWindow. (e.g., on November 10th a window of 'month' and and
-   * offset of '0' would generate a report for Oct1-Oct31.)
-   * 
-   * Incrementing the dateOffset (1, 2, 3, etc) moves back in time by the
-   * specified dateWindow, much like the 'page' of a paged result set.
+   * @see {@link buildDateRange}
    *
    * @defaultValue {-1}
    * @type {number}
@@ -212,7 +205,26 @@ export function buildUaRequest(viewId: string, customOptions: Partial<UaRequestO
   return request;
 }
 
-export function buildDateRange(window: DateWindow = 'month', offset = -1, today = DateTime.local()) {
+/**
+ * Given a unit of time and an offset, generates start and end ISO dates.
+ * 
+ * A dateOffset of -1 will generate a range starting one dateWindow ago, and
+ * ending yesterday. (e.g., on November 10th a window of 'month' and an
+ * offset of '-1' would generate a report for Oct9-Nov9.)
+ * 
+ * A dateOffset of 0 will generate a range covering the most recent complete
+ * dateWindow. (e.g., on November 10th a window of 'month' and and
+ * offset of '0' would generate a report for Oct1-Oct31.)
+ * 
+ * Incrementing the dateOffset (1, 2, 3, etc) moves back in time by the
+ * specified dateWindow, much like the 'page' of a paged result set.
+ *
+ * @export
+ * @param {DateWindow} [window='month'] The span of time the range should cover.
+ * @param {number} [offset=-1] The span's offset from the current day.
+ * @param {today} [DateTime.local()] Optional override for the 'current day'; useful for testing.
+ */
+export function buildDateRange(window: DateWindow = 'month', offset = -1, today = DateTime.local()): { startDate: string, endDate: string} {
   // Prep the starting points
   let start = today.minus({ days: 1 });
   let end = today.minus({ days: 1 });
