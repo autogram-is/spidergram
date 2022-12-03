@@ -27,7 +27,7 @@ export async function find(
         ) {
           results.push({
             href,
-            text: $(element).text(),
+            text: $(element).text().trim(),
             label,
             selector,
             attributes,
