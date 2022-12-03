@@ -1,5 +1,6 @@
 {
   "name": "spidergram",
+  "description": "Example configuration for a Spidergram crawling project; Copy this file to spidergram.json to use its settings.",
   "root": "./",
   "files": {
     "default": "downloads",
