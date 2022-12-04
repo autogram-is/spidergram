@@ -2,30 +2,14 @@ import is from '@sindresorhus/is';
 import * as htmlparser2 from "htmlparser2";
 import { Handler, Result as HtmlMetaResult } from "htmlmetaparser";
 import * as cheerio from 'cheerio';
-
 import { htmlToText, HtmlToTextOptions } from 'html-to-text';
+import { Resource } from '../model/index.js';
 
-import { Properties } from '../model/helpers/properties.js';
 
 export { social as getSocialLinks, parseOpenGraph as getOpenGraph } from 'crawlee';
-import { Resource } from '../model/index.js';
 
 export function getPlainText(html: string, options?: HtmlToTextOptions): string {
   return htmlToText(html, options);
-}
-
-export function parseFeed(
-  feed: string | Buffer,
-  options?: Parameters<typeof htmlparser2.parseFeed>[1]
-  ) {
-  return htmlparser2.parseDocument(feed.toString());
-}
-
-export function getDocument(
-  html: string | Buffer,
-  options?: Parameters<typeof htmlparser2.parseDocument>[1]
-  ) {
-  return htmlparser2.parseDocument(html.toString());
 }
 
 export function parseWithCheerio(
@@ -65,12 +49,12 @@ export function getMetadata(input: string | Resource, baseUrl?: string) {
   }
 }
 
-export function getBodyAttributes(input: string | cheerio.Root): Properties<string> {
+export function getBodyAttributes(input: string | cheerio.Root) {
   const $ = is.string(input) ? parseWithCheerio(input) : input;
-  let results: Properties<string> = { ...$('body').attr() };
-  if ('class' in results) {
-    results.class = results.class?.toString().replace(/\s+/, ' ').split(' ');
+  let output: Record<string, string | string[]> = { ...$('body').attr() };
+  if ('class' in output) {
+    output.class = output.class?.toString().replace(/\s+/, ' ').split(' ');
   }
-  return results;
+  return output;
 }
 
