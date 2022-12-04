@@ -4,6 +4,7 @@ import {Readable} from 'node:stream';
 import is from '@sindresorhus/is';
 import * as XLSX from 'xlsx';
 import {JsonPrimitive} from 'type-fest';
+import { Buffer } from 'node:buffer';
 
 XLSX.set_fs(fs);
 XLSX.stream.set_readable(Readable);
@@ -28,10 +29,12 @@ export type SheetData = RowData[];
 export type RowData = Record<string, CellValue>;
 export type CellValue = JsonPrimitive;
 
-type SpreadsheetSaveOptions = {
+type SpreadsheetWriteOptions = {
   format: XLSX.BookType;
   compression: boolean;
 };
+
+type SpreadsheetGenerateOptions = Omit<XLSX.WritingOptions, 'type'>;
 
 export class Spreadsheet {
   static utils = XLSX.utils;
@@ -60,8 +63,8 @@ export class Spreadsheet {
     }
   }
 
-  async save(filename: string, customOptions: Partial<SpreadsheetSaveOptions> = {}): Promise<string> {
-    const options: SpreadsheetSaveOptions = {
+  async save(filename: string, customOptions: Partial<SpreadsheetWriteOptions> = {}): Promise<string> {
+    const options: SpreadsheetWriteOptions = {
       format: 'xlsx',
       compression: true,
       ...customOptions,
@@ -79,5 +82,15 @@ export class Spreadsheet {
         reject(error);
       }
     });
+  }
+
+  generate(customOptions: Partial<SpreadsheetGenerateOptions> = {}): Buffer {
+    const options = {
+      format: 'xlsx',
+      compression: true,
+      ...customOptions,
+    };
+
+    return XLSX.write(this.workbook, { ...options, type: 'buffer' }) as Buffer;
   }
 }
