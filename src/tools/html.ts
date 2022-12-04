@@ -1,23 +1,32 @@
 import is from '@sindresorhus/is';
+import * as htmlparser2 from "htmlparser2";
+import { Handler, Result as HtmlMetaResult } from "htmlmetaparser";
 import * as cheerio from 'cheerio';
-import {JSDOM} from 'jsdom';
-import * as xpath from 'xpath-ts';
+
 import { htmlToText, HtmlToTextOptions } from 'html-to-text';
-import {
-  Properties,
-} from '../model/helpers/properties.js';
+
+import { Properties } from '../model/helpers/properties.js';
+
 export { social as getSocialLinks, parseOpenGraph as getOpenGraph } from 'crawlee';
 import { Thing, Graph as SchemaGraph } from "schema-dts";
+import { Resource } from '../model/index.js';
 
 export function getPlainText(html: string, options?: HtmlToTextOptions): string {
   return htmlToText(html, options);
 }
 
-export function parseWithJsDom(
+export function parseFeed(
+  feed: string | Buffer,
+  options?: Parameters<typeof htmlparser2.parseFeed>[1]
+  ) {
+  return htmlparser2.parseDocument(feed.toString());
+}
+
+export function getDocument(
   html: string | Buffer,
-  options?: ConstructorParameters<typeof JSDOM>[1]
-  ): JSDOM {
-  return new JSDOM(html, options);
+  options?: Parameters<typeof htmlparser2.parseDocument>[1]
+  ) {
+  return htmlparser2.parseDocument(html.toString());
 }
 
 export function parseWithCheerio(
@@ -27,16 +36,38 @@ export function parseWithCheerio(
   return cheerio.load(html, options);
 }
 
-export function selectWithXPath(input: string | JSDOM, selector: string) {
-  const jsdom = is.string(input) ? parseWithJsDom(input) : input;
-  return xpath.select(selector, jsdom.window.document);
+export function getMetadata(input: string | Resource, baseUrl?: string) {
+  const html = is.string(input) ? input : input.body ?? '';
+  const url = (input instanceof Resource) ? input.url : input ?? '';
+  
+  let output: HtmlMetaResult | undefined;
+
+  const handler = new Handler(
+    (err, result) => { 
+      if (err instanceof Error) throw err;
+      output = result;
+    },
+    { url }
+  );
+  
+  const parser = new htmlparser2.Parser(handler, { decodeEntities: true });
+  parser.write(html);
+  parser.end();
+
+  if (is.undefined(output)) {
+    throw new Error('Could not parse document.');
+  } else {
+    const { html, ...remainder } = output;
+    return {
+      head: html,
+      ...remainder
+    }
+    return output;
+  }
 }
 
-export function selectWithCSS(input: string | cheerio.Root, selector: string) {
-  const $ = is.string(input) ? parseWithCheerio(input) : input;
-  return $(selector);
-}
-
+// We'll want to deprecate this; Properties in particular is jank; a relic of some 
+// bad JSON-parsing practices from early in the project.
 export function getMetaTags(input: string | cheerio.Root): Properties<string> {
   const $ = is.string(input) ? parseWithCheerio(input) : input;
   const results: Record<string, string> = {};
