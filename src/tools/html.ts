@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import * as htmlparser2 from "htmlparser2";
-import { Handler, Result as HtmlMetaResult } from "htmlmetaparser";
+import { Handler, Result as HtmlMetaResult, ResultHtml } from "htmlmetaparser";
 import * as cheerio from 'cheerio';
 import { htmlToText, HtmlToTextOptions } from 'html-to-text';
 import { Resource } from '../model/index.js';
@@ -19,34 +19,38 @@ export function parseWithCheerio(
   return cheerio.load(html, options);
 }
 
-export function getMetadata(input: string | Resource, baseUrl?: string) {
+type MetadataResponse = Omit<HtmlMetaResult, 'links' | 'images'> & { head?: ResultHtml };
+export async function getMetadata(input: string | Resource, baseUrl?: string) {
   const html = is.string(input) ? input : input.body ?? '';
   const url = (input instanceof Resource) ? input.url : input ?? '';
   
   let output: HtmlMetaResult | undefined;
 
-  const handler = new Handler(
-    (err, result) => { 
-      if (err instanceof Error) throw err;
-      output = result;
-    },
-    { url }
-  );
+  return new Promise<MetadataResponse>((resolve, reject) => {
+    const handler = new Handler(
+      (err, result) => { 
+        if (err instanceof Error) reject(err);
+        const { html, links, images, ...remainder } = result;
+        resolve({  head: html, ...remainder });
+      },
+      { url }
+    );
+    
+    const parser = new htmlparser2.Parser(handler, { decodeEntities: true });
+    parser.write(html);
+    parser.end();
   
-  const parser = new htmlparser2.Parser(handler, { decodeEntities: true });
-  parser.write(html);
-  parser.end();
-
-  if (is.undefined(output)) {
-    throw new Error('Could not parse document.');
-  } else {
-    const { html, ...remainder } = output;
-    return {
-      head: html,
-      ...remainder
+    if (is.undefined(output)) {
+      throw new Error('Could not parse document.');
+    } else {
+      const { html, links, images, ...remainder } = output;
+      return {
+        meta: html,
+        ...remainder
+      }
+      return output;
     }
-    return output;
-  }
+  })
 }
 
 export function getBodyAttributes(input: string | cheerio.Root) {

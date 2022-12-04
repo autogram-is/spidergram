@@ -45,7 +45,7 @@ export default class Analyze extends SgCommand {
       task: async (resource) => {
         if (is.nonEmptyStringAndNotWhitespace(resource.body)) {
           if (flags.metadata) {
-            resource.meta = HtmlTools.getMetaTags(resource.body);
+            resource.data = await HtmlTools.getMetadata(resource);
           }
 
           let text = '';
