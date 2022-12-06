@@ -118,6 +118,18 @@ export interface EnqueueUrlOptions {
   requestQueue?: RequestQueue;
 
   /**
+   * Don't save or enqueue the link if it already exists in the graph.
+   *
+   * *NOTE:* Only affects the saving and enqueuing of {@apilink UniqueUrl} 
+   * objects themselves; LinksTo records connection crawled Resources to
+   * the UniqueUrl may still be created. 
+   *
+   * @type {boolean}
+   * @default true
+   */
+  discardExistingLinks?: boolean;
+
+  /**
    * A label applied to any {@apilink LinksTo} objects created when the
    * URLs are saved to the project graph. This can be used in conjunction
    * with a restrictive selector to record which links appeared in body
@@ -145,6 +157,7 @@ const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
   skipAnchors: true,
   skipNonWebLinks: false,
   skipUnparsableLinks: false,
+  discardExistingLinks: true,
 };
 
 export type AnchorTagData = {

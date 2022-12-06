@@ -40,8 +40,31 @@ export async function save(
       continue;
     }
 
-    results.uniques.push(uu);
+    // If 'discardExistingLinks' is set, we don't bother including URLs
+    // that were already known to the system in the result set; this means
+    // they won't be persisted, or enqueued for crawling.
+    //
+    // On a single continuous crawl this doesn't make much difference, but
+    // in situations where a *second crawl* is being conducted on top of an
+    // old dataset, it prevents already-visited URL from being recrawled.
+    // This makes it possible to do a crawl with an agressive UrlNormalizer,
+    // find cases where it should be loosened, and add the new URL permutations
+    // in a second pass.
+    //
+    // This will be simple once we implement an Arango-based StorageProvider
+    // for Crawlee, and ensure that its Request de-duplication stays in sync
+    // with Spidergram's UniqueUrl de-duplication.
+    if (!options.discardExistingLinks || !(await graph.exists(uu))) {
+      results.uniques.push(uu);
+    }
 
+    // This chunk in particular is tricky: we insert LinksTo records "blind"
+    // because the same link can exist in a resource multiple times. That means
+    // running a crawl that reprocesses a given page will insert duplicate links
+    // for that page, with no easy way to identify them.
+    // 
+    // There's no perfect solution for this, other than clearing out the existing
+    // links for a Resource whenever we add a new set. We'll look into that.
     if (resource !== undefined) {
       const lt = new LinksTo({
         url: uu,
