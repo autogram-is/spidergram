@@ -6,7 +6,7 @@ import {DocumentMetadata} from 'arangojs/documents.js';
 import {DocumentCollection} from 'arangojs/collection.js';
 import arrify from 'arrify';
 import slugify from '@sindresorhus/slugify';
-import {Vertice, VerticeData, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn, DataSet, Fragment} from '../model/index.js';
+import {Vertice, Reference, VerticeData, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn, DataSet, Fragment} from '../model/index.js';
 import { Project } from './project.js';
 
 export {aql} from 'arangojs';
@@ -144,8 +144,13 @@ export class ArangoStore {
    * Convenience wrappers for saving and deleting Spidergram Entities
    */
 
-  async get<T extends Vertice = Vertice>(id: string): Promise<T | undefined> {
-    const [collection, key] = id.split('/');
+  async exists(ref: Reference) : Promise<boolean> {
+    const [collection, key] = Vertice.idFromReference(ref).split('/');
+    return this.db.collection(collection).documentExists(key);
+  }
+
+  async get<T extends Vertice = Vertice>(ref: Reference): Promise<T | undefined> {
+    const [collection, key] = Vertice.idFromReference(ref).split('/');
     return this.db.collection<VerticeData>(collection).document(key)
       .then(json => Vertice.fromJSON(json) as T)
       .catch(() => undefined);

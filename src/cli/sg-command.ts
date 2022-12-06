@@ -45,6 +45,17 @@ export abstract class SgCommand extends Command {
     verbose: CLI.outputFlags.verbose
   }
 
+
+  /**
+   * Given a {JobStatus} object, display a status update to the user.
+   * 
+   * By default, it will advance the console progress bar and update the ETA.
+   * If the command is running in verbose mode, a line will be logged to stderr.
+   * If the command is running in silent mode, nothing will be displayed.
+   *
+   * @protected
+   * @param {JobStatus} status
+   */
   protected updateProgress(status: JobStatus) {
     switch (this.output) {
       case OutputLevel.verbose: {
@@ -76,6 +87,15 @@ export abstract class SgCommand extends Command {
     }
   }
 
+
+  /**
+   * Given a {JobStatus} object, print a summary of what work was perfomed,
+   * how long the operation took, and whether any errors were encountered.
+   *
+   * @protected
+   * @param {JobStatus} status
+   * @param {boolean} [listFailures=true]
+   */
   protected summarizeStatus(status: JobStatus, listFailures = true) {
     this.stopProgress();
     if (this.output !== OutputLevel.silent) {
@@ -94,6 +114,27 @@ export abstract class SgCommand extends Command {
     }
   }
 
+
+  /**
+   * Loads instances of the {Project} and {ArangoStore} classes for
+   * the current project; if the current command exposes a `context`
+   * flag to override the default settings, this function will respect
+   * the custom context.
+   * 
+   * By default, this function throws an error if the Arango server
+   * can't be reached, or tthe Project configuration data is malformed.
+   * If the `returnErrors` parameter is true, it will instead return
+   * an array of errors that can be checked and optionally displayed
+   * to the user when graceful recovery is possible.
+   * 
+   * This makes it easier to create functions that use the Project and
+   * graph context *if they exist* but continue without them if they
+   * can't be loaded.
+   *
+   * @async
+   * @param {boolean} [returnErrors=false]
+   * @returns {unknown}
+   */
   async getProjectContext(returnErrors = false) {
     const errors: Error[] = [];
     let project = {} as unknown as Project;
