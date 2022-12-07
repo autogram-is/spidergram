@@ -149,14 +149,14 @@ export const LinkSummaries = {
 
     LET inlinks = (
         FOR lt IN links_to
-        FILTER lt._to == u._id
+        FILTER lt._to == uu._id
         RETURN DISTINCT lt.href
     )
     FILTER LENGTH(inlinks) > 1
     SORT LENGTH(inlinks) DESC
     RETURN {
-        domain: u.parsed.domain,
-        url: u.url,
+        domain: uu.parsed.domain,
+        url: uu.url,
         inlinks
     }`
   }
