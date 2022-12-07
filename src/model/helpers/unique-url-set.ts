@@ -24,7 +24,7 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
     const uu = this.parse(value);
     if (uu) {
       super.add(uu);
-      this.verifier.add(uu.documentId);
+      this.verifier.add(uu.key);
     } else {
       this.unparsable.add(value as string);
     }
@@ -35,7 +35,7 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
   override has(value: ValidUniqueUrlInput): boolean {
     const uu = this.parse(value);
     if (uu) {
-      return this.verifier.has(uu.documentId);
+      return this.verifier.has(uu.key);
     }
 
     return false;
@@ -44,9 +44,9 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
   override delete(value: ValidUniqueUrlInput): boolean {
     const uu = this.parse(value);
     if (uu) {
-      this.verifier.delete(uu.documentId);
+      this.verifier.delete(uu.key);
       for (const u of this) {
-        if (u.documentId === uu.documentId) {
+        if (u.key === uu.key) {
           super.delete(u);
         }
       }
