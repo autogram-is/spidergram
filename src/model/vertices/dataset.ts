@@ -1,6 +1,6 @@
-import {Vertice, VerticeData} from './vertice.js';
+import {Vertice, VerticeConstructorOptions} from './vertice.js';
 
-export interface DataSetData<DataInterface = unknown> extends VerticeData {
+export interface DataSetConstructorOptions<DataInterface = unknown> extends VerticeConstructorOptions {
   name: string;
   data: DataInterface;
 };
@@ -41,9 +41,9 @@ export class DataSet<DataInterface = unknown> extends Vertice {
    * Creates an instance of DataSet.
    *
    * @constructor
-   * @param {DataSetData<DataInterface>} input
+   * @param {DataSetConstructorOptions<DataInterface>} input
    */
-  constructor(input: DataSetData<DataInterface>) {
+  constructor(input: DataSetConstructorOptions<DataInterface>) {
     const {name, data, ...dataForSuper} = input;
     super(dataForSuper);
 

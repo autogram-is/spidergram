@@ -1,6 +1,6 @@
-import {Edge, EdgeData, Vertice, Reference, Resource} from '../index.js';
+import {Edge, EdgeConstructorOptions, Vertice, Reference, Resource} from '../index.js';
 
-export interface AppearsOnData<F extends Vertice = Vertice, T extends Vertice = Resource> extends EdgeData<F, T> {
+export interface AppearsOnConstructorOptions<F extends Vertice = Vertice, T extends Vertice = Resource> extends EdgeConstructorOptions<F, T> {
   item?: Reference<F>;
   location?: Reference<T>;
 };
@@ -8,7 +8,7 @@ export interface AppearsOnData<F extends Vertice = Vertice, T extends Vertice = 
 export class AppearsOn<F extends Vertice = Vertice, T extends Vertice = Resource> extends Edge<F, T> {
   readonly _collection = 'appears_on';
 
-  constructor(data: AppearsOnData<F, T> = {}) {
+  constructor(data: AppearsOnConstructorOptions<F, T> = {}) {
     const {item, location, ...dataForSuper} = data;
 
     dataForSuper.from ??= item;

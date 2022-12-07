@@ -1,6 +1,6 @@
-import {Edge, EdgeData, Vertice, Reference, Resource} from '../index.js';
+import {Edge, EdgeConstructorOptions, Vertice, Reference, Resource} from '../index.js';
 
-export interface IsVariantOfData<F extends Vertice = Resource, T extends Vertice = Resource> extends EdgeData<F, T> {
+export interface IsVariantOfConstructorOptions<F extends Vertice = Resource, T extends Vertice = Resource> extends EdgeConstructorOptions<F, T> {
   variant?: Reference<F>;
   original?: Reference<T>;
 };
@@ -8,7 +8,7 @@ export interface IsVariantOfData<F extends Vertice = Resource, T extends Vertice
 export class IsVariantOf<F extends Vertice = Resource, T extends Vertice = Resource> extends Edge<F, T> {
   readonly _collection = 'is_variant_of';
 
-  constructor(data: IsVariantOfData<F, T> = {}) {
+  constructor(data: IsVariantOfConstructorOptions<F, T> = {}) {
     const {variant, original, ...dataForSuper} = data;
 
     dataForSuper.from ??= variant;

@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import {GeneratedAqlQuery} from 'arangojs/aql';
 import {Vertice, Edge, UniqueUrl, IsChildOf, UrlSource, ArangoStore, aql} from '../index.js';
 import {ParsedUrl} from '@autogram/url-tools';
-import {JsonObject} from 'type-fest';
+import {JsonMap} from '@salesforce/ts-types';
 
 
 export interface HierarchyData<V extends Vertice = Vertice, E extends Edge = Edge> {
@@ -46,7 +46,7 @@ export class UrlHierarchyBuilder {
   // can be passed in, but should use the `aql` template literal
   // function rather than raw strings.
   async loadPool<V>(filter?: GeneratedAqlQuery): Promise<void> {
-    const cursor = await this.graph.query(
+    const cursor = await this.graph.query<JsonMap>(
       aql`
         FOR item in unique_urls
           FILTER item.parsed != null
@@ -54,7 +54,7 @@ export class UrlHierarchyBuilder {
           ${filter}
           return item`,
     );
-    await cursor.map(result => UniqueUrl.fromJSON(result as JsonObject))
+    await cursor.map(result => UniqueUrl.fromJSON(result))
       .then(urls => {
         this.pool = urls;
       })
