@@ -1,4 +1,4 @@
-import {Vertice, isVertice, VerticeData, Reference} from '../vertices/vertice.js';
+import {Vertice, isVertice, VerticeConstructorOptions, Reference} from '../vertices/vertice.js';
 
 export function isEdge(value: unknown): value is Edge {
   return (
@@ -8,7 +8,7 @@ export function isEdge(value: unknown): value is Edge {
   );
 }
 
-export interface EdgeData<F extends Vertice = Vertice, T extends Vertice = Vertice> extends VerticeData {
+export interface EdgeConstructorOptions<F extends Vertice = Vertice, T extends Vertice = Vertice> extends VerticeConstructorOptions {
   from?: Reference<F>;
   to?: Reference<T>;
 };
@@ -18,7 +18,7 @@ export abstract class Edge<F extends Vertice = Vertice, T extends Vertice = Vert
   _to!: string;
 
   // We accept a special-purpose
-  constructor(data: EdgeData<F, T> = {}) {
+  constructor(data: EdgeConstructorOptions<F, T> = {}) {
     const {from, to, ...dataForSuper} = data;
     super(dataForSuper);
 

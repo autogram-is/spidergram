@@ -6,8 +6,9 @@ import {DocumentMetadata} from 'arangojs/documents.js';
 import {DocumentCollection} from 'arangojs/collection.js';
 import arrify from 'arrify';
 import slugify from '@sindresorhus/slugify';
-import {Vertice, Reference, VerticeData, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn, DataSet, Fragment} from '../model/index.js';
+import {Vertice, Reference, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn, DataSet, Fragment} from '../model/index.js';
 import { Project } from './project.js';
+import { JsonMap } from '@salesforce/ts-types'
 
 export {aql} from 'arangojs';
 
@@ -151,7 +152,7 @@ export class ArangoStore {
 
   async get<T extends Vertice = Vertice>(ref: Reference): Promise<T | undefined> {
     const [collection, key] = Vertice.idFromReference(ref).split('/');
-    return this.db.collection<VerticeData>(collection).document(key)
+    return this.db.collection<JsonMap>(collection).document(key)
       .then(json => Vertice.fromJSON(json) as T)
       .catch(() => undefined);
   }

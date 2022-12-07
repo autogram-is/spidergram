@@ -3,7 +3,7 @@ import * as fs from 'node:fs';
 import {Readable} from 'node:stream';
 import is from '@sindresorhus/is';
 import * as XLSX from 'xlsx';
-import {JsonPrimitive} from 'type-fest';
+import {JsonPrimitive} from '@salesforce/ts-types';
 import { Buffer } from 'node:buffer';
 
 XLSX.set_fs(fs);
@@ -24,10 +24,11 @@ XLSX.stream.set_readable(Readable);
  * Named columns: { col1: 'some data', col2: 123, ... }
  * Array of values: [ 'some data', 123 ]
  */
-export type SpreadsheetData = Record<string, SheetData> | SheetData[];
-export type SheetData = RowData[];
-export type RowData = Record<string, CellValue>;
-export type CellValue = JsonPrimitive;
+
+type Workbook = Sheet[] | Record<string, Sheet>;
+type Sheet = Row[];
+type Row = Record<string, Cell>;
+type Cell = JsonPrimitive
 
 type SpreadsheetWriteOptions = {
   format: XLSX.BookType;
@@ -41,7 +42,7 @@ export class Spreadsheet {
 
   workbook: XLSX.WorkBook;
 
-  constructor(data?: SpreadsheetData) {
+  constructor(data?: Workbook) {
     const {utils} = Spreadsheet;
     this.workbook = utils.book_new();
     if (!is.undefined(data)) {
@@ -57,7 +58,7 @@ export class Spreadsheet {
     }
   }
 
-  addSheet(data: SheetData, name?: string) {
+  addSheet(data: Sheet | Cell[], name?: string) {
     if (is.array(data)) {
       name = Spreadsheet.utils.book_append_sheet(this.workbook, XLSX.utils.json_to_sheet(data), name);
     }

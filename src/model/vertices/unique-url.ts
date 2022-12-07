@@ -1,9 +1,9 @@
 import {URL} from 'node:url';
 import is from '@sindresorhus/is';
 import {NormalizedUrl, UrlMutators} from '@autogram/url-tools';
-import {Vertice, VerticeData, Transform} from './vertice.js';
+import {Vertice, VerticeConstructorOptions, Transform} from './vertice.js';
 
-export interface UniqueUrlData extends VerticeData {
+export interface UniqueUrlConstructorOptions extends VerticeConstructorOptions {
   url?: string | NormalizedUrl;
   source?: UrlSource;
   base?: string | URL;
@@ -54,7 +54,7 @@ export class UniqueUrl extends Vertice {
     return this.parsed !== undefined;
   }
 
-  constructor(data: UniqueUrlData = {}) {
+  constructor(data: UniqueUrlConstructorOptions = {}) {
     let {url, base, normalizer, referer, depth, ...dataForSuper} = data;
     super(dataForSuper);
 

@@ -10,13 +10,14 @@ import {
   ClassTransformOptions,
   TargetMap,
 } from 'class-transformer';
-import {JsonObject} from 'type-fest';
 import {Uuid, UuidFactory} from '../helpers/uuid.js';
+import _ from 'lodash';
+import {ensureJsonMap, JsonMap, has} from '@salesforce/ts-types';
 
 export {Transform, Exclude, Expose} from 'class-transformer';
 export type Reference<T extends Vertice = Vertice> = T | [ string, Uuid ] | string;
-export interface VerticeData {
-  [keyof: string]: unknown,
+
+export interface VerticeConstructorOptions extends Record<string, unknown> {
   label?: string,
 };
 
@@ -58,15 +59,13 @@ export abstract class Vertice {
 
   label?: string;
 
-  constructor(data: VerticeData = {}) {
+  constructor(data: VerticeConstructorOptions = {}) {
     // Special handling for arbitrary properties.
-    if (is.object(data)) {
-      for (const k in data) {
-        this[k] = data[k];
-      }
-
-      this.assignKey();
+    for (const k in data) {
+      this[k] = data[k];
     }
+
+    this.assignKey();
   }
 
   /*
@@ -76,7 +75,7 @@ export abstract class Vertice {
    * everything to the proper Arango properties.
    */
 
-  static getSerializerOptions() {
+  protected static getSerializerOptions() {
     const options: ClassTransformOptions = {
       strategy: 'exposeAll',
       excludeExtraneousValues: false,
@@ -90,14 +89,14 @@ export abstract class Vertice {
 
   static fromJSON<T extends typeof Vertice = typeof this>(
     this: T,
-    data: string | Record<string, unknown>,
+    data: string | JsonMap,
   ): InstanceType<T> {
     const object = (
-      typeof data === 'string' ? JSON.parse(data) : data
-    ) as Vertice;
+      typeof data === 'string' ? ensureJsonMap(JSON.parse(data)) : data
+    );
 
-    if (isVertice(object)) {
-      const ctor = Vertice.types.get(object._collection)?.constructor;
+    if (((has(object, '_id') || has(object, ['_collection', '_key'])))) {
+      const ctor = Vertice.types.get(object._collection as string)?.constructor;
       if (ctor) {
         return plainToInstance(
           ctor,
@@ -110,7 +109,7 @@ export abstract class Vertice {
     throw new TypeError('Vertices require collection and key or id');
   }
 
-  toJSON(): JsonObject {
+  toJSON(): JsonMap {
     return instanceToPlain(this, Vertice.getSerializerOptions());
   }
 

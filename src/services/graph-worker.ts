@@ -1,7 +1,7 @@
 import EventEmitter from 'node:events';
 import {AqlQuery} from 'arangojs/aql.js';
 import is from '@sindresorhus/is';
-import {JsonObject} from 'type-fest';
+import {JsonMap} from '@salesforce/ts-types';
 import {Project, Vertice, aql, ProjectConfig, ArangoStore, JobStatus} from '../index.js';
 
 export type GraphWorkerTask<T extends Vertice = Vertice> = (item: T) => Promise<void>;
@@ -62,7 +62,7 @@ export class GraphWorker<T extends Vertice = Vertice> extends EventEmitter {
         return item
       `;
 
-      return graph.query<JsonObject>(query, {count: true, batchSize: 10})
+      return graph.query<JsonMap>(query, {count: true, batchSize: 10})
         .then(async cursor => {
           this.status.total = cursor.count ?? 0;
           for await (const batch of cursor.batches) {

@@ -1,6 +1,6 @@
-import {Vertice, VerticeData, Reference} from '../index.js';
+import {Vertice, VerticeConstructorOptions, Reference} from '../index.js';
 
-export interface FragmentData extends VerticeData {
+export interface FragmentConstructorOptions extends VerticeConstructorOptions {
   location?: Reference;
 };
 
@@ -28,9 +28,9 @@ export class Fragment extends Vertice {
    * Creates an instance of a Fragment, with an optional connection to an existing graph Entity.
    *
    * @constructor
-   * @param {FragmentData} input
+   * @param {FragmentConstructorOptions} input
    */
-  constructor(input: FragmentData) {
+  constructor(input: FragmentConstructorOptions) {
     const {location, ...dataForSuper} = input;
     super(dataForSuper);
 

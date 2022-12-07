@@ -65,6 +65,7 @@
     "@autogram/url-tools": "^2.5.2",
     "@oclif/plugin-help": "^5",
     "@oclif/plugin-plugins": "^2.1.6",
+    "@salesforce/ts-types": "^1.7.1",
     "@sindresorhus/is": "^5.3.0",
     "@sindresorhus/slugify": "^2.1.1",
     "@vladfrangu/async_event_emitter": "^2.1.2",
@@ -93,7 +94,6 @@
     "read-pkg-up": "^9.1.0",
     "reflect-metadata": "^0.1.13",
     "terminal-link": "^3.0.0",
-    "type-fest": "^3.1.0",
     "typefs": "^1.1.147",
     "uuid": "^9.0.0"
   },

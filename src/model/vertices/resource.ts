@@ -1,9 +1,9 @@
 import { ParsedUrl } from '@autogram/url-tools';
 import is from '@sindresorhus/is';
-import {Vertice, VerticeData, Expose, Transform} from './vertice.js';
+import {Vertice, VerticeConstructorOptions, Expose, Transform} from './vertice.js';
 import {parse as parseContentType} from 'content-type';
 
-export interface ResourceData extends VerticeData {
+export interface ResourceConstructorOptions extends VerticeConstructorOptions {
   url?: string | URL;
   code?: number | string;
   message?: string;
@@ -28,7 +28,7 @@ export class Resource extends Vertice {
   body?: string;
   files!: SavedFile[];
 
-  constructor(data: ResourceData = {}) {
+  constructor(data: ResourceConstructorOptions = {}) {
     const {url, parsed, code, message, headers, mime, size, body, files, ...dataForSuper} = data;
     super(dataForSuper);
 
