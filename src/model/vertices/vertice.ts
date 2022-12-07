@@ -95,7 +95,7 @@ export abstract class Vertice {
       typeof data === 'string' ? ensureJsonMap(JSON.parse(data)) : data
     );
 
-    if (((has(object, '_id') || has(object, ['_collection', '_key'])))) {
+    if (has(object, ['_collection'])) {
       const ctor = Vertice.types.get(object._collection as string)?.constructor;
       if (ctor) {
         return plainToInstance(
@@ -106,7 +106,7 @@ export abstract class Vertice {
       }
     }
 
-    throw new TypeError('Vertices require collection and key or id');
+    throw new TypeError('Vertice data has no _collection property');
   }
 
   toJSON(): JsonMap {
