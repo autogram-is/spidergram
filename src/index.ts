@@ -11,5 +11,3 @@ export * from './services/index.js';
 export * from './spider/index.js';
 export * from './tools/index.js';
 export * from './reports/index.js';
-
-export * from './types.js'
