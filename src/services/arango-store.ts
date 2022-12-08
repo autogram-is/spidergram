@@ -1,14 +1,15 @@
 import {assert} from 'node:console';
 import is from '@sindresorhus/is';
 import {Config} from 'arangojs/connection.js';
-import {Database} from 'arangojs';
+import {aql, Database} from 'arangojs';
 import {DocumentMetadata} from 'arangojs/documents.js';
 import {DocumentCollection} from 'arangojs/collection.js';
 import arrify from 'arrify';
 import slugify from '@sindresorhus/slugify';
 import {Vertice, Reference, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn, DataSet, Fragment} from '../model/index.js';
 import { Project } from './project.js';
-import { JsonMap } from '@salesforce/ts-types'
+import { JsonMap, JsonPrimitive } from '@salesforce/ts-types'
+import { join, AqlQuery, literal } from 'arangojs/aql.js';
 
 export {aql} from 'arangojs';
 
@@ -150,11 +151,27 @@ export class ArangoStore {
     return this.db.collection(collection).documentExists(key);
   }
 
-  async get<T extends Vertice = Vertice>(ref: Reference): Promise<T | undefined> {
+  async findById<T extends Vertice = Vertice>(ref: Reference): Promise<T | undefined> {
     const [collection, key] = Vertice.idFromReference(ref).split('/');
     return this.db.collection<JsonMap>(collection).document(key)
       .then(json => Vertice.fromJSON(json) as T)
       .catch(() => undefined);
+  }
+
+  async findAll<T extends Vertice = Vertice>(collection: string, criteria: Record<string, JsonPrimitive> = {}, limit?: number) {
+    const col = this.db.collection(collection);
+    const clauses: AqlQuery[] = [];
+    for (const prop in criteria) {
+      // The literal is a terrible idea, and we should be ashamed of ourselves. Very soon,
+      // we'll want to throw together a light query builder. In the meantime, we do this.
+      clauses.push(aql`FILTER ${literal('item.' + prop)} == ${criteria[prop]}`)
+    }
+    if (limit) clauses.push(aql`LIMIT ${limit}`);
+    const query = aql`FOR item IN ${col} ${ join(clauses) } return item`;
+
+    return this.db.query<JsonMap>(query)
+      .then(async cursor => cursor.all())
+      .then(results => results.map(value => Vertice.fromJSON(value) as T));
   }
 
   async push(input: Vertice | Vertice[], overwrite = true): Promise<PromiseSettledResult<DocumentMetadata>[]> {
@@ -214,7 +231,7 @@ export class ArangoStore {
   // Two quick helpers that eliminate unecessary property traversal
   get query() {
     return this.db.query.bind(this.db);
-  }
+  }  
 
   get collection() {
     return this.db.collection.bind(this.db);
