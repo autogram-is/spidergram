@@ -95,7 +95,12 @@
     "reflect-metadata": "^0.1.13",
     "terminal-link": "^3.0.0",
     "typefs": "^1.1.147",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "vega": "^5.22.1",
+    "vega-embed": "^6.21.0",
+    "vega-lite": "^5.6.0",
+    "vega-lite-api": "^5.0.0",
+    "vega-themes": "^2.12.0"
   },
   "devDependencies": {
     "@oclif/test": "^2.2.8",
