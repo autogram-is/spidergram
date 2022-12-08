@@ -3,6 +3,12 @@ import { CliUx, Command, Interfaces } from '@oclif/core';
 import { Duration } from 'luxon';
 import is from '@sindresorhus/is';
 
+export enum OutputLevel {
+  silent = 0,
+  interactive = 1,
+  verbose = 2,
+}
+
 /**
  * A base command that provided common functionality for all Spidergram commands.
  * Most of these options are possible to wire together with tools in the Oclif library,
@@ -17,13 +23,6 @@ import is from '@sindresorhus/is';
  *
  * All implementations of this class need to implement the run() method.
  */
-
-export enum OutputLevel {
-  silent = 0,
-  interactive = 1,
-  verbose = 2,
-}
-
 export abstract class SgCommand extends Command {
   static enableJsonFlag = true;
 
