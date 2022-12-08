@@ -9,7 +9,6 @@ export const Colors = {
   info: chalk.dim,
   success: chalk.bold.green,
   highlight: chalk.bold.bgYellow,
-  h: chalk.bold.bgYellow,
 };
 
 export const Prefixes = {
