@@ -29,11 +29,11 @@ export async function save(
     });
 
     // Run each URL through a few gauntlets
-    if (options.skipUnparsableLinks && is.undefined(uu.parsed)) {
+    if (options.discardUnparsableLinks && is.undefined(uu.parsed)) {
       continue;
     }
 
-    if (options.skipNonWebLinks && !['https:', 'https:'].includes(uu.parsed!.protocol.toLowerCase())) {
+    if (options.discardNonWebLinks && !['https:', 'https:'].includes(uu.parsed!.protocol.toLowerCase())) {
       continue;
     }
 

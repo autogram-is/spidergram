@@ -53,7 +53,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default false
    */
-  skipUnparsableLinks: boolean;
+  discardUnparsableLinks: boolean;
 
   /**
    * Ignore HTML tags that are found by the selector, but have no `href`
@@ -65,7 +65,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default true
    */
-  skipEmptyLinks: boolean;
+  discardEmptyLinks: boolean;
 
   /**
    * Ignore links that only contain an anchor, e.g. `<a href="#top">Scroll to top</a>`
@@ -73,7 +73,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default true
    */
-  skipAnchors: boolean;
+  discardAnchorOnlyLinks: boolean;
 
   /**
    * Ignore HTML tags with protocols other than `http` and `https`.
@@ -84,7 +84,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default true
    */
-  skipNonWebLinks: boolean;
+  discardNonWebLinks: boolean;
 
   /**
    * A function to modify the {@apilink Request} object before a link is
@@ -152,10 +152,10 @@ export const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
   selector: 'a',
   save: EnqueueStrategy.All,
   enqueue: EnqueueStrategy.SameDomain,
-  skipEmptyLinks: true,
-  skipAnchors: true,
-  skipNonWebLinks: false,
-  skipUnparsableLinks: false,
+  discardEmptyLinks: true,
+  discardAnchorOnlyLinks: true,
+  discardNonWebLinks: false,
+  discardUnparsableLinks: false,
   discardExistingLinks: true,
 };
 

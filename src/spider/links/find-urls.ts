@@ -11,8 +11,8 @@ export async function find(
   const {
     label,
     selector,
-    skipAnchors,
-    skipEmptyLinks,
+    discardAnchorOnlyLinks,
+    discardEmptyLinks,
   } = options;
   const {$} = context;
 
@@ -22,9 +22,9 @@ export async function find(
       $(selector).each((i, element) => {
         const {href, ...attributes} = $(element).attr();
         if (
-          !(skipEmptyLinks && is.undefined(href))
-          && !(skipEmptyLinks && is.emptyStringOrWhitespace(href))
-          && !(skipAnchors && href.startsWith('#'))
+          !(discardEmptyLinks && is.undefined(href))
+          && !(discardEmptyLinks && is.emptyStringOrWhitespace(href))
+          && !(discardAnchorOnlyLinks && href.startsWith('#'))
         ) {
           results.push({
             href,
