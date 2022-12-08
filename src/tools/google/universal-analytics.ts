@@ -5,6 +5,7 @@ import { DateTime } from 'luxon';
 
 export type UaRequest = analyticsreporting_v4.Schema$ReportRequest;
 export type UaReport = analyticsreporting_v4.Schema$Report;
+export type UaReportRow = analyticsreporting_v4.Schema$ReportRow;
 
 type DateWindow = 'day' | 'week' | 'month' | 'year';
 
