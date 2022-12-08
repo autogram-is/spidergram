@@ -9,7 +9,7 @@ export default class Urls extends SgCommand {
 
   static examples = [
     '<%= config.bin %> <%= command.id %> https://example.com',
-    '<%= config.bin %> <%= command.id %> --parsable --web --limit=100',
+    '<%= config.bin %> <%= command.id %> --un --limit=100',
   ];
 
   static flags = {
@@ -18,12 +18,10 @@ export default class Urls extends SgCommand {
       summary: 'Limit the number of URLs tested',
       default: 20,
     }),
-    unchanged: Flags.boolean({
+    unfiltered: Flags.boolean({
       summary: 'Show both changed and unchanged urls',
       default: false,
-      allowNo: true,
     }),
-    verbose: CLI.outputFlags.verbose
   }
 
   static args = [{
@@ -63,7 +61,7 @@ export default class Urls extends SgCommand {
       try {
         const normal = new NormalizedUrl(url).href;
         if (normal === url) {
-          if (flags.unchanged) {
+          if (flags.unfiltered) {
             data.push({
               original: this.format.info(url),
               normalized: this.format.info('unchanged')
