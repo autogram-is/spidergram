@@ -2,9 +2,10 @@ import {Dictionary, LogLevel, PlaywrightCrawlerOptions} from 'crawlee';
 import {ProjectConfig, projectConfigDefaults} from '../index.js';
 import { mimeGroups } from './helpers/mime.js';
 import {SpiderHook} from './hooks/index.js';
-import {EnqueueUrlOptions} from './links/index.js';
+import {EnqueueUrlOptions, urlDiscoveryDefaultOptions} from './links/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';
 import {readPackageUp} from 'read-pkg-up';
+import _ from 'lodash';
 
 const pkgData = await readPackageUp();
 
@@ -147,25 +148,14 @@ export interface InternalSpiderOptions extends Dictionary {
   userAgent?: string;
 }
 
-export function buildSpiderOptions(
-  options: Partial<InternalSpiderOptions>,
-  internaloverrides: Partial<InternalSpiderOptions> = {},
-): InternalSpiderOptions {
-  return {
-    ...defaultSpiderOptions,
-    ...options,
-    ...internaloverrides,
-  };
-}
-
-const defaultSpiderOptions: InternalSpiderOptions = {
+export const defaultSpiderOptions: InternalSpiderOptions = {
   projectConfig: projectConfigDefaults,
   logLevel: LogLevel.INFO,
   preNavigationHooks: [],
   postNavigationHooks: [],
   pageHandler: undefined,
   requestHandlers: {},
-  urlOptions: {},
+  urlOptions: urlDiscoveryDefaultOptions,
   parseMimeTypes: mimeGroups.page,
   downloadMimeTypes: [],
   userAgent: `Spidergram ${pkgData?.packageJson.version}`

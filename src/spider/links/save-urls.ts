@@ -2,14 +2,15 @@ import is from '@sindresorhus/is';
 import arrify from 'arrify';
 import {SpiderContext} from '../context.js';
 import {UniqueUrl, LinksTo} from '../../model/index.js';
-import {AnchorTagData, EnqueueUrlOptions, filter, ensureOptions} from './index.js';
+import {AnchorTagData, EnqueueUrlOptions, filter} from './index.js';
+import _ from 'lodash';
 
 export async function save(
   context: SpiderContext,
   links: AnchorTagData | AnchorTagData[],
   customOptions: Partial<EnqueueUrlOptions> = {},
 ) {
-  const options = await ensureOptions(context, customOptions);
+  const options: EnqueueUrlOptions =  _.defaultsDeep(customOptions, context.urlOptions);
   const {graph, uniqueUrl, resource} = context;
   const results: {
     uniques: UniqueUrl[];

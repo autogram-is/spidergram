@@ -4,6 +4,7 @@ import arrify from 'arrify';
 import { log, PlaywrightCrawlingContext } from 'crawlee';
 import prependHttp from 'prepend-http';
 import { FinalStatistics } from 'crawlee';
+import _ from 'lodash';
 
 // We have a chance to set the log level HIGHER when configuring,
 // but this (hopefully) ensures that sub-logs won't be created
@@ -27,7 +28,7 @@ import {
   InternalSpiderOptions,
   SpiderOptions,
   SpiderContext,
-  buildSpiderOptions,
+  defaultSpiderOptions,
   handlers,
   helpers,
   contextualizeHandler,
@@ -241,7 +242,7 @@ function splitOptions(
   } = options;
 
   return {
-    internal: buildSpiderOptions(options),
+    internal: _.defaultsDeep(options, defaultSpiderOptions) as InternalSpiderOptions,
     crawler: crawlerOptions as PlaywrightCrawlerOptions,
   };
 }

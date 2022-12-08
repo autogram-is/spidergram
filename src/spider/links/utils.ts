@@ -1,7 +1,8 @@
 import {RequestQueue, EnqueueStrategy, RequestTransform} from 'crawlee';
 import {ParsedUrl} from '@autogram/url-tools';
-import {InternalSpiderContext, SpiderContext} from '../../index.js';
+import {InternalSpiderContext} from '../../index.js';
 import {FilterInput} from './index.js';
+import _ from 'lodash';
 
 /**
  * @export
@@ -139,8 +140,6 @@ export interface EnqueueUrlOptions {
    * @type {string}
    */
   label?: string;
-
-  _built?: boolean;
 }
 
 export type UrlMutatorWithContext<T = unknown> = (
@@ -148,7 +147,7 @@ export type UrlMutatorWithContext<T = unknown> = (
   context?: InternalSpiderContext
 ) => ParsedUrl;
 
-const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
+export const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
   limit: Number.POSITIVE_INFINITY,
   selector: 'a',
   save: EnqueueStrategy.All,
@@ -168,21 +167,3 @@ export type AnchorTagData = {
   attributes?: Record<string, string>;
   data?: unknown;
 };
-
-export async function ensureOptions(
-  context: SpiderContext,
-  options: Partial<EnqueueUrlOptions> = {},
-): Promise<EnqueueUrlOptions> {
-  if (options._built) {
-    return options as EnqueueUrlOptions;
-  }
-
-  const results = {
-    requestQueue: await context.crawler.getRequestQueue(),
-    ...urlDiscoveryDefaultOptions,
-    ...context.urlOptions,
-    ...options,
-    _built: true,
-  };
-  return results;
-}

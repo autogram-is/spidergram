@@ -2,16 +2,16 @@ import arrify from 'arrify';
 import {Dictionary, Request} from 'crawlee';
 import {UniqueUrl} from '../../model/index.js';
 import {SpiderContext} from '../context.js';
-import {EnqueueUrlOptions, ensureOptions, filter} from './index.js';
+import {EnqueueUrlOptions, urlDiscoveryDefaultOptions, filter} from './index.js';
+import _ from 'lodash';
 
 export async function enqueue(
   context: SpiderContext,
   urls: UniqueUrl | UniqueUrl[],
   customOptions: Partial<EnqueueUrlOptions> = {},
 ) {
-  const options = await ensureOptions(context, customOptions);
+  const options: EnqueueUrlOptions = _.defaultsDeep(customOptions, context.urlOptions, urlDiscoveryDefaultOptions);
   const input = arrify(urls);
-
   const queue = options.requestQueue ?? await context.crawler.getRequestQueue();
   const requests: Request[] = [];
   for (const uu of input) {
