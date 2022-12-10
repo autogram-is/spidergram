@@ -165,7 +165,7 @@ const defaultRequestOptions: UaRequestOptions = {
   ignoreUnvisited: true
 };
 
-export async function fetchUaReport(request: UaRequest, pageToken?: string): Promise<UaResponseData> {
+export async function fetchUaReport(request: UaRequest, pageToken?: string): Promise<UaResponse> {
   await authenticate('https://www.googleapis.com/auth/analytics.readonly');
   const ua = google.analyticsreporting('v4');
   return ua.reports.batchGet({ requestBody: { reportRequests: [ { ...request, pageToken: pageToken } ] } })
