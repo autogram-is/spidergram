@@ -15,7 +15,7 @@ import prependHttp from 'prepend-http';
 
 export type UaRequest = analyticsreporting_v4.Schema$ReportRequest;
 export type UaResponse = analyticsreporting_v4.Schema$GetReportsResponse;
-export type UaRawReport = analyticsreporting_v4.Schema$Report;
+export type UaReport = analyticsreporting_v4.Schema$Report;
 export type UaReportRow = analyticsreporting_v4.Schema$ReportRow;
 
 type DateWindow = 'day' | 'week' | 'month' | 'year';
@@ -314,7 +314,7 @@ function buildMetrics(input: string[] | Record<string, string>) {
 // columns; additional data can be passed in by the caller (for example, key IDs for other records
 // or date-spans)
 export function flattenReport(
-  report: UaRawReport,
+  report: UaReport,
   defaults: Record<string, JsonPrimitive> = {},
 ) {
   const types = [
