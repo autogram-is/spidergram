@@ -14,7 +14,7 @@ import prependHttp from 'prepend-http';
 // See https://developers.google.com/analytics/devguides/reporting/core/v4/basics
 
 export type UaRequest = analyticsreporting_v4.Schema$ReportRequest;
-export type UaResponseData = analyticsreporting_v4.Schema$GetReportsResponse;
+export type UaResponse = analyticsreporting_v4.Schema$GetReportsResponse;
 export type UaRawReport = analyticsreporting_v4.Schema$Report;
 export type UaReportRow = analyticsreporting_v4.Schema$ReportRow;
 
