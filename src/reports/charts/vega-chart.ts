@@ -1,11 +1,11 @@
-import { Chart } from './index.js';
-import {View, Spec, parse} from 'vega';
+import { Chart, ChartSize } from './index.js';
+import {View, Spec, Config, parse} from 'vega';
 import _ from 'lodash';
 
 export abstract class VegaChart implements Chart {
   protected abstract defaults: Partial<Spec>;
 
-  constructor(protected options: Partial<Spec> = {}) { }
+  constructor(protected options: Partial<Spec> = {}, public config: Config = {}) { }
 
   get spec(): Spec {
     return _.defaultsDeep(this.options, this.defaults);
@@ -19,8 +19,14 @@ export abstract class VegaChart implements Chart {
     this.options.data = input;
   }
 
-  async toSvg() {
-    const view = new View(parse(this.spec), {renderer: 'none'});
+  async toSvg(options: Config & ChartSize = {}) {
+    const { height, width, ...config } = options;
+
+    const view = new View(parse(this.spec, _.defaultsDeep(config, this.config)), {renderer: 'none'});
+
+    if (options.height) view.height(options.height);
+    if (options.width) view.width(options.width);
+
     return view.toSVG()
   }
 }
