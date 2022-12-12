@@ -1,8 +1,9 @@
+import { Chart } from './index.js';
 import {Config, TopLevelSpec, compile} from 'vega-lite';
 import {View, parse} from 'vega';
 import _ from 'lodash';
 
-export abstract class ChartBase {
+export abstract class VegaLiteChart implements Chart {
   protected abstract defaults: Partial<TopLevelSpec>;
 
   constructor(protected options: Partial<TopLevelSpec> = {}, public config: Config = {}) { }
