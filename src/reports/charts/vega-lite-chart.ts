@@ -1,4 +1,4 @@
-import {Chart, ChartSize} from './index.js';
+import {Chart} from './index.js';
 import {TopLevelSpec, compile} from 'vega-lite';
 import {View, parse} from 'vega';
 import _ from 'lodash';
@@ -24,12 +24,8 @@ export class VegaLiteChart implements Chart {
     return new View(parse(vegaSpec.spec), {renderer: 'none'})
   }
 
-  async toSvg(options: Record<string, unknown> & ChartSize = {}) {
+  async toSvg() {
     const view = this.buildView();
-
-    if (options.height) view.height(options.height);
-    if (options.width) view.width(options.width);
-
     return view.toSVG()
   }
 }
