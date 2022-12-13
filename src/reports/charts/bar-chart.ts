@@ -6,8 +6,8 @@ export class Bar extends VegaLiteChart {
     mark: 'bar',
     data: null,
     encoding: {
-      x: {field: 'a', type: 'nominal', axis: {labelAngle: 0}},
-      y: {field: 'b', type: 'quantitative'}
+      x: { field: 'x', type: 'nominal', axis: { labelAngle: 0 }},
+      y: { field: 'y', type: 'quantitative'}
     }
   }
 }

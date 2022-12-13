@@ -2,26 +2,21 @@ import {Chart, ChartSize} from './index.js';
 import {TopLevelSpec, compile} from 'vega-lite';
 import {View, parse} from 'vega';
 import _ from 'lodash';
+import { Encoding } from 'vega-lite/build/src/encoding.js';
+import { Field } from 'vega-lite/build/src/channeldef.js';
 
-type VegaLiteData = TopLevelSpec['data'];
+export type VegaLiteData = TopLevelSpec['data'];
+export type VegaLiteEncoding = Encoding<Field>;
+export type VegaLiteSchema = TopLevelSpec & { encoding: VegaLiteEncoding }
 
 export class VegaLiteChart implements Chart {
   readonly defaults: Partial<TopLevelSpec> = {};
-  spec: TopLevelSpec;
+  data: VegaLiteData | undefined;
+  encoding: VegaLiteEncoding | undefined;
+  options: Partial<VegaLiteSchema> = {};
 
-  constructor(
-    data: VegaLiteData = { values: [] },
-    spec: Partial<TopLevelSpec> = {},
-  ) {
-    this.spec = _.defaultsDeep({ data: data }, this.defaults, spec);
-  }
-
-  get data(): VegaLiteData {
-    return this.spec.data;
-  }
-  
-  set data(input: VegaLiteData) {
-    this.spec.data = input;
+  get spec(): TopLevelSpec {
+    return _.defaultsDeep({ data: this.data }, { encoding: this.encoding }, this.options, this.defaults);
   }
 
   buildView() {

@@ -8,10 +8,9 @@ export class Line extends VegaLiteChart {
       "type": "line",
       "point": true
     },
-    "encoding": {
-      "x": {"timeUnit": "year", "field": "date"},
-      "y": {"aggregate":"mean", "field": "price", "type": "quantitative"},
-      "color": {"field": "symbol", "type": "nominal"}
+    encoding: {
+      x: { field: 'x' },
+      y: { field: 'y', type: 'quantitative' },
     }
   }
 }
