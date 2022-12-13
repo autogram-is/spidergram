@@ -1,30 +1,36 @@
-import { Chart, ChartSize } from './index.js';
-import {Config, TopLevelSpec, compile} from 'vega-lite';
+import {Chart, ChartSize} from './index.js';
+import {TopLevelSpec, compile} from 'vega-lite';
 import {View, parse} from 'vega';
 import _ from 'lodash';
 
-export abstract class VegaLiteChart implements Chart {
-  protected abstract defaults: Partial<TopLevelSpec>;
+type VegaLiteData = TopLevelSpec['data'];
 
-  constructor(protected options: Partial<TopLevelSpec> = {}, public config: Config = {}) { }
+export class VegaLiteChart implements Chart {
+  readonly defaults: Partial<TopLevelSpec> = {};
+  spec: TopLevelSpec;
 
-  get spec(): TopLevelSpec {
-    return _.defaultsDeep(this.options, this.defaults);
+  constructor(
+    data: VegaLiteData = { values: [] },
+    spec: Partial<TopLevelSpec> = {},
+  ) {
+    this.spec = _.defaultsDeep({ data: data }, this.defaults, spec);
   }
 
-  get data() {
-    return this.options.data;
+  get data(): VegaLiteData {
+    return this.spec.data;
+  }
+  
+  set data(input: VegaLiteData) {
+    this.spec.data = input;
   }
 
-  set data(input: TopLevelSpec['data']) {
-    this.options.data = input;
+  buildView() {
+    const vegaSpec = compile(this.spec);
+    return new View(parse(vegaSpec.spec), {renderer: 'none'})
   }
 
-  async toSvg(options: Config & ChartSize = {}) {
-    const { height, width, ...config } = options;
-    
-    const vegaSpec = compile(this.spec, { config: _.defaultsDeep(config, this.config) });
-    const view = new View(parse(vegaSpec.spec), {renderer: 'none'});
+  async toSvg(options: Record<string, unknown> & ChartSize = {}) {
+    const view = this.buildView();
 
     if (options.height) view.height(options.height);
     if (options.width) view.width(options.width);

@@ -13,5 +13,5 @@ export class Line extends VegaLiteChart {
       "y": {"aggregate":"mean", "field": "price", "type": "quantitative"},
       "color": {"field": "symbol", "type": "nominal"}
     }
-  }  
+  }
 }
