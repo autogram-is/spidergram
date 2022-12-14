@@ -1,2 +1,2 @@
 export * from './link-summaries.js';
-export * as Charts from './charts/index.js';
+export * from './charts/index.js';

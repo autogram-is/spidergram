@@ -1,6 +1,6 @@
 import { VegaLiteChart } from './index.js';
 
-export class Bar extends VegaLiteChart {
+export class BarChart extends VegaLiteChart {
   defaults = {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
     mark: 'bar',

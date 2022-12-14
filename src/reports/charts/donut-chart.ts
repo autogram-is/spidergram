@@ -1,6 +1,6 @@
 import { VegaLiteChart } from './index.js';
 
-export class Donut extends VegaLiteChart {
+export class DonutChart extends VegaLiteChart {
   defaults = {
     $schema: "https://vega.github.io/schema/vega-lite/v5.json",
     mark: { type: "arc", innerRadius: 50},
