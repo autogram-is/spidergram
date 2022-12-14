@@ -6,7 +6,7 @@ import { Field } from 'vega-lite/build/src/channeldef.js';
 
 export type VegaLiteData = TopLevelSpec['data'];
 export type VegaLiteEncoding = Encoding<Field>;
-export type VegaLiteSpec = TopLevelSpec & { encoding: VegaLiteEncoding }
+export type VegaLiteSpec = TopLevelSpec;
 
 export class VegaLiteChart {
   readonly defaults: Partial<TopLevelSpec> = {};
@@ -15,7 +15,7 @@ export class VegaLiteChart {
   options: Partial<VegaLiteSpec> = {};
 
   get spec(): TopLevelSpec {
-    return _.defaultsDeep({ data: this.data }, { encoding: this.encoding }, this.options, this.defaults);
+    return _.defaultsDeep({ data: this.data }, { spec: { encoding: this.encoding } }, this.options, this.defaults);
   }
 
   buildView() {
