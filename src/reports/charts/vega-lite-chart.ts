@@ -29,7 +29,7 @@ export class VegaLiteChart {
   }
 }
 
-export async function vegaLiteToSvg(spec: VegaLiteSpec) {
+export async function vegaLiteToSvg(spec: TopLevelSpec) {
   const vegaSpec = compile(spec);
   const view = new View(parse(vegaSpec.spec), {renderer: 'none'})
   return view.toSVG().then(svg => Buffer.from(svg));
