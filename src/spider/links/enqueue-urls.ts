@@ -1,5 +1,5 @@
 import arrify from 'arrify';
-import {Dictionary, Request} from 'crawlee';
+import {Request, RequestOptions} from 'crawlee';
 import {UniqueUrl} from '../../model/index.js';
 import {SpiderContext} from '../context.js';
 import {EnqueueUrlOptions, urlDiscoveryDefaultOptions, filter} from './index.js';
@@ -35,18 +35,16 @@ export async function enqueue(
   return queue.addRequests(requests.slice(0, options.limit));
 }
 
-export function uniqueUrlToRequest(uu: UniqueUrl, userData: Dictionary = {}): Request {
-  const r = new Request({
+
+export function uniqueUrlToRequest(uu: UniqueUrl, options: Partial<RequestOptions> = {}): Request {
+  const r = new Request<Partial<UniqueUrl & { fromUniqueUrl: boolean }>>({
+    ...options,
     url: uu.url,
     uniqueKey: uu.key,
-    userData: {
-      ...userData,
-      fromUniqueUrl: true,
-    },
   });
-  if (uu.referer) {
-    r.userData.referer = uu.referer;
-  }
+  if (uu.referer) r.userData.referer = uu.referer;
+  if (uu.depth > 0) r.userData.depth = uu.depth;
+  r.userData.fromUniqueUrl = true;
 
   return r;
 }

@@ -4,7 +4,8 @@ import {PlaywrightCrawlingContext, Request, CheerioRoot, PlaywrightGotoOptions, 
 import {TDiskDriver} from 'typefs';
 import {UniqueUrl, Resource} from '../model/index.js';
 import {ArangoStore} from '../services/arango-store.js';
-import {EnqueueUrlOptions, AnchorTagData} from './links/index.js';
+import {EnqueueUrlOptions} from './links/index.js';
+import { HtmlTools } from '../index.js';
 import {InternalSpiderOptions} from './options.js';
 import {SpiderHook} from './hooks/index.js';
 import {SpiderRequestHandler} from './handlers/index.js';
@@ -99,7 +100,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * in the options; but does not save or enqueue them.
    * @type {Function}
    */
-  findUrls: (options?: Partial<EnqueueUrlOptions>) => Promise<AnchorTagData[]>;
+  findUrls: (options?: Partial<EnqueueUrlOptions>) => Promise<HtmlTools.LinkData[]>;
 
   /**
    * Saves a list of found links as {@apilink UniqueUrl} objects, applying
@@ -107,7 +108,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * does not enqueue them.
    * @type {Function}
    */
-  saveUrls: (links: AnchorTagData[], options?: Partial<EnqueueUrlOptions>) => Promise<UniqueUrl[]>;
+  saveUrls: (links: HtmlTools.LinkData[], options?: Partial<EnqueueUrlOptions>) => Promise<UniqueUrl[]>;
 
   /**
    * Accepts a list of {@apilink UniqueUrl} objects, applies any filters

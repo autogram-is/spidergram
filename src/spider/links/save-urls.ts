@@ -2,12 +2,13 @@ import is from '@sindresorhus/is';
 import arrify from 'arrify';
 import {SpiderContext} from '../context.js';
 import {UniqueUrl, LinksTo} from '../../model/index.js';
-import {AnchorTagData, EnqueueUrlOptions, filter} from './index.js';
+import {EnqueueUrlOptions, filter} from './index.js';
+import { HtmlTools, aql } from '../../index.js';
 import _ from 'lodash';
 
 export async function save(
   context: SpiderContext,
-  links: AnchorTagData | AnchorTagData[],
+  links: HtmlTools.LinkData | HtmlTools.LinkData[],
   customOptions: Partial<EnqueueUrlOptions> = {},
 ) {
   const options: EnqueueUrlOptions =  _.defaultsDeep(customOptions, context.urlOptions);
@@ -22,7 +23,7 @@ export async function save(
 
   for (const link of arrify(links)) {
     const uu = new UniqueUrl({
-      url: link.href,
+      url: link.url,
       base: uniqueUrl?.url,
       referer: uniqueUrl?.url,
       depth: (uniqueUrl === undefined) ? 0 : uniqueUrl.depth + 1,
@@ -59,36 +60,42 @@ export async function save(
       results.uniques.push(uu);
     }
 
-    // This chunk in particular is tricky: we insert LinksTo records "blind"
-    // because the same link can exist in a resource multiple times. That means
-    // running a crawl that reprocesses a given page will insert duplicate links
-    // for that page, with no easy way to identify them.
-    // 
-    // There's no perfect solution for this, other than clearing out the existing
-    // links for a Resource whenever we add a new set. We'll look into that.
     if (resource !== undefined) {
       const lt = new LinksTo({
-        url: uu,
-        resource,
+        from: resource,
+        to: uu,
         ...link,
       });
       results.links.push(lt);
     }
   }
 
+  // This is a little complicated; when we're about to save new link_to records,
+  // we need to make sure the old ones aren't cluttering things up. This is
+  // about as clean as it gets, sadly.
+  if (resource !== undefined && results.links.length > 0) {
+    const deleteLinkTos = aql`
+      FOR lt IN links_to
+      FILTER lt._from == ${resource.documentId}
+      REMOVE lt IN links_to
+    `;
+    await graph.db.query(deleteLinkTos);
+  }
+
   return graph.push(results.uniques, false)
-    .then(async () => graph.push(results.links))
+    .then(() => graph.push(results.links))
     .then(() => results.uniques);
 }
 
 export async function saveCurrentUrl(context: SpiderContext): Promise<void> {
-  const { fromUniqueUrl, referer } = context.request.userData ?? {};
+  const { fromUniqueUrl, referer, depth } = context.request.userData ?? {};
 
   if (is.boolean(fromUniqueUrl)) {
     context.uniqueUrl = new UniqueUrl({
       url: context.request.url,
       normalizer: url => url,
-      referer: is.string(referer) ? referer : undefined
+      referer: is.string(referer) ? referer : undefined,
+      depth: is.number(depth) ? depth : 0,
     });
   } else {
     context.uniqueUrl = new UniqueUrl({url: context.request.url});

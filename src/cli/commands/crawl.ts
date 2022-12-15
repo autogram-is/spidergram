@@ -25,8 +25,6 @@ export default class Crawl extends SgCommand {
     }),
     ...CLI.crawlFlags,
     selector: Flags.string({
-      multiple: true,
-      default: ['a'],
       summary: 'CSS selector for links',
     }),
     verbose: CLI.outputFlags.verbose
@@ -76,10 +74,10 @@ export default class Crawl extends SgCommand {
           urlOptions.save = flags.discover;
           urlOptions.enqueue = (flags.enqueue === 'none') ? () => false : flags.enqueue;
 
-          for (let sel of flags.selector) {
-            urlOptions.selector = sel;
-            await enqueueUrls(urlOptions);  
+          if (flags.selector) {
+            urlOptions.selector = flags.selector;
           }
+          await enqueueUrls(urlOptions);  
         }
       },
     });

@@ -2,6 +2,7 @@ import {Spider, SpiderContext} from '../index.js';
 import {Project, UniqueUrl} from '../../index.js';
 import {helpers} from '../index.js';
 import * as urls from '../links/index.js';
+import { HtmlTools } from '../../index.js';
 
 export async function enhanceSpiderContext(context: SpiderContext): Promise<void> {
   const crawler = context.crawler as Spider;
@@ -20,7 +21,7 @@ export async function enhanceSpiderContext(context: SpiderContext): Promise<void
     findLinks: async (options: Partial<urls.EnqueueUrlOptions> = {}) =>
       urls.find(context, options),
 
-    saveLinks: async (input: urls.AnchorTagData[], options: Partial<urls.EnqueueUrlOptions> = {}) =>
+    saveLinks: async (input: HtmlTools.LinkData[], options: Partial<urls.EnqueueUrlOptions> = {}) =>
       urls.save(context, input, options),
 
     saveRequests: async (input: UniqueUrl[], options: Partial<urls.EnqueueUrlOptions> = {}) =>

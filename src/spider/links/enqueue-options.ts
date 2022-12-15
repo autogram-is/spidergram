@@ -23,7 +23,7 @@ export interface EnqueueUrlOptions {
    * can be run multiple times with different options on a given page to find
    * and capture different sets of links, e.g. navigation vs footer vs body.
    *
-   * @default 'body a'
+   * @default 'body a, head link'
    */
   selector: string;
 
@@ -149,7 +149,7 @@ export type UrlMutatorWithContext<T = unknown> = (
 
 export const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
   limit: Number.POSITIVE_INFINITY,
-  selector: 'a',
+  selector: 'body a, head link',
   save: EnqueueStrategy.All,
   enqueue: EnqueueStrategy.SameDomain,
   discardEmptyLinks: true,
@@ -157,13 +157,4 @@ export const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
   discardNonWebLinks: false,
   discardUnparsableLinks: false,
   discardExistingLinks: true,
-};
-
-export type AnchorTagData = {
-  href: string;
-  selector?: string;
-  label?: string;
-  text?: string;
-  attributes?: Record<string, string>;
-  data?: unknown;
 };

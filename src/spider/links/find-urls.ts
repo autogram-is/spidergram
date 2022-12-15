@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import {SpiderContext} from '../context.js';
-import {EnqueueUrlOptions, AnchorTagData} from './index.js';
+import {EnqueueUrlOptions} from './index.js';
+import { HtmlTools } from '../../index.js';
 import _ from 'lodash';
 
 export async function find(
@@ -16,26 +17,19 @@ export async function find(
   } = options;
   const {$} = context;
 
-  return new Promise<AnchorTagData[]>(resolve => {
-    const results: AnchorTagData[] = [];
+  return new Promise<HtmlTools.LinkData[]>(resolve => {
+    const results: HtmlTools.LinkData[] = [];
     if (!is.undefined($)) {
-      $(selector).each((i, element) => {
-        const {href, ...attributes} = $(element).attr();
+      for (const link of HtmlTools.findLinks($, selector)) {
         if (
-          !(discardEmptyLinks && is.undefined(href))
-          && !(discardEmptyLinks && is.emptyStringOrWhitespace(href))
-          && !(discardAnchorOnlyLinks && href.startsWith('#'))
+          link !== undefined
+          && !(discardEmptyLinks && is.undefined(link.url))
+          && !(discardEmptyLinks && is.emptyStringOrWhitespace(link.url))
+          && !(discardAnchorOnlyLinks && link.url?.startsWith('#'))
         ) {
-          results.push({
-            href,
-            text: $(element).text().trim(),
-            label,
-            selector,
-            attributes,
-            data: $(element).data() ?? {},
-          });
+          results.push({ ...link, label });
         }
-      });
+      }
     }
 
     resolve(results);
