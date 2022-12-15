@@ -33,7 +33,7 @@ export async function save(
       continue;
     }
 
-    if (options.discardNonWebLinks && !['https:', 'https:'].includes(uu.parsed!.protocol.toLowerCase())) {
+    if (options.discardNonWebLinks && !['http:', 'https:'].includes(uu.parsed!.protocol.toLowerCase())) {
       continue;
     }
 
