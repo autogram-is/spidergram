@@ -31,6 +31,30 @@ export function findLinks(input: string | cheerio.Root, selectors: string | stri
   return results;
 }
 
+export function findBodyLinks(input: string | cheerio.Root) {
+  //const $ = (typeof(input) === 'string') ? parseWithCheerio(input, { xmlMode: true }) : input;
+  const results: LinkData[] = [];
+  return results;
+}
+
+export function findHeadLinks(input: string | cheerio.Root) {
+  //const $ = (typeof(input) === 'string') ? parseWithCheerio(input, { xmlMode: true }) : input;
+  const results: LinkData[] = [];
+  return results;
+}
+
+export function findSitemapLinks(input: string | cheerio.Root) {
+  //const $ = (typeof(input) === 'string') ? parseWithCheerio(input, { xmlMode: true }) : input;
+  const results: LinkData[] = [];
+  return results;
+}
+
+export function findFeedLinks(input: string | cheerio.Root) {
+  //const $ = (typeof(input) === 'string') ? parseWithCheerio(input, { xmlMode: true }) : input;
+  const results: LinkData[] = [];
+  return results;
+}
+
 export function getLinkData(element: cheerio.Element, $: cheerio.Root) {
   const attributes = $(element).attr();
   const text = $(element).text().trim();
