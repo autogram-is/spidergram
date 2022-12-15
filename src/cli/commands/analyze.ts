@@ -11,12 +11,6 @@ import { CLI, SgCommand } from '../index.js';
 export default class Analyze extends SgCommand {
   static summary = "Analyze the content of all crawled pages";
 
-  static usage = '<%= config.bin %> <%= command.id %>'
-
-  static examples = [
-    '<%= config.bin %> <%= command.id %>',
-  ];
-
   static flags = {
     config: CLI.globalFlags.config,
     options: CLI.globalFlags.options,
@@ -60,11 +54,15 @@ export default class Analyze extends SgCommand {
           }
 
           if (text.length > 0) {
+            const content: Record<string, unknown> = {};
             if (flags.text) { 
-              resource.text = text;
+              content.text = text;
             }
             if (flags.readability) {
-              resource.readability = TextTools.calculateReadability(text);
+              content.readability = TextTools.calculateReadability(text);
+            }
+            if (!is.emptyObject(content)) {
+              resource.content = content;
             }
           }
 

@@ -153,18 +153,6 @@ export const analysisFlags = {
     allowNo: true,
     summary: 'Calculate page readability',
   }),
-  topics: Flags.boolean({
-    char: 'w',
-    default: true,
-    allowNo: true,
-    summary: 'Extract topics from page content',
-  }),
-  hierarchy: Flags.boolean({
-    char: 'u',
-    default: true,
-    allowNo: true,
-    summary: 'Calculate hierarchy from URL structure',
-  }),
   metadata: Flags.boolean({
     char: 'm',
     default: true,
