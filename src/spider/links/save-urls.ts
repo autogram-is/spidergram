@@ -8,7 +8,7 @@ import _ from 'lodash';
 
 export async function save(
   context: SpiderContext,
-  links: HtmlTools.LinkData | HtmlTools.LinkData[],
+  links: HtmlTools.FoundLink | HtmlTools.FoundLink[],
   customOptions: Partial<EnqueueUrlOptions> = {},
 ) {
   const options: EnqueueUrlOptions =  _.defaultsDeep(customOptions, context.urlOptions);

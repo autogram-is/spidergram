@@ -17,8 +17,8 @@ export async function find(
   } = options;
   const {$} = context;
 
-  return new Promise<HtmlTools.LinkData[]>(resolve => {
-    const results: HtmlTools.LinkData[] = [];
+  return new Promise<HtmlTools.FoundLink[]>(resolve => {
+    const results: HtmlTools.FoundLink[] = [];
     if (!is.undefined($)) {
       for (const link of HtmlTools.findLinks($, selector)) {
         if (

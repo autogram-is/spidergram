@@ -21,7 +21,7 @@ export async function enhanceSpiderContext(context: SpiderContext): Promise<void
     findLinks: async (options: Partial<urls.EnqueueUrlOptions> = {}) =>
       urls.find(context, options),
 
-    saveLinks: async (input: HtmlTools.LinkData[], options: Partial<urls.EnqueueUrlOptions> = {}) =>
+    saveLinks: async (input: HtmlTools.FoundLink[], options: Partial<urls.EnqueueUrlOptions> = {}) =>
       urls.save(context, input, options),
 
     saveRequests: async (input: UniqueUrl[], options: Partial<urls.EnqueueUrlOptions> = {}) =>

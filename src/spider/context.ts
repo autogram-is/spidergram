@@ -100,7 +100,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * in the options; but does not save or enqueue them.
    * @type {Function}
    */
-  findUrls: (options?: Partial<EnqueueUrlOptions>) => Promise<HtmlTools.LinkData[]>;
+  findUrls: (options?: Partial<EnqueueUrlOptions>) => Promise<HtmlTools.FoundLink[]>;
 
   /**
    * Saves a list of found links as {@apilink UniqueUrl} objects, applying
@@ -108,7 +108,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * does not enqueue them.
    * @type {Function}
    */
-  saveUrls: (links: HtmlTools.LinkData[], options?: Partial<EnqueueUrlOptions>) => Promise<UniqueUrl[]>;
+  saveUrls: (links: HtmlTools.FoundLink[], options?: Partial<EnqueueUrlOptions>) => Promise<UniqueUrl[]>;
 
   /**
    * Accepts a list of {@apilink UniqueUrl} objects, applies any filters
