@@ -9,6 +9,7 @@ export async function enqueue(
   context: SpiderContext,
   urls: UniqueUrl | UniqueUrl[],
   customOptions: Partial<EnqueueUrlOptions> = {},
+  requestOptions: Partial<RequestOptions> = {}
 ) {
   const options: EnqueueUrlOptions = _.defaultsDeep(customOptions, context.urlOptions, urlDiscoveryDefaultOptions);
   const input = arrify(urls);
@@ -29,7 +30,7 @@ export async function enqueue(
       continue;
     }
 
-    requests.push(uniqueUrlToRequest(uu));
+    requests.push(uniqueUrlToRequest(uu, requestOptions));
   }
 
   return queue.addRequests(requests.slice(0, options.limit));
