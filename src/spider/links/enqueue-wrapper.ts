@@ -6,7 +6,7 @@ export async function enqueueUrls(
   context: SpiderContext,
   customOptions: Partial<EnqueueUrlOptions> = {},
 ) {
-  return find(context, customOptions)
-    .then(async links => save(context, links, customOptions))
+  const links =  find(context, customOptions);
+  return save(context, links, customOptions)
     .then(async urls => enqueue(context, urls, customOptions));
 }

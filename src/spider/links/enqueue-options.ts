@@ -37,6 +37,22 @@ export interface EnqueueUrlOptions {
   save: FilterInput;
 
   /**
+   * When enqueing a new hostname, infer a sitemap URL and enqueue it as well.
+   *
+   * @type {boolean}
+   * @default true
+   */
+  alwaysCheckForSitemap: boolean;
+
+  /**
+   * When enqueuing, bump sitemap.xml links to the top of the request queue.
+   *
+   * @type {boolean}
+   * @default true
+   */
+  prioritizeSitemaps: boolean;
+
+  /**
    * A filter condition to determine which links will be enqueued for crawling.
    *
    * @type {string | RegExp | EnqueueStrategy | UrlFilterWithContext}
@@ -152,6 +168,8 @@ export const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
   selector: 'body a, head link',
   save: EnqueueStrategy.All,
   enqueue: EnqueueStrategy.SameDomain,
+  alwaysCheckForSitemap: true,
+  prioritizeSitemaps: true,
   discardEmptyLinks: true,
   discardAnchorOnlyLinks: true,
   discardNonWebLinks: false,

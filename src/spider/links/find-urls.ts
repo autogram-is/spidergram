@@ -4,7 +4,7 @@ import {EnqueueUrlOptions} from './index.js';
 import { HtmlTools } from '../../index.js';
 import _ from 'lodash';
 
-export async function find(
+export function find(
   context: SpiderContext,
   customOptions?: Partial<EnqueueUrlOptions>,
 ) {
@@ -17,21 +17,19 @@ export async function find(
   } = options;
   const {$} = context;
 
-  return new Promise<HtmlTools.FoundLink[]>(resolve => {
-    const results: HtmlTools.FoundLink[] = [];
-    if (!is.undefined($)) {
-      for (const link of HtmlTools.findLinks($, selector)) {
-        if (
-          link !== undefined
-          && !(discardEmptyLinks && is.undefined(link.url))
-          && !(discardEmptyLinks && is.emptyStringOrWhitespace(link.url))
-          && !(discardAnchorOnlyLinks && link.url?.startsWith('#'))
-        ) {
-          results.push({ ...link, label });
-        }
+  const results: HtmlTools.FoundLink[] = [];
+  if (!is.undefined($)) {
+    for (const link of HtmlTools.findLinks($, selector)) {
+      if (
+        link !== undefined
+        && !(discardEmptyLinks && is.undefined(link.url))
+        && !(discardEmptyLinks && is.emptyStringOrWhitespace(link.url))
+        && !(discardAnchorOnlyLinks && link.url?.startsWith('#'))
+      ) {
+        results.push({ ...link, label });
       }
     }
+  }
 
-    resolve(results);
-  });
+  return results;
 }

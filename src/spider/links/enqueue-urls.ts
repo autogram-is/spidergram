@@ -30,7 +30,11 @@ export async function enqueue(
       continue;
     }
 
-    requests.push(uniqueUrlToRequest(uu, requestOptions));
+    if (uu.forefrontRequest) {
+      await queue.addRequests([uniqueUrlToRequest(uu, requestOptions)], { forefront: true })
+    } else {
+      requests.push(uniqueUrlToRequest(uu, requestOptions));
+    }
   }
 
   return queue.addRequests(requests.slice(0, options.limit));
@@ -42,6 +46,7 @@ export function uniqueUrlToRequest(uu: UniqueUrl, options: Partial<RequestOption
     ...options,
     url: uu.url,
     uniqueKey: uu.key,
+    label: uu.requestLabel ? uu.requestLabel as string : undefined
   });
   if (uu.referer) r.userData.referer = uu.referer;
   if (uu.depth > 0) r.userData.depth = uu.depth;

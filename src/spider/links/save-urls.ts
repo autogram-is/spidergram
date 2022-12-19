@@ -3,7 +3,7 @@ import arrify from 'arrify';
 import {SpiderContext} from '../context.js';
 import {UniqueUrl, LinksTo} from '../../model/index.js';
 import {EnqueueUrlOptions, filter} from './index.js';
-import { HtmlTools, aql } from '../../index.js';
+import { HtmlTools, NormalizedUrl, aql } from '../../index.js';
 import _ from 'lodash';
 
 export async function save(
@@ -40,6 +40,16 @@ export async function save(
 
     if (!filter(context, uu, options.save)) {
       continue;
+    }
+
+    // This approach is pretty inefficient, but it'll do for new.
+    if (options.alwaysCheckForSitemap && is.emptyStringOrWhitespace(uu.parsed?.pathname)) {
+      const nu = new NormalizedUrl(uu.url);
+      nu.pathname = 'sitemap.xml';
+      const suu = new UniqueUrl({ url: nu, requestLabel: 'sitemap', forefrontRequest: true });
+      if (!options.discardExistingLinks || !(await graph.exists(suu))) {
+        results.uniques.push(suu);
+      }
     }
 
     // If 'discardExistingLinks' is set, we don't bother including URLs
