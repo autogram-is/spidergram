@@ -72,7 +72,6 @@
     "chalk": "^5.1.2",
     "class-transformer": "^0.5.1",
     "cli-progress": "^3.11.2",
-    "cli-table3": "^0.6.3",
     "content-type": "^1.0.4",
     "dot-prop": "^7.2.0",
     "dotenv": "^16.0.3",
@@ -119,7 +118,7 @@
     "shx": "^0.3.3",
     "ts-node": "^10.8.0",
     "typedoc": "^0.23.19",
-    "typescript": "^4.8.4"
+    "typescript": "^4.9.4"
   },
   "peerDependencies": {
     "@oclif/core": "^1.19.1",
@@ -128,7 +127,6 @@
     "crawlee": "^3.1.0",
     "googleapis": "^108.0.1",
     "html-to-text": "^8.2.1",
-    "listr2": "^5.0.5",
     "playwright": "^1.27.1",
     "readability-scores": "^1.0.8",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.18.12/xlsx-0.18.12.tgz"
