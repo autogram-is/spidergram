@@ -121,7 +121,6 @@ export class Spider extends PlaywrightCrawler {
     this.crawlerOptions = crawler;
 
     this._events = new AsyncEventEmitter();
-    //this.events.on(EventType.SYSTEM_INFO, ({event, ...args}) => this.emit(event, ...args));
   }
 
   protected override async _runRequestHandler(
@@ -132,11 +131,11 @@ export class Spider extends PlaywrightCrawler {
     await super._runRequestHandler(context);
   }
 
-  on(event: SpiderEventName, listener: (...args: any[]) => any): void {
+  on(event: SpiderEventName, listener: (...args: unknown[]) => unknown): void {
     this._events.on(event, listener);
   }
 
-  off(event: SpiderEventName, listener?: (...args: any[]) => any): void {
+  off(event: SpiderEventName, listener?: (...args: unknown[]) => unknown): void {
     if (listener) {
       this._events.removeListener(event, listener);
     } else {
@@ -144,7 +143,7 @@ export class Spider extends PlaywrightCrawler {
     }
   }
 
-  emit(event: SpiderEventName, ...args: any[]): void {
+  emit(event: SpiderEventName, ...args: unknown[]): void {
     this._events.emit(event, ...args);
   }
 
@@ -241,6 +240,7 @@ async function playwrightPostNavigate(context: SpiderContext) {
   context.$ = await playwrightUtils.parseWithCheerio(context.page);
 }
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 function splitOptions(options: Partial<SpiderOptions> = {}) {
   const {
     projectConfig,
@@ -265,3 +265,5 @@ function splitOptions(options: Partial<SpiderOptions> = {}) {
     crawler: crawlerOptions as PlaywrightCrawlerOptions,
   };
 }
+/* eslint-enable no-unused-vars */
+

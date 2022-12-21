@@ -15,8 +15,8 @@ export class LineChart extends VegaLiteChart {
       },
       data: { values: data },
       encoding: {
-        x: { field: 'x' },
-        y: { field: 'y', type: 'quantitative' },
+        x: { field: x },
+        y: { field: y, type: 'quantitative' },
       },
     };
 

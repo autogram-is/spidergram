@@ -31,7 +31,7 @@ export async function enqueue(
       continue;
     }
 
-    if (!['https:', 'https:'].includes(uu.parsed!.protocol.toLowerCase())) {
+    if (!['https:', 'https:'].includes(uu.parsed?.protocol.toLowerCase() ?? '')) {
       continue;
     }
 

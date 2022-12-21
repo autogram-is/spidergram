@@ -89,16 +89,14 @@ export class ArangoStore {
   }
 
   /**
-   * Load an Arango database and (optionally) initialize it with collections
+   * Load an Arango database and (if necessary) initialize it with collections
    * for all Spidergram entities. Requires an existing connection to Arango.
    *
    * @param databaseName
-   * @param initialize
    * @returns
    */
   protected static async load(
     name: string,
-    initialize = true,
   ): Promise<Database> {
     const { system } = ArangoStore;
 

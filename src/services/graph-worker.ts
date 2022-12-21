@@ -47,6 +47,10 @@ export class GraphWorker<T extends Vertice = Vertice> extends EventEmitter {
       ...options,
     };
 
+    if (workerOptions.task === undefined) {
+      throw new Error('No worker task was given');
+    }
+
     const project = await Project.config(workerOptions.project);
     const graph = await project.graph();
 
@@ -80,7 +84,7 @@ export class GraphWorker<T extends Vertice = Vertice> extends EventEmitter {
               batch.map(value =>
                 this.performTask(
                   Vertice.fromJSON(value) as T,
-                  workerOptions.task!,
+                  workerOptions.task as GraphWorkerTask,
                 ),
               ),
             );

@@ -62,7 +62,7 @@ export function fileExtensionFromHeaders(
   headers: IncomingHttpHeaders = {},
 ): string {
   const filename = fileNameFromHeaders(url, headers);
-  return filename.split('.').shift()!.toString();
+  return filename.split('.').shift()?.toString() ?? '';
 }
 
 export const mimeGroups = {

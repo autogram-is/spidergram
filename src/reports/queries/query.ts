@@ -19,7 +19,7 @@ export class Query {
         .then(project => project.graph())
         .then(graph => graph.db);
     }
-    return this.db!.query<T>(query, options).then(cursor => cursor.all());
+    return this.db.query<T>(query, options).then(cursor => cursor.all());
   }
 
   get query() {
@@ -27,6 +27,6 @@ export class Query {
   }
 
   async run<T = AnyJson>(options: QueryOptions = {}) {
-    return Query.run(this.query, options);
+    return Query.run<T>(this.query, options);
   }
 }

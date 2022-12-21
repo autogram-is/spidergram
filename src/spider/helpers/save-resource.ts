@@ -15,10 +15,10 @@ export async function saveResource(
   // `properties` object.
   results.push(
     new Resource({
-      url: requestMeta!.url,
+      url: requestMeta?.url,
       code: requestMeta?.statusCode ?? -1,
-      message: requestMeta!.statusMessage ?? '',
-      headers: requestMeta!.headers ?? {},
+      message: requestMeta?.statusMessage ?? '',
+      headers: requestMeta?.headers ?? {},
       ...properties,
     }),
   );
