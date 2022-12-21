@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { SpiderContext } from '../context.js';
 import { EnqueueUrlOptions, find, save, enqueue } from './index.js';
 

@@ -8,7 +8,6 @@ import {
 } from './links/index.js';
 import { SpiderRequestHandler } from './handlers/index.js';
 import { readPackageUp } from 'read-pkg-up';
-import _ from 'lodash';
 
 const pkgData = await readPackageUp();
 

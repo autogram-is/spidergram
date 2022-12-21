@@ -2,7 +2,6 @@ import { RequestQueue, EnqueueStrategy, RequestTransform } from 'crawlee';
 import { ParsedUrl } from '@autogram/url-tools';
 import { InternalSpiderContext } from '../../index.js';
 import { FilterInput } from './index.js';
-import _ from 'lodash';
 
 /**
  * @export
@@ -158,9 +157,9 @@ export interface EnqueueUrlOptions {
   label?: string;
 }
 
-export type UrlMutatorWithContext<T = unknown> = (
+export type UrlMutatorWithContext<T extends InternalSpiderContext = InternalSpiderContext> = (
   found: ParsedUrl,
-  context?: InternalSpiderContext,
+  context?: T,
 ) => ParsedUrl;
 
 export const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {

@@ -39,7 +39,7 @@ export async function save(
 
     if (
       options.discardNonWebLinks &&
-      !['http:', 'https:'].includes(uu.parsed!.protocol.toLowerCase())
+      !['http:', 'https:'].includes(uu.parsed?.protocol.toLowerCase() ?? '')
     ) {
       continue;
     }
