@@ -13,6 +13,9 @@
     "spidergram": "./bin/run.js"
   },
   "scripts": {
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
+    "lint-and-fix": "eslint . --ext .ts --fix",
     "clean": "rm -rf ./dist",
     "nuke": "npm run clean; rm -rf ./node_modules; rm package-lock.json; npm install",
     "prepublish": "npm run build",
@@ -114,7 +117,11 @@
     "@types/node": "^18.11.0",
     "@types/object-hash": "^2.2.1",
     "@types/uuid": "^8.3.4",
+    "@typescript-eslint/eslint-plugin": "^5.47.0",
+    "@typescript-eslint/parser": "^5.47.0",
+    "eslint": "^8.30.0",
     "oclif": "^3",
+    "prettier": "^2.8.1",
     "shx": "^0.3.3",
     "ts-node": "^10.8.0",
     "typedoc": "^0.23.19",
