@@ -1,4 +1,4 @@
-import {SpiderContext} from '../context.js';
+import { SpiderContext } from '../context.js';
 
 export async function statusHandler(context: SpiderContext): Promise<void> {
   const { saveResource } = context;

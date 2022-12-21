@@ -5,7 +5,10 @@ export * from 'inquirer';
 /**
  * Prompt user for information. See https://www.npmjs.com/package/inquirer for details.
  */
-export async function prompt<T extends Answers = Answers>(questions: QuestionCollection<T>, initialAnswers?: Partial<T>) {
+export async function prompt<T extends Answers = Answers>(
+  questions: QuestionCollection<T>,
+  initialAnswers?: Partial<T>,
+) {
   return inquirer.prompt<T>(questions, initialAnswers);
 }
 
@@ -16,7 +19,7 @@ export async function prompt<T extends Answers = Answers>(questions: QuestionCol
 export async function timedPrompt<T extends Answers>(
   questions: QuestionCollection<T>,
   ms = 20_000,
-  initialAnswers?: Partial<T>
+  initialAnswers?: Partial<T>,
 ): Promise<T> {
   let id: NodeJS.Timeout;
   const thePrompt = prompt<T>(questions, initialAnswers);
@@ -31,7 +34,7 @@ export async function timedPrompt<T extends Answers>(
     }, ms).unref();
   });
 
-  return Promise.race([timeout, thePrompt]).then((result) => {
+  return Promise.race([timeout, thePrompt]).then(result => {
     clearTimeout(id);
     return result as T;
   });
@@ -44,10 +47,10 @@ export async function timedPrompt<T extends Answers>(
  * @param ms milliseconds to wait for user input.  Defaults to 10s.
  * @return true if the user confirms, false if they do not.
  */
- export async function confirm(message: string, ms = 20_000): Promise<boolean> {
+export async function confirm(message: string, ms = 20_000): Promise<boolean> {
   const { confirmed } = await timedPrompt<{ confirmed: boolean }>(
-    [ { name: 'confirmed', message, type: 'confirm', }, ], ms
+    [{ name: 'confirmed', message, type: 'confirm' }],
+    ms,
   );
   return confirmed;
 }
-

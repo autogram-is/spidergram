@@ -5,22 +5,22 @@ import { Flags } from '@oclif/core';
 const ua = GoogleTools.UniversalAnalytics;
 
 export default class GA extends SgCommand {
-  static description = "Test Google analytics credentials";
+  static description = 'Test Google analytics credentials';
 
   static flags = {
     config: CLI.globalFlags.config,
     view: Flags.string({
       summary: 'Universal Analytics View ID',
-      required: true
+      required: true,
     }),
     host: Flags.string({
       summary: 'Limit results to a specific hostname',
-      required: false
+      required: false,
     }),
-  }
+  };
 
   async run() {
-    const {flags} = await this.parse(GA);
+    const { flags } = await this.parse(GA);
 
     // Obtain user credentials to use for the request
     await GoogleTools.ServiceAccount.authenticate();
@@ -36,9 +36,9 @@ export default class GA extends SgCommand {
     const results = await ua.fetchUaReport(request);
     const data = ua.flattenReport(results.reports?.pop() ?? {}, dateRange);
     const dataByNormalizedUrl = ua.sumReportByUrl(data);
-    
+
     const headers: Parameters<typeof this.ux.table>[1] = {};
-    for (let h of Object.keys(data[0])) {
+    for (const h of Object.keys(data[0])) {
       headers[h] = { header: h };
     }
     this.ux.table(dataByNormalizedUrl, headers);

@@ -1,17 +1,17 @@
 import is from '@sindresorhus/is';
-import {EnqueueStrategy} from 'crawlee';
-import {ParsedUrl} from '@autogram/url-tools';
+import { EnqueueStrategy } from 'crawlee';
+import { ParsedUrl } from '@autogram/url-tools';
 import minimatch from 'minimatch';
 import arrify from 'arrify';
-import {UniqueUrl} from '../../model/index.js';
-import {SpiderContext} from '../index.js';
+import { UniqueUrl } from '../../model/index.js';
+import { SpiderContext } from '../index.js';
 
 export function filter(
   context: SpiderContext,
   input: UniqueUrl | ParsedUrl,
   filters: Filter | Filter[],
 ): boolean {
-  const incomingUrl = (input instanceof UniqueUrl) ? input.parsed : input;
+  const incomingUrl = input instanceof UniqueUrl ? input.parsed : input;
   if (is.undefined(incomingUrl)) {
     return false;
   }
@@ -25,7 +25,11 @@ export function filter(
   return true;
 }
 
-function singleFilter(context: SpiderContext, url: ParsedUrl, filter: Filter): boolean {
+function singleFilter(
+  context: SpiderContext,
+  url: ParsedUrl,
+  filter: Filter,
+): boolean {
   const currentUrl = context.uniqueUrl?.parsed;
 
   if (is.enumCase(filter, EnqueueStrategy)) {
@@ -60,7 +64,10 @@ function singleFilter(context: SpiderContext, url: ParsedUrl, filter: Filter): b
   return false;
 }
 
-export type FilterFunction = (link: FilterableLink, context?: SpiderContext) => boolean;
+export type FilterFunction = (
+  link: FilterableLink,
+  context?: SpiderContext,
+) => boolean;
 export type FilterableLink = UniqueUrl | ParsedUrl;
 
 // We accept a staggering array of filter types. Come, behold our filters.
@@ -69,5 +76,5 @@ export type Filter = string | RegExp | UrlFilterWithContext | EnqueueStrategy;
 
 export type UrlFilterWithContext = (
   found: ParsedUrl,
-  context?: SpiderContext
+  context?: SpiderContext,
 ) => boolean;

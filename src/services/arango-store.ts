@@ -1,17 +1,30 @@
-import {assert} from 'node:console';
+import { assert } from 'node:console';
 import is from '@sindresorhus/is';
-import {Config} from 'arangojs/connection.js';
-import {aql, Database} from 'arangojs';
-import {DocumentMetadata} from 'arangojs/documents.js';
-import {DocumentCollection} from 'arangojs/collection.js';
+import { Config } from 'arangojs/connection.js';
+import { aql, Database } from 'arangojs';
+import { DocumentMetadata } from 'arangojs/documents.js';
+import { DocumentCollection } from 'arangojs/collection.js';
 import arrify from 'arrify';
 import slugify from '@sindresorhus/slugify';
-import {Vertice, Reference, isEdge, UniqueUrl, RespondsWith, Resource, LinksTo, IsChildOf, IsVariantOf, AppearsOn, DataSet, Fragment} from '../model/index.js';
+import {
+  Vertice,
+  Reference,
+  isEdge,
+  UniqueUrl,
+  RespondsWith,
+  Resource,
+  LinksTo,
+  IsChildOf,
+  IsVariantOf,
+  AppearsOn,
+  DataSet,
+  Fragment,
+} from '../model/index.js';
 import { Project } from './project.js';
-import { JsonMap, JsonPrimitive } from '@salesforce/ts-types'
+import { JsonMap, JsonPrimitive } from '@salesforce/ts-types';
 import { join, AqlQuery, literal } from 'arangojs/aql.js';
 
-export {aql} from 'arangojs';
+export { aql } from 'arangojs';
 
 export class ArangoStore {
   protected static _systemDb?: Database;
@@ -47,24 +60,29 @@ export class ArangoStore {
    * @param connection
    * @returns
    */
-  static async open(name?: string, customConnection: Partial<Config> = {}): Promise<ArangoStore> {
+  static async open(
+    name?: string,
+    customConnection: Partial<Config> = {},
+  ): Promise<ArangoStore> {
     const project = await Project.config();
-    const { databaseName, ...connection } =  project.configuration.graph.connection;
+    const { databaseName, ...connection } =
+      project.configuration.graph.connection;
 
     const dbName = name ?? databaseName ?? 'spidergram';
     const dbConn = customConnection ?? connection;
 
     if (is.undefined(ArangoStore._systemDb)) {
       ArangoStore.connect(dbConn);
-      await this.system.databases()
-        .catch((error: unknown) => { 
-          if (is.error(error)) throw error;
-          throw new Error('Could not connect to Arango');
-        });
+      await this.system.databases().catch((error: unknown) => {
+        if (is.error(error)) throw error;
+        throw new Error('Could not connect to Arango');
+      });
     }
 
     if (is.undefined(ArangoStore.instances[dbName])) {
-      ArangoStore.instances[dbName] = new ArangoStore(await ArangoStore.load(dbName));
+      ArangoStore.instances[dbName] = new ArangoStore(
+        await ArangoStore.load(dbName),
+      );
     }
 
     return ArangoStore.instances[dbName];
@@ -78,8 +96,11 @@ export class ArangoStore {
    * @param initialize
    * @returns
    */
-  protected static async load(name: string, initialize = true): Promise<Database> {
-    const {system} = ArangoStore;
+  protected static async load(
+    name: string,
+    initialize = true,
+  ): Promise<Database> {
+    const { system } = ArangoStore;
 
     if (is.emptyStringOrWhitespace(name)) {
       throw new Error(`Invalid database '${name}'`);
@@ -87,12 +108,13 @@ export class ArangoStore {
       name = slugify(name);
     }
 
-    return ArangoStore.system.listDatabases()
-      .then(databases => 
-        databases.includes(name) ? 
-          system.database(name) : 
-          system.createDatabase(name)
-        )
+    return ArangoStore.system
+      .listDatabases()
+      .then(databases =>
+        databases.includes(name)
+          ? system.database(name)
+          : system.createDatabase(name),
+      )
       .then(database => ArangoStore.initialize(database));
   }
 
@@ -119,24 +141,40 @@ export class ArangoStore {
    * Load, save, and access working databases
    */
 
-  static async initialize(database: Database, erase = false): Promise<Database> {
+  static async initialize(
+    database: Database,
+    erase = false,
+  ): Promise<Database> {
     // Ugly shim to ensure all of our entity types are present before initializing.
-    const includedTypes = [UniqueUrl, RespondsWith, Resource, DataSet, LinksTo, IsChildOf, IsVariantOf, AppearsOn, Fragment];
+    const includedTypes = [
+      UniqueUrl,
+      RespondsWith,
+      Resource,
+      DataSet,
+      LinksTo,
+      IsChildOf,
+      IsVariantOf,
+      AppearsOn,
+      Fragment,
+    ];
     assert(includedTypes.length > 0);
 
     const promises: Array<Promise<DocumentCollection>> = [];
     for (const type of Vertice.types.keys()) {
-      await database.collection(type).exists().then(exists => {
-        if (!exists) {
-          if (Vertice.types.get(type)?.isEdge) {
-            promises.push(database.createEdgeCollection(type));
-          } else {
-            promises.push(database.createCollection(type));
+      await database
+        .collection(type)
+        .exists()
+        .then(exists => {
+          if (!exists) {
+            if (Vertice.types.get(type)?.isEdge) {
+              promises.push(database.createEdgeCollection(type));
+            } else {
+              promises.push(database.createCollection(type));
+            }
+          } else if (erase) {
+            database.collection(type).truncate();
           }
-        } else if (erase) {
-          database.collection(type).truncate();
-        }
-      });
+        });
     }
 
     return Promise.all(promises).then(() => database);
@@ -146,56 +184,74 @@ export class ArangoStore {
    * Convenience wrappers for saving and deleting Spidergram Entities
    */
 
-  async exists(ref: Reference) : Promise<boolean> {
+  async exists(ref: Reference): Promise<boolean> {
     const [collection, key] = Vertice.idFromReference(ref).split('/');
     return this.db.collection(collection).documentExists(key);
   }
 
-  async findById<T extends Vertice = Vertice>(ref: Reference): Promise<T | undefined> {
+  async findById<T extends Vertice = Vertice>(
+    ref: Reference,
+  ): Promise<T | undefined> {
     const [collection, key] = Vertice.idFromReference(ref).split('/');
-    return this.db.collection<JsonMap>(collection).document(key)
+    return this.db
+      .collection<JsonMap>(collection)
+      .document(key)
       .then(json => Vertice.fromJSON(json) as T)
       .catch(() => undefined);
   }
 
-  async findAll<T extends Vertice = Vertice>(collection: string, criteria: Record<string, JsonPrimitive> = {}, limit?: number) {
+  async findAll<T extends Vertice = Vertice>(
+    collection: string,
+    criteria: Record<string, JsonPrimitive> = {},
+    limit?: number,
+  ) {
     const col = this.db.collection(collection);
     const clauses: AqlQuery[] = [];
     for (const prop in criteria) {
       // The literal is a terrible idea, and we should be ashamed of ourselves. Very soon,
       // we'll want to throw together a light query builder. In the meantime, we do this.
-      clauses.push(aql`FILTER ${literal('item.' + prop)} == ${criteria[prop]}`)
+      clauses.push(aql`FILTER ${literal('item.' + prop)} == ${criteria[prop]}`);
     }
     if (limit) clauses.push(aql`LIMIT ${limit}`);
-    const query = aql`FOR item IN ${col} ${ join(clauses) } return item`;
+    const query = aql`FOR item IN ${col} ${join(clauses)} return item`;
 
-    return this.db.query<JsonMap>(query)
+    return this.db
+      .query<JsonMap>(query)
       .then(async cursor => cursor.all())
       .then(results => results.map(value => Vertice.fromJSON(value) as T));
   }
 
-  async push(input: Vertice | Vertice[], overwrite = true): Promise<PromiseSettledResult<DocumentMetadata>[]> {
+  async push(
+    input: Vertice | Vertice[],
+    overwrite = true,
+  ): Promise<PromiseSettledResult<DocumentMetadata>[]> {
     const promises: Array<Promise<DocumentMetadata>> = [];
-    const overwriteMode = (overwrite) ? 'replace' : 'ignore';
+    const overwriteMode = overwrite ? 'replace' : 'ignore';
     input = arrify(input);
 
     // To ensure we don't have any premature reference insertions, we
     // save all vertices before saving edges.
     for (const vertice of input) {
       if (!isEdge(vertice)) {
-        promises.push(this.db.collection(vertice._collection)
-          .save(vertice.toJSON(), {overwriteMode}));
+        promises.push(
+          this.db
+            .collection(vertice._collection)
+            .save(vertice.toJSON(), { overwriteMode }),
+        );
       }
     }
 
     for (const edge of input) {
       if (isEdge(edge)) {
-        promises.push(this.db.collection(edge._collection)
-          .save(edge.toJSON(), {overwriteMode}));
+        promises.push(
+          this.db
+            .collection(edge._collection)
+            .save(edge.toJSON(), { overwriteMode }),
+        );
       }
     }
 
-    return Promise.allSettled(promises)
+    return Promise.allSettled(promises);
   }
 
   async delete(input: Vertice | Vertice[]) {
@@ -205,24 +261,31 @@ export class ArangoStore {
     // When bulk deleting, remove edges first.
     for (const edge of input) {
       if (isEdge(edge)) {
-        promises.push(this.db.collection(edge._collection).remove(edge.documentId));
+        promises.push(
+          this.db.collection(edge._collection).remove(edge.documentId),
+        );
       }
     }
 
     for (const vertice of input) {
       if (!isEdge(vertice)) {
-        promises.push(this.db.collection(vertice._collection).remove(vertice.documentId));
+        promises.push(
+          this.db.collection(vertice._collection).remove(vertice.documentId),
+        );
       }
     }
 
     return Promise.all(promises);
   }
 
-  async erase(options: {collections?: string[]; eraseAll?: boolean}) {
+  async erase(options: { collections?: string[]; eraseAll?: boolean }) {
     options.collections ??= [];
     const collections = await this.db.listCollections(true);
     for (const collection of collections) {
-      if ((options.collections.includes(collection.name)) || (options.collections.length === 0 && options.eraseAll === true)) {
+      if (
+        options.collections.includes(collection.name) ||
+        (options.collections.length === 0 && options.eraseAll === true)
+      ) {
         await this.db.collection(collection.name).truncate();
       }
     }
@@ -231,7 +294,7 @@ export class ArangoStore {
   // Two quick helpers that eliminate unecessary property traversal
   get query() {
     return this.db.query.bind(this.db);
-  }  
+  }
 
   get collection() {
     return this.db.collection.bind(this.db);

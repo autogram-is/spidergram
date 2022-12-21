@@ -1,8 +1,6 @@
 import is from '@sindresorhus/is';
-import {
-  NormalizedUrl,
-} from '@autogram/url-tools';
-import {UniqueUrl} from '../vertices/unique-url.js';
+import { NormalizedUrl } from '@autogram/url-tools';
+import { UniqueUrl } from '../vertices/unique-url.js';
 
 type ValidUniqueUrlInput = UniqueUrl | NormalizedUrl | string;
 export class UniqueUrlSet extends Set<UniqueUrl> {

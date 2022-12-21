@@ -1,7 +1,7 @@
-import {RequestQueue, EnqueueStrategy, RequestTransform} from 'crawlee';
-import {ParsedUrl} from '@autogram/url-tools';
-import {InternalSpiderContext} from '../../index.js';
-import {FilterInput} from './index.js';
+import { RequestQueue, EnqueueStrategy, RequestTransform } from 'crawlee';
+import { ParsedUrl } from '@autogram/url-tools';
+import { InternalSpiderContext } from '../../index.js';
+import { FilterInput } from './index.js';
 import _ from 'lodash';
 
 /**
@@ -137,9 +137,9 @@ export interface EnqueueUrlOptions {
   /**
    * Don't save or enqueue the link if it already exists in the graph.
    *
-   * *NOTE:* Only affects the saving and enqueuing of {@apilink UniqueUrl} 
+   * *NOTE:* Only affects the saving and enqueuing of {@apilink UniqueUrl}
    * objects themselves; LinksTo records connection crawled Resources to
-   * the UniqueUrl may still be created. 
+   * the UniqueUrl may still be created.
    *
    * @type {boolean}
    * @default true
@@ -160,7 +160,7 @@ export interface EnqueueUrlOptions {
 
 export type UrlMutatorWithContext<T = unknown> = (
   found: ParsedUrl,
-  context?: InternalSpiderContext
+  context?: InternalSpiderContext,
 ) => ParsedUrl;
 
 export const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {

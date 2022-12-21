@@ -1,8 +1,8 @@
-import {Vertice, VerticeConstructorOptions, Reference} from '../index.js';
+import { Vertice, VerticeConstructorOptions, Reference } from '../index.js';
 
 export interface FragmentConstructorOptions extends VerticeConstructorOptions {
   location?: Reference;
-};
+}
 
 /**
  * A sub-page content element without a standalone URL of its own.
@@ -14,12 +14,12 @@ export interface FragmentConstructorOptions extends VerticeConstructorOptions {
  */
 export class Fragment extends Vertice {
   readonly _collection = 'fragments';
-  
+
   /**
    * Optional reference to the graph entity where the fragment was found.
-   * 
+   *
    * NOTE: If an entity ID is passed in as a string it must be a full Arango ID, i.e., 'collection_name/12346...'
-   * 
+   *
    * @param {Vertice | string} input
    */
   location?: string;
@@ -31,7 +31,7 @@ export class Fragment extends Vertice {
    * @param {FragmentConstructorOptions} input
    */
   constructor(input: FragmentConstructorOptions) {
-    const {location, ...dataForSuper} = input;
+    const { location, ...dataForSuper } = input;
     super(dataForSuper);
 
     if (location) {
@@ -40,4 +40,4 @@ export class Fragment extends Vertice {
   }
 }
 
-Vertice.types.set('fragments', {constructor: Fragment});
+Vertice.types.set('fragments', { constructor: Fragment });

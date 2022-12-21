@@ -1,12 +1,22 @@
 import is from '@sindresorhus/is';
 
-import {GeneratedAqlQuery} from 'arangojs/aql';
-import {Vertice, Edge, UniqueUrl, IsChildOf, UrlSource, ArangoStore, aql} from '../index.js';
-import {ParsedUrl} from '@autogram/url-tools';
-import {JsonMap} from '@salesforce/ts-types';
+import { GeneratedAqlQuery } from 'arangojs/aql';
+import {
+  Vertice,
+  Edge,
+  UniqueUrl,
+  IsChildOf,
+  UrlSource,
+  ArangoStore,
+  aql,
+} from '../index.js';
+import { ParsedUrl } from '@autogram/url-tools';
+import { JsonMap } from '@salesforce/ts-types';
 
-
-export interface HierarchyData<V extends Vertice = Vertice, E extends Edge = Edge> {
+export interface HierarchyData<
+  V extends Vertice = Vertice,
+  E extends Edge = Edge,
+> {
   participants: V[];
   orphans: V[];
   new: V[];
@@ -28,7 +38,7 @@ interface UrlHierarchyOptions {
 }
 
 export class UrlHierarchyBuilder {
-  pool: UniqueUrl[] = [];// Candidate URLs to organize
+  pool: UniqueUrl[] = []; // Candidate URLs to organize
   data: HierarchyData<UniqueUrl, IsChildOf> = {
     participants: [],
     orphans: [],
@@ -37,10 +47,7 @@ export class UrlHierarchyBuilder {
     hierarchy: [],
   };
 
-  constructor(
-    protected readonly graph: ArangoStore,
-    readonly label = 'url',
-  ) {}
+  constructor(protected readonly graph: ArangoStore, readonly label = 'url') {}
 
   // Only returns parsable web URLs; additional filter criteria
   // can be passed in, but should use the `aql` template literal
@@ -54,7 +61,8 @@ export class UrlHierarchyBuilder {
           ${filter}
           return item`,
     );
-    await cursor.map(result => UniqueUrl.fromJSON(result))
+    await cursor
+      .map(result => UniqueUrl.fromJSON(result))
       .then(urls => {
         this.pool = urls;
       })
@@ -70,7 +78,7 @@ export class UrlHierarchyBuilder {
   }
 
   async buildRelationships(customOptions: Partial<UrlHierarchyOptions> = {}) {
-    const {urlToSortable, createParent, ...config} = customOptions;
+    const { urlToSortable, createParent, ...config } = customOptions;
 
     const options = {
       fillGaps: true,
@@ -90,14 +98,14 @@ export class UrlHierarchyBuilder {
     this.sort();
 
     let url: UniqueUrl | undefined;
-    while (url = this.pool.pop()) {
+    while ((url = this.pool.pop())) {
       const parent = this.findParent(url.parsed!, options);
 
       if (is.undefined(parent)) {
         this.data.orphans.push(url);
       } else {
         this.data.relationships.push(
-          new IsChildOf({child: url, parent, label: 'url'}),
+          new IsChildOf({ child: url, parent, label: 'url' }),
         );
         this.data.participants.push(url);
       }
@@ -113,10 +121,7 @@ export class UrlHierarchyBuilder {
   }
 
   async save() {
-    await this.graph.push([
-      ...this.data.new,
-      ...this.data.relationships,
-    ]);
+    await this.graph.push([...this.data.new, ...this.data.relationships]);
   }
 
   urlCompare(a: ParsedUrl, b: ParsedUrl): number {
@@ -125,7 +130,7 @@ export class UrlHierarchyBuilder {
 
   isDirectParent(child: ParsedUrl, candidate: ParsedUrl): boolean {
     const expectedParent = this.createParent(child);
-    if (expectedParent && (this.urlCompare(expectedParent, candidate) === 0)) {
+    if (expectedParent && this.urlCompare(expectedParent, candidate) === 0) {
       return true;
     }
 
@@ -157,9 +162,7 @@ export class UrlHierarchyBuilder {
   }
 
   urlToSortable(url: ParsedUrl): string[] {
-    let components = [
-      url.domain.replace('/', ''),
-    ];
+    let components = [url.domain.replace('/', '')];
     if (is.nonEmptyStringAndNotWhitespace(url.subdomain)) {
       components.push(url.subdomain);
     }
@@ -179,7 +182,9 @@ export class UrlHierarchyBuilder {
   // popping the last item will always produce the most distant
   // leaf nodes possible.
   protected sort() {
-    this.pool.sort((a: UniqueUrl, b: UniqueUrl): number => this.sortKey(a.parsed!).localeCompare(this.sortKey(b.parsed!)));
+    this.pool.sort((a: UniqueUrl, b: UniqueUrl): number =>
+      this.sortKey(a.parsed!).localeCompare(this.sortKey(b.parsed!)),
+    );
   }
 
   protected findParent(
@@ -187,8 +192,12 @@ export class UrlHierarchyBuilder {
     options: UrlHierarchyOptions,
     distance = 1,
   ): UniqueUrl | undefined {
-    const maxDistance = options.fillGaps ? Math.min(options.maxParentDistance, this.urlToSortable(url).length) : 1;
-    let parent = this.pool.find(candidate => this.isDirectParent(url, candidate.parsed!));
+    const maxDistance = options.fillGaps
+      ? Math.min(options.maxParentDistance, this.urlToSortable(url).length)
+      : 1;
+    let parent = this.pool.find(candidate =>
+      this.isDirectParent(url, candidate.parsed!),
+    );
 
     if (is.undefined(parent)) {
       if (distance >= maxDistance) {
@@ -205,19 +214,24 @@ export class UrlHierarchyBuilder {
     return parent;
   }
 
-  protected connectToAncestor(child: ParsedUrl, ancestor: ParsedUrl): UniqueUrl | undefined {
+  protected connectToAncestor(
+    child: ParsedUrl,
+    ancestor: ParsedUrl,
+  ): UniqueUrl | undefined {
     const newUrls: UniqueUrl[] = [];
 
     for (
       let parent = this.createParent(child);
-      (parent && this.urlCompare(parent, ancestor) > 0);
+      parent && this.urlCompare(parent, ancestor) > 0;
       parent = this.createParent(child)
     ) {
-      newUrls.push(new UniqueUrl({
-        url: parent.href,
-        source: UrlSource.Path,
-        normalizer: url => url,
-      }));
+      newUrls.push(
+        new UniqueUrl({
+          url: parent.href,
+          source: UrlSource.Path,
+          normalizer: url => url,
+        }),
+      );
     }
 
     this.data.new.push(...newUrls);

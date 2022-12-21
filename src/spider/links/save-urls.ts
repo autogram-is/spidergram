@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import arrify from 'arrify';
-import {SpiderContext} from '../context.js';
-import {UniqueUrl, LinksTo} from '../../model/index.js';
-import {EnqueueUrlOptions, filter} from './index.js';
+import { SpiderContext } from '../context.js';
+import { UniqueUrl, LinksTo } from '../../model/index.js';
+import { EnqueueUrlOptions, filter } from './index.js';
 import { HtmlTools, NormalizedUrl, aql } from '../../index.js';
 import _ from 'lodash';
 
@@ -11,8 +11,11 @@ export async function save(
   links: HtmlTools.FoundLink | HtmlTools.FoundLink[],
   customOptions: Partial<EnqueueUrlOptions> = {},
 ) {
-  const options: EnqueueUrlOptions =  _.defaultsDeep(customOptions, context.urlOptions);
-  const {graph, uniqueUrl, resource} = context;
+  const options: EnqueueUrlOptions = _.defaultsDeep(
+    customOptions,
+    context.urlOptions,
+  );
+  const { graph, uniqueUrl, resource } = context;
   const results: {
     uniques: UniqueUrl[];
     links: LinksTo[];
@@ -26,7 +29,7 @@ export async function save(
       url: link.url,
       base: uniqueUrl?.url,
       referer: uniqueUrl?.url,
-      depth: (uniqueUrl === undefined) ? 0 : uniqueUrl.depth + 1,
+      depth: uniqueUrl === undefined ? 0 : uniqueUrl.depth + 1,
     });
 
     // Run each URL through a few gauntlets
@@ -34,7 +37,10 @@ export async function save(
       continue;
     }
 
-    if (options.discardNonWebLinks && !['http:', 'https:'].includes(uu.parsed!.protocol.toLowerCase())) {
+    if (
+      options.discardNonWebLinks &&
+      !['http:', 'https:'].includes(uu.parsed!.protocol.toLowerCase())
+    ) {
       continue;
     }
 
@@ -43,10 +49,17 @@ export async function save(
     }
 
     // This approach is pretty inefficient, but it'll do for new.
-    if (options.alwaysCheckForSitemap && is.emptyStringOrWhitespace(uu.parsed?.pathname)) {
+    if (
+      options.alwaysCheckForSitemap &&
+      is.emptyStringOrWhitespace(uu.parsed?.pathname)
+    ) {
       const nu = new NormalizedUrl(uu.url);
       nu.pathname = 'sitemap.xml';
-      const suu = new UniqueUrl({ url: nu, requestLabel: 'sitemap', forefrontRequest: true });
+      const suu = new UniqueUrl({
+        url: nu,
+        requestLabel: 'sitemap',
+        forefrontRequest: true,
+      });
       if (!options.discardExistingLinks || !(await graph.exists(suu))) {
         results.uniques.push(suu);
       }
@@ -92,7 +105,8 @@ export async function save(
     await graph.db.query(deleteLinkTos);
   }
 
-  return graph.push(results.uniques, false)
+  return graph
+    .push(results.uniques, false)
     .then(() => graph.push(results.links))
     .then(() => results.uniques);
 }
@@ -108,7 +122,7 @@ export async function saveCurrentUrl(context: SpiderContext): Promise<void> {
       depth: is.number(depth) ? depth : 0,
     });
   } else {
-    context.uniqueUrl = new UniqueUrl({url: context.request.url});
+    context.uniqueUrl = new UniqueUrl({ url: context.request.url });
     await context.graph.push(context.uniqueUrl, false);
   }
 }

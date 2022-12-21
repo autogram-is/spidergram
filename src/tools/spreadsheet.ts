@@ -1,9 +1,9 @@
 // Sheets.js setup
 import * as fs from 'node:fs';
-import {Readable} from 'node:stream';
+import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import * as XLSX from 'xlsx';
-import {JsonPrimitive} from '@salesforce/ts-types';
+import { JsonPrimitive } from '@salesforce/ts-types';
 import { Buffer } from 'node:buffer';
 
 XLSX.set_fs(fs);
@@ -28,7 +28,7 @@ XLSX.stream.set_readable(Readable);
 type Workbook = Sheet[] | Record<string, Sheet>;
 type Sheet = Row[];
 type Row = Record<string, Cell>;
-type Cell = JsonPrimitive
+type Cell = JsonPrimitive;
 
 type SpreadsheetWriteOptions = {
   format: XLSX.BookType;
@@ -43,7 +43,7 @@ export class Spreadsheet {
   workbook: XLSX.WorkBook;
 
   constructor(data?: Workbook) {
-    const {utils} = Spreadsheet;
+    const { utils } = Spreadsheet;
     this.workbook = utils.book_new();
     if (!is.undefined(data)) {
       if (is.array(data)) {
@@ -60,11 +60,19 @@ export class Spreadsheet {
 
   addSheet(data: Sheet | Cell[], name?: string) {
     if (is.array(data)) {
-      name = Spreadsheet.utils.book_append_sheet(this.workbook, XLSX.utils.json_to_sheet(data), name);
+      name = Spreadsheet.utils.book_append_sheet(
+        this.workbook,
+        XLSX.utils.json_to_sheet(data),
+        name,
+      );
     }
+    return name;
   }
 
-  async save(filename: string, customOptions: Partial<SpreadsheetWriteOptions> = {}): Promise<string> {
+  async save(
+    filename: string,
+    customOptions: Partial<SpreadsheetWriteOptions> = {},
+  ): Promise<string> {
     const options: SpreadsheetWriteOptions = {
       format: 'xlsx',
       compression: true,

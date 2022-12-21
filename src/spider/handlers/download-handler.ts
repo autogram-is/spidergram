@@ -1,9 +1,9 @@
-import {Readable} from 'node:stream';
-import {fileNameFromHeaders} from '../helpers/mime.js';
-import {SpiderContext} from '../context.js';
+import { Readable } from 'node:stream';
+import { fileNameFromHeaders } from '../helpers/mime.js';
+import { SpiderContext } from '../context.js';
 
 export async function downloadHandler(context: SpiderContext): Promise<void> {
-  const {graph, files, saveResource, sendRequest} = context;
+  const { graph, files, saveResource, sendRequest } = context;
   const resource = await saveResource();
 
   const buffer = await sendRequest({
@@ -11,10 +11,13 @@ export async function downloadHandler(context: SpiderContext): Promise<void> {
     resolveBodyOnly: true,
     allowGetBody: true,
     decompress: true,
-    method: 'GET'
+    method: 'GET',
   });
-  
-  const fileName = resource.key + '-' + fileNameFromHeaders(new URL(buffer.url), buffer.headers);
+
+  const fileName =
+    resource.key +
+    '-' +
+    fileNameFromHeaders(new URL(buffer.url), buffer.headers);
   await files('downloads').writeStream(fileName, Readable.from(buffer.rawBody));
 
   resource.files.push({ bucket: 'downloads', filename: fileName });

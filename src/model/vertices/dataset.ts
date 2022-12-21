@@ -1,13 +1,13 @@
-import _ from 'lodash';
 import slugify from '@sindresorhus/slugify';
-import {Vertice, VerticeConstructorOptions} from './vertice.js';
-import {JsonCollection} from '@salesforce/ts-types';
+import { Vertice, VerticeConstructorOptions } from './vertice.js';
+import { JsonCollection } from '@salesforce/ts-types';
 
-export interface DataSetConstructorOptions<DataInterface = JsonCollection> extends VerticeConstructorOptions {
-  type?: string,
+export interface DataSetConstructorOptions<DataInterface = JsonCollection>
+  extends VerticeConstructorOptions {
+  type?: string;
   name: string;
   data: DataInterface;
-};
+}
 
 /**
  * General-purpose storage for imported and third-party API data.
@@ -48,7 +48,7 @@ export class DataSet<DataInterface = JsonCollection> extends Vertice {
    * @param {DataSetConstructorOptions<DataInterface>} input
    */
   constructor(input: DataSetConstructorOptions<DataInterface>) {
-    const {type, name, data, ...dataForSuper} = input;
+    const { type, name, data, ...dataForSuper } = input;
     super(dataForSuper);
 
     // Flatten the URL to a string
@@ -70,8 +70,8 @@ export class DataSet<DataInterface = JsonCollection> extends Vertice {
   static buildKey(name: string, type = 'default', label?: string): string {
     const keyParts = [type, name];
     if (label) keyParts.push(label);
-    return slugify(keyParts.join('-'), { lowercase: true })
+    return slugify(keyParts.join('-'), { lowercase: true });
   }
 }
 
-Vertice.types.set('datasets', {constructor: DataSet});
+Vertice.types.set('datasets', { constructor: DataSet });

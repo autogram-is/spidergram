@@ -1,5 +1,5 @@
-import { Flags, CliUx } from "@oclif/core"
-import { EnqueueStrategy } from "crawlee";
+import { Flags, CliUx } from '@oclif/core';
+import { EnqueueStrategy } from 'crawlee';
 
 /**
  * Flags that you can use for manipulating tables.
@@ -24,7 +24,7 @@ export enum OutputFormats {
   CSV = 'csv',
   TSV = 'tsv',
   INTERACTIVE = 'interactive',
-};
+}
 
 export const globalFlags = {
   config: Flags.string({
@@ -41,7 +41,7 @@ export const globalFlags = {
     summary: 'Bypass warnings (dangerous)',
     helpGroup: 'OUTPUT',
   }),
-}
+};
 
 export const queryFlags = {
   limit: Flags.integer({
@@ -67,21 +67,21 @@ export const queryFlags = {
     multiple: true,
     default: ['key:_key'],
     helpGroup: 'QUERY',
-  })
-}
+  }),
+};
 
 export const outputFlags = {
   output: Flags.enum<OutputFormats>({
     default: OutputFormats.INTERACTIVE,
     options: [
-      OutputFormats.INTERACTIVE, 
+      OutputFormats.INTERACTIVE,
       OutputFormats.JSON,
       OutputFormats.CSV,
       OutputFormats.TSV,
       OutputFormats.XML,
     ],
     summary: 'Control console output format',
-    helpGroup: 'OUTPUT'
+    helpGroup: 'OUTPUT',
   }),
   verbose: Flags.boolean({
     char: 'v',
@@ -97,7 +97,7 @@ export const outputFlags = {
     exclusive: ['verbose'],
     helpGroup: 'OUTPUT',
   }),
-}
+};
 
 export const crawlFlags = {
   discover: Flags.enum<EnqueueStrategy | 'none'>({
@@ -106,9 +106,9 @@ export const crawlFlags = {
       EnqueueStrategy.All,
       EnqueueStrategy.SameDomain,
       EnqueueStrategy.SameHostname,
-      'none'
+      'none',
     ],
-    summary: "Link discovery strategy",
+    summary: 'Link discovery strategy',
   }),
   enqueue: Flags.enum<EnqueueStrategy | 'none'>({
     default: EnqueueStrategy.SameDomain,
@@ -116,9 +116,9 @@ export const crawlFlags = {
       EnqueueStrategy.All,
       EnqueueStrategy.SameDomain,
       EnqueueStrategy.SameHostname,
-      'none'
+      'none',
     ],
-    summary: "Link enqueueing strategy",
+    summary: 'Link enqueueing strategy',
   }),
   download: Flags.string({
     aliases: ['dl'],
@@ -126,13 +126,13 @@ export const crawlFlags = {
   }),
   concurrency: Flags.integer({
     default: 1,
-    summary: 'Max simultaneous requests'
+    summary: 'Max simultaneous requests',
   }),
   rate: Flags.integer({
     default: 300,
-    summary: 'Max requests to process per minute'
-  })
-}
+    summary: 'Max requests to process per minute',
+  }),
+};
 
 export const analysisFlags = {
   body: Flags.string({
@@ -157,6 +157,6 @@ export const analysisFlags = {
     char: 'm',
     default: true,
     allowNo: true,
-    summary: "Extract page metadata",
+    summary: 'Extract page metadata',
   }),
-}
+};

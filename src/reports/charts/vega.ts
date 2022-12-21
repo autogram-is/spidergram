@@ -1,14 +1,14 @@
-import {View, Spec, parse} from 'vega';
+import { View, Spec, parse } from 'vega';
 
 export type VegaSpec = Spec;
 
 export class VegaChart {
-  constructor(public spec: VegaSpec) { }
+  constructor(public spec: VegaSpec) {}
   protected _view?: View;
 
   get view() {
     if (this._view === undefined) {
-      this._view = new View(parse(this.spec), {renderer: 'none'});
+      this._view = new View(parse(this.spec), { renderer: 'none' });
     }
     return this._view;
   }

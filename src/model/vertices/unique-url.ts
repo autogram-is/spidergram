@@ -1,7 +1,7 @@
-import {URL} from 'node:url';
+import { URL } from 'node:url';
 import is from '@sindresorhus/is';
-import {NormalizedUrl, UrlMutators} from '@autogram/url-tools';
-import {Vertice, VerticeConstructorOptions, Transform} from './vertice.js';
+import { NormalizedUrl, UrlMutators } from '@autogram/url-tools';
+import { Vertice, VerticeConstructorOptions, Transform } from './vertice.js';
 
 export interface UniqueUrlConstructorOptions extends VerticeConstructorOptions {
   url?: string | NormalizedUrl;
@@ -10,7 +10,7 @@ export interface UniqueUrlConstructorOptions extends VerticeConstructorOptions {
   normalizer?: UrlMutators.UrlMutator;
   referer?: string;
   depth?: number;
-};
+}
 
 export enum UrlSource {
   Page = 'page',
@@ -23,31 +23,32 @@ export class UniqueUrl extends Vertice {
   readonly _collection = 'unique_urls';
   url!: string;
 
-  @Transform((transformation) => {
+  @Transform(transformation => {
     if (transformation.type === 1) {
-  // Class to plain
-    return transformation.value ? (transformation.value as NormalizedUrl).properties : undefined;
+      // Class to plain
+      return transformation.value
+        ? (transformation.value as NormalizedUrl).properties
+        : undefined;
     } else {
-  // Plain to class
-    if (transformation.value) {
-    const n = new NormalizedUrl(transformation.value, undefined, (u) => u);
-    if ('original' in transformation.value) {
-    n.original = transformation.value.original as string;
+      // Plain to class
+      if (transformation.value) {
+        const n = new NormalizedUrl(transformation.value, undefined, u => u);
+        if ('original' in transformation.value) {
+          n.original = transformation.value.original as string;
+        }
+        return n;
+      }
+      return transformation.value;
     }
-    return n;
-    }
-    return transformation.value;
-    }
-    })
-
-    parsed?: NormalizedUrl;
+  })
+  parsed?: NormalizedUrl;
 
   referer?: string;
   source?: UrlSource;
   depth!: number;
 
   protected override keySeed(): unknown {
-    return {url: this.url};
+    return { url: this.url };
   }
 
   get parsable(): boolean {
@@ -55,16 +56,18 @@ export class UniqueUrl extends Vertice {
   }
 
   constructor(data: UniqueUrlConstructorOptions = {}) {
-    let {url, base, normalizer, referer, depth, ...dataForSuper} = data;
+    const { url, base, normalizer, referer, depth, ...dataForSuper } = data;
+    
     super(dataForSuper);
 
-    if (is.urlInstance(base)) {
-      base = base.toString();
+    let baseUrl = base;
+    if (is.urlInstance(baseUrl)) {
+      baseUrl = baseUrl.toString();
     }
 
     if (is.string(url)) {
       try {
-        this.parsed = new NormalizedUrl(url, base, normalizer);
+        this.parsed = new NormalizedUrl(url, baseUrl, normalizer);
         this.url = this.parsed.href;
       } catch {
         // Not parsable, but we're okay with that.
@@ -81,4 +84,4 @@ export class UniqueUrl extends Vertice {
   }
 }
 
-Vertice.types.set('unique_urls', {constructor: UniqueUrl});
+Vertice.types.set('unique_urls', { constructor: UniqueUrl });

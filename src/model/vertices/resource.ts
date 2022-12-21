@@ -1,20 +1,28 @@
 import { ParsedUrl } from '@autogram/url-tools';
 import is from '@sindresorhus/is';
-import {Vertice, VerticeConstructorOptions, Expose, Transform} from './vertice.js';
-import {parse as parseContentType} from 'content-type';
+import {
+  Vertice,
+  VerticeConstructorOptions,
+  Expose,
+  Transform,
+} from './vertice.js';
+import { parse as parseContentType } from 'content-type';
 
 export interface ResourceConstructorOptions extends VerticeConstructorOptions {
   url?: string | URL;
   code?: number | string;
   message?: string;
   headers?: Record<string, string | string[] | undefined>;
-  mime?: string,
-  size?: number,
+  mime?: string;
+  size?: number;
   body?: string;
   files?: SavedFile[];
-};
+}
 
-export interface SavedFile { bucket: string, filename: string };
+export interface SavedFile {
+  bucket: string;
+  filename: string;
+}
 
 export class Resource extends Vertice {
   readonly _collection = 'resources';
@@ -29,7 +37,15 @@ export class Resource extends Vertice {
   files!: SavedFile[];
 
   constructor(data: ResourceConstructorOptions = {}) {
-    const {url, parsed, code, message, headers, mime, size, body, files, ...dataForSuper} = data;
+    const {
+      url,
+      code,
+      message,
+      headers,
+      body,
+      files,
+      ...dataForSuper
+    } = data;
     super(dataForSuper);
 
     // Flatten the URL to a string
@@ -62,10 +78,12 @@ export class Resource extends Vertice {
   }
 
   @Expose()
-  @Transform((transformation) => {
+  @Transform(transformation => {
     if (transformation.type === 1) {
-      return transformation.value ? (transformation.value as ParsedUrl).properties : undefined;
-    } else { 
+      return transformation.value
+        ? (transformation.value as ParsedUrl).properties
+        : undefined;
+    } else {
       return transformation;
     }
   })
@@ -74,8 +92,8 @@ export class Resource extends Vertice {
   }
 
   protected override keySeed(): unknown {
-    return {url: this.url, label: this.label};
+    return { url: this.url, label: this.label };
   }
 }
 
-Vertice.types.set('resources', {constructor: Resource});
+Vertice.types.set('resources', { constructor: Resource });

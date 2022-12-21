@@ -1,4 +1,4 @@
-import {SpiderContext} from '../context.js';
+import { SpiderContext } from '../context.js';
 
 export * from './page-handler.js';
 export * from './status-handler.js';

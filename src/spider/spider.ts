@@ -20,10 +20,10 @@ import {
   CrawlerAddRequestsOptions,
   RequestOptions,
 } from 'crawlee';
-import {NormalizedUrl, ParsedUrl} from '@autogram/url-tools';
-import {Project} from '../services/project.js';
-import {UniqueUrl, UniqueUrlSet} from '../model/index.js';
-import {SpiderRequestHandler} from './handlers/index.js';
+import { NormalizedUrl, ParsedUrl } from '@autogram/url-tools';
+import { Project } from '../services/project.js';
+import { UniqueUrl, UniqueUrlSet } from '../model/index.js';
+import { SpiderRequestHandler } from './handlers/index.js';
 import {
   InternalSpiderOptions,
   SpiderOptions,
@@ -37,7 +37,12 @@ import {
   SpiderStatus,
 } from './index.js';
 
-type RequestValue = string | Request | RequestOptions | NormalizedUrl | UniqueUrl;
+type RequestValue =
+  | string
+  | Request
+  | RequestOptions
+  | NormalizedUrl
+  | UniqueUrl;
 
 export const enum SpiderEventType {
   SYSTEM_INFO = 'systemInfo',
@@ -46,7 +51,12 @@ export const enum SpiderEventType {
   EXIT = 'exit',
 }
 
-export type SpiderEventName = SpiderEventType | 'systemInfo' | 'aborting' | 'exit' | 'requestComplete';
+export type SpiderEventName =
+  | SpiderEventType
+  | 'systemInfo'
+  | 'aborting'
+  | 'exit'
+  | 'requestComplete';
 
 export class Spider extends PlaywrightCrawler {
   spiderOptions: InternalSpiderOptions;
@@ -60,15 +70,12 @@ export class Spider extends PlaywrightCrawler {
     requestsByStatus: {},
     requestsByType: {},
     requestsByHost: {},
-    requestsByLabel: {}
-  }
+    requestsByLabel: {},
+  };
   protected _events: AsyncEventEmitter;
 
-  constructor(
-    options: Partial<SpiderOptions> = {},
-    config?: Configuration,
-  ) {
-    const {crawler, internal} = splitOptions(options);
+  constructor(options: Partial<SpiderOptions> = {}, config?: Configuration) {
+    const { crawler, internal } = splitOptions(options);
 
     const requestHandlers: Record<string, SpiderRequestHandler> = {
       page: internal.pageHandler ?? handlers.pageHandler,
@@ -86,17 +93,23 @@ export class Spider extends PlaywrightCrawler {
     crawler.requestHandler = router;
 
     crawler.preNavigationHooks = [
-      ...(internal.preNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
+      ...(internal.preNavigationHooks ?? []).map(hook =>
+        contextualizeHook(hook),
+      ),
     ];
 
     crawler.postNavigationHooks = [
       contextualizeHook(playwrightPostNavigate),
-      ...(internal.postNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
+      ...(internal.postNavigationHooks ?? []).map(hook =>
+        contextualizeHook(hook),
+      ),
     ];
 
-    crawler.failedRequestHandler = 
-      async (ctx: PlaywrightCrawlingContext, error: Error): Promise<void> => 
-      handlers.failureHandler(ctx as unknown as SpiderContext, error)
+    crawler.failedRequestHandler = async (
+      ctx: PlaywrightCrawlingContext,
+      error: Error,
+    ): Promise<void> =>
+      handlers.failureHandler(ctx as unknown as SpiderContext, error);
 
     if (internal.userAgent) {
       crawler.launchContext = { userAgent: internal.userAgent };
@@ -111,12 +124,13 @@ export class Spider extends PlaywrightCrawler {
     //this.events.on(EventType.SYSTEM_INFO, ({event, ...args}) => this.emit(event, ...args));
   }
 
-  protected override async _runRequestHandler(context: PlaywrightCrawlingContext) {
+  protected override async _runRequestHandler(
+    context: PlaywrightCrawlingContext,
+  ) {
     await helpers.enhanceSpiderContext(context as SpiderContext);
     await helpers.requestPrecheck(context as SpiderContext);
     await super._runRequestHandler(context);
   }
-
 
   on(event: SpiderEventName, listener: (...args: any[]) => any): void {
     this._events.on(event, listener);
@@ -128,14 +142,15 @@ export class Spider extends PlaywrightCrawler {
     } else {
       this._events.removeAllListeners(event);
     }
-  } 
+  }
 
   emit(event: SpiderEventName, ...args: any[]): void {
     this._events.emit(event, ...args);
   }
 
-  updateStats({request, requestMeta}: SpiderContext) {
-    const type = requestMeta?.type ?? requestMeta?.headers['content-type'] ?? 'unknown';
+  updateStats({ request, requestMeta }: SpiderContext) {
+    const type =
+      requestMeta?.type ?? requestMeta?.headers['content-type'] ?? 'unknown';
     const status = requestMeta?.statusCode ?? -1;
     const host = new ParsedUrl(request.url).hostname.toLocaleLowerCase();
     const label = request.label ?? 'none';
@@ -145,7 +160,6 @@ export class Spider extends PlaywrightCrawler {
     this.status.requestsByStatus[status] ??= 0;
     this.status.requestsByType[type] ??= 0;
 
-    
     this.status.requestsByHost[host]++;
     this.status.requestsByLabel[label]++;
     this.status.requestsByStatus[status]++;
@@ -162,13 +176,15 @@ export class Spider extends PlaywrightCrawler {
       this.updateStats(context);
     } else {
       const errors = context.request.errorMessages;
-      this.status.lastError = errors[errors.length];  
+      this.status.lastError = errors[errors.length];
     }
 
     // Even in the case of an error, we'll fire the event so that progress
     // indicators can be updated, etc.
     this.emit(
-      SpiderEventType.REQUEST_COMPLETE, this.status, context.request.url
+      SpiderEventType.REQUEST_COMPLETE,
+      this.status,
+      context.request.url,
     );
 
     super._cleanupContext(context as PlaywrightCrawlingContext);
@@ -182,7 +198,7 @@ export class Spider extends PlaywrightCrawler {
     const project = await Project.config(this.spiderOptions.projectConfig);
     const graph = await project.graph();
     requests = arrify(requests);
-    
+
     // Crawlee has a lot of logs going on.
     // Long term we want to do something nicer here.
     this.config.set('logLevel', this.spiderOptions.logLevel);
@@ -209,13 +225,15 @@ export class Spider extends PlaywrightCrawler {
 
     await graph.push([...uniques], false);
     const queue = await this.getRequestQueue();
-    await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)), options);
+    await queue.addRequests(
+      [...uniques].map(uu => uniqueUrlToRequest(uu)),
+      options,
+    );
 
-    return super.run()
-      .then(stats => {
-        this.status.finishTime = Date.now();
-        return { ...this.status, ...stats};
-      });
+    return super.run().then(stats => {
+      this.status.finishTime = Date.now();
+      return { ...this.status, ...stats };
+    });
   }
 }
 
@@ -223,9 +241,7 @@ async function playwrightPostNavigate(context: SpiderContext) {
   context.$ = await playwrightUtils.parseWithCheerio(context.page);
 }
 
-function splitOptions(
-  options: Partial<SpiderOptions> = {},
-) {
+function splitOptions(options: Partial<SpiderOptions> = {}) {
   const {
     projectConfig,
     logLevel,
@@ -242,7 +258,10 @@ function splitOptions(
   } = options;
 
   return {
-    internal: _.defaultsDeep(options, defaultSpiderOptions) as InternalSpiderOptions,
+    internal: _.defaultsDeep(
+      options,
+      defaultSpiderOptions,
+    ) as InternalSpiderOptions,
     crawler: crawlerOptions as PlaywrightCrawlerOptions,
   };
 }

@@ -1,12 +1,15 @@
-import {IncomingHttpHeaders} from 'node:http';
+import { IncomingHttpHeaders } from 'node:http';
 import is from '@sindresorhus/is';
 import arrify from 'arrify';
 import minimatch from 'minimatch';
 import mime from 'mime';
 
-export {parse as parseContentType} from 'content-type';
+export { parse as parseContentType } from 'content-type';
 
-export function mimeMatches(candidate: string, match: string | string[]): boolean {
+export function mimeMatches(
+  candidate: string,
+  match: string | string[],
+): boolean {
   const matches = arrify(match);
   for (const m of matches) {
     if (minimatch(candidate, m)) {
@@ -25,8 +28,7 @@ export function fileNameFromHeaders(
   let filename: string | undefined;
 
   if (!is.nonEmptyStringAndNotWhitespace(filename)) {
-    filename = (filenameRx.exec(headers['content-disposition'] ?? '')
-      ?? [])[0];
+    filename = (filenameRx.exec(headers['content-disposition'] ?? '') ?? [])[0];
   }
 
   if (!is.nonEmptyStringAndNotWhitespace(filename)) {
@@ -59,10 +61,7 @@ export function fileExtensionFromHeaders(
   url: URL,
   headers: IncomingHttpHeaders = {},
 ): string {
-  const filename = fileNameFromHeaders(
-    url,
-    headers,
-  );
+  const filename = fileNameFromHeaders(url, headers);
   return filename.split('.').shift()!.toString();
 }
 
@@ -112,13 +111,7 @@ export const mimeGroups = {
     'font/woff2',
     'application/vnd.ms-fontobject',
   ],
-  image: [
-    'image/svg+xml',
-    'image/png',
-    'image/jpeg',
-    'image/gif',
-    'image/bmp',
-  ],
+  image: ['image/svg+xml', 'image/png', 'image/jpeg', 'image/gif', 'image/bmp'],
   data: [
     'text/csv',
     'application/json',
@@ -130,10 +123,7 @@ export const mimeGroups = {
     'application/rss+xml',
     'application/xhtml+xml',
   ],
-  ebook: [
-    'application/epub+zip',
-    'application/vnd.amazon.ebook',
-  ],
+  ebook: ['application/epub+zip', 'application/vnd.amazon.ebook'],
   archive: [
     'application/zip',
     'application/x-bzip',
@@ -143,9 +133,5 @@ export const mimeGroups = {
     'application/x-freearc',
     'application/x-7z-compressed',
   ],
-  misc: [
-    'application/octet-stream',
-    'application/vnd.visio',
-    'text/calendar',
-  ],
+  misc: ['application/octet-stream', 'application/vnd.visio', 'text/calendar'],
 };
