@@ -16,11 +16,11 @@
     "lint": "eslint . --ext .ts",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "lint-and-fix": "eslint . --ext .ts --fix",
-    "clean": "rm -rf ./dist",
+    "clean": "rm -rf ./dist; rm ./*.tsbuildinfo",
     "nuke": "npm run clean; rm -rf ./node_modules; rm package-lock.json; npm install",
     "prepublish": "npm run build",
     "build": "npm run clean; npm run compile",
-    "compile": "tsc",
+    "compile": "tsc -p ./tsconfig.build.json",
     "docs": "rm -rf ./docs/*; typedoc src/index.ts --out ./docs"
   },
   "files": [
