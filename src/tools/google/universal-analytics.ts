@@ -221,7 +221,7 @@ export function buildUaRequest(
 
   // Generate filters
   if (options.spiderUserAgent) {
-    request.dimensionFilterClauses![0].filters!.push({
+    request.dimensionFilterClauses?.[0].filters?.push({
       dimensionName: 'ga:browser',
       not: true,
       operator: 'PARTIAL',
@@ -229,14 +229,14 @@ export function buildUaRequest(
     });
   }
   if (options.hostname) {
-    request.dimensionFilterClauses![0].filters!.push({
+    request.dimensionFilterClauses?.[0].filters?.push({
       dimensionName: 'ga:hostname',
       operator: 'BEGINS_WITH',
       expressions: [options['hostname']],
     });
   }
   if (options.ignoreUnvisited) {
-    request.metricFilterClauses![0].filters!.push({
+    request.metricFilterClauses?.[0].filters?.push({
       metricName: 'ga:uniquePageViews',
       operator: 'GREATER_THAN',
       comparisonValue: '0',
@@ -350,7 +350,7 @@ export function flattenReport(
 ) {
   const types = [
     ...(report.columnHeader?.dimensions ?? []).map(
-      value => 'METRIC_TYPE_UNSPECIFIED',
+      () => 'METRIC_TYPE_UNSPECIFIED',
     ),
     ...(report.columnHeader?.metricHeader?.metricHeaderEntries?.map(
       header => header.type ?? 'METRIC_TYPE_UNSPECIFIED',
