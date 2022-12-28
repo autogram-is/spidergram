@@ -47,7 +47,7 @@
   "bugs": {
     "url": "https://github.com/autogram-is/spidergram/issues"
   },
-  "homepage": "https://spidergram.autogram.is",
+  "homepage": "https://spidergram.dev",
   "oclif": {
     "bin": "spidergram",
     "dirname": "spidergram",
