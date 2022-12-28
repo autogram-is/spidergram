@@ -46,7 +46,7 @@ export function fileNameFromHeaders(
     filename = fallback;
   }
 
-  const mimeExtension = mime.getExtension(headers['content-type'] ?? '');
+  const mimeExtension = mime.getExtension(headers['content-type'] ?? '') ?? undefined;
   if (mimeExtension !== undefined) {
     const fileExtension = filename.split('.').pop();
     if (fileExtension === undefined || fileExtension !== mimeExtension) {
