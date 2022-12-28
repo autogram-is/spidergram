@@ -1,4 +1,9 @@
 export default {
+  "files": [
+    "tests/**/*",
+    "!tests/**/fixtures/*",
+    "!tests/**/*.md"
+  ],
   "extensions": {
     "ts": "module"
   },

@@ -22,7 +22,8 @@
     "build": "npm run clean; npm run compile",
     "compile": "tsc -p ./tsconfig.build.json",
     "docs": "rm -rf ./docs/*; typedoc src/index.ts --out ./docs",
-    "test": "ava"
+    "test": "ava",
+    "overage": "nyc --reporter=text ava"
   },
   "files": [
     "dist/**/*",
@@ -124,6 +125,7 @@
     "ava": "^5.1.0",
     "eslint": "^8.30.0",
     "eslint-plugin-ava": "^13.2.0",
+    "nyc": "^15.1.0",
     "oclif": "^3",
     "prettier": "^2.8.1",
     "shx": "^0.3.3",
