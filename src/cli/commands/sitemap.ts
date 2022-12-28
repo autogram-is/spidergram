@@ -1,4 +1,5 @@
-import { CLI, SgCommand } from '../../index.js';
+import { CLI, SgCommand, Spider, OutputLevel } from '../../index.js';
+import { ParsedUrl, NormalizedUrl, NormalizedUrlSet } from '@autogram/url-tools';
 
 export default class GetSitemap extends SgCommand {
   static summary = 'Retrieve and analyze sitemap data';
@@ -20,6 +21,30 @@ export default class GetSitemap extends SgCommand {
   static strict = false;
 
   async run() {
-    this.ux.info('Nothing to see here, yet.');
+    await this.getProjectContext();
+    const { argv: urls, flags } = await this.parse(GetSitemap);
+
+    if (flags.verbose) {
+      this.output = OutputLevel.verbose;
+    }
+
+    const urlSetOptions = {
+      normalizer: (url: ParsedUrl) => {
+        url.href = NormalizedUrl.normalizer(url).href; 
+        url.pathname = 'sitemap.xml';
+        return url;
+      }
+    }
+
+    const sitemapList = new NormalizedUrlSet(urls, urlSetOptions);
+
+    const spider = new Spider({
+      urlOptions: {
+        save: true,
+        enqueue: false,
+      }
+    });
+    const results = await spider.run(...sitemapList);
+    this.ux.styledObject(results);
   }
 }
