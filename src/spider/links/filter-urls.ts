@@ -9,12 +9,14 @@ import { SpiderContext } from '../index.js';
 export function filter(
   context: SpiderContext,
   input: UniqueUrl | ParsedUrl,
-  filters: Filter | Filter[],
+  filters: FilterInput,
 ): boolean {
   const incomingUrl = input instanceof UniqueUrl ? input.parsed : input;
   if (is.undefined(incomingUrl)) {
     return false;
   }
+
+  if (is.boolean(filters)) return filters;
 
   for (const filter of arrify(filters)) {
     if (!singleFilter(context, incomingUrl, filter)) {
@@ -71,7 +73,7 @@ export type FilterFunction = (
 export type FilterableLink = UniqueUrl | ParsedUrl;
 
 // We accept a staggering array of filter types. Come, behold our filters.
-export type FilterInput = Filter | Filter[];
+export type FilterInput = Filter | Filter[] | boolean;
 export type Filter = string | RegExp | UrlFilterWithContext | EnqueueStrategy;
 
 export type UrlFilterWithContext = (

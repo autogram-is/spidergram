@@ -30,7 +30,7 @@ export interface EnqueueUrlOptions {
    * A filter condition to determine which links will be saved as
    * {@apilink UniqueUrl} objects in the current project's graph.
    *
-   * @type {string | RegExp | EnqueueStrategy | UrlFilterWithContext}
+   * @type {boolean | string | RegExp | EnqueueStrategy | UrlFilterWithContext}
    * @default EnqueueStrategy.All
    */
   save: FilterInput;
@@ -54,7 +54,7 @@ export interface EnqueueUrlOptions {
   /**
    * A filter condition to determine which links will be enqueued for crawling.
    *
-   * @type {string | RegExp | EnqueueStrategy | UrlFilterWithContext}
+   * @type {boolean | string | RegExp | EnqueueStrategy | UrlFilterWithContext}
    * @default EnqueueStrategy.SameDomain
    */
   enqueue: FilterInput;
