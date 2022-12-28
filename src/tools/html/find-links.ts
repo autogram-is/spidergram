@@ -54,10 +54,7 @@ export function findHeadLinks(input: string | cheerio.Root) {
  * and SitemapIndex XML markup.
  */
 export function findLinksInSitemap(input: string | cheerio.Root) {
-  const $ =
-    typeof input === 'string'
-      ? parseWithCheerio(input, { xmlMode: true })
-      : input;
+  const $ = typeof input === 'string' ? parseWithCheerio(input, { xmlMode: true }) : input;
   const results: FoundLink[] = [];
   $('urlset url')
     .toArray()
@@ -72,7 +69,7 @@ export function findLinksInSitemap(input: string | cheerio.Root) {
       });
     });
 
-  $('sitemapset sitemap')
+  $('sitemapindex sitemap')
     .toArray()
     .forEach(element => {
       results.push({

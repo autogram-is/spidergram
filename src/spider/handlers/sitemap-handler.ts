@@ -25,12 +25,18 @@ export async function sitemapHandler(context: SpiderContext) {
   const fileName =
     resource.key +
     '-' +
-    fileNameFromHeaders(new URL(buffer.url), buffer.headers);
+    fileNameFromHeaders(new URL(context.request.url), buffer.headers);
+
   await files('downloads').writeStream(fileName, Readable.from(buffer));
   resource.files.push({ bucket: 'downloads', filename: fileName });
   await graph.push(resource);
 
-  // Now parse the sitemap and pull out URLs.
-  const links = HtmlTools.findLinksInSitemap(buffer.body);
+  // Now read it back in
+  const xml = await files('downloads').read(fileName);
+
+  // Now parse the sitemap and pull out URLs. Some sites (vanityfair.com is one
+  // example) do odd things like sitemap URLs with querystrings
+   
+  const links = HtmlTools.findLinksInSitemap(xml.toString());
   await save(context, links).then(savedLinks => enqueue(context, savedLinks));
 }

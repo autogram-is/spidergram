@@ -81,6 +81,7 @@ export class Spider extends PlaywrightCrawler {
       page: internal.pageHandler ?? handlers.pageHandler,
       download: handlers.downloadHandler,
       status: handlers.statusHandler,
+      sitemap: handlers.sitemapHandler,
       ...internal.requestHandlers,
     };
 
