@@ -12,7 +12,7 @@ export function find(
     customOptions,
     context.urlOptions,
   );
-  const { label, selector, discardAnchorOnlyLinks, discardEmptyLinks } =
+  const { linkLabel, selector, discardAnchorOnlyLinks, discardEmptyLinks } =
     options;
   const { $ } = context;
 
@@ -25,7 +25,7 @@ export function find(
         !(discardEmptyLinks && is.emptyStringOrWhitespace(link.url)) &&
         !(discardAnchorOnlyLinks && link.url?.startsWith('#'))
       ) {
-        results.push({ ...link, label });
+        results.push({ ...link, label: linkLabel });
       }
     }
   }

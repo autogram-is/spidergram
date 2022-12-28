@@ -31,6 +31,7 @@ export async function save(
       referer: uniqueUrl?.url,
       depth: uniqueUrl === undefined ? 0 : uniqueUrl.depth + 1,
     });
+    if (options.requestLabel) uu.requestLabel = options.requestLabel;
 
     // Run each URL through a few gauntlets
     if (options.discardUnparsableLinks && is.undefined(uu.parsed)) {
@@ -49,6 +50,11 @@ export async function save(
     }
 
     // This approach is pretty inefficient, but it'll do for new.
+    // If the 'always check' flag is set, and we're processing a top-level URL,
+    // also save a version of the URL with sitemap.xml appended. We might
+    // want to handle this in a parallel track to ensure that any newly
+    // spotted domain gets both sitemap and robots.txt analysis if enabled, even
+    // if the link to it isn't the top level index.
     if (
       options.alwaysCheckForSitemap &&
       is.emptyStringOrWhitespace(uu.parsed?.pathname)
@@ -87,6 +93,7 @@ export async function save(
       const lt = new LinksTo({
         from: resource,
         to: uu,
+        label: options.linkLabel,
         ...link,
       });
       results.links.push(lt);

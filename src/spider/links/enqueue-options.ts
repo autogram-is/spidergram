@@ -154,7 +154,17 @@ export interface EnqueueUrlOptions {
    * @default {undefined}
    * @type {string}
    */
-  label?: string;
+  linkLabel?: string;
+
+  /**
+   * A label applied to any {@apilink Request} objects created when the
+   * URLs are enqueued for crawling. This can be used to control which
+   * handlers process the resulting HTTP responses.
+   *
+   * @default {undefined}
+   * @type {string}
+   */
+  requestLabel?: string;
 }
 
 export type UrlMutatorWithContext<T extends InternalSpiderContext = InternalSpiderContext> = (
