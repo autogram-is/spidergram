@@ -66,7 +66,7 @@
     ]
   },
   "dependencies": {
-    "@autogram/url-tools": "^2.5.2",
+    "@autogram/url-tools": "^2.5.3",
     "@oclif/plugin-help": "^5",
     "@oclif/plugin-plugins": "^2.1.6",
     "@salesforce/ts-types": "^1.7.1",
