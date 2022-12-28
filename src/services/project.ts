@@ -241,7 +241,7 @@ export const projectConfigDefaults: ProjectConfig = {
     discardAnchor: true,
     discardAuth: true,
     discardIndex: '**/{index,default}.{htm,html,aspx,php}',
-    discardSearch: '*',
+    discardSearch: '!{page,p}',
     discardTrailingSlash: false,
     sortSearchParams: true,
   },
