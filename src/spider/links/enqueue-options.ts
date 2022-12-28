@@ -165,6 +165,15 @@ export interface EnqueueUrlOptions {
    * @type {string}
    */
   requestLabel?: string;
+
+  /**
+   * An optional normalizer function to override the crawl- and project-wide
+   * normalizer defaults.
+   *
+   * @default {undefined}
+   * @type {UrlMutatorWithContext}
+   */
+  normalizer?: UrlMutatorWithContext
 }
 
 export type UrlMutatorWithContext<T extends InternalSpiderContext = InternalSpiderContext> = (

@@ -30,6 +30,7 @@ export async function save(
       base: uniqueUrl?.url,
       referer: uniqueUrl?.url,
       depth: uniqueUrl === undefined ? 0 : uniqueUrl.depth + 1,
+      normalizer: options.normalizer ?? NormalizedUrl.normalizer
     });
     if (options.requestLabel) uu.requestLabel = options.requestLabel;
 
