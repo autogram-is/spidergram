@@ -39,6 +39,7 @@
     "discardAuth": true,
     "discardIndex": "**/{index,default}.{htm,html,aspx,php}",
     "discardSearch": "*",
-    "discardTrailingSlash": false
+    "discardTrailingSlash": false,
+    "sortSearchParams": true
   }
 }
