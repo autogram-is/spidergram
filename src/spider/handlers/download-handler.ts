@@ -20,6 +20,6 @@ export async function downloadHandler(context: SpiderContext): Promise<void> {
     fileNameFromHeaders(new URL(buffer.url), buffer.headers);
   await files('downloads').writeStream(fileName, Readable.from(buffer.rawBody));
 
-  resource.files.push({ bucket: 'downloads', filename: fileName });
+  resource.payload = { bucket: 'downloads', path: fileName };
   await graph.push(resource);
 }

@@ -7,6 +7,7 @@ import {
   Transform,
 } from './vertice.js';
 import { parse as parseContentType } from 'content-type';
+import { SavedFile } from '../index.js';
 
 export interface ResourceConstructorOptions extends VerticeConstructorOptions {
   url?: string | URL;
@@ -16,12 +17,7 @@ export interface ResourceConstructorOptions extends VerticeConstructorOptions {
   mime?: string;
   size?: number;
   body?: string;
-  files?: SavedFile[];
-}
-
-export interface SavedFile {
-  bucket: string;
-  filename: string;
+  payload?: SavedFile;
 }
 
 export class Resource extends Vertice {
@@ -34,7 +30,7 @@ export class Resource extends Vertice {
   mime?: string;
   size?: number;
   body?: string;
-  files!: SavedFile[];
+  payload?: SavedFile;
 
   constructor(data: ResourceConstructorOptions = {}) {
     const {
@@ -43,7 +39,7 @@ export class Resource extends Vertice {
       message,
       headers,
       body,
-      files,
+      payload,
       ...dataForSuper
     } = data;
     super(dataForSuper);
@@ -72,7 +68,7 @@ export class Resource extends Vertice {
     this.message = message ?? '';
     this.headers = headers ?? {};
     this.body = body;
-    this.files = files ?? [];
+    this.payload = payload;
 
     this.assignKey();
   }

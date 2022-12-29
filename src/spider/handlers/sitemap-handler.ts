@@ -28,7 +28,7 @@ export async function sitemapHandler(context: SpiderContext) {
     fileNameFromHeaders(new URL(context.request.url), buffer.headers);
 
   await files('downloads').writeStream(fileName, Readable.from(buffer));
-  resource.files.push({ bucket: 'downloads', filename: fileName });
+  resource.payload = { bucket: 'downloads', path: fileName };
   await graph.push(resource);
 
   // Now read it back in
