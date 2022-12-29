@@ -42,7 +42,8 @@ export default class GetSitemap extends SgCommand {
       urlOptions: {
         save: true,
         enqueue: false,
-      }
+      },
+      maxConcurrency: 1
     });
     const results = await spider.run(...sitemapList);
     this.ux.styledObject(results);
