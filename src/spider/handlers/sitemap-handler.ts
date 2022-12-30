@@ -38,5 +38,10 @@ export async function sitemapHandler(context: SpiderContext) {
   // example) do odd things like sitemap URLs with querystrings
    
   const links = HtmlTools.findLinksInSitemap(xml.toString());
-  await save(context, links).then(savedLinks => enqueue(context, savedLinks));
+
+  const subSitemaps = links.filter(l => l.label === 'sitemap');
+  const normalLinks = links.filter(l => l.label !== 'sitemap');
+
+  await save(context, subSitemaps).then(savedLinks => enqueue(context, savedLinks, {}, { label: 'sitemap' }));
+  await save(context, normalLinks).then(savedLinks => enqueue(context, savedLinks));
 }

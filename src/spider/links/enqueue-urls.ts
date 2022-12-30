@@ -2,6 +2,7 @@ import arrify from 'arrify';
 import { Request, RequestOptions } from 'crawlee';
 import { UniqueUrl } from '../../model/index.js';
 import { SpiderContext } from '../context.js';
+import { Robots } from '../../tools/html/robots.js';
 import {
   EnqueueUrlOptions,
   urlDiscoveryDefaultOptions,
@@ -39,27 +40,32 @@ export async function enqueue(
       continue;
     }
 
+    if (Robots.isDisallowed(uu.url, context.userAgent)) {
+      continue;
+    }
+
     if (uu.forefrontRequest) {
       await queue.addRequests([uniqueUrlToRequest(uu, requestOptions)], {
         forefront: true,
       });
     } else {
-      requests.push(uniqueUrlToRequest(uu, requestOptions));
+      requests.push(uniqueUrlToRequest(uu, requestOptions, options));
     }
   }
 
-  return queue.addRequests(requests.slice(0, options.limit));
+  return queue.addRequests(requests.slice(0, options.limit), { forefront: options.forefrontRequests });
 }
 
 export function uniqueUrlToRequest(
   uu: UniqueUrl,
   options: Partial<RequestOptions> = {},
+  contextOptions: Partial<EnqueueUrlOptions> = {}
 ): Request {
-  const r = new Request<Partial<UniqueUrl & { fromUniqueUrl: boolean }>>({
+  const r = new Request<Partial<UniqueUrl & { fromUniqueUrl?: boolean, requestLabel?: string }>>({
     ...options,
     url: uu.url,
     uniqueKey: uu.key,
-    label: uu.requestLabel ? (uu.requestLabel as string) : undefined,
+    label: options.label ?? contextOptions.requestLabel ?? (uu.requestLabel ? (uu.requestLabel as string) : undefined),
   });
   if (uu.referer) r.userData.referer = uu.referer;
   if (uu.depth > 0) r.userData.depth = uu.depth;

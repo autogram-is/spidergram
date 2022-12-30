@@ -56,22 +56,32 @@ export async function save(
     // want to handle this in a parallel track to ensure that any newly
     // spotted domain gets both sitemap and robots.txt analysis if enabled, even
     // if the link to it isn't the top level index.
-    if (
-      options.alwaysCheckForSitemap &&
-      is.emptyStringOrWhitespace(uu.parsed?.pathname)
-    ) {
-      const nu = new NormalizedUrl(uu.url);
-      nu.pathname = 'sitemap.xml';
-      const suu = new UniqueUrl({
-        url: nu,
-        requestLabel: 'sitemap',
-        forefrontRequest: true,
-      });
-      if (!options.discardExistingLinks || !(await graph.exists(suu))) {
-        results.uniques.push(suu);
+    if (is.emptyArray(uu.parsed?.path)) {
+      if (options.checkRobots) {
+        const ru = new NormalizedUrl(uu.url);
+        ru.pathname = 'robots.txt';
+        const ruu = new UniqueUrl({
+          url: ru,
+          requestLabel: 'robotstxt',
+          forefrontRequest: true,
+        });
+        if (!options.discardExistingLinks || !(await graph.exists(ruu))) {
+          results.uniques.push(ruu);
+        }
+      } else if (options.checkSitemaps) {
+        const nu = new NormalizedUrl(uu.url);
+        nu.pathname = 'sitemap.xml';
+        const suu = new UniqueUrl({
+          url: nu,
+          requestLabel: 'sitemap',
+          forefrontRequest: true,
+        });
+        if (!options.discardExistingLinks || !(await graph.exists(suu))) {
+          results.uniques.push(suu);
+        }
       }
     }
-
+    
     // If 'discardExistingLinks' is set, we don't bother including URLs
     // that were already known to the system in the result set; this means
     // they won't be persisted, or enqueued for crawling.

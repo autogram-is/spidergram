@@ -89,6 +89,13 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
         normalizer: this.normalizer,
       });
     }
+    
+    if (input instanceof UniqueUrl) {
+      return new UniqueUrl({
+        url: input.url,
+        normalizer: this.normalizer,
+      });
+    }
 
     return input;
   }

@@ -82,6 +82,7 @@ export class Spider extends PlaywrightCrawler {
       download: handlers.downloadHandler,
       status: handlers.statusHandler,
       sitemap: handlers.sitemapHandler,
+      robotstxt: handlers.robotsTxtHandler,
       ...internal.requestHandlers,
     };
 
@@ -115,6 +116,9 @@ export class Spider extends PlaywrightCrawler {
     if (internal.userAgent) {
       crawler.launchContext = { userAgent: internal.userAgent };
     }
+
+    // We're bumping this WAY up to deal with large sitemaps
+    crawler.requestHandlerTimeoutSecs = 240;
 
     super(crawler, config);
 
@@ -205,6 +209,8 @@ export class Spider extends PlaywrightCrawler {
     this.log.setLevel(this.spiderOptions.logLevel);
     log.setLevel(this.spiderOptions.logLevel);
 
+    const queue = await this.getRequestQueue();
+
     // Normalize and deduplicate any incoming requests.
     const uniques = new UniqueUrlSet();
     for (const value of requests) {
@@ -220,11 +226,31 @@ export class Spider extends PlaywrightCrawler {
         uniques.add(value.url);
       }
     }
+    await graph.push([...uniques], false);
+
+    // If we're set up to check robot rules, also enqueue them.
+    if (this.spiderOptions.urlOptions.checkRobots) {
+      const robotUrlMaker = (url: ParsedUrl) => { url.pathname = '/robots.txt'; return url; };
+      const domains = new UniqueUrlSet([...uniques], false, robotUrlMaker);
+      await graph.push([...domains], false);
+      await queue.addRequests(
+        [...domains].map(uu => uniqueUrlToRequest(uu, { label: 'robotstxt' })),
+        { ...options, forefront: true },
+      );  
+    }
+
+    if (this.spiderOptions.urlOptions.checkSitemaps) {
+      const robotUrlMaker = (url: ParsedUrl) => { url.pathname = '/sitemap.xml'; return url; };
+      const domains = new UniqueUrlSet([...uniques], false, robotUrlMaker);
+      await graph.push([...domains], false);
+      await queue.addRequests(
+        [...domains].map(uu => uniqueUrlToRequest(uu, { label: 'sitemap' })),
+        { ...options, forefront: true },
+      );  
+    }
 
     this.status.startTime = Date.now();
 
-    await graph.push([...uniques], false);
-    const queue = await this.getRequestQueue();
     await queue.addRequests(
       [...uniques].map(uu => uniqueUrlToRequest(uu)),
       options,

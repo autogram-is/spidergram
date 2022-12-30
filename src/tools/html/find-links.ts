@@ -10,7 +10,6 @@ export interface FoundLink {
   data?: Record<string, string>;
   tagName?: string;
   selector?: string;
-  label?: string;
 }
 
 export const LinkSelector: Record<string, string> = {
@@ -65,7 +64,6 @@ export function findLinksInSitemap(input: string | cheerio.Root) {
         date: $(element).find('lastmod').text(),
         changfreq: $(element).find('changefreq').text(),
         priority: $(element).find('priority').text(),
-        label: 'sitemap',
       });
     });
 
@@ -99,7 +97,6 @@ export function findLinksInFeed(input: string | cheerio.Root) {
         url: $(element).find('link').text(),
         title: $(element).find('title').text(),
         date: $(element).find('pubDate').text(),
-        label: 'rss',
       });
     });
 
@@ -110,7 +107,6 @@ export function findLinksInFeed(input: string | cheerio.Root) {
         url: $(element).find('link').attr('href')?.toString(),
         title: $(element).find('title').text(),
         date: $(element).find('updated').text(),
-        label: 'atom',
       });
     });
 

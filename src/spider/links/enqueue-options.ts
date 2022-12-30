@@ -36,12 +36,28 @@ export interface EnqueueUrlOptions {
   save: FilterInput;
 
   /**
+   * When enqueing a new hostname, enqueue a high-priority robots.txt as well.
+   *
+   * @type {boolean}
+   * @default true
+   */
+  checkRobots: boolean;
+
+  /**
+   * Do not enqueue URLs if they're disallowed in a hostname's Robots.txt.
+   *
+   * @type {boolean}
+   * @default true
+   */
+  respectRobots: boolean;
+
+  /**
    * When enqueing a new hostname, infer a sitemap URL and enqueue it as well.
    *
    * @type {boolean}
    * @default true
    */
-  alwaysCheckForSitemap: boolean;
+  checkSitemaps: boolean;
 
   /**
    * When enqueuing, bump sitemap.xml links to the top of the request queue.
@@ -167,6 +183,15 @@ export interface EnqueueUrlOptions {
   requestLabel?: string;
 
   /**
+   * If URLs found in this operation are enqueued, move them to the front
+   * ofr the request queue.
+   *
+   * @default {false}
+   * @type {boolean}
+   */
+  forefrontRequests?: boolean;
+
+  /**
    * An optional normalizer function to override the crawl- and project-wide
    * normalizer defaults.
    *
@@ -183,10 +208,13 @@ export type UrlMutatorWithContext<T extends InternalSpiderContext = InternalSpid
 
 export const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
   limit: Number.POSITIVE_INFINITY,
-  selector: 'body a, head link',
+  selector: 'body a',
   save: EnqueueStrategy.All,
   enqueue: EnqueueStrategy.SameDomain,
-  alwaysCheckForSitemap: true,
+  forefrontRequests: false,
+  checkRobots: true,
+  respectRobots: true,
+  checkSitemaps: true,
   prioritizeSitemaps: true,
   discardEmptyLinks: true,
   discardAnchorOnlyLinks: true,

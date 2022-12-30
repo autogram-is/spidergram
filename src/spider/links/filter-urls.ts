@@ -54,7 +54,7 @@ function singleFilter(
     }
   } else if (is.string(filter)) {
     // Treat it as a glob to match against the url's href
-    return minimatch(url.href, filter);
+    return minimatch(url.href, filter, { dot: true });
   } else if (is.regExp(filter)) {
     // This is extremely naive; we should rip off crawlee's handling, but this will do for now..
     return url.href.match(filter) !== null;
