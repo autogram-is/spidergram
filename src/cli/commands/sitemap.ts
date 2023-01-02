@@ -50,7 +50,7 @@ export default class GetSitemap extends SgCommand {
     const spider = new Spider({
       urlOptions: { 
         save: EnqueueStrategy.All,
-        enqueue: '**/*{xml,txt}'
+        enqueue: '**/{*.xml,robots.txt}'
       },
       maxConcurrency: 1
     });
