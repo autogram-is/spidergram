@@ -1,4 +1,4 @@
-import { GeneratedAqlQuery, aql } from 'arangojs/aql';
+import { GeneratedAqlQuery, aql } from 'arangojs/aql.js';
 import { Database } from 'arangojs';
 import { JsonMap } from '@salesforce/ts-types';
 import arrify from 'arrify';
