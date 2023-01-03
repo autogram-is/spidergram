@@ -200,7 +200,9 @@ export class Spider extends PlaywrightCrawler {
   /**
    * Enqueue a set of URLs and crawl them using the current Spider options.
    */
-  override async run(requests: RequestValue | RequestValue[] = []): Promise<SpiderStatus & FinalStatistics> {
+  override async run(
+    requests: RequestValue | RequestValue[] = [],
+  ): Promise<SpiderStatus & FinalStatistics> {
     // If only a single value came in, turn it into an array.
     const project = await Project.config(this.spiderOptions.projectConfig);
     const graph = await project.graph();
@@ -260,9 +262,7 @@ export class Spider extends PlaywrightCrawler {
 
     this.status.startTime = Date.now();
 
-    await queue.addRequests(
-      [...uniques].map(uu => uniqueUrlToRequest(uu)),
-    );
+    await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)));
 
     return super.run().then(stats => {
       this.status.finishTime = Date.now();
