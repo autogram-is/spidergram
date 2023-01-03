@@ -1,10 +1,6 @@
 import { EnqueueStrategy } from 'crawlee';
 import { CLI, SgCommand, Spider, OutputLevel } from '../../index.js';
-import {
-  ParsedUrl,
-  NormalizedUrl,
-  NormalizedUrlSet,
-} from '@autogram/url-tools';
+import { ParsedUrl, NormalizedUrl, NormalizedUrlSet } from '@autogram/url-tools';
 
 export default class GetSitemap extends SgCommand {
   static summary = 'Retrieve and analyze sitemap data';
@@ -35,28 +31,28 @@ export default class GetSitemap extends SgCommand {
 
     const robotOptions = {
       normalizer: (url: ParsedUrl) => {
-        url.href = NormalizedUrl.normalizer(url).href;
+        url.href = NormalizedUrl.normalizer(url).href; 
         url.pathname = '/robots.txt';
         return url;
-      },
-    };
+      }
+    }
     const robotList = new NormalizedUrlSet(urls, robotOptions);
 
     const sitemapOptions = {
       normalizer: (url: ParsedUrl) => {
-        url.href = NormalizedUrl.normalizer(url).href;
+        url.href = NormalizedUrl.normalizer(url).href; 
         url.pathname = '/sitemap.xml';
         return url;
-      },
-    };
+      }
+    }
     const sitemapList = new NormalizedUrlSet(urls, sitemapOptions);
 
     const spider = new Spider({
-      urlOptions: {
+      urlOptions: { 
         save: EnqueueStrategy.All,
-        enqueue: '**/*{xml,txt}',
+        enqueue: '**/{*.xml,robots.txt}'
       },
-      maxConcurrency: 1,
+      maxConcurrency: 1
     });
     const results = await spider.run([...robotList, ...sitemapList]);
     this.ux.styledObject(results);
