@@ -4,6 +4,8 @@ import arrify from 'arrify';
 import { log, PlaywrightCrawlingContext } from 'crawlee';
 import prependHttp from 'prepend-http';
 import { FinalStatistics } from 'crawlee';
+import { UncrawledUrlOptions, UncrawledUrlQuery } from '../reports/index.js';
+import _ from 'lodash';
 
 // We have a chance to set the log level HIGHER when configuring,
 // but this (hopefully) ensures that sub-logs won't be created
@@ -16,18 +18,17 @@ import {
   Configuration,
   createPlaywrightRouter,
   playwrightUtils,
-  CrawlerAddRequestsOptions,
   RequestOptions,
 } from 'crawlee';
-import {NormalizedUrl, ParsedUrl} from '@autogram/url-tools';
-import {Project} from '../services/project.js';
-import {UniqueUrl, UniqueUrlSet} from '../model/index.js';
-import {SpiderRequestHandler} from './handlers/index.js';
+import { NormalizedUrl, ParsedUrl } from '@autogram/url-tools';
+import { Project } from '../services/project.js';
+import { UniqueUrl, UniqueUrlSet } from '../model/index.js';
+import { SpiderRequestHandler } from './handlers/index.js';
 import {
   InternalSpiderOptions,
   SpiderOptions,
   SpiderContext,
-  buildSpiderOptions,
+  defaultSpiderOptions,
   handlers,
   helpers,
   contextualizeHandler,
@@ -36,7 +37,12 @@ import {
   SpiderStatus,
 } from './index.js';
 
-type RequestValue = string | Request | RequestOptions | NormalizedUrl | UniqueUrl;
+type RequestValue =
+  | string
+  | Request
+  | RequestOptions
+  | NormalizedUrl
+  | UniqueUrl;
 
 export const enum SpiderEventType {
   SYSTEM_INFO = 'systemInfo',
@@ -45,7 +51,12 @@ export const enum SpiderEventType {
   EXIT = 'exit',
 }
 
-export type SpiderEventName = SpiderEventType | 'systemInfo' | 'aborting' | 'exit' | 'requestComplete';
+export type SpiderEventName =
+  | SpiderEventType
+  | 'systemInfo'
+  | 'aborting'
+  | 'exit'
+  | 'requestComplete';
 
 export class Spider extends PlaywrightCrawler {
   spiderOptions: InternalSpiderOptions;
@@ -59,20 +70,19 @@ export class Spider extends PlaywrightCrawler {
     requestsByStatus: {},
     requestsByType: {},
     requestsByHost: {},
-    requestsByLabel: {}
-  }
+    requestsByLabel: {},
+  };
   protected _events: AsyncEventEmitter;
 
-  constructor(
-    options: Partial<SpiderOptions> = {},
-    config?: Configuration,
-  ) {
-    const {crawler, internal} = splitOptions(options);
+  constructor(options: Partial<SpiderOptions> = {}, config?: Configuration) {
+    const { crawler, internal } = splitOptions(options);
 
     const requestHandlers: Record<string, SpiderRequestHandler> = {
       page: internal.pageHandler ?? handlers.pageHandler,
       download: handlers.downloadHandler,
       status: handlers.statusHandler,
+      sitemap: handlers.sitemapHandler,
+      robotstxt: handlers.robotsTxtHandler,
       ...internal.requestHandlers,
     };
 
@@ -85,21 +95,30 @@ export class Spider extends PlaywrightCrawler {
     crawler.requestHandler = router;
 
     crawler.preNavigationHooks = [
-      ...(internal.preNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
+      ...(internal.preNavigationHooks ?? []).map(hook =>
+        contextualizeHook(hook),
+      ),
     ];
 
     crawler.postNavigationHooks = [
       contextualizeHook(playwrightPostNavigate),
-      ...(internal.postNavigationHooks ?? []).map(hook => contextualizeHook(hook)),
+      ...(internal.postNavigationHooks ?? []).map(hook =>
+        contextualizeHook(hook),
+      ),
     ];
 
-    crawler.failedRequestHandler = 
-      async (ctx: PlaywrightCrawlingContext, error: Error): Promise<void> => 
-      handlers.failureHandler(ctx as unknown as SpiderContext, error)
+    crawler.failedRequestHandler = async (
+      ctx: PlaywrightCrawlingContext,
+      error: Error,
+    ): Promise<void> =>
+      handlers.failureHandler(ctx as unknown as SpiderContext, error);
 
     if (internal.userAgent) {
       crawler.launchContext = { userAgent: internal.userAgent };
     }
+
+    // We're bumping this WAY up to deal with large sitemaps
+    crawler.requestHandlerTimeoutSecs = internal.handlerTimeout;
 
     super(crawler, config);
 
@@ -107,34 +126,38 @@ export class Spider extends PlaywrightCrawler {
     this.crawlerOptions = crawler;
 
     this._events = new AsyncEventEmitter();
-    //this.events.on(EventType.SYSTEM_INFO, ({event, ...args}) => this.emit(event, ...args));
   }
 
-  protected override async _runRequestHandler(context: PlaywrightCrawlingContext) {
+  protected override async _runRequestHandler(
+    context: PlaywrightCrawlingContext,
+  ) {
     await helpers.enhanceSpiderContext(context as SpiderContext);
     await helpers.requestPrecheck(context as SpiderContext);
     await super._runRequestHandler(context);
   }
 
-
-  on(event: SpiderEventName, listener: (...args: any[]) => any): void {
+  on(event: SpiderEventName, listener: (...args: unknown[]) => unknown): void {
     this._events.on(event, listener);
   }
 
-  off(event: SpiderEventName, listener?: (...args: any[]) => any): void {
+  off(
+    event: SpiderEventName,
+    listener?: (...args: unknown[]) => unknown,
+  ): void {
     if (listener) {
       this._events.removeListener(event, listener);
     } else {
       this._events.removeAllListeners(event);
     }
-  } 
+  }
 
-  emit(event: SpiderEventName, ...args: any[]): void {
+  emit(event: SpiderEventName, ...args: unknown[]): void {
     this._events.emit(event, ...args);
   }
 
-  updateStats({request, requestMeta}: SpiderContext) {
-    const type = requestMeta?.type ?? requestMeta?.headers['content-type'] ?? 'unknown';
+  protected updateStats({ request, requestMeta }: SpiderContext) {
+    const type =
+      requestMeta?.type ?? requestMeta?.headers['content-type'] ?? 'unknown';
     const status = requestMeta?.statusCode ?? -1;
     const host = new ParsedUrl(request.url).hostname.toLocaleLowerCase();
     const label = request.label ?? 'none';
@@ -144,7 +167,6 @@ export class Spider extends PlaywrightCrawler {
     this.status.requestsByStatus[status] ??= 0;
     this.status.requestsByType[type] ??= 0;
 
-    
     this.status.requestsByHost[host]++;
     this.status.requestsByLabel[label]++;
     this.status.requestsByStatus[status]++;
@@ -154,39 +176,43 @@ export class Spider extends PlaywrightCrawler {
     this.status.finished++;
   }
 
-  override async _cleanupContext(context: SpiderContext) {
+  protected override async _cleanupContext(context: SpiderContext) {
     // This is pretty sketchy way of capturing a non-error; we need to verify that
     // a request that previously failed but then succeeded will still be noticed.
     if (context.request.errorMessages.length === 0) {
       this.updateStats(context);
     } else {
       const errors = context.request.errorMessages;
-      this.status.lastError = errors[errors.length];  
+      this.status.lastError = errors[errors.length];
     }
 
     // Even in the case of an error, we'll fire the event so that progress
     // indicators can be updated, etc.
     this.emit(
-      SpiderEventType.REQUEST_COMPLETE, this.status, context.request.url
+      SpiderEventType.REQUEST_COMPLETE,
+      this.status,
+      context.request.url,
     );
 
     super._cleanupContext(context as PlaywrightCrawlingContext);
   }
 
-  override async run(
-    requests: RequestValue | RequestValue[] = [],
-    options?: CrawlerAddRequestsOptions,
-  ): Promise<SpiderStatus & FinalStatistics> {
+  /**
+   * Enqueue a set of URLs and crawl them using the current Spider options.
+   */
+  override async run(requests: RequestValue | RequestValue[] = []): Promise<SpiderStatus & FinalStatistics> {
     // If only a single value came in, turn it into an array.
     const project = await Project.config(this.spiderOptions.projectConfig);
     const graph = await project.graph();
     requests = arrify(requests);
-    
+
     // Crawlee has a lot of logs going on.
     // Long term we want to do something nicer here.
     this.config.set('logLevel', this.spiderOptions.logLevel);
     this.log.setLevel(this.spiderOptions.logLevel);
     log.setLevel(this.spiderOptions.logLevel);
+
+    const queue = await this.getRequestQueue();
 
     // Normalize and deduplicate any incoming requests.
     const uniques = new UniqueUrlSet();
@@ -203,18 +229,85 @@ export class Spider extends PlaywrightCrawler {
         uniques.add(value.url);
       }
     }
+    await graph.push([...uniques], false);
+
+    // If we're set up to check robot rules, also enqueue them.
+    if (this.spiderOptions.urlOptions.checkRobots) {
+      const robotUrlMaker = (url: ParsedUrl) => {
+        url.pathname = '/robots.txt';
+        return url;
+      };
+      const domains = new UniqueUrlSet([...uniques], false, robotUrlMaker);
+      await graph.push([...domains], false);
+      await queue.addRequests(
+        [...domains].map(uu => uniqueUrlToRequest(uu, { label: 'robotstxt' })),
+        { forefront: true },
+      );
+    }
+
+    if (this.spiderOptions.urlOptions.checkSitemaps) {
+      const robotUrlMaker = (url: ParsedUrl) => {
+        url.pathname = '/sitemap.xml';
+        return url;
+      };
+      const domains = new UniqueUrlSet([...uniques], false, robotUrlMaker);
+      await graph.push([...domains], false);
+      await queue.addRequests(
+        [...domains].map(uu => uniqueUrlToRequest(uu, { label: 'sitemap' })),
+        { forefront: true },
+      );
+    }
 
     this.status.startTime = Date.now();
 
-    await graph.push([...uniques], false);
-    const queue = await this.getRequestQueue();
-    await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)), options);
+    await queue.addRequests(
+      [...uniques].map(uu => uniqueUrlToRequest(uu)),
+    );
 
-    return super.run()
-      .then(stats => {
-        this.status.finishTime = Date.now();
-        return { ...this.status, ...stats};
-      });
+    return super.run().then(stats => {
+      this.status.finishTime = Date.now();
+      return { ...this.status, ...stats };
+    });
+  }
+
+  /**
+   * Resume the crawl with saved-but-unvisited URLs.
+   */
+  async resume(options: UniqueUrl[] | UncrawledUrlOptions) {
+    let urls: UniqueUrl[];
+    if (is.array(options)) {
+      urls = options;
+    } else {
+      if (
+        !(
+          options.domain ||
+          options.hostname ||
+          options.label ||
+          options.referer
+        )
+      ) {
+        throw new Error(
+          'At least one URL filter should be used when restarting a crawl',
+        );
+      }
+      urls = await new UncrawledUrlQuery(options).run();
+    }
+
+    this.status.startTime = Date.now();
+
+    // Crawlee has a lot of logs going on.
+    // Long term we want to do something nicer here.
+    this.config.set('logLevel', this.spiderOptions.logLevel);
+    this.log.setLevel(this.spiderOptions.logLevel);
+    log.setLevel(this.spiderOptions.logLevel);
+
+    const queue = await this.getRequestQueue();
+
+    await queue.addRequests(urls.map(uu => uniqueUrlToRequest(uu)));
+    return super.run().then(stats => {
+      this.status.finishTime = Date.now();
+      return { ...this.status, ...stats };
+    });
   }
 }
 
@@ -222,9 +315,8 @@ async function playwrightPostNavigate(context: SpiderContext) {
   context.$ = await playwrightUtils.parseWithCheerio(context.page);
 }
 
-function splitOptions(
-  options: Partial<SpiderOptions> = {},
-) {
+/* eslint-disable @typescript-eslint/no-unused-vars */
+function splitOptions(options: Partial<SpiderOptions> = {}) {
   const {
     projectConfig,
     logLevel,
@@ -236,12 +328,17 @@ function splitOptions(
     preNavigationHooks,
     postNavigationHooks,
     userAgent,
+    handlerTimeout,
 
     ...crawlerOptions
   } = options;
 
   return {
-    internal: buildSpiderOptions(options),
+    internal: _.defaultsDeep(
+      options,
+      defaultSpiderOptions,
+    ) as InternalSpiderOptions,
     crawler: crawlerOptions as PlaywrightCrawlerOptions,
   };
 }
+/* eslint-enable no-unused-vars */

@@ -1,19 +1,24 @@
-import {Dictionary, LogLevel, PlaywrightCrawlerOptions} from 'crawlee';
-import {ProjectConfig, projectConfigDefaults} from '../index.js';
+import { Dictionary, LogLevel, PlaywrightCrawlerOptions } from 'crawlee';
+import { ProjectConfig, projectConfigDefaults } from '../index.js';
 import { mimeGroups } from './helpers/mime.js';
-import {SpiderHook} from './hooks/index.js';
-import {EnqueueUrlOptions} from './links/index.js';
-import {SpiderRequestHandler} from './handlers/index.js';
-import {readPackageUp} from 'read-pkg-up';
+import { SpiderHook } from './hooks/index.js';
+import {
+  EnqueueUrlOptions,
+  urlDiscoveryDefaultOptions,
+} from './links/index.js';
+import { SpiderRequestHandler } from './handlers/index.js';
+import { readPackageUp } from 'read-pkg-up';
 
 const pkgData = await readPackageUp();
 
-export type SpiderOptions = InternalSpiderOptions & Omit<PlaywrightCrawlerOptions,
-'preNavigationHooks' |
-'postNavigationHooks' |
-'requestHandler' |
-'handlePageFunction'
->;
+export type SpiderOptions = InternalSpiderOptions &
+  Omit<
+    PlaywrightCrawlerOptions,
+    | 'preNavigationHooks'
+    | 'postNavigationHooks'
+    | 'requestHandler'
+    | 'handlePageFunction'
+  >;
 
 export interface InternalSpiderOptions extends Dictionary {
   /**
@@ -30,12 +35,11 @@ export interface InternalSpiderOptions extends Dictionary {
 
   /**
    * Logging level for the spider's internal crawler.
-   * 
+   *
    * @default {LogLevel.INFO}
    * @type {LogLevel}
    */
   logLevel: LogLevel;
-
 
   /**
    * A function to process a successfully loaded page view. If none is
@@ -137,36 +141,34 @@ export interface InternalSpiderOptions extends Dictionary {
    */
   postNavigationHooks: SpiderHook[];
 
-
   /**
    * User-agent to use when requesting pages; if none is specified, reasonable defaults
-   * for the chosen browser engine will be used. 
+   * for the chosen browser engine will be used.
    *
    * @type {string}
    */
   userAgent?: string;
+
+  /**
+   * Number of seconds to wait for a handler before cancelling the request and
+   * treating it as an eror. np
+   *
+   * @default 180
+   * @type {?number}
+   */
+  handlerTimeout?: number;
 }
 
-export function buildSpiderOptions(
-  options: Partial<InternalSpiderOptions>,
-  internaloverrides: Partial<InternalSpiderOptions> = {},
-): InternalSpiderOptions {
-  return {
-    ...defaultSpiderOptions,
-    ...options,
-    ...internaloverrides,
-  };
-}
-
-const defaultSpiderOptions: InternalSpiderOptions = {
+export const defaultSpiderOptions: InternalSpiderOptions = {
   projectConfig: projectConfigDefaults,
   logLevel: LogLevel.INFO,
   preNavigationHooks: [],
   postNavigationHooks: [],
   pageHandler: undefined,
   requestHandlers: {},
-  urlOptions: {},
+  urlOptions: urlDiscoveryDefaultOptions,
   parseMimeTypes: mimeGroups.page,
   downloadMimeTypes: [],
-  userAgent: `Spidergram ${pkgData?.packageJson.version}`
+  userAgent: `Spidergram ${pkgData?.packageJson.version}`,
+  handlerTimeout: 180,
 };

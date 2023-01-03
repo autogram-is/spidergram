@@ -7,12 +7,13 @@ export default class Admin extends SgCommand {
 
   static flags = {
     config: CLI.globalFlags.config,
-  }
+  };
 
   async run() {
-    const {project, graph} = await this.getProjectContext();
+    const { project, graph } = await this.getProjectContext();
     const dbUrl = new URL(
-      arrify(project.configuration.graph.connection.url)[0] ?? 'http://127.0.0.1:8529'
+      arrify(project.configuration.graph.connection.url)[0] ??
+        'http://127.0.0.1:8529',
     );
     dbUrl.pathname = `_db/${graph.db.name}`;
 

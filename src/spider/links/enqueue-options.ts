@@ -1,7 +1,7 @@
-import {RequestQueue, EnqueueStrategy, RequestTransform} from 'crawlee';
-import {ParsedUrl} from '@autogram/url-tools';
-import {InternalSpiderContext, SpiderContext} from '../../index.js';
-import {FilterInput} from './index.js';
+import { RequestQueue, EnqueueStrategy, RequestTransform } from 'crawlee';
+import { ParsedUrl } from '@autogram/url-tools';
+import { InternalSpiderContext } from '../../index.js';
+import { FilterInput } from './index.js';
 
 /**
  * @export
@@ -22,7 +22,7 @@ export interface EnqueueUrlOptions {
    * can be run multiple times with different options on a given page to find
    * and capture different sets of links, e.g. navigation vs footer vs body.
    *
-   * @default 'body a'
+   * @default 'body a, head link'
    */
   selector: string;
 
@@ -30,15 +30,47 @@ export interface EnqueueUrlOptions {
    * A filter condition to determine which links will be saved as
    * {@apilink UniqueUrl} objects in the current project's graph.
    *
-   * @type {string | RegExp | EnqueueStrategy | UrlFilterWithContext}
+   * @type {boolean | string | RegExp | EnqueueStrategy | UrlFilterWithContext}
    * @default EnqueueStrategy.All
    */
   save: FilterInput;
 
   /**
+   * When enqueing a new hostname, enqueue a high-priority robots.txt as well.
+   *
+   * @type {boolean}
+   * @default true
+   */
+  checkRobots: boolean;
+
+  /**
+   * Do not enqueue URLs if they're disallowed in a hostname's Robots.txt.
+   *
+   * @type {boolean}
+   * @default true
+   */
+  respectRobots: boolean;
+
+  /**
+   * When enqueing a new hostname, infer a sitemap URL and enqueue it as well.
+   *
+   * @type {boolean}
+   * @default true
+   */
+  checkSitemaps: boolean;
+
+  /**
+   * When enqueuing, bump sitemap.xml links to the top of the request queue.
+   *
+   * @type {boolean}
+   * @default true
+   */
+  prioritizeSitemaps: boolean;
+
+  /**
    * A filter condition to determine which links will be enqueued for crawling.
    *
-   * @type {string | RegExp | EnqueueStrategy | UrlFilterWithContext}
+   * @type {boolean | string | RegExp | EnqueueStrategy | UrlFilterWithContext}
    * @default EnqueueStrategy.SameDomain
    */
   enqueue: FilterInput;
@@ -52,7 +84,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default false
    */
-  skipUnparsableLinks: boolean;
+  discardUnparsableLinks: boolean;
 
   /**
    * Ignore HTML tags that are found by the selector, but have no `href`
@@ -64,7 +96,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default true
    */
-  skipEmptyLinks: boolean;
+  discardEmptyLinks: boolean;
 
   /**
    * Ignore links that only contain an anchor, e.g. `<a href="#top">Scroll to top</a>`
@@ -72,7 +104,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default true
    */
-  skipAnchors: boolean;
+  discardAnchorOnlyLinks: boolean;
 
   /**
    * Ignore HTML tags with protocols other than `http` and `https`.
@@ -83,7 +115,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default true
    */
-  skipNonWebLinks: boolean;
+  discardNonWebLinks: boolean;
 
   /**
    * A function to modify the {@apilink Request} object before a link is
@@ -118,6 +150,18 @@ export interface EnqueueUrlOptions {
   requestQueue?: RequestQueue;
 
   /**
+   * Don't save or enqueue the link if it already exists in the graph.
+   *
+   * *NOTE:* Only affects the saving and enqueuing of {@apilink UniqueUrl}
+   * objects themselves; LinksTo records connection crawled Resources to
+   * the UniqueUrl may still be created.
+   *
+   * @type {boolean}
+   * @default true
+   */
+  discardExistingLinks?: boolean;
+
+  /**
    * A label applied to any {@apilink LinksTo} objects created when the
    * URLs are saved to the project graph. This can be used in conjunction
    * with a restrictive selector to record which links appeared in body
@@ -126,50 +170,54 @@ export interface EnqueueUrlOptions {
    * @default {undefined}
    * @type {string}
    */
-  label?: string;
+  linkLabel?: string;
 
-  _built?: boolean;
+  /**
+   * A label applied to any {@apilink Request} objects created when the
+   * URLs are enqueued for crawling. This can be used to control which
+   * handlers process the resulting HTTP responses.
+   *
+   * @default {undefined}
+   * @type {string}
+   */
+  handler?: string;
+
+  /**
+   * If URLs found in this operation are enqueued, move them to the front
+   * ofr the request queue.
+   *
+   * @default {false}
+   * @type {boolean}
+   */
+  prioritize?: boolean;
+
+  /**
+   * An optional normalizer function to override the crawl- and project-wide
+   * normalizer defaults.
+   *
+   * @default {undefined}
+   * @type {UrlMutatorWithContext}
+   */
+  normalizer?: UrlMutatorWithContext;
 }
 
-export type UrlMutatorWithContext<T = unknown> = (
-  found: ParsedUrl,
-  context?: InternalSpiderContext
-) => ParsedUrl;
+export type UrlMutatorWithContext<
+  T extends InternalSpiderContext = InternalSpiderContext,
+> = (found: ParsedUrl, context?: T) => ParsedUrl;
 
-const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
+export const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
   limit: Number.POSITIVE_INFINITY,
-  selector: 'a',
+  selector: 'body a',
   save: EnqueueStrategy.All,
   enqueue: EnqueueStrategy.SameDomain,
-  skipEmptyLinks: true,
-  skipAnchors: true,
-  skipNonWebLinks: false,
-  skipUnparsableLinks: false,
+  prioritize: false,
+  checkRobots: true,
+  respectRobots: true,
+  checkSitemaps: true,
+  prioritizeSitemaps: true,
+  discardEmptyLinks: true,
+  discardAnchorOnlyLinks: true,
+  discardNonWebLinks: false,
+  discardUnparsableLinks: false,
+  discardExistingLinks: true,
 };
-
-export type AnchorTagData = {
-  href: string;
-  selector?: string;
-  label?: string;
-  text?: string;
-  attributes?: Record<string, string>;
-  data?: unknown;
-};
-
-export async function ensureOptions(
-  context: SpiderContext,
-  options: Partial<EnqueueUrlOptions> = {},
-): Promise<EnqueueUrlOptions> {
-  if (options._built) {
-    return options as EnqueueUrlOptions;
-  }
-
-  const results = {
-    requestQueue: await context.crawler.getRequestQueue(),
-    ...urlDiscoveryDefaultOptions,
-    ...context.urlOptions,
-    ...options,
-    _built: true,
-  };
-  return results;
-}

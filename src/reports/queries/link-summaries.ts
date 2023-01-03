@@ -1,7 +1,6 @@
-import {aql} from 'arangojs';
+import { aql } from 'arangojs';
 
 export const LinkSummaries = {
-
   inboundLinkCount: aql`
     let inlinks = (
       for lt in links_to
@@ -119,6 +118,9 @@ export const LinkSummaries = {
   `;
   },
 
+  /**
+   * A list of all 30x redirects encountered during the crawl
+   */
   redirects() {
     return aql`
     for u in unique_urls
@@ -133,4 +135,27 @@ export const LinkSummaries = {
   `;
   },
 
+  /**
+   * A list of every UniqueUrl whose inbound links contain more
+   * than one distinct HREF value. This can be used to find important
+   * querystring parameters or path elements that are being discared
+   * by an overly-aggressive URL Normalizer.
+   */
+  normalized() {
+    return aql`
+    FOR uu IN unique_urls
+
+    LET inlinks = (
+        FOR lt IN links_to
+        FILTER lt._to == uu._id
+        RETURN DISTINCT lt.href
+    )
+    FILTER LENGTH(inlinks) > 1
+    SORT LENGTH(inlinks) DESC
+    RETURN {
+        domain: uu.parsed.domain,
+        url: uu.url,
+        inlinks
+    }`;
+  },
 };

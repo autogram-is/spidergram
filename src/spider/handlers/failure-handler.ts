@@ -1,8 +1,8 @@
-import {RespondsWith, Resource, Project} from '../../index.js';
-import {SpiderContext} from '../context.js';
+import { RespondsWith, Resource, Project } from '../../index.js';
+import { SpiderContext } from '../context.js';
 
 export async function failureHandler(context: SpiderContext, error: Error) {
-  const {request} = context;
+  const { request } = context;
 
   const graph = await Project.config().then(project => project.graph());
 
@@ -10,6 +10,7 @@ export async function failureHandler(context: SpiderContext, error: Error) {
     url: request.loadedUrl ?? request.url,
     code: -1,
     message: `(${error.name}: ${error.message})`,
+    errors: request.errorMessages,
     headers: {},
   });
 

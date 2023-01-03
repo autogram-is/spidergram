@@ -1,25 +1,25 @@
 import is from '@sindresorhus/is';
 import arrify from 'arrify';
-import {google} from 'googleapis';
-import {Project} from '../../index.js';
+import { google } from 'googleapis';
+import { Project } from '../../index.js';
 
 export interface GoogleKeyJson {
-  "type": string,
-  "project_id": string,
-  "private_key_id": string,
-  "private_key": string,
-  "client_email": string,
-  "client_id": string,
-  "auth_uri": string,
-  "token_uri": string,
-  "auth_provider_x509_cert_url": string,
-  "client_x509_cert_url": string
+  type: string;
+  project_id: string;
+  private_key_id: string;
+  private_key: string;
+  client_email: string;
+  client_id: string;
+  auth_uri: string;
+  token_uri: string;
+  auth_provider_x509_cert_url: string;
+  client_x509_cert_url: string;
 }
 
 const defaultScopes = [
   'https://www.googleapis.com/auth/analytics.readonly',
-  'openid'
-]
+  'openid',
+];
 
 export async function authenticate(scopes?: string | string[]) {
   const project = await Project.config();
@@ -33,14 +33,14 @@ export async function authenticate(scopes?: string | string[]) {
       undefined,
       process.env.GOOGLE_APPLICATION_CREDENTIALS,
       undefined,
-      workingScopes
+      workingScopes,
     );
 
     google._options.auth = jwtClient;
     return jwtClient.authorize();
-
   } else {
-    const json = await files.read(configAuth)
+    const json = await files
+      .read(configAuth)
       .then(buffer => JSON.parse(buffer.toString()) as GoogleKeyJson);
 
     const jwtClient = new google.auth.JWT(
@@ -49,7 +49,7 @@ export async function authenticate(scopes?: string | string[]) {
       json.private_key,
       workingScopes,
       undefined,
-      json.private_key_id
+      json.private_key_id,
     );
 
     google.options({ auth: jwtClient });

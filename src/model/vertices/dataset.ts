@@ -1,9 +1,13 @@
-import {Vertice, VerticeData} from './vertice.js';
+import slugify from '@sindresorhus/slugify';
+import { Vertice, VerticeConstructorOptions } from './vertice.js';
+import { JsonCollection } from '@salesforce/ts-types';
 
-export interface DataSetData<DataInterface = unknown> extends VerticeData {
+export interface DataSetConstructorOptions<DataInterface = JsonCollection>
+  extends VerticeConstructorOptions {
+  type?: string;
   name: string;
   data: DataInterface;
-};
+}
 
 /**
  * General-purpose storage for imported and third-party API data.
@@ -12,56 +16,62 @@ export interface DataSetData<DataInterface = unknown> extends VerticeData {
  * @export
  * @class DataSet
  * @typedef {DataSet}
- * @template DataInterface = unknown
+ * @template DataInterface = JsonCollection
  * @extends {Vertice}
  */
-export class DataSet<DataInterface = unknown> extends Vertice {
+export class DataSet<DataInterface = JsonCollection> extends Vertice {
   readonly _collection = 'datasets';
-  
+
   /**
-   * Description placeholder
+   * Identifier for the dataset type; can be used to group multiple related datasets together.
    *
    * @type {!string}
    */
-  type!: string;
+  type: string;
+
   /**
-   * Description placeholder
+   * The unique identifier for this particular dataset.
    *
    * @type {!string}
    */
-  name!: string;
+  name: string;
+
   /**
-   * Description placeholder
-   *
-   * @type {!DataInterface}
+   * Raw data for the DataSet; must be JSON-serializable.
    */
-  data!: DataInterface;
+  data: DataInterface;
 
   /**
    * Creates an instance of DataSet.
    *
    * @constructor
-   * @param {DataSetData<DataInterface>} input
+   * @param {DataSetConstructorOptions<DataInterface>} input
    */
-  constructor(input: DataSetData<DataInterface>) {
-    const {name, data, ...dataForSuper} = input;
+  constructor(input: DataSetConstructorOptions<DataInterface>) {
+    const { type, name, data, ...dataForSuper } = input;
     super(dataForSuper);
 
     // Flatten the URL to a string
+    this.type = type ?? 'default';
     this.name = name;
     this.data = data;
+
+    this.assignKey();
+  }
+
+  override assignKey() {
+    this._key = DataSet.buildKey(this.name, this.type, this.label);
   }
 
   /**
-   * Description placeholder
-   *
-   * @protected
-   * @override
-   * @returns {unknown}
+   * Given a Dataset name (with optional type and label), generate
+   * a compound key that can be used to look up a full Dataset record.
    */
-  protected override keySeed(): unknown {
-    return {label: this.label, name: this.name};
+  static buildKey(name: string, type = 'default', label?: string): string {
+    const keyParts = [type, name];
+    if (label) keyParts.push(label);
+    return slugify(keyParts.join('-'), { lowercase: true });
   }
 }
 
-Vertice.types.set('datasets', {constructor: DataSet});
+Vertice.types.set('datasets', { constructor: DataSet });

@@ -1,10 +1,19 @@
 import EventEmitter from 'node:events';
-import {AqlQuery} from 'arangojs/aql.js';
+import { AqlQuery } from 'arangojs/aql.js';
 import is from '@sindresorhus/is';
-import {JsonObject} from 'type-fest';
-import {Project, Vertice, aql, ProjectConfig, ArangoStore, JobStatus} from '../index.js';
+import { JsonMap } from '@salesforce/ts-types';
+import {
+  Project,
+  Vertice,
+  aql,
+  ProjectConfig,
+  ArangoStore,
+  JobStatus,
+} from '../index.js';
 
-export type GraphWorkerTask<T extends Vertice = Vertice> = (item: T) => Promise<void>;
+export type GraphWorkerTask<T extends Vertice = Vertice> = (
+  item: T,
+) => Promise<void>;
 
 export interface GraphWorkerOptions<T extends Vertice = Vertice> {
   project?: Partial<ProjectConfig>;
@@ -38,6 +47,10 @@ export class GraphWorker<T extends Vertice = Vertice> extends EventEmitter {
       ...options,
     };
 
+    if (workerOptions.task === undefined) {
+      throw new Error('No worker task was given');
+    }
+
     const project = await Project.config(workerOptions.project);
     const graph = await project.graph();
 
@@ -51,7 +64,7 @@ export class GraphWorker<T extends Vertice = Vertice> extends EventEmitter {
       for (const v of workerOptions.items) {
         await this.performTask(v, workerOptions.task);
       }
-      
+
       this.status.finishTime = Date.now();
       return this.status;
     } else if (is.nonEmptyStringAndNotWhitespace(workerOptions.collection)) {
@@ -62,13 +75,19 @@ export class GraphWorker<T extends Vertice = Vertice> extends EventEmitter {
         return item
       `;
 
-      return graph.query<JsonObject>(query, {count: true, batchSize: 10})
+      return graph
+        .query<JsonMap>(query, { count: true, batchSize: 10 })
         .then(async cursor => {
           this.status.total = cursor.count ?? 0;
           for await (const batch of cursor.batches) {
-            await Promise.all(batch.map(
-              value => this.performTask(Vertice.fromJSON(value) as T, workerOptions.task!)
-            ));
+            await Promise.all(
+              batch.map(value =>
+                this.performTask(
+                  Vertice.fromJSON(value) as T,
+                  workerOptions.task as GraphWorkerTask,
+                ),
+              ),
+            );
           }
         })
         .then(() => {
@@ -84,7 +103,8 @@ export class GraphWorker<T extends Vertice = Vertice> extends EventEmitter {
   }
 
   async performTask(item: T, task: GraphWorkerTask<T>): Promise<void> {
-    return task(item).then(() => {
+    return task(item)
+      .then(() => {
         this.status.finished++;
       })
       .catch(error => {

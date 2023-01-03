@@ -1,7 +1,12 @@
-/* eslint-disable import/no-unassigned-import */
 import 'reflect-metadata';
 import is from '@sindresorhus/is';
-import {getProperty, setProperty, hasProperty, deleteProperty, deepKeys} from 'dot-prop';
+import {
+  getProperty,
+  setProperty,
+  hasProperty,
+  deleteProperty,
+  deepKeys,
+} from 'dot-prop';
 import {
   Exclude,
   plainToInstance,
@@ -10,15 +15,18 @@ import {
   ClassTransformOptions,
   TargetMap,
 } from 'class-transformer';
-import {JsonObject} from 'type-fest';
-import {Uuid, UuidFactory} from '../helpers/uuid.js';
+import { Uuid, UuidFactory } from '../helpers/uuid.js';
+import { ensureJsonMap, JsonMap, has } from '@salesforce/ts-types';
 
-export {Transform, Exclude, Expose} from 'class-transformer';
-export type Reference<T extends Vertice = Vertice> = T | [ string, Uuid ] | string;
-export interface VerticeData {
-  [keyof: string]: unknown,
-  label?: string,
-};
+export { Transform, Exclude, Expose } from 'class-transformer';
+export type Reference<T extends Vertice = Vertice> =
+  | T
+  | [string, Uuid]
+  | string;
+
+export interface VerticeConstructorOptions extends Record<string, unknown> {
+  label?: string;
+}
 
 export interface CollectionMeta {
   isEdge?: true;
@@ -27,7 +35,8 @@ export interface CollectionMeta {
 
 export function isVertice(value: unknown): value is Vertice {
   return (
-    is.object(value) && (('_id' in value) || ('_collection' in value && '_key' in value))
+    is.object(value) &&
+    ('_id' in value || ('_collection' in value && '_key' in value))
   );
 }
 
@@ -54,19 +63,17 @@ export abstract class Vertice {
   _id!: string;
 
   @Exclude({ toClassOnly: true })
-    _rev?: string;
+  _rev?: string;
 
   label?: string;
 
-  constructor(data: VerticeData = {}) {
+  constructor(data: VerticeConstructorOptions = {}) {
     // Special handling for arbitrary properties.
-    if (is.object(data)) {
-      for (const k in data) {
-        this[k] = data[k];
-      }
-
-      this.assignKey();
+    for (const k in data) {
+      this[k] = data[k];
     }
+
+    this.assignKey();
   }
 
   /*
@@ -76,7 +83,7 @@ export abstract class Vertice {
    * everything to the proper Arango properties.
    */
 
-  static getSerializerOptions() {
+  protected static getSerializerOptions() {
     const options: ClassTransformOptions = {
       strategy: 'exposeAll',
       excludeExtraneousValues: false,
@@ -90,14 +97,13 @@ export abstract class Vertice {
 
   static fromJSON<T extends typeof Vertice = typeof this>(
     this: T,
-    data: string | Record<string, unknown>,
+    data: string | JsonMap,
   ): InstanceType<T> {
-    const object = (
-      typeof data === 'string' ? JSON.parse(data) : data
-    ) as Vertice;
+    const object =
+      typeof data === 'string' ? ensureJsonMap(JSON.parse(data)) : data;
 
-    if (isVertice(object)) {
-      const ctor = Vertice.types.get(object._collection)?.constructor;
+    if (has(object, ['_collection'])) {
+      const ctor = Vertice.types.get(object._collection as string)?.constructor;
       if (ctor) {
         return plainToInstance(
           ctor,
@@ -107,10 +113,10 @@ export abstract class Vertice {
       }
     }
 
-    throw new TypeError('Vertices require collection and key or id');
+    throw new TypeError('Vertice data has no _collection property');
   }
 
-  toJSON(): JsonObject {
+  toJSON(): JsonMap {
     return instanceToPlain(this, Vertice.getSerializerOptions());
   }
 
@@ -158,10 +164,7 @@ export abstract class Vertice {
     return getProperty(this, path);
   }
 
-  set(
-    path: string,
-    value: unknown,
-  ) {
+  set(path: string, value: unknown) {
     return setProperty(this, path, value);
   }
 

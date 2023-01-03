@@ -1,13 +1,20 @@
-
-import {IncomingHttpHeaders} from 'node:http';
-import {PlaywrightCrawlingContext, Request, CheerioRoot, PlaywrightGotoOptions, PlaywrightRequestHandler, PlaywrightHook} from 'crawlee';
-import {TDiskDriver} from 'typefs';
-import {UniqueUrl, Resource} from '../model/index.js';
-import {ArangoStore} from '../services/arango-store.js';
-import {EnqueueUrlOptions, AnchorTagData} from './links/index.js';
-import {InternalSpiderOptions} from './options.js';
-import {SpiderHook} from './hooks/index.js';
-import {SpiderRequestHandler} from './handlers/index.js';
+import { IncomingHttpHeaders } from 'node:http';
+import {
+  PlaywrightCrawlingContext,
+  Request,
+  CheerioRoot,
+  PlaywrightGotoOptions,
+  PlaywrightRequestHandler,
+  PlaywrightHook,
+} from 'crawlee';
+import { TDiskDriver } from 'typefs';
+import { UniqueUrl, Resource } from '../model/index.js';
+import { ArangoStore } from '../services/arango-store.js';
+import { EnqueueUrlOptions } from './links/index.js';
+import { HtmlTools } from '../index.js';
+import { InternalSpiderOptions } from './options.js';
+import { SpiderHook } from './hooks/index.js';
+import { SpiderRequestHandler } from './handlers/index.js';
 
 export type SpiderContext = InternalSpiderContext & PlaywrightCrawlingContext;
 
@@ -99,7 +106,9 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * in the options; but does not save or enqueue them.
    * @type {Function}
    */
-  findUrls: (options?: Partial<EnqueueUrlOptions>) => Promise<AnchorTagData[]>;
+  findUrls: (
+    options?: Partial<EnqueueUrlOptions>,
+  ) => Promise<HtmlTools.FoundLink[]>;
 
   /**
    * Saves a list of found links as {@apilink UniqueUrl} objects, applying
@@ -107,7 +116,10 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * does not enqueue them.
    * @type {Function}
    */
-  saveUrls: (links: AnchorTagData[], options?: Partial<EnqueueUrlOptions>) => Promise<UniqueUrl[]>;
+  saveUrls: (
+    links: HtmlTools.FoundLink[],
+    options?: Partial<EnqueueUrlOptions>,
+  ) => Promise<UniqueUrl[]>;
 
   /**
    * Accepts a list of {@apilink UniqueUrl} objects, applies any filters
@@ -115,7 +127,10 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * for the current crawl.
    * @type {Function}
    */
-  saveRequests: (urls: UniqueUrl[], options?: Partial<EnqueueUrlOptions>) => Promise<Request[]>;
+  saveRequests: (
+    urls: UniqueUrl[],
+    options?: Partial<EnqueueUrlOptions>,
+  ) => Promise<Request[]>;
 
   /**
    * A connection to the project's Arango graph database. Can be used to
@@ -172,6 +187,9 @@ export function contextualizeHook(hook: SpiderHook): PlaywrightHook {
 /**
  * Wraps a handler that expects Spidergram's global context for use with PlaywrightCrawler
  */
-export function contextualizeHandler(handler: SpiderRequestHandler): PlaywrightRequestHandler {
-  return async (ctx: PlaywrightCrawlingContext): Promise<void> => handler(ctx as unknown as SpiderContext);
+export function contextualizeHandler(
+  handler: SpiderRequestHandler,
+): PlaywrightRequestHandler {
+  return async (ctx: PlaywrightCrawlingContext): Promise<void> =>
+    handler(ctx as unknown as SpiderContext);
 }

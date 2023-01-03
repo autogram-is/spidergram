@@ -1,20 +1,22 @@
 import is from '@sindresorhus/is';
-import {EnqueueStrategy} from 'crawlee';
-import {ParsedUrl} from '@autogram/url-tools';
+import { EnqueueStrategy } from 'crawlee';
+import { ParsedUrl } from '@autogram/url-tools';
 import minimatch from 'minimatch';
 import arrify from 'arrify';
-import {UniqueUrl} from '../../model/index.js';
-import {SpiderContext} from '../index.js';
+import { UniqueUrl } from '../../model/index.js';
+import { SpiderContext } from '../index.js';
 
 export function filter(
   context: SpiderContext,
   input: UniqueUrl | ParsedUrl,
-  filters: Filter | Filter[],
+  filters: FilterInput,
 ): boolean {
-  const incomingUrl = (input instanceof UniqueUrl) ? input.parsed : input;
+  const incomingUrl = input instanceof UniqueUrl ? input.parsed : input;
   if (is.undefined(incomingUrl)) {
     return false;
   }
+
+  if (is.boolean(filters)) return filters;
 
   for (const filter of arrify(filters)) {
     if (!singleFilter(context, incomingUrl, filter)) {
@@ -25,7 +27,11 @@ export function filter(
   return true;
 }
 
-function singleFilter(context: SpiderContext, url: ParsedUrl, filter: Filter): boolean {
+function singleFilter(
+  context: SpiderContext,
+  url: ParsedUrl,
+  filter: Filter,
+): boolean {
   const currentUrl = context.uniqueUrl?.parsed;
 
   if (is.enumCase(filter, EnqueueStrategy)) {
@@ -48,7 +54,7 @@ function singleFilter(context: SpiderContext, url: ParsedUrl, filter: Filter): b
     }
   } else if (is.string(filter)) {
     // Treat it as a glob to match against the url's href
-    return minimatch(url.href, filter);
+    return minimatch(url.href, filter, { dot: true });
   } else if (is.regExp(filter)) {
     // This is extremely naive; we should rip off crawlee's handling, but this will do for now..
     return url.href.match(filter) !== null;
@@ -60,14 +66,17 @@ function singleFilter(context: SpiderContext, url: ParsedUrl, filter: Filter): b
   return false;
 }
 
-export type FilterFunction = (link: FilterableLink, context?: SpiderContext) => boolean;
+export type FilterFunction = (
+  link: FilterableLink,
+  context?: SpiderContext,
+) => boolean;
 export type FilterableLink = UniqueUrl | ParsedUrl;
 
 // We accept a staggering array of filter types. Come, behold our filters.
-export type FilterInput = Filter | Filter[];
+export type FilterInput = Filter | Filter[] | boolean;
 export type Filter = string | RegExp | UrlFilterWithContext | EnqueueStrategy;
 
 export type UrlFilterWithContext = (
   found: ParsedUrl,
-  context?: SpiderContext
+  context?: SpiderContext,
 ) => boolean;
