@@ -180,7 +180,7 @@ export interface EnqueueUrlOptions {
    * @default {undefined}
    * @type {string}
    */
-  requestLabel?: string;
+  handler?: string;
 
   /**
    * If URLs found in this operation are enqueued, move them to the front
@@ -189,7 +189,7 @@ export interface EnqueueUrlOptions {
    * @default {false}
    * @type {boolean}
    */
-  forefrontRequests?: boolean;
+  prioritize?: boolean;
 
   /**
    * An optional normalizer function to override the crawl- and project-wide
@@ -198,20 +198,19 @@ export interface EnqueueUrlOptions {
    * @default {undefined}
    * @type {UrlMutatorWithContext}
    */
-  normalizer?: UrlMutatorWithContext
+  normalizer?: UrlMutatorWithContext;
 }
 
-export type UrlMutatorWithContext<T extends InternalSpiderContext = InternalSpiderContext> = (
-  found: ParsedUrl,
-  context?: T,
-) => ParsedUrl;
+export type UrlMutatorWithContext<
+  T extends InternalSpiderContext = InternalSpiderContext,
+> = (found: ParsedUrl, context?: T) => ParsedUrl;
 
 export const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
   limit: Number.POSITIVE_INFINITY,
   selector: 'body a',
   save: EnqueueStrategy.All,
   enqueue: EnqueueStrategy.SameDomain,
-  forefrontRequests: false,
+  prioritize: false,
   checkRobots: true,
   respectRobots: true,
   checkSitemaps: true,

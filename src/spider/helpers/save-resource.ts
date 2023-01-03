@@ -19,6 +19,7 @@ export async function saveResource(
       code: requestMeta?.statusCode ?? -1,
       message: requestMeta?.statusMessage ?? '',
       headers: requestMeta?.headers ?? {},
+      handler: request.label,
       ...properties,
     }),
   );

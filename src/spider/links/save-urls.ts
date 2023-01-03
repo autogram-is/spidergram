@@ -30,9 +30,8 @@ export async function save(
       base: uniqueUrl?.url,
       referer: uniqueUrl?.url,
       depth: uniqueUrl === undefined ? 0 : uniqueUrl.depth + 1,
-      normalizer: options.normalizer ?? NormalizedUrl.normalizer
+      normalizer: options.normalizer ?? NormalizedUrl.normalizer,
     });
-    if (options.requestLabel) uu.requestLabel = options.requestLabel;
 
     // Run each URL through a few gauntlets
     if (options.discardUnparsableLinks && is.undefined(uu.parsed)) {
@@ -62,7 +61,7 @@ export async function save(
         ru.pathname = 'robots.txt';
         const ruu = new UniqueUrl({
           url: ru,
-          requestLabel: 'robotstxt',
+          handler: 'robotstxt',
           forefrontRequest: true,
         });
         if (!options.discardExistingLinks || !(await graph.exists(ruu))) {
@@ -73,7 +72,7 @@ export async function save(
         nu.pathname = 'sitemap.xml';
         const suu = new UniqueUrl({
           url: nu,
-          requestLabel: 'sitemap',
+          handler: 'sitemap',
           forefrontRequest: true,
         });
         if (!options.discardExistingLinks || !(await graph.exists(suu))) {
@@ -81,7 +80,7 @@ export async function save(
         }
       }
     }
-    
+
     // If 'discardExistingLinks' is set, we don't bother including URLs
     // that were already known to the system in the result set; this means
     // they won't be persisted, or enqueued for crawling.

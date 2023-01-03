@@ -10,6 +10,7 @@ export interface FoundLink {
   data?: Record<string, string>;
   tagName?: string;
   selector?: string;
+  label?: string;
 }
 
 export const LinkSelector: Record<string, string> = {
@@ -53,17 +54,20 @@ export function findHeadLinks(input: string | cheerio.Root) {
  * and SitemapIndex XML markup.
  */
 export function findLinksInSitemap(input: string | cheerio.Root) {
-  const $ = typeof input === 'string' ? parseWithCheerio(input, { xmlMode: true }) : input;
+  const $ =
+    typeof input === 'string'
+      ? parseWithCheerio(input, { xmlMode: true })
+      : input;
   const results: FoundLink[] = [];
   $('urlset url')
     .toArray()
     .forEach(element => {
       results.push({
         url: $(element).find('loc').text(),
-        title: $(element).find('title').text(),
-        date: $(element).find('lastmod').text(),
-        changfreq: $(element).find('changefreq').text(),
-        priority: $(element).find('priority').text(),
+        title: $(element).find('title').text() ?? undefined,
+        date: $(element).find('lastmod').text() ?? undefined,
+        changfreq: $(element).find('changefreq').text() ?? undefined,
+        priority: $(element).find('priority').text() ?? undefined,
       });
     });
 
@@ -72,8 +76,7 @@ export function findLinksInSitemap(input: string | cheerio.Root) {
     .forEach(element => {
       results.push({
         url: $(element).find('loc').text(),
-        date: $(element).find('lastmod').text(),
-        label: 'sitemap',
+        date: $(element).find('lastmod').text() ?? undefined,
       });
     });
 
@@ -95,8 +98,8 @@ export function findLinksInFeed(input: string | cheerio.Root) {
     .forEach(element => {
       results.push({
         url: $(element).find('link').text(),
-        title: $(element).find('title').text(),
-        date: $(element).find('pubDate').text(),
+        title: $(element).find('title').text() ?? undefined,
+        date: $(element).find('pubDate').text() ?? undefined,
       });
     });
 
@@ -105,8 +108,8 @@ export function findLinksInFeed(input: string | cheerio.Root) {
     .forEach(element => {
       results.push({
         url: $(element).find('link').attr('href')?.toString(),
-        title: $(element).find('title').text(),
-        date: $(element).find('updated').text(),
+        title: $(element).find('title').text() ?? undefined,
+        date: $(element).find('updated').text() ?? undefined,
       });
     });
 
@@ -123,7 +126,7 @@ export function getLinkElementAttributes(
   const result = {
     url: attributes.href ?? attributes.src,
     attributes: attributes,
-    text: text.length > 0 ? text : undefined,
+    text: text ?? undefined,
     data: Object.keys(dataAttributes).length > 0 ? dataAttributes : undefined,
     tag: (element as { tagName?: string }).tagName,
   } as FoundLink;

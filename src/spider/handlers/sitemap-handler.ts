@@ -7,7 +7,6 @@ import { save, enqueue } from '../links/index.js';
 // Because large feed and sitemap files can be enormous (google limits
 // them to 'no more than 50 megabytes'), we store them as file downloads
 // that are loaded as needed, rather than body data persisted to Arango.
-
 export async function sitemapHandler(context: SpiderContext) {
   const { graph, files, saveResource, sendRequest } = context;
   const resource = await saveResource();
@@ -22,10 +21,10 @@ export async function sitemapHandler(context: SpiderContext) {
   });
 
   // Save the raw XML we've retrieved — we'll retrieve it later.
-  const fileName =
-    resource.key +
-    '-' +
-    fileNameFromHeaders(new URL(context.request.url), buffer.headers);
+  const fileName = `sitemaps/'${resource.key}-${fileNameFromHeaders(
+    new URL(context.request.url),
+    buffer.headers,
+  )}`;
 
   await files('downloads').writeStream(fileName, Readable.from(buffer));
   resource.payload = { bucket: 'downloads', path: fileName };
@@ -36,12 +35,16 @@ export async function sitemapHandler(context: SpiderContext) {
 
   // Now parse the sitemap and pull out URLs. Some sites (vanityfair.com is one
   // example) do odd things like sitemap URLs with querystrings
-   
+
   const links = HtmlTools.findLinksInSitemap(xml.toString());
 
   const subSitemaps = links.filter(l => l.label === 'sitemap');
   const normalLinks = links.filter(l => l.label !== 'sitemap');
 
-  await save(context, subSitemaps).then(savedLinks => enqueue(context, savedLinks, {}, { label: 'sitemap' }));
-  await save(context, normalLinks).then(savedLinks => enqueue(context, savedLinks));
+  await save(context, subSitemaps, { handler: 'sitemap' }).then(savedLinks =>
+    enqueue(context, savedLinks),
+  );
+  await save(context, normalLinks).then(savedLinks =>
+    enqueue(context, savedLinks),
+  );
 }

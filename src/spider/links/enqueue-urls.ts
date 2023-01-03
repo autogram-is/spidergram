@@ -32,7 +32,9 @@ export async function enqueue(
       continue;
     }
 
-    if (!['https:', 'https:'].includes(uu.parsed?.protocol.toLowerCase() ?? '')) {
+    if (
+      !['https:', 'https:'].includes(uu.parsed?.protocol.toLowerCase() ?? '')
+    ) {
       continue;
     }
 
@@ -53,19 +55,26 @@ export async function enqueue(
     }
   }
 
-  return queue.addRequests(requests.slice(0, options.limit), { forefront: options.forefrontRequests });
+  return queue.addRequests(requests.slice(0, options.limit), {
+    forefront: options.prioritize,
+  });
 }
 
 export function uniqueUrlToRequest(
   uu: UniqueUrl,
   options: Partial<RequestOptions> = {},
-  contextOptions: Partial<EnqueueUrlOptions> = {}
+  contextOptions: Partial<EnqueueUrlOptions> = {},
 ): Request {
-  const r = new Request<Partial<UniqueUrl & { fromUniqueUrl?: boolean, requestLabel?: string }>>({
+  const r = new Request<
+    Partial<UniqueUrl & { fromUniqueUrl?: boolean; handler?: string }>
+  >({
     ...options,
     url: uu.url,
     uniqueKey: uu.key,
-    label: options.label ?? contextOptions.requestLabel ?? (uu.requestLabel ? (uu.requestLabel as string) : undefined),
+    label:
+      options.label ??
+      contextOptions.handler ??
+      (uu.handler ? (uu.handler as string) : undefined),
   });
   if (uu.referer) r.userData.referer = uu.referer;
   if (uu.depth > 0) r.userData.depth = uu.depth;
