@@ -12,7 +12,7 @@ import { UniqueUrl, Resource } from '../model/index.js';
 import { ArangoStore } from '../services/arango-store.js';
 import { EnqueueUrlOptions } from './links/index.js';
 import { HtmlTools } from '../index.js';
-import { InternalSpiderOptions } from './options.js';
+import { InternalSpiderOptions } from './spider-options.js';
 import { SpiderHook } from './hooks/index.js';
 import { SpiderRequestHandler } from './handlers/index.js';
 

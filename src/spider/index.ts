@@ -1,4 +1,4 @@
-export * from './options.js';
+export * from './spider-options.js';
 export * from './context.js';
 export * from './links/index.js';
 
