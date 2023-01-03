@@ -31,29 +31,30 @@ export interface UncrawledUrlOptions extends VerticeQueryOptions {
   hostname?: string | string[];
 
   /**
-   * A string representing a URL's full or partial pathname. AQL wildcard
+   * A string containing a URL's full or partial pathname. AQL wildcard
    * placeholders (`%`) can be used to specify the substring matching;
    * for exact matches, the pathname should always begin with a forward-slash.
+   * 
+   * @see {link https://www.arangodb.com/docs/3.10/aql/functions-string.html#like|Arango string functions}
    */
   pathname?: string;
 
   /**
-   * The number of distinct items in the URL's path; using the default URL
-   * normalizer, site and directory indexes will not be included in this count.
+   * A full or partial version of the location where a URL was original found.
+   * AQL wildcard placeholders can be used to specify substring matching;
+   * if exact matching is used remember that the URL protocol is included.
+   * 
+   * @see {link https://www.arangodb.com/docs/3.10/aql/functions-string.html#like|Arango string functions}
    */
-  depth?: number;
+  referer?: string;
 }
 
-const defaultOptions: UncrawledUrlOptions = {
-  includeErrors: false,
-};
 export class UncrawledUrlQuery extends VerticeQuery<
   UniqueUrl,
   UncrawledUrlOptions
 > {
   constructor(options: UncrawledUrlOptions) {
     super({
-      ...defaultOptions,
       ...options,
       collection: 'unique_urls',
     });
@@ -70,10 +71,9 @@ export class UncrawledUrlQuery extends VerticeQuery<
     const pathname = this.options.pathname
       ? aql`FILTER item.parsed.pathname LIKE {$this.options.pathname}`
       : undefined;
-    const depth =
-      this.options.depth && this.options.depth >= 0
-        ? aql`FILTER item.parsed.depth == ${this.options.depth}`
-        : undefined;
+    const referer = this.options.referer
+      ? aql`FILTER item.parsed.referer LIKE {$this.options.referer}`
+      : undefined;
     let visited: GeneratedAqlQuery | undefined;
     if (this.options.includeErrors) {
       visited = aql`
@@ -95,7 +95,7 @@ export class UncrawledUrlQuery extends VerticeQuery<
       ${domain}
       ${hostname}
       ${pathname}
-      ${depth}
+      ${referer}
       ${visited}
     `;
   }
