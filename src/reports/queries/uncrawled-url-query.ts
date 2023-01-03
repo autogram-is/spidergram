@@ -34,7 +34,7 @@ export interface UncrawledUrlOptions extends VerticeQueryOptions {
    * A string containing a URL's full or partial pathname. AQL wildcard
    * placeholders (`%`) can be used to specify the substring matching;
    * for exact matches, the pathname should always begin with a forward-slash.
-   * 
+   *
    * @see {link https://www.arangodb.com/docs/3.10/aql/functions-string.html#like|Arango string functions}
    */
   pathname?: string;
@@ -43,7 +43,7 @@ export interface UncrawledUrlOptions extends VerticeQueryOptions {
    * A full or partial version of the location where a URL was original found.
    * AQL wildcard placeholders can be used to specify substring matching;
    * if exact matching is used remember that the URL protocol is included.
-   * 
+   *
    * @see {link https://www.arangodb.com/docs/3.10/aql/functions-string.html#like|Arango string functions}
    */
   referer?: string;
