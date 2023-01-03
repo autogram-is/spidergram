@@ -148,6 +148,15 @@ export interface InternalSpiderOptions extends Dictionary {
    * @type {string}
    */
   userAgent?: string;
+
+  /**
+   * Number of seconds to wait for a handler before cancelling the request and
+   * treating it as an eror. np
+   *
+   * @default 180
+   * @type {?number}
+   */
+  handlerTimeout?: number;
 }
 
 export const defaultSpiderOptions: InternalSpiderOptions = {
@@ -161,4 +170,5 @@ export const defaultSpiderOptions: InternalSpiderOptions = {
   parseMimeTypes: mimeGroups.page,
   downloadMimeTypes: [],
   userAgent: `Spidergram ${pkgData?.packageJson.version}`,
+  handlerTimeout: 180,
 };

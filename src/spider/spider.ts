@@ -118,7 +118,7 @@ export class Spider extends PlaywrightCrawler {
     }
 
     // We're bumping this WAY up to deal with large sitemaps
-    crawler.requestHandlerTimeoutSecs = 240;
+    crawler.requestHandlerTimeoutSecs = internal.handlerTimeout;
 
     super(crawler, config);
 
@@ -140,7 +140,10 @@ export class Spider extends PlaywrightCrawler {
     this._events.on(event, listener);
   }
 
-  off(event: SpiderEventName, listener?: (...args: unknown[]) => unknown): void {
+  off(
+    event: SpiderEventName,
+    listener?: (...args: unknown[]) => unknown,
+  ): void {
     if (listener) {
       this._events.removeListener(event, listener);
     } else {
@@ -230,23 +233,29 @@ export class Spider extends PlaywrightCrawler {
 
     // If we're set up to check robot rules, also enqueue them.
     if (this.spiderOptions.urlOptions.checkRobots) {
-      const robotUrlMaker = (url: ParsedUrl) => { url.pathname = '/robots.txt'; return url; };
+      const robotUrlMaker = (url: ParsedUrl) => {
+        url.pathname = '/robots.txt';
+        return url;
+      };
       const domains = new UniqueUrlSet([...uniques], false, robotUrlMaker);
       await graph.push([...domains], false);
       await queue.addRequests(
         [...domains].map(uu => uniqueUrlToRequest(uu, { label: 'robotstxt' })),
         { ...options, forefront: true },
-      );  
+      );
     }
 
     if (this.spiderOptions.urlOptions.checkSitemaps) {
-      const robotUrlMaker = (url: ParsedUrl) => { url.pathname = '/sitemap.xml'; return url; };
+      const robotUrlMaker = (url: ParsedUrl) => {
+        url.pathname = '/sitemap.xml';
+        return url;
+      };
       const domains = new UniqueUrlSet([...uniques], false, robotUrlMaker);
       await graph.push([...domains], false);
       await queue.addRequests(
         [...domains].map(uu => uniqueUrlToRequest(uu, { label: 'sitemap' })),
         { ...options, forefront: true },
-      );  
+      );
     }
 
     this.status.startTime = Date.now();
@@ -280,6 +289,7 @@ function splitOptions(options: Partial<SpiderOptions> = {}) {
     preNavigationHooks,
     postNavigationHooks,
     userAgent,
+    handlerTimeout,
 
     ...crawlerOptions
   } = options;
@@ -293,4 +303,3 @@ function splitOptions(options: Partial<SpiderOptions> = {}) {
   };
 }
 /* eslint-enable no-unused-vars */
-
