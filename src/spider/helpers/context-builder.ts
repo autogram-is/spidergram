@@ -21,17 +21,17 @@ export async function enhanceSpiderContext(
       urls.enqueueUrls(context, options),
 
     findLinks: async (options: Partial<urls.EnqueueUrlOptions> = {}) =>
-      urls.find(context, options),
+      urls.findUrls(context, options),
 
     saveLinks: async (
       input: HtmlTools.FoundLink[],
       options: Partial<urls.EnqueueUrlOptions> = {},
-    ) => urls.save(context, input, options),
+    ) => urls.saveUrls(context, input, options),
 
     saveRequests: async (
       input: UniqueUrl[],
       options: Partial<urls.EnqueueUrlOptions> = {},
-    ) => urls.enqueue(context, input, options),
+    ) => urls.enqueueRequests(context, input, options),
 
     graph: await project.graph(),
     files: project.files,

@@ -6,11 +6,11 @@ import { Robots } from '../../tools/html/robots.js';
 import {
   EnqueueUrlOptions,
   urlDiscoveryDefaultOptions,
-  filter,
+  filterUrls,
 } from './index.js';
 import _ from 'lodash';
 
-export async function enqueue(
+export async function enqueueRequests(
   context: SpiderContext,
   urls: UniqueUrl | UniqueUrl[],
   customOptions: Partial<EnqueueUrlOptions> = {},
@@ -38,7 +38,7 @@ export async function enqueue(
       continue;
     }
 
-    if (!filter(context, uu, options.enqueue)) {
+    if (!filterUrls(context, uu, options.enqueue)) {
       continue;
     }
 
