@@ -8,7 +8,7 @@ export class Robots {
   protected static _rules: Map<string, Robot>;
 
   protected static getHost(url: string | URL): string {
-    const parsed = (typeof url === 'string') ? new URL(url) : url;
+    const parsed = typeof url === 'string' ? new URL(url) : url;
     return parsed.hostname;
   }
 
@@ -35,21 +35,21 @@ export class Robots {
     return rules?.isAllowed(url.toString(), ua);
   }
 
-	static isDisallowed(url: string, ua?: string): boolean | undefined {
+  static isDisallowed(url: string, ua?: string): boolean | undefined {
     const rules = Robots.getRules(url);
     return rules?.isDisallowed(url.toString(), ua);
   }
 
-	static getCrawlDelay(url: string | URL, ua?: string): number | undefined {
+  static getCrawlDelay(url: string | URL, ua?: string): number | undefined {
     const rules = Robots.getRules(url);
     return rules?.getCrawlDelay(ua);
   }
 
-	static getSitemaps(url?: string | URL): string[] {
+  static getSitemaps(url?: string | URL): string[] {
     let sitemaps: string[] = [];
     if (url) {
       const robot = Robots.getRules(url);
-      sitemaps = robot?.getSitemaps() ?? []
+      sitemaps = robot?.getSitemaps() ?? [];
     } else {
       for (const r of Robots.rules.values()) {
         sitemaps.push(...r.getSitemaps());
@@ -58,7 +58,7 @@ export class Robots {
     return sitemaps;
   }
 
-	static getPreferredHost(url: string | URL): string | undefined {
+  static getPreferredHost(url: string | URL): string | undefined {
     const rules = Robots.getRules(url);
     return rules?.getPreferredHost() ?? undefined;
   }

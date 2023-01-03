@@ -2,13 +2,8 @@ import { SpiderContext } from '../context.js';
 import { helpers } from '../index.js';
 
 export async function requestPrecheck(context: SpiderContext): Promise<void> {
-  const {
-    log,
-    request,
-    prefetchRequest,
-    downloadMimeTypes,
-    parseMimeTypes,
-  } = context;
+  const { log, request, prefetchRequest, downloadMimeTypes, parseMimeTypes } =
+    context;
 
   // prefetchRequest also sticks requestMeta into the crawl context,
   // so its header information can be used later even if skipNavigation
@@ -18,7 +13,7 @@ export async function requestPrecheck(context: SpiderContext): Promise<void> {
   try {
     const { type } = helpers.parseContentType(requestMeta);
     requestMeta.type = type;
-  } catch(error: unknown) {
+  } catch (error: unknown) {
     if (error instanceof TypeError) {
       requestMeta.type = 'unknown/unknown';
     } else {
@@ -45,7 +40,7 @@ export async function requestPrecheck(context: SpiderContext): Promise<void> {
     // want to deal with that someday.
     request.label ??= 'download';
   } else {
-    // If none of our other checks matched, and no label was assigned 
+    // If none of our other checks matched, and no label was assigned
     // to the request, we fall back to 'status'.
     request.label ??= 'status';
   }

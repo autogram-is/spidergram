@@ -33,15 +33,8 @@ export class Resource extends Vertice {
   payload?: SavedFile;
 
   constructor(data: ResourceConstructorOptions = {}) {
-    const {
-      url,
-      code,
-      message,
-      headers,
-      body,
-      payload,
-      ...dataForSuper
-    } = data;
+    const { url, code, message, headers, body, payload, ...dataForSuper } =
+      data;
     super(dataForSuper);
 
     // Flatten the URL to a string

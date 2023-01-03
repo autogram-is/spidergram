@@ -95,9 +95,7 @@ export class ArangoStore {
    * @param databaseName
    * @returns
    */
-  protected static async load(
-    name: string,
-  ): Promise<Database> {
+  protected static async load(name: string): Promise<Database> {
     const { system } = ArangoStore;
 
     if (is.emptyStringOrWhitespace(name)) {

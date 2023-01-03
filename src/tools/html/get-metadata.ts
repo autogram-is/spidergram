@@ -14,7 +14,7 @@ export async function getMetadata(input: string | Resource) {
   // We're using destructuring to pull variables out of the results
   // that we never want to use; there's probably a cleaner way of dealing with
   // this, buuuuut…
-  
+
   /* eslint-disable @typescript-eslint/no-unused-vars */
   return new Promise<MetadataResponse>((resolve, reject) => {
     const handler = new Handler(

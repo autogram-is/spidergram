@@ -19,7 +19,7 @@ export interface UniqueUrlConstructorOptions extends VerticeConstructorOptions {
    * an absolute URL during parsing.
    */
   base?: string | URL;
-  
+
   /**
    * An optional URL normalizer that can override the project-wide default.
    * Be aware that changing normalizers mid-project may result in duplicate
@@ -29,7 +29,7 @@ export interface UniqueUrlConstructorOptions extends VerticeConstructorOptions {
 
   /**
    * The location of the page where this URL was found; it may be used during
-   * crawl processes to create a more realistic HTTP request. 
+   * crawl processes to create a more realistic HTTP request.
    */
   referer?: string;
 
@@ -41,7 +41,7 @@ export interface UniqueUrlConstructorOptions extends VerticeConstructorOptions {
 
   /**
    * Optional enum indicating the origin of this URL. Was it found while crawling,
-   * imported from a third-party data source, extrapolated from the existence of 
+   * imported from a third-party data source, extrapolated from the existence of
    * other URLs, etc.
    *
    * @type {?UrlSource}
@@ -52,9 +52,9 @@ export interface UniqueUrlConstructorOptions extends VerticeConstructorOptions {
    * An optional hint that will be passed on to the crawler as a Request Label,
    * which ultimately controls the handler function that will process the URL's
    * response.
-   * 
+   *
    * By default, Spidergram will correctly handle the following values:
-   * 
+   *
    * - status
    * - page
    * - download
@@ -111,8 +111,9 @@ export class UniqueUrl extends Vertice {
   }
 
   constructor(data: UniqueUrlConstructorOptions = {}) {
-    const { url, base, normalizer, referer, handler, depth, ...dataForSuper } = data;
-    
+    const { url, base, normalizer, referer, handler, depth, ...dataForSuper } =
+      data;
+
     super(dataForSuper);
 
     let baseUrl = base;
