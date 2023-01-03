@@ -10,6 +10,7 @@ export async function failureHandler(context: SpiderContext, error: Error) {
     url: request.loadedUrl ?? request.url,
     code: -1,
     message: `(${error.name}: ${error.message})`,
+    errors: request.errorMessages,
     headers: {},
   });
 
