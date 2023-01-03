@@ -4,6 +4,7 @@ import arrify from 'arrify';
 import { log, PlaywrightCrawlingContext } from 'crawlee';
 import prependHttp from 'prepend-http';
 import { FinalStatistics } from 'crawlee';
+import { UncrawledUrlOptions, UncrawledUrlQuery } from '../reports/index.js';
 import _ from 'lodash';
 
 // We have a chance to set the log level HIGHER when configuring,
@@ -17,7 +18,6 @@ import {
   Configuration,
   createPlaywrightRouter,
   playwrightUtils,
-  CrawlerAddRequestsOptions,
   RequestOptions,
 } from 'crawlee';
 import { NormalizedUrl, ParsedUrl } from '@autogram/url-tools';
@@ -155,7 +155,7 @@ export class Spider extends PlaywrightCrawler {
     this._events.emit(event, ...args);
   }
 
-  updateStats({ request, requestMeta }: SpiderContext) {
+  protected updateStats({ request, requestMeta }: SpiderContext) {
     const type =
       requestMeta?.type ?? requestMeta?.headers['content-type'] ?? 'unknown';
     const status = requestMeta?.statusCode ?? -1;
@@ -176,7 +176,7 @@ export class Spider extends PlaywrightCrawler {
     this.status.finished++;
   }
 
-  override async _cleanupContext(context: SpiderContext) {
+  protected override async _cleanupContext(context: SpiderContext) {
     // This is pretty sketchy way of capturing a non-error; we need to verify that
     // a request that previously failed but then succeeded will still be noticed.
     if (context.request.errorMessages.length === 0) {
@@ -197,10 +197,10 @@ export class Spider extends PlaywrightCrawler {
     super._cleanupContext(context as PlaywrightCrawlingContext);
   }
 
-  override async run(
-    requests: RequestValue | RequestValue[] = [],
-    options?: CrawlerAddRequestsOptions,
-  ): Promise<SpiderStatus & FinalStatistics> {
+  /**
+   * Enqueue a set of URLs and crawl them using the current Spider options.
+   */
+  override async run(requests: RequestValue | RequestValue[] = []): Promise<SpiderStatus & FinalStatistics> {
     // If only a single value came in, turn it into an array.
     const project = await Project.config(this.spiderOptions.projectConfig);
     const graph = await project.graph();
@@ -241,7 +241,7 @@ export class Spider extends PlaywrightCrawler {
       await graph.push([...domains], false);
       await queue.addRequests(
         [...domains].map(uu => uniqueUrlToRequest(uu, { label: 'robotstxt' })),
-        { ...options, forefront: true },
+        { forefront: true },
       );
     }
 
@@ -254,7 +254,7 @@ export class Spider extends PlaywrightCrawler {
       await graph.push([...domains], false);
       await queue.addRequests(
         [...domains].map(uu => uniqueUrlToRequest(uu, { label: 'sitemap' })),
-        { ...options, forefront: true },
+        { forefront: true },
       );
     }
 
@@ -262,9 +262,48 @@ export class Spider extends PlaywrightCrawler {
 
     await queue.addRequests(
       [...uniques].map(uu => uniqueUrlToRequest(uu)),
-      options,
     );
 
+    return super.run().then(stats => {
+      this.status.finishTime = Date.now();
+      return { ...this.status, ...stats };
+    });
+  }
+
+  /**
+   * Resume the crawl with saved-but-unvisited URLs.
+   */
+  async resume(options: UniqueUrl[] | UncrawledUrlOptions) {
+    let urls: UniqueUrl[];
+    if (is.array(options)) {
+      urls = options;
+    } else {
+      if (
+        !(
+          options.domain ||
+          options.hostname ||
+          options.label ||
+          options.referer
+        )
+      ) {
+        throw new Error(
+          'At least one URL filter should be used when restarting a crawl',
+        );
+      }
+      urls = await new UncrawledUrlQuery(options).run();
+    }
+
+    this.status.startTime = Date.now();
+
+    // Crawlee has a lot of logs going on.
+    // Long term we want to do something nicer here.
+    this.config.set('logLevel', this.spiderOptions.logLevel);
+    this.log.setLevel(this.spiderOptions.logLevel);
+    log.setLevel(this.spiderOptions.logLevel);
+
+    const queue = await this.getRequestQueue();
+
+    await queue.addRequests(urls.map(uu => uniqueUrlToRequest(uu)));
     return super.run().then(stats => {
       this.status.finishTime = Date.now();
       return { ...this.status, ...stats };
