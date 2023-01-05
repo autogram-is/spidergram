@@ -1,6 +1,6 @@
 # Spidergram: Structural analysis tools for complex web sites
 
-Spidergram is a toolbox for exploring, auditing, and analyzing complicated web sites — particularly ones that use multiple CMSs, span more than one domain, and are maintained by multiple teams inside an organization. Although it works well for smaller projects, Autogram built it to overcome the roadblocks we hit when using existing crawling and inventory tools on our clients' complex, multi-site web properties. Using it to crawl your blog is a bit light swatting a fly with a Buick.
+Spidergram is a toolbox for exploring, auditing, and analyzing complicated web sites — particularly ones that use multiple CMSs, span more than one domain, and are maintained by multiple teams inside an organization. Although it works well for smaller projects, [Autogram](https://autogram-is) built it to overcome the roadblocks we hit when using existing crawling and inventory tools on complex, multi-site web properties. Using it to crawl your blog is a bit light swatting a fly with a Buick.
 
 ## Why this thing?
 
