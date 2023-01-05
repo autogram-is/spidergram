@@ -4,7 +4,7 @@ import { EnqueueUrlOptions } from './index.js';
 import { HtmlTools } from '../../index.js';
 import _ from 'lodash';
 
-export function find(
+export function findUrls(
   context: SpiderContext,
   customOptions?: Partial<EnqueueUrlOptions>,
 ) {

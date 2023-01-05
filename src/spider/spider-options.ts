@@ -57,7 +57,7 @@ export interface InternalSpiderOptions extends Dictionary {
    *   await enqueueUrls();
    * }
    *
-   * @default: {@apilink pageHandler}
+   * @defaultValue {@apilink pageHandler}
    * @type {SpiderRequestHandler}
    */
   pageHandler?: SpiderRequestHandler;

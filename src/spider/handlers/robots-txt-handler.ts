@@ -1,7 +1,7 @@
 import { SpiderContext } from '../context.js';
 import { fileNameFromHeaders } from '../helpers/mime.js';
 import { Readable } from 'stream';
-import { save, enqueue } from '../links/index.js';
+import { saveUrls, enqueueRequests } from '../links/index.js';
 import { Robots } from '../../tools/html/robots.js';
 import { FoundLink } from '../../tools/html/find-links.js';
 
@@ -42,8 +42,8 @@ export async function robotsTxtHandler(context: SpiderContext) {
     const links: FoundLink[] = sitemaps.map(s => {
       return { url: s };
     });
-    await save(context, links, { handler: 'sitemap' }).then(savedLinks =>
-      enqueue(context, savedLinks),
+    await saveUrls(context, links, { handler: 'sitemap' }).then(savedLinks =>
+      enqueueRequests(context, savedLinks),
     );
   }
 }

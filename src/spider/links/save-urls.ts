@@ -1,12 +1,18 @@
 import is from '@sindresorhus/is';
 import arrify from 'arrify';
 import { SpiderContext } from '../context.js';
-import { UniqueUrl, LinksTo } from '../../model/index.js';
-import { EnqueueUrlOptions, filter } from './index.js';
-import { HtmlTools, NormalizedUrl, aql } from '../../index.js';
+import {
+  UniqueUrl,
+  LinksTo,
+  EnqueueUrlOptions,
+  filterUrls,
+  HtmlTools,
+  NormalizedUrl,
+  aql,
+} from '../../index.js';
 import _ from 'lodash';
 
-export async function save(
+export async function saveUrls(
   context: SpiderContext,
   links: HtmlTools.FoundLink | HtmlTools.FoundLink[],
   customOptions: Partial<EnqueueUrlOptions> = {},
@@ -45,7 +51,7 @@ export async function save(
       continue;
     }
 
-    if (!filter(context, uu, options.save)) {
+    if (!filterUrls(context, uu, options.save)) {
       continue;
     }
 

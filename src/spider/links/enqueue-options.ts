@@ -4,16 +4,14 @@ import { InternalSpiderContext } from '../../index.js';
 import { FilterInput } from './index.js';
 
 /**
- * @export
- * @interface EnqueueUrlOptions
- * @typedef {EnqueueUrlOptions}
+ * Configuration options for Spidergram's URL enqueing options.
  */
 export interface EnqueueUrlOptions {
   /**
    * Limits the number of links that will be enqueued by this call; useful for
    * selecting a subset of links on the page for testing.
    *
-   * @default: Infinity
+   * @defaultValue Infinity
    */
   limit: number;
 
@@ -211,10 +209,10 @@ export const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
   save: EnqueueStrategy.All,
   enqueue: EnqueueStrategy.SameDomain,
   prioritize: false,
-  checkRobots: true,
-  respectRobots: true,
-  checkSitemaps: true,
-  prioritizeSitemaps: true,
+  checkRobots: false,
+  respectRobots: false,
+  checkSitemaps: false,
+  prioritizeSitemaps: false,
   discardEmptyLinks: true,
   discardAnchorOnlyLinks: true,
   discardNonWebLinks: false,

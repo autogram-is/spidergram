@@ -2,7 +2,7 @@ import { SpiderContext } from '../context.js';
 import { HtmlTools } from '../../tools/index.js';
 import { fileNameFromHeaders } from '../helpers/mime.js';
 import { Readable } from 'stream';
-import { save, enqueue } from '../links/index.js';
+import { saveUrls, enqueueRequests } from '../links/index.js';
 
 // Because large feed and sitemap files can be enormous (google limits
 // them to 'no more than 50 megabytes'), we store them as file downloads
@@ -41,10 +41,10 @@ export async function sitemapHandler(context: SpiderContext) {
   const subSitemaps = links.filter(l => l.label === 'sitemap');
   const normalLinks = links.filter(l => l.label !== 'sitemap');
 
-  await save(context, subSitemaps, { handler: 'sitemap' }).then(savedLinks =>
-    enqueue(context, savedLinks),
+  await saveUrls(context, subSitemaps, { handler: 'sitemap' }).then(
+    savedLinks => enqueueRequests(context, savedLinks),
   );
-  await save(context, normalLinks).then(savedLinks =>
-    enqueue(context, savedLinks),
+  await saveUrls(context, normalLinks).then(savedLinks =>
+    enqueueRequests(context, savedLinks),
   );
 }
