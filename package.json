@@ -1,6 +1,6 @@
 {
   "name": "spidergram",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Structural analysis tools for complex web sites",
   "main": "./dist/index.js",
   "exports": "./dist/index.js",
