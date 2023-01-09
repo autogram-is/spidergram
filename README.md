@@ -23,7 +23,7 @@ There are tons of useful programs, hosted services, and open source projects tha
 
 ### Starting a new project
 
-`node init spidergram` will set up a fresh node.js project using one of several example crawler projects. For more details on the example projects, see the [Create Spidergram](https://github.com/autogram-is/create-spidergram) project page.
+`npx create-spidergram` will set up a fresh node.js project using one of several example crawler projects. For more details on the example projects, see the [Create Spidergram](https://github.com/autogram-is/create-spidergram) project page.
 
 ### Adding to an existing project
 
@@ -98,4 +98,4 @@ Spidergram is a tool we use when solving problems for our clients; it's been evo
 
 If you're interested in contributing, feel free to jump into the issue queue and/or [contact us](https://autogram.is) with your ideas.
 
-If you're wrestling with complicated digital publishing, content operations, or design system challenges you should _definitely_ [drop us a line](https://autogram.is/listening/), because we love that shit. We've helped dozens of the world's largest tech companies, educational institutions, publishers, and retailers; we get dangerously bored without complicated problems to solve, and we'd love to hear about yours.
+If you're wrestling with complicated digital publishing, content operations, or design system challenges you should *definitely* [drop us a line](https://autogram.is/listening/), because we love that shit. We've helped dozens of the world's largest tech companies, educational institutions, publishers, and retailers; we get dangerously bored without complicated problems to solve, and we'd love to hear about yours.
