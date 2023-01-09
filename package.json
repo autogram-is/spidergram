@@ -39,7 +39,7 @@
     "Ethan Marcotte <karen@autogram.is> (https://ethanmarcotte.com)",
     "Karen McGrane <karen@autogram.is> (https://karenmcgrane.com)"
   ],
-  "license": "MIT",
+  "license": "GPL",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/autogram-is/spidergram"
