@@ -216,8 +216,10 @@ export class Spider extends PlaywrightCrawler {
 
     const queue = await this.getRequestQueue();
 
-    // Normalize and deduplicate any incoming requests.
-    const uniques = new UniqueUrlSet();
+    // Normalize and deduplicate any incoming URLs.
+    const currentNormalizer = this.spiderOptions.urlOptions.normalizer ?? NormalizedUrl.normalizer;
+    const uniques = new UniqueUrlSet(undefined, { normalizer: currentNormalizer });
+    
     for (const value of requests) {
       if (is.string(value)) {
         // We assume these are at least somewhat web-url-like if they're passed in,
@@ -235,11 +237,15 @@ export class Spider extends PlaywrightCrawler {
 
     // If we're set up to check robot rules, also enqueue them.
     if (this.spiderOptions.urlOptions.checkRobots) {
-      const robotUrlMaker = (url: ParsedUrl) => {
-        url.pathname = '/robots.txt';
-        return url;
-      };
-      const domains = new UniqueUrlSet([...uniques], false, robotUrlMaker);
+      const rOptions = {
+        keepUnparsable: false,
+        guessProtocol: true,
+        normalizer: (url: ParsedUrl) => {
+          url.pathname = '/robots.txt';
+          return url;
+        }
+      }
+      const domains = new UniqueUrlSet([...uniques], rOptions);
       await graph.push([...domains], false);
       await queue.addRequests(
         [...domains].map(uu => uniqueUrlToRequest(uu, { label: 'robotstxt' })),
@@ -248,11 +254,15 @@ export class Spider extends PlaywrightCrawler {
     }
 
     if (this.spiderOptions.urlOptions.checkSitemaps) {
-      const robotUrlMaker = (url: ParsedUrl) => {
-        url.pathname = '/sitemap.xml';
-        return url;
-      };
-      const domains = new UniqueUrlSet([...uniques], false, robotUrlMaker);
+      const sOptions = {
+        keepUnparsable: false,
+        guessProtocol: true,
+        normalizer: (url: ParsedUrl) => {
+          url.pathname = '/sitemap.txt';
+          return url;
+        }
+      }
+      const domains = new UniqueUrlSet([...uniques], sOptions);
       await graph.push([...domains], false);
       await queue.addRequests(
         [...domains].map(uu => uniqueUrlToRequest(uu, { label: 'sitemap' })),
@@ -292,6 +302,9 @@ export class Spider extends PlaywrightCrawler {
       }
       urls = await new UncrawledUrlQuery(options).run();
     }
+    
+    // The resume method currently DOES NOT retrieve robots files
+    // that had previously been parsed and processed.
 
     this.status.startTime = Date.now();
 
