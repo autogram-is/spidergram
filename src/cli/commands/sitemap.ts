@@ -1,5 +1,4 @@
-import { EnqueueStrategy } from 'crawlee';
-import { CLI, SgCommand, Spider, OutputLevel } from '../../index.js';
+import { CLI, SgCommand, Spider, OutputLevel, UrlMatchStrategy } from '../../index.js';
 import {
   ParsedUrl,
   NormalizedUrl,
@@ -53,7 +52,7 @@ export default class GetSitemap extends SgCommand {
 
     const spider = new Spider({
       urlOptions: {
-        save: EnqueueStrategy.All,
+        save: UrlMatchStrategy.All,
         enqueue: '**/{*.xml,robots.txt}',
       },
       maxConcurrency: 1,

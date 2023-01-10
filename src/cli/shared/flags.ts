@@ -1,5 +1,5 @@
 import { Flags, CliUx } from '@oclif/core';
-import { EnqueueStrategy } from 'crawlee';
+import { UrlMatchStrategy } from '../../spider/index.js';
 
 /**
  * Flags that you can use for manipulating tables.
@@ -100,22 +100,22 @@ export const outputFlags = {
 };
 
 export const crawlFlags = {
-  discover: Flags.enum<EnqueueStrategy | 'none'>({
-    default: EnqueueStrategy.All,
+  discover: Flags.enum<UrlMatchStrategy | 'none'>({
+    default: UrlMatchStrategy.All,
     options: [
-      EnqueueStrategy.All,
-      EnqueueStrategy.SameDomain,
-      EnqueueStrategy.SameHostname,
+      UrlMatchStrategy.All,
+      UrlMatchStrategy.SameDomain,
+      UrlMatchStrategy.SameHostname,
       'none',
     ],
     summary: 'Link discovery strategy',
   }),
-  enqueue: Flags.enum<EnqueueStrategy | 'none'>({
-    default: EnqueueStrategy.SameDomain,
+  enqueue: Flags.enum<UrlMatchStrategy | 'none'>({
+    default: UrlMatchStrategy.SameDomain,
     options: [
-      EnqueueStrategy.All,
-      EnqueueStrategy.SameDomain,
-      EnqueueStrategy.SameHostname,
+      UrlMatchStrategy.All,
+      UrlMatchStrategy.SameDomain,
+      UrlMatchStrategy.SameHostname,
       'none',
     ],
     summary: 'Link enqueueing strategy',
