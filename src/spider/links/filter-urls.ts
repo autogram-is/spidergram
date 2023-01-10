@@ -1,9 +1,10 @@
 import is from '@sindresorhus/is';
+import { EnqueueStrategy } from 'crawlee';
 import { ParsedUrl } from '@autogram/url-tools';
 import minimatch from 'minimatch';
 import arrify from 'arrify';
 import { UniqueUrl } from '../../model/index.js';
-import { SpiderContext, UrlMatchStrategy } from '../index.js';
+import { SpiderContext } from '../index.js';
 
 export function filterUrls(
   context: SpiderContext,
@@ -33,19 +34,16 @@ function singleFilter(
 ): boolean {
   const currentUrl = context.uniqueUrl?.parsed;
 
-  if (is.enumCase(filter, UrlMatchStrategy)) {
+  if (is.enumCase(filter, EnqueueStrategy)) {
     // We're much lazier than crawlee, and ignore ugly IP address scenarios.
     switch (filter) {
-      case UrlMatchStrategy.None: 
-        return false;
-        
-      case UrlMatchStrategy.SameDomain:
+      case EnqueueStrategy.SameDomain:
         if (currentUrl === undefined) {
           return false;
         }
 
         return url.domain === currentUrl.domain;
-      case UrlMatchStrategy.SameHostname:
+      case EnqueueStrategy.SameHostname:
         if (currentUrl === undefined) {
           return false;
         }
@@ -76,7 +74,7 @@ export type FilterableLink = UniqueUrl | ParsedUrl;
 
 // We accept a staggering array of filter types. Come, behold our filters.
 export type FilterInput = Filter | Filter[] | boolean;
-export type Filter = string | RegExp | UrlFilterWithContext | UrlMatchStrategy;
+export type Filter = string | RegExp | UrlFilterWithContext | EnqueueStrategy;
 
 export type UrlFilterWithContext = (
   found: ParsedUrl,
