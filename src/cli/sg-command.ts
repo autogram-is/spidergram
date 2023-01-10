@@ -1,5 +1,5 @@
 import { Project, ArangoStore, CLI, JobStatus } from '../index.js';
-import { CliUx, Command, Interfaces } from '@oclif/core';
+import { CliUx, Command } from '@oclif/core';
 import { Duration } from 'luxon';
 import is from '@sindresorhus/is';
 
@@ -36,13 +36,6 @@ export abstract class SgCommand extends Command {
   protected get statics(): typeof SgCommand {
     return this.constructor as typeof SgCommand;
   }
-
-  // If no flags are set for a Spidergram Command, inherit
-  // the shared global flags.
-  static flags: Interfaces.FlagInput = {
-    config: CLI.globalFlags.config,
-    verbose: CLI.outputFlags.verbose,
-  };
 
   /**
    * Given a {JobStatus} object, display a status update to the user.
