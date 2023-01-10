@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import arrify from 'arrify';
 import { log, PlaywrightCrawlingContext } from 'crawlee';
-import prependHttp from 'prepend-http';
 import { FinalStatistics } from 'crawlee';
 import { UncrawledUrlOptions, UncrawledUrlQuery } from '../reports/index.js';
 import _ from 'lodash';
@@ -218,13 +217,11 @@ export class Spider extends PlaywrightCrawler {
 
     // Normalize and deduplicate any incoming URLs.
     const currentNormalizer = this.spiderOptions.urlOptions.normalizer ?? NormalizedUrl.normalizer;
-    const uniques = new UniqueUrlSet(undefined, { normalizer: currentNormalizer });
+    const uniques = new UniqueUrlSet(undefined, { normalizer: currentNormalizer, guessProtocol: true });
     
     for (const value of requests) {
       if (is.string(value)) {
-        // We assume these are at least somewhat web-url-like if they're passed in,
-        // but might not have a protocol.
-        uniques.add(prependHttp(value));
+        uniques.add(value);
       } else if (is.urlInstance(value) || value instanceof UniqueUrl) {
         uniques.add(value);
       } else if (value instanceof Request) {
@@ -243,12 +240,13 @@ export class Spider extends PlaywrightCrawler {
         normalizer: (url: ParsedUrl) => {
           url.pathname = '/robots.txt';
           return url;
-        }
+        },
+        userData: { handler: 'robotstxt' }
       }
       const domains = new UniqueUrlSet([...uniques], rOptions);
       await graph.push([...domains], false);
       await queue.addRequests(
-        [...domains].map(uu => uniqueUrlToRequest(uu, { label: 'robotstxt' })),
+        [...domains].map(uu => uniqueUrlToRequest(uu)),
         { forefront: true },
       );
     }
@@ -258,14 +256,15 @@ export class Spider extends PlaywrightCrawler {
         keepUnparsable: false,
         guessProtocol: true,
         normalizer: (url: ParsedUrl) => {
-          url.pathname = '/sitemap.txt';
+          url.pathname = '/sitemap.xml';
           return url;
-        }
+        },
+        userData: { handler: 'sitemap' }
       }
       const domains = new UniqueUrlSet([...uniques], sOptions);
       await graph.push([...domains], false);
       await queue.addRequests(
-        [...domains].map(uu => uniqueUrlToRequest(uu, { label: 'sitemap' })),
+        [...domains].map(uu => uniqueUrlToRequest(uu)),
         { forefront: true },
       );
     }

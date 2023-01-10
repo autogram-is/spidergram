@@ -3,14 +3,48 @@ import { NormalizedUrl } from '@autogram/url-tools';
 import { UniqueUrl } from '../vertices/unique-url.js';
 import { UrlMutator } from '@autogram/url-tools/dist/source/mutators.js';
 import prependHttp from 'prepend-http';
+import { JsonMap } from '@salesforce/ts-types';
 import arrify from 'arrify';
 
 type ValidUniqueUrlInput = UniqueUrl | NormalizedUrl | string
 
+/**
+ * Behavioral options for a UniqueUrlSet
+ */
 export interface UniqueUrlSetOptions {
+  /**
+   * Keep a list of all URLs that were rejected as unparsable, for later reporting.
+   *
+   * @type {?boolean}
+   */
   keepUnparsable?: boolean;
+
+  /**
+   * A UrlMutator function to transform any parsed URLs.
+   * 
+   * NOTE: This function *will not* be applied to NormalizedUrl and UniqueUrl objects,
+   * on the assumption that they've both been normalized already.
+   * 
+   * If no Mutator is specified, the default NormalizedUrl.normalizer will be used.
+   */
   normalizer?: UrlMutator;
+
+  /**
+   * If protocol-less URLs are passed in (www.example.com), automatially prepend
+   * 'https' to them.
+   */
   guessProtocol?: boolean;
+
+  /**
+   * A dictionary of additional data to set on all UniqueUrl objects in the set.
+   * This can be useful for bulk-transforming strings to UniqueUrls.
+   * 
+   * NOTE: Values will be overwritten if the keys in userData already exist on
+   * the UniqueUrl.
+   *
+   * @type {?JsonMap}
+   */
+  userData?: JsonMap
 }
 
 export class UniqueUrlSet extends Set<UniqueUrl> {
@@ -20,6 +54,7 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
   keepUnparsable: boolean;
   normalizer: UrlMutator;
   guessProtocol: boolean;
+  userData: JsonMap;
 
   public constructor(
     input?: ValidUniqueUrlInput[] | ValidUniqueUrlInput,
@@ -30,6 +65,7 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
     this.keepUnparsable = options.keepUnparsable ?? false;
     this.normalizer = options.normalizer ?? NormalizedUrl.normalizer;
     this.guessProtocol = options.guessProtocol ?? false;
+    this.userData = options.userData ?? {};
 
     this.addItems(arrify(input));
   }
@@ -90,6 +126,7 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
       input = new UniqueUrl({
         url: this.guessProtocol ? prependHttp(input) : input,
         normalizer: this.normalizer,
+        ...this.userData,
       });
       if (input.parsable || this.keepUnparsable) {
         return input;
@@ -103,6 +140,7 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
       return new UniqueUrl({
         url: input,
         normalizer: this.normalizer,
+        ...this.userData,
       });
     }
 
@@ -110,6 +148,7 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
       return new UniqueUrl({
         url: input.url,
         normalizer: this.normalizer,
+        ...this.userData,
       });
     }
 
