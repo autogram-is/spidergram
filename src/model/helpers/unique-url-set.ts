@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { NormalizedUrl } from '@autogram/url-tools';
 import { UniqueUrl } from '../vertices/unique-url.js';
 import { UrlMutator } from '@autogram/url-tools/dist/source/mutators.js';
-import protocolify from 'protocolify';
+import prependHttp from 'prepend-http';
 import arrify from 'arrify';
 
 type ValidUniqueUrlInput = UniqueUrl | NormalizedUrl | string
@@ -88,7 +88,7 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
   protected parse(input: ValidUniqueUrlInput): UniqueUrl | false {
     if (is.nonEmptyStringAndNotWhitespace(input)) {
       input = new UniqueUrl({
-        url: this.guessProtocol ? protocolify(input) : input,
+        url: this.guessProtocol ? prependHttp(input) : input,
         normalizer: this.normalizer,
       });
       if (input.parsable || this.keepUnparsable) {
