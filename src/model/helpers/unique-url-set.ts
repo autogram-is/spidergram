@@ -1,21 +1,37 @@
 import is from '@sindresorhus/is';
 import { NormalizedUrl } from '@autogram/url-tools';
 import { UniqueUrl } from '../vertices/unique-url.js';
+import { UrlMutator } from '@autogram/url-tools/dist/source/mutators.js';
+import protocolify from 'protocolify';
+import arrify from 'arrify';
 
-type ValidUniqueUrlInput = UniqueUrl | NormalizedUrl | string;
+type ValidUniqueUrlInput = UniqueUrl | NormalizedUrl | string
+
+export interface UniqueUrlSetOptions {
+  keepUnparsable?: boolean;
+  normalizer?: UrlMutator;
+  guessProtocol?: boolean;
+}
+
 export class UniqueUrlSet extends Set<UniqueUrl> {
   verifier = new Set<string>();
   unparsable = new Set<string>();
 
+  keepUnparsable: boolean;
+  normalizer: UrlMutator;
+  guessProtocol: boolean;
+
   public constructor(
-    input?: ValidUniqueUrlInput[],
-    public keepUnparsable: boolean = true,
-    public normalizer = NormalizedUrl.normalizer,
+    input?: ValidUniqueUrlInput[] | ValidUniqueUrlInput,
+    options: UniqueUrlSetOptions = {}
   ) {
     super();
-    if (is.nonEmptyArray(input)) {
-      this.addItems(input);
-    }
+    
+    this.keepUnparsable = options.keepUnparsable ?? false;
+    this.normalizer = options.normalizer ?? NormalizedUrl.normalizer;
+    this.guessProtocol = options.guessProtocol ?? false;
+
+    this.addItems(arrify(input));
   }
 
   override add(value: ValidUniqueUrlInput): this {
@@ -72,7 +88,7 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
   protected parse(input: ValidUniqueUrlInput): UniqueUrl | false {
     if (is.nonEmptyStringAndNotWhitespace(input)) {
       input = new UniqueUrl({
-        url: input,
+        url: this.guessProtocol ? protocolify(input) : input,
         normalizer: this.normalizer,
       });
       if (input.parsable || this.keepUnparsable) {
