@@ -38,10 +38,9 @@ export default class Analyze extends SgCommand {
       collection: 'resources',
       task: async resource => {
         if (is.nonEmptyStringAndNotWhitespace(resource.body)) {
+          let data: Record<string, unknown> = {};
           if (flags.metadata) {
-            for (const [key, value] of Object.entries(HtmlTools.getMetadata(resource.body))) {
-              resource[key] = value;
-            }
+            data = HtmlTools.getMetadata(resource.body);
           }
 
           let text = '';
@@ -53,12 +52,14 @@ export default class Analyze extends SgCommand {
 
           if (text.length > 0) {
             if (flags.text) {
-              resource.text = text
+              data.text = text
             }
             if (flags.readability) {
-              resource.readability = TextTools.calculateReadability(text);
+              data.readability = TextTools.calculateReadability(text);
             }
           }
+
+          resource.data = data;
 
           await graph.push(resource);
         }
