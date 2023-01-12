@@ -3,9 +3,9 @@ import _ from "lodash";
 import { parseWithCheerio } from "./parse-with-cheerio.js";
 import { parseElementsToArray, parseElementsToDictionary } from './parse-elements.js';
 import { parseMetatags, MetaValues } from "./parse-meta.js";
-import { getBodyAttributes } from "./get-body-attributes.js";
+import { getElementAttributes, ElementAttributes } from "./get-element-attributes.js";
 
-export type ParseOptions = {
+type PageDataOptions = {
   attributes?: boolean,
   head?:  boolean,
   meta?: boolean,
@@ -14,19 +14,17 @@ export type ParseOptions = {
   scripts?: boolean,
   styles?: boolean,
   templates?: boolean,
-  silent?: boolean,
 }
 
-export const parseOptionDefaults = {
+export const defaultOptions = {
   attributes: true,
   head: true,
   meta: true,
-  links: true,
-  noscript: true,
-  scripts: true,
-  styles: true,
-  templates: true,
-  silent: false,
+  links: false,
+  noscript: false,
+  scripts: false,
+  styles: false,
+  templates: false,
 } 
 
 /**
@@ -35,16 +33,9 @@ export const parseOptionDefaults = {
  * This function makes a best attempt to return accurate and complete data that's
  * actually easy to retrieve in code, without rewriting a parser. Nobody wants that.
  */
-export interface ParsedResults {
+export interface PageData {
   [key: string]: unknown;
-
-  /**
-   * If the perser options include the 'silent' mode flag and an error occurs during parsing,
-   * its message will be included in this return property rather than a thrown error.
-   */
-  error?: string,
-
-  attributes?: Record<string, string | string[] | undefined>;
+  attributes?: ElementAttributes;
   title?: string,
   base?: string,
   baseTarget?: string,
@@ -57,15 +48,14 @@ export interface ParsedResults {
   noscript?: Record<string, string | undefined>[],
 }
 
-export function getMetadata(input: string | cheerio.Root, customOptions: ParseOptions = {}): ParsedResults {
+export function getPageData(input: string | cheerio.Root, customOptions: PageDataOptions = {}): PageData {
   const $ = typeof input === 'string' ? parseWithCheerio(input) : input;
-  const results: ParsedResults = { };
-  const options = _.defaultsDeep(customOptions, parseOptionDefaults);
+  const results: PageData = { };
+  const options = _.defaultsDeep(customOptions, defaultOptions);
   
   if (options.attributes) {
-    const attributes = getBodyAttributes($);
+    const attributes = getElementAttributes($, $('body')[0]);
     if (Object.entries(attributes).length) {
-      results.attributes ??= {};
       results.attributes = attributes;
     }
   }

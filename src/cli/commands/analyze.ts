@@ -44,7 +44,7 @@ export default class Analyze extends SgCommand {
         if (is.nonEmptyString(resource.body)) {
           let data: Record<string, unknown> = {};
           if (flags.metadata) {
-            data = HtmlTools.getMetadata(resource.body);
+            data = HtmlTools.getPageData(resource.body);
           }
 
           let text = '';
