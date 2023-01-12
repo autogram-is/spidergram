@@ -3,30 +3,75 @@ import _ from "lodash";
 import { parseWithCheerio } from "./parse-with-cheerio.js";
 import { parseElementsToArray, parseElementsToDictionary } from './parse-elements.js';
 import { parseMetatags, MetaValues } from "./parse-meta.js";
-import { getBodyAttributes } from "./get-body-attributes.js";
+import { getElementAttributes, ElementAttributes } from "./get-element-attributes.js";
 
-export type ParseOptions = {
+
+/**
+ * Options to control extraction of structured data from HTML pages
+ */
+type PageDataOptions = {
+  /**
+   * Parse all available information, ignoring any other 'false' parameters set in
+   * the options object.
+   */
+  all?: boolean,
+  /**
+   * Parse and list the attributes of the HTML `<body>` tag. Body classes and IDs are
+   * often populated with contextual and content related metadata by CMSs templates.
+   */
   attributes?: boolean,
+  /**
+   * Extract common HTML head sub-tags like `<title>`, `<base>`, and so on.
+   */
   head?:  boolean,
+  /**
+   * Parse and list any `<meta>` tags present in the document. These will be returned
+   * as a dictionary keyed by the 'name', 'itemprop', and 'property' attributes of the
+   * meta tags; keys with colons will be treated as nested; `<meta name="og:title" ...>`
+   * for example will become become `meta['og']['title'] = ...`
+   */
   meta?: boolean,
+  /**
+   * Parse and list any `<link>` tags present in the document. These will be returned
+   * as a dictionary keyed by the links' `rel` attributes.
+   */
   links?: boolean,
+  /**
+   * Parse and list any `<noscript>` tags present in the document.
+   */
   noscript?: boolean,
+  /**
+   * Parse and list any `<script>` tags in the document; JSON data will be parsed
+   * and stored in a separate 'json' property of the results
+   */
   scripts?: boolean,
+  /**
+   * Parse and list any CSS `<style>` tags present in the document.
+   */
   styles?: boolean,
+  /**
+   * Parse and list any HTML `<template>` tags present in the document.
+   */
   templates?: boolean,
-  silent?: boolean,
+  /**
+   * Ignore rather than modifying tags and structured data that are present but
+   * incomplete or in the wrong location. Turning on 'strict' mode will throw away
+   * quite a bit of data, because everyone on the planet outputs horribly malformed
+   * meta tags, RDFa gunk, and so on. It's a plague. Nightmarish stuff, really.
+   */
+  strict?: boolean,
+  metaArrayAttributes?: string[],
 }
 
-export const parseOptionDefaults = {
+export const defaultOptions = {
   attributes: true,
   head: true,
   meta: true,
-  links: true,
-  noscript: true,
-  scripts: true,
-  styles: true,
-  templates: true,
-  silent: false,
+  links: false,
+  noscript: false,
+  scripts: false,
+  styles: false,
+  templates: false,
 } 
 
 /**
@@ -35,16 +80,9 @@ export const parseOptionDefaults = {
  * This function makes a best attempt to return accurate and complete data that's
  * actually easy to retrieve in code, without rewriting a parser. Nobody wants that.
  */
-export interface ParsedResults {
+export interface PageData {
   [key: string]: unknown;
-
-  /**
-   * If the perser options include the 'silent' mode flag and an error occurs during parsing,
-   * its message will be included in this return property rather than a thrown error.
-   */
-  error?: string,
-
-  attributes?: Record<string, string | string[] | undefined>;
+  attributes?: ElementAttributes;
   title?: string,
   base?: string,
   baseTarget?: string,
@@ -57,20 +95,19 @@ export interface ParsedResults {
   noscript?: Record<string, string | undefined>[],
 }
 
-export function getMetadata(input: string | cheerio.Root, customOptions: ParseOptions = {}): ParsedResults {
+export function getPageData(input: string | cheerio.Root, customOptions: PageDataOptions = {}): PageData {
   const $ = typeof input === 'string' ? parseWithCheerio(input) : input;
-  const results: ParsedResults = { };
-  const options = _.defaultsDeep(customOptions, parseOptionDefaults);
+  const results: PageData = { };
+  const options = _.defaultsDeep(customOptions, defaultOptions);
   
-  if (options.attributes) {
-    const attributes = getBodyAttributes($);
+  if (options.attributes || options.all) {
+    const attributes = getElementAttributes($('body'));
     if (Object.entries(attributes).length) {
-      results.attributes ??= {};
       results.attributes = attributes;
     }
   }
 
-  if (options.head) {
+  if (options.head || options.all) {
     const title = $('title').first().html()?.toString().trim() ?? undefined;
     if (title) {
       results.title = title;
@@ -87,42 +124,42 @@ export function getMetadata(input: string | cheerio.Root, customOptions: ParseOp
     }
   }
 
-  if (options.meta) {
+  if (options.meta || options.all) {
     const headMeta = $('meta').toArray().map(element => $(element).attr());
     if (Object.entries(headMeta).length) {
       results.meta = parseMetatags(headMeta);
     }
   }
 
-  if (options.links) {
+  if (options.links || options.all) {
     const links = parseElementsToDictionary($, 'link', 'rel');
     if (links) {
       results.links = links;
     }
   }
 
-  if (options.noscript) {
+  if (options.noscript || options.all) {
     const noscript = parseElementsToArray($, 'noscript');
     if (noscript.length) {
       results.noscript = noscript;
     }
   }
 
-  if (options.templates) {
+  if (options.templates || options.all) {
     const templates = parseElementsToArray($, 'template');
     if (templates.length) {
       results.templates = templates;
     }
   }
 
-  if (options.styles) {
+  if (options.styles || options.all) {
     const styles = parseElementsToArray($, 'style');
     if (styles.length) {
       results.styles = styles;
     }
   }
 
-  if (options.scripts) {
+  if (options.scripts || options.all) {
     const json: Record<string, string | unknown>[] = [];
     const scripts: Record<string, string | undefined>[] = [];
 
