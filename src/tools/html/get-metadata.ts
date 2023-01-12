@@ -1,8 +1,9 @@
 import _ from "lodash";
-import cheerio from "cheerio";
 
+import { parseWithCheerio } from "./parse-with-cheerio.js";
 import { parseElementsToArray, parseElementsToDictionary } from './parse-elements.js';
 import { parseMetatags, MetaValues } from "./parse-meta.js";
+import { getBodyAttributes } from "./get-body-attributes.js";
 
 export type ParseOptions = {
   attributes?: boolean,
@@ -63,18 +64,14 @@ export interface ParsedResults {
   noscript?: Record<string, string | undefined>[],
 }
 
-export function getMetadata(body: string, customOptions: ParseOptions = {}): ParsedResults {
+export function getMetadata(input: string | cheerio.Root, customOptions: ParseOptions = {}): ParsedResults {
+  const $ = typeof input === 'string' ? parseWithCheerio(input) : input;
   const results: ParsedResults = { };
   const options = _.defaultsDeep(customOptions, parseOptionDefaults);
   
-  const $ = cheerio.load(body);
-
   if (options.attributes) {
-    const attributes: Record<string, string | string[]> = { ...$('body').attr(), ...$('body').data()};
+    const attributes = getBodyAttributes($);
     if (Object.entries(attributes).length) {
-      if (typeof attributes['class'] === 'string') {
-        attributes['class'] = attributes['class'].split(' ').map(c => c.trim());
-      }
       results.attributes ??= {};
       results.attributes = attributes;
     }
