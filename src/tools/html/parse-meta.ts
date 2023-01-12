@@ -34,7 +34,8 @@ export function parseMetatags(tags: Tag[], customOptions: metaParseOptions = {})
           _.set(output, path, tag.content);
         }
       } else if (tag['http-equiv']) {
-        _.set(output, 'http-equiv', `${tag['http-equiv']}: ${tag.content}`);
+        const path = ['http-equiv', tag['http-equiv'].toString()];
+        _.set(output, path, tag.content);
       }
     } else if (tag.charset) {
       _.set(output, 'charset', tag['charset']);

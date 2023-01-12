@@ -7,11 +7,9 @@ import { getBodyAttributes } from "./get-body-attributes.js";
 
 export type ParseOptions = {
   attributes?: boolean,
-  head?: {
-    basic?: boolean,
-    meta?: boolean,
-    links?: boolean,
-  },
+  head?:  boolean,
+  meta?: boolean,
+  links?: boolean,
   noscript?: boolean,
   scripts?: boolean,
   styles?: boolean,
@@ -21,11 +19,9 @@ export type ParseOptions = {
 
 export const parseOptionDefaults = {
   attributes: true,
-  head: {
-    basic: true,
-    meta: true,
-    links: true,
-  },
+  head: true,
+  meta: true,
+  links: true,
   noscript: true,
   scripts: true,
   styles: true,
@@ -49,14 +45,11 @@ export interface ParsedResults {
   error?: string,
 
   attributes?: Record<string, string | string[] | undefined>;
-  head?: {
-    [key: string]: unknown,
-    title?: string,
-    base?: string,
-    baseTarget?: string,
-    meta?: MetaValues,
-    links?: Record<string, Record<string, string | undefined>[]>,
-  }
+  title?: string,
+  base?: string,
+  baseTarget?: string,
+  meta?: MetaValues,
+  links?: Record<string, Record<string, string | undefined>[]>,
   templates?: Record<string, string | undefined>[],
   scripts?: Record<string, string | undefined>[],
   json?: Record<string, unknown>[],
@@ -77,39 +70,34 @@ export function getMetadata(input: string | cheerio.Root, customOptions: ParseOp
     }
   }
 
-  if (options.head?.basic) {
-    const title = $('head title').first().html()?.toString().trim() ?? undefined;
+  if (options.head) {
+    const title = $('title').first().html()?.toString().trim() ?? undefined;
     if (title) {
-      results.head ??= {};
-      results.head.title = title;
+      results.title = title;
     }
 
-    const base = $('head base').first().attr('href')?.toString().trim() ?? undefined;
+    const base = $('base').first().attr('href')?.toString().trim() ?? undefined;
     if (base) {
-      results.head ??= {};
-      results.head.base = base;
+      results.base = base;
     }
 
-    const baseTarget = $('head base').first().attr('target')?.toString().trim() ?? undefined;
+    const baseTarget = $('base').first().attr('target')?.toString().trim() ?? undefined;
     if (baseTarget) {
-      results.head ??= {};
-      results.head.baseTarget = baseTarget;
+      results.baseTarget = baseTarget;
     }
   }
 
-  if (options.head?.meta) {
-    const headMeta = $('head meta').toArray().map(element => $(element).attr());
+  if (options.meta) {
+    const headMeta = $('meta').toArray().map(element => $(element).attr());
     if (Object.entries(headMeta).length) {
-      results.head ??= {};
-      results.head.meta = parseMetatags(headMeta);
+      results.meta = parseMetatags(headMeta);
     }
   }
 
-  if (options.head?.links) {
-    const links = parseElementsToDictionary($, 'head link', 'rel');
+  if (options.links) {
+    const links = parseElementsToDictionary($, 'link', 'rel');
     if (links) {
-      results.head ??= {};
-      results.head.links = links;
+      results.links = links;
     }
   }
 
