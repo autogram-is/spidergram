@@ -39,11 +39,9 @@ export default class Analyze extends SgCommand {
       task: async resource => {
         if (is.nonEmptyStringAndNotWhitespace(resource.body)) {
           if (flags.metadata) {
-            const data: Record<string, unknown> = {
-              ...(await HtmlTools.getMetadata(resource)),
-              bodyAttributes: HtmlTools.getBodyAttributes(resource.body),
-            };
-            resource.data = data;
+            for (const [key, value] of Object.entries(HtmlTools.getMetadata(resource.body))) {
+              resource[key] = value;
+            }
           }
 
           let text = '';
@@ -54,15 +52,11 @@ export default class Analyze extends SgCommand {
           }
 
           if (text.length > 0) {
-            const content: Record<string, unknown> = {};
             if (flags.text) {
-              content.text = text;
+              resource.text = text
             }
             if (flags.readability) {
-              content.readability = TextTools.calculateReadability(text);
-            }
-            if (!is.emptyObject(content)) {
-              resource.content = content;
+              resource.readability = TextTools.calculateReadability(text);
             }
           }
 
