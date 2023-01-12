@@ -1,7 +1,30 @@
-import { RequestQueue, EnqueueStrategy, RequestTransform } from 'crawlee';
+import { RequestQueue, RequestTransform } from 'crawlee';
 import { ParsedUrl } from '@autogram/url-tools';
 import { InternalSpiderContext } from '../../index.js';
 import { FilterInput } from './index.js';
+
+export enum UrlMatchStrategy {
+  /**
+   * Matches any URLs found
+   */
+  All = "all",
+  /**
+   * Matches any URLs that have the same hostname.
+   * For example, `https://wow.example.com/hello` will be matched for a base url of `https://example.com/`, but
+   * `https://example.com/hello` will not be matched.
+   */
+  SameHostname = "same-hostname",
+  /**
+   * Matches any URLs that have the same (sub-)domain as the base URL.
+   * For example, `https://wow.an.example.com` and `https://example.com` will both be matched for a base url of
+   * `https://example.com`.
+   */
+  SameDomain = "same-domain",
+  /**
+   * Matches no URLs; useful when all or some URLs should be saved, but none should be enqueued.
+   */
+  None = "none"
+}
 
 /**
  * Configuration options for Spidergram's URL enqueing options.
@@ -28,8 +51,8 @@ export interface EnqueueUrlOptions {
    * A filter condition to determine which links will be saved as
    * {@apilink UniqueUrl} objects in the current project's graph.
    *
-   * @type {boolean | string | RegExp | EnqueueStrategy | UrlFilterWithContext}
-   * @default EnqueueStrategy.All
+   * @type {boolean | string | RegExp | UrlMatchStrategy | UrlFilterWithContext}
+   * @default UrlMatchStrategy.All
    */
   save: FilterInput;
 
@@ -68,8 +91,8 @@ export interface EnqueueUrlOptions {
   /**
    * A filter condition to determine which links will be enqueued for crawling.
    *
-   * @type {boolean | string | RegExp | EnqueueStrategy | UrlFilterWithContext}
-   * @default EnqueueStrategy.SameDomain
+   * @type {boolean | string | RegExp | UrlMatchStrategy | UrlFilterWithContext}
+   * @default UrlMatchStrategy.SameDomain
    */
   enqueue: FilterInput;
 
@@ -206,8 +229,8 @@ export type UrlMutatorWithContext<
 export const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
   limit: Number.POSITIVE_INFINITY,
   selector: 'body a',
-  save: EnqueueStrategy.All,
-  enqueue: EnqueueStrategy.SameDomain,
+  save: UrlMatchStrategy.All,
+  enqueue: UrlMatchStrategy.SameDomain,
   prioritize: false,
   checkRobots: false,
   respectRobots: false,

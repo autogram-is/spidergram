@@ -2,7 +2,7 @@ import { SpiderContext } from '../context.js';
 import { fileNameFromHeaders } from '../helpers/mime.js';
 import { Readable } from 'stream';
 import { saveUrls, enqueueRequests } from '../links/index.js';
-import { Robots } from '../../tools/html/robots.js';
+import { Robots } from '../../tools/robots.js';
 import { FoundLink } from '../../tools/html/find-links.js';
 
 // Very similar to sitemapHandler, but we also stick rulesets in the global

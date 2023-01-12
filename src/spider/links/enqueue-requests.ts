@@ -2,7 +2,7 @@ import arrify from 'arrify';
 import { Request, RequestOptions } from 'crawlee';
 import { UniqueUrl } from '../../model/index.js';
 import { SpiderContext } from '../context.js';
-import { Robots } from '../../tools/html/robots.js';
+import { Robots } from '../../tools/robots.js';
 import {
   EnqueueUrlOptions,
   urlDiscoveryDefaultOptions,

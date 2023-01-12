@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import arrify from 'arrify';
 import { log, PlaywrightCrawlingContext } from 'crawlee';
-import prependHttp from 'prepend-http';
 import { FinalStatistics } from 'crawlee';
 import { UncrawledUrlOptions, UncrawledUrlQuery } from '../reports/index.js';
 import _ from 'lodash';
@@ -216,13 +215,13 @@ export class Spider extends PlaywrightCrawler {
 
     const queue = await this.getRequestQueue();
 
-    // Normalize and deduplicate any incoming requests.
-    const uniques = new UniqueUrlSet();
+    // Normalize and deduplicate any incoming URLs.
+    const currentNormalizer = this.spiderOptions.urlOptions.normalizer ?? NormalizedUrl.normalizer;
+    const uniques = new UniqueUrlSet(undefined, { normalizer: currentNormalizer, guessProtocol: true });
+    
     for (const value of requests) {
       if (is.string(value)) {
-        // We assume these are at least somewhat web-url-like if they're passed in,
-        // but might not have a protocol.
-        uniques.add(prependHttp(value));
+        uniques.add(value);
       } else if (is.urlInstance(value) || value instanceof UniqueUrl) {
         uniques.add(value);
       } else if (value instanceof Request) {
@@ -235,27 +234,37 @@ export class Spider extends PlaywrightCrawler {
 
     // If we're set up to check robot rules, also enqueue them.
     if (this.spiderOptions.urlOptions.checkRobots) {
-      const robotUrlMaker = (url: ParsedUrl) => {
-        url.pathname = '/robots.txt';
-        return url;
-      };
-      const domains = new UniqueUrlSet([...uniques], false, robotUrlMaker);
+      const rOptions = {
+        keepUnparsable: false,
+        guessProtocol: true,
+        normalizer: (url: ParsedUrl) => {
+          url.pathname = '/robots.txt';
+          return url;
+        },
+        userData: { handler: 'robotstxt' }
+      }
+      const domains = new UniqueUrlSet([...uniques], rOptions);
       await graph.push([...domains], false);
       await queue.addRequests(
-        [...domains].map(uu => uniqueUrlToRequest(uu, { label: 'robotstxt' })),
+        [...domains].map(uu => uniqueUrlToRequest(uu)),
         { forefront: true },
       );
     }
 
     if (this.spiderOptions.urlOptions.checkSitemaps) {
-      const robotUrlMaker = (url: ParsedUrl) => {
-        url.pathname = '/sitemap.xml';
-        return url;
-      };
-      const domains = new UniqueUrlSet([...uniques], false, robotUrlMaker);
+      const sOptions = {
+        keepUnparsable: false,
+        guessProtocol: true,
+        normalizer: (url: ParsedUrl) => {
+          url.pathname = '/sitemap.xml';
+          return url;
+        },
+        userData: { handler: 'sitemap' }
+      }
+      const domains = new UniqueUrlSet([...uniques], sOptions);
       await graph.push([...domains], false);
       await queue.addRequests(
-        [...domains].map(uu => uniqueUrlToRequest(uu, { label: 'sitemap' })),
+        [...domains].map(uu => uniqueUrlToRequest(uu)),
         { forefront: true },
       );
     }
@@ -292,6 +301,9 @@ export class Spider extends PlaywrightCrawler {
       }
       urls = await new UncrawledUrlQuery(options).run();
     }
+    
+    // The resume method currently DOES NOT retrieve robots files
+    // that had previously been parsed and processed.
 
     this.status.startTime = Date.now();
 

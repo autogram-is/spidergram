@@ -5,6 +5,7 @@ import {
   TextTools,
   GraphWorker,
   OutputLevel,
+  aql
 } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
 
@@ -34,16 +35,16 @@ export default class Analyze extends SgCommand {
       this.output = OutputLevel.verbose;
     }
 
+    console.log(flags);
+
     const worker = new GraphWorker<Resource>({
       collection: 'resources',
+      filter: aql`FILTER item.code == 200 AND item.mime == 'text/html'`,
       task: async resource => {
-        if (is.nonEmptyStringAndNotWhitespace(resource.body)) {
+        if (is.nonEmptyString(resource.body)) {
+          let data: Record<string, unknown> = {};
           if (flags.metadata) {
-            const data: Record<string, unknown> = {
-              ...(await HtmlTools.getMetadata(resource)),
-              bodyAttributes: HtmlTools.getBodyAttributes(resource.body),
-            };
-            resource.data = data;
+            data = HtmlTools.getMetadata(resource.body);
           }
 
           let text = '';
@@ -54,17 +55,15 @@ export default class Analyze extends SgCommand {
           }
 
           if (text.length > 0) {
-            const content: Record<string, unknown> = {};
             if (flags.text) {
-              content.text = text;
+              data.text = text
             }
             if (flags.readability) {
-              content.readability = TextTools.calculateReadability(text);
-            }
-            if (!is.emptyObject(content)) {
-              resource.content = content;
+              data.readability = TextTools.calculateReadability(text);
             }
           }
+
+          resource.data = data;
 
           await graph.push(resource);
         }
