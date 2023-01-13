@@ -3,7 +3,7 @@ import _ from "lodash";
 import { parseWithCheerio } from "./parse-with-cheerio.js";
 import { parseElementsToArray, parseElementsToDictionary } from './parse-elements.js';
 import { parseMetatags, MetaValues } from "./parse-meta.js";
-import { getElementAttributes, ElementAttributes } from "./get-element-attributes.js";
+import { getElementData, ElementData } from "./get-element-data.js";
 
 
 /**
@@ -82,7 +82,7 @@ export const defaultOptions = {
  */
 export interface PageData {
   [key: string]: unknown;
-  attributes?: ElementAttributes;
+  attributes?: ElementData;
   title?: string,
   base?: string,
   baseTarget?: string,
@@ -101,7 +101,7 @@ export function getPageData(input: string | cheerio.Root, customOptions: PageDat
   const options = _.defaultsDeep(customOptions, defaultOptions);
   
   if (options.attributes || options.all) {
-    const attributes = getElementAttributes($('body'));
+    const attributes = getElementData($('body'));
     if (Object.entries(attributes).length) {
       results.attributes = attributes;
     }
