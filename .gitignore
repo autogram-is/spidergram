@@ -65,6 +65,5 @@ package-lock.json
 
 # Build output, crawl data, instance-specific config files
 storage
-docs
 spidergram.json
 dist
