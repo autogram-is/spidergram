@@ -3,7 +3,7 @@ import _ from 'lodash';
 
 export { HtmlToTextOptions } from 'html-to-text';
 
-const defaults = {
+const defaults: HtmlToTextOptions = {
   wordwrap: false,
   limits: { maxBaseElements: 1 },
   selectors: [{ selector: 'a', options: { ignoreHref: true } }],

@@ -4,5 +4,6 @@ export * from './get-page-data.js';
 export * from './get-plaintext.js';
 export * from './parse-with-cheerio.js';
 export * from './find-patterns.js';
+export * from './get-page-content.js'
 
 export { social as getSocialLinks } from 'crawlee';

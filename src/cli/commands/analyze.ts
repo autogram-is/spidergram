@@ -44,17 +44,15 @@ export default class Analyze extends SgCommand {
         if (is.nonEmptyString(resource.body)) {
           let data: Record<string, unknown> = {};
           if (flags.metadata) {
-            data = HtmlTools.getPageData(resource.body);
+            data = HtmlTools.getPageData(resource);
           }
 
-          let text = '';
+          let text: string | undefined = '';
           if (flags.text || flags.readability) {
-            text = HtmlTools.getPlainText(resource.body, {
-              baseElements: { selectors: flags.body },
-            });
+            text = HtmlTools.getPageText(resource, flags.body);
           }
 
-          if (text.length > 0) {
+          if (text) {
             if (flags.text) {
               data.text = text
             }
