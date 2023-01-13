@@ -7,7 +7,7 @@ Spidergram includes quite a few standalone helper functions that can be used in 
 ### Handling flags and options
 
 - Define but don't export an Options type, with all properties optional
-  - If the Options are complex enough that users will likely create them, rather than defining them inline, defined and export the options as an interface whose name matches the helper function's name (e.g., getData and GetDataOptions).
+  - If the Options are complex enough that users will pre-build them before calling the function, define and export the options as an interface whose name matches the helper function's name (e.g., getData and GetDataOptions).
 - Define but don't export a defaults const
 - Accept a customOptions param that defaults to {}
 - Use lodash to populate the defaults, and proceed.
