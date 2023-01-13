@@ -1,34 +1,31 @@
 // Sheets.js setup
 import * as fs from 'node:fs';
 import { Readable } from 'node:stream';
-import is from '@sindresorhus/is';
 import * as XLSX from 'xlsx';
-import { JsonPrimitive } from '@salesforce/ts-types';
+import { JsonPrimitive, isJsonMap, isJsonArray, toAnyJson, isAnyJson } from '@salesforce/ts-types';
 import { Buffer } from 'node:buffer';
 
 XLSX.set_fs(fs);
 XLSX.stream.set_readable(Readable);
 
-/**
- * TODO: Support the following structures…
- *
- * Workbook
- * Named Records: { sheet1: sheetData1, sheet2: sheetData2 }
- * Array of Sheets: [sheetData1, sheetData2]
- *
- * Sheet
- * Object with meta: { name: 'Sheet 1', data: [ rowData1, rowData2 ], headers: [...] }
- * Array of Rows: [ rowData1, rowData2 ]
- *
- * Row
- * Named columns: { col1: 'some data', col2: 123, ... }
- * Array of values: [ 'some data', 123 ]
- */
+export type Sheet = SimpleSheet | StructuredSheet;
+export type SimpleSheet = (JsonPrimitive[] | Record<string, JsonPrimitive>)[];
+export type StructuredSheet = {
+  name?: string,
+  data: SimpleSheet,
+  header?: string[],
+  skipHeader?: boolean,
+}
 
-type Workbook = Sheet[] | Record<string, Sheet>;
-type Sheet = Row[];
-type Row = Record<string, Cell>;
-type Cell = JsonPrimitive;
+function isSimpleSheet(input: unknown): input is SimpleSheet {
+  return isJsonArray(toAnyJson(input));
+}
+
+function isStructuredSheet(input: unknown): input is StructuredSheet {
+  if (!isAnyJson(input)) return false;
+  if (!isJsonMap(input)) return false;
+  return isSimpleSheet(input.data);
+}
 
 type SpreadsheetWriteOptions = {
   format: XLSX.BookType;
@@ -42,29 +39,26 @@ export class Spreadsheet {
 
   workbook: XLSX.WorkBook;
 
-  constructor(data?: Workbook) {
+  constructor() {
     const { utils } = Spreadsheet;
     this.workbook = utils.book_new();
-    if (!is.undefined(data)) {
-      if (is.array(data)) {
-        for (const sheet of data) {
-          this.addSheet(sheet);
-        }
-      } else {
-        for (const name in data) {
-          this.addSheet(data[name], name);
-        }
-      }
-    }
   }
 
-  addSheet(data: Sheet | Cell[], name?: string) {
-    if (is.array(data)) {
+  addSheet(input: unknown, name?: string) {
+    if (isSimpleSheet(input)) {
       name = Spreadsheet.utils.book_append_sheet(
         this.workbook,
-        XLSX.utils.json_to_sheet(data),
+        XLSX.utils.json_to_sheet(input),
         name,
       );
+    } else if (isStructuredSheet(input)) {
+      name = Spreadsheet.utils.book_append_sheet(
+        this.workbook,
+        XLSX.utils.json_to_sheet(input.data, { header: input.header, skipHeader: input.skipHeader }),
+        input.name ?? name
+      );
+    } else {
+      throw new TypeError('Input must be a SimpleSheet array or StructuredSheet object');
     }
     return name;
   }
@@ -93,7 +87,7 @@ export class Spreadsheet {
     });
   }
 
-  generate(customOptions: Partial<SpreadsheetGenerateOptions> = {}): Buffer {
+  toBuffer(customOptions: Partial<SpreadsheetGenerateOptions> = {}): Buffer {
     const options = {
       format: 'xlsx',
       compression: true,
@@ -101,5 +95,9 @@ export class Spreadsheet {
     };
 
     return XLSX.write(this.workbook, { ...options, type: 'buffer' }) as Buffer;
+  }
+
+  toStream(customOptions: Partial<SpreadsheetGenerateOptions> = {}): Readable {
+    return Readable.from(this.toBuffer(customOptions));
   }
 }
