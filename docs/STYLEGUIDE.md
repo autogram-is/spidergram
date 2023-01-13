@@ -4,6 +4,18 @@
 
 Spidergram includes quite a few standalone helper functions that can be used in multiple contexts; using them together effectively is easier when they follow similar standards and conventions.
 
+### Naming and organizing
+
+Helper function names should be camel-cased and follow the pattern: Verb - Optional Context - Object. Examples include `getPageData`, `parseMetaTags`, `findLinks`, and so on. Some verb examples:
+
+- `has` implies a predicate function that returns true if the object meets certain criteria, or contains certain information (e.g. `hasPlaintext`, `hasCategories`, `hasSubdomain`).
+- `find` implies searching for one or more objects that *might* be present in the context (e.g. `findLinks`, `findSitemapLinks`, `findPageParent`).
+- `get` implies gathering gathering a known set of objects from a given context (e.g. `getPageData`, `getPlaintext`).
+- `fetch` implies retrieving the object from a remote location (e.g. `fetchPage`, `fetchResourcePayload`).
+
+Stateless helper functions large enough to be reused should live in their own files, along with any relevant type and interface definitions, TSDoc blocks, etc. File names should be kebab-cased versions of the helper function's name (e.g., `get-page-data.ts` would contain the function `getPageData()`).
+
+
 ### Handling flags and options
 
 - Define but don't export an Options type, with all properties optional
