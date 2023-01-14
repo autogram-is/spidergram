@@ -53,7 +53,7 @@ export function findHeadLinks(input: string | cheerio.Root) {
  * Finds links (with titles and publication dates, if present) in Sitemap
  * and SitemapIndex XML markup.
  */
-export function findLinksInSitemap(input: string | cheerio.Root) {
+export function findSitempLinks(input: string | cheerio.Root) {
   const $ =
     typeof input === 'string'
       ? parseWithCheerio(input, { xmlMode: true })
@@ -87,7 +87,7 @@ export function findLinksInSitemap(input: string | cheerio.Root) {
  * Finds links (with titles and publication dates, if present) in RSS
  * and Atom feed markup.
  */
-export function findLinksInFeed(input: string | cheerio.Root) {
+export function findFeedLinks(input: string | cheerio.Root) {
   const $ =
     typeof input === 'string'
       ? parseWithCheerio(input, { xmlMode: true })
@@ -115,6 +115,8 @@ export function findLinksInFeed(input: string | cheerio.Root) {
 
   return results;
 }
+
+// TODO: Convert this code to use getElementData
 
 export function getLinkElementAttributes(
   element: cheerio.Element,

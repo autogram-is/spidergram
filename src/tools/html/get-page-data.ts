@@ -3,9 +3,8 @@ import _ from "lodash";
 import { Resource } from "../../model/index.js";
 import { parseWithCheerio } from "./parse-with-cheerio.js";
 import { parseElementsToArray, parseElementsToDictionary } from './parse-elements.js';
-import { parseMetatags, MetaValues } from "./parse-meta.js";
+import { parseMetaTags, MetaValues } from "./parse-meta-tags.js";
 import { getElementData, ElementData } from "./get-element-data.js";
-
 
 /**
  * Options to control extraction of structured data from HTML pages
@@ -64,7 +63,7 @@ type PageDataOptions = {
   metaArrayAttributes?: string[],
 }
 
-export const defaultOptions = {
+export const defaults = {
   attributes: true,
   head: true,
   meta: true,
@@ -99,7 +98,7 @@ export interface PageData {
 export function getPageData(input: string | cheerio.Root | Resource, customOptions: PageDataOptions = {}): PageData {
   const $ = getCheerioFromInput(input);
   const results: PageData = { };
-  const options = _.defaultsDeep(customOptions, defaultOptions);
+  const options = _.defaultsDeep(customOptions, defaults);
   
   if (options.attributes || options.all) {
     const attributes = getElementData($('body'));
@@ -128,7 +127,7 @@ export function getPageData(input: string | cheerio.Root | Resource, customOptio
   if (options.meta || options.all) {
     const headMeta = $('meta').toArray().map(element => $(element).attr());
     if (Object.entries(headMeta).length) {
-      results.meta = parseMetatags(headMeta);
+      results.meta = parseMetaTags(headMeta);
     }
   }
 

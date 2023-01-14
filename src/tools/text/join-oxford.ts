@@ -1,6 +1,4 @@
-import readabilityScores from 'readability-scores';
-
-export function oxfordJoin(input: string[], conjunction = 'and'): string {
+export function joinOxford(input: string[], conjunction = 'and'): string {
   if (input.length === 2) {
     return input.join(` ${conjunction} `);
   } else if (input.length > 2) {
@@ -12,5 +10,3 @@ export function oxfordJoin(input: string[], conjunction = 'and'): string {
     return input.join(', ');
   }
 }
-
-export const calculateReadability = readabilityScores;

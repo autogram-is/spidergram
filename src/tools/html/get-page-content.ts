@@ -1,45 +1,43 @@
-import { Resource } from '../../index.js';
-import { getPlainText, HtmlToTextOptions } from './get-plaintext.js';
+import { HtmlTools, TextTools, Resource } from "../../index.js";
+import _ from 'lodash';
 
-export type TestedSelector = [(r: Resource) => boolean, string | string[] | HtmlToTextOptions];
-export type PageTextOptions = string | string[] | TestedSelector[] | HtmlToTextOptions;
+export interface PageContent {
+  [key: string]: unknown;
+  title?: string;
+  text?: string;
+  readability?: TextTools.ReadabilityScore;
+}
 
-export function getPageText(page: string | Resource, options: PageTextOptions = {}) {
-  const markup = (typeof page === 'string') ? page : page.body ?? '';
-  const resource = (page instanceof Resource) ? page : undefined;
+export interface PageContentOptions extends HtmlTools.PageTextOptions {
+  readability?: boolean | TextTools.ReadabilityScoreOptions;
+  postProcessor?: (content: PageContent, resource: Resource) => PageContent;
+}
 
-  if (typeof options === 'string' || isArrayOfStrings(options)) {
-    return getPlainText(markup, buildTransformOptions(options));
-  } if (isArrayOfTestedSelectors(options)) {
-    if (resource) {
-      const matchedSelector = options.find(tuple => tuple[0](resource))?.[1] ?? false;
-      if (matchedSelector) {
-        return getPlainText(markup, buildTransformOptions(matchedSelector));
-      }
-    } else {
-      throw new TypeError('TestedSelector requires Resource');
+const defaults: PageContentOptions = {
+  readability: true
+};
+
+export function getPageContent(input: Resource, customOptions: PageContentOptions = {}) {
+  const options = _.defaultsDeep(customOptions, defaults);
+
+  let results: PageContent | undefined;
+
+  const text = HtmlTools.getPageText({ ...options, resource: input });
+  if (text.length > 0) {
+    const title = _.get(input, 'data.meta.og.title') as string | undefined ?? _.get(input, 'data.title') as string | undefined;
+
+    results = { title, text };
+
+    if (options.readability === true) {
+      results.readability = TextTools.getReadabilityScore(text);
+    } else if (typeof options.readability === 'object') {
+      results.readability = TextTools.getReadabilityScore(text, options.readability);
     }
-  } else {
-    return getPlainText(markup, options);
+
+    if (options.postProcessor) {
+      results = options.postProcessor(results, input);
+    }
   }
 
-  return undefined;
-}
-
-function isArrayOfStrings(input: unknown): input is string[] {
-  return (Array.isArray(input) && (typeof input.pop() === 'string'));
-}
-
-function isArrayOfTestedSelectors(input: unknown): input is TestedSelector[] {
-  return (!isArrayOfStrings(input) && Array.isArray(input));
-}
-
-function buildTransformOptions(input: string | string[] | HtmlToTextOptions): HtmlToTextOptions {
-  if (typeof input === 'string') {
-    return { baseElements: { selectors: [input] }};
-  } else if (Array.isArray(input)) {
-    return { baseElements: { selectors: input }};
-  } else {
-    return input;
-  }
+  return results;
 }

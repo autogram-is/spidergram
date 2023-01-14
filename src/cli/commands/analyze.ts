@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import {
   Resource,
   HtmlTools,
-  TextTools,
   GraphWorker,
   OutputLevel,
   aql
@@ -42,26 +41,20 @@ export default class Analyze extends SgCommand {
       filter: aql`FILTER item.code == 200 AND item.mime == 'text/html'`,
       task: async resource => {
         if (is.nonEmptyString(resource.body)) {
-          let data: Record<string, unknown> = {};
+
           if (flags.metadata) {
-            data = HtmlTools.getPageData(resource);
+            const data = HtmlTools.getPageData(resource);
+            if (data) resource.data = data;
           }
 
-          let text: string | undefined = '';
-          if (flags.text || flags.readability) {
-            text = HtmlTools.getPageText(resource, flags.body);
+          if (flags.text) {
+            const content = HtmlTools.getPageContent( resource, {
+              selectors: flags.body,
+              readability: flags.readability
+            });
+  
+            resource.content = content;
           }
-
-          if (text) {
-            if (flags.text) {
-              data.text = text
-            }
-            if (flags.readability) {
-              data.readability = TextTools.calculateReadability(text);
-            }
-          }
-
-          resource.data = data;
 
           await graph.push(resource);
         }
