@@ -46,7 +46,7 @@ export function getReadabilityScore(input: string, customOptions: ReadabilitySco
       // We calculate the Reading Level rather than the Grade Level.
       // See https://github.com/words/flesch for a standalone implementation.
       results.score = 206.835 - 1.015 * (rawScores.wordCount / rawScores.sentenceCount) - 84.6 * (rawScores.syllableCount / rawScores.wordCount)
-      results.score = Number.parseFloat(results.score.toPrecision(1));
+      results.score = Math.round((results.score * 100)) / 100;
       break;
     case 'GunningFog':
       results.score = rawScores.gunningFog;
