@@ -36,7 +36,7 @@ export async function sitemapHandler(context: SpiderContext) {
   // Now parse the sitemap and pull out URLs. Some sites (vanityfair.com is one
   // example) do odd things like sitemap URLs with querystrings
 
-  const links = HtmlTools.findLinksInSitemap(xml.toString());
+  const links = HtmlTools.findSitempLinks(xml.toString());
 
   const subSitemaps = links.filter(l => l.label === 'sitemap');
   const normalLinks = links.filter(l => l.label !== 'sitemap');

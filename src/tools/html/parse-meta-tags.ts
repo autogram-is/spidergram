@@ -9,16 +9,16 @@ type Tag = Record<string, unknown> & {
   content?: string
 }
 
-type metaParseOptions = {
-  arrayMetaTags?: string[],
+type MetaTagOptions = {
+  arrayTags?: string[],
 }
 
-const defaultMetaParseOptions = {
-  arrayMetaTags: ['keywords', 'field_category'],
+const defaults: MetaTagOptions = {
+  arrayTags: ['keywords'],
 }
 
-export function parseMetatags(tags: Tag[], customOptions: metaParseOptions = {}): MetaValues {
-  const options = _.defaultsDeep(customOptions, defaultMetaParseOptions);
+export function parseMetaTags(tags: Tag[], customOptions: MetaTagOptions = {}): MetaValues {
+  const options = _.defaultsDeep(customOptions, defaults);
   const output: Record<string, string | string[]> = {};
 
   for (const tag of tags) {

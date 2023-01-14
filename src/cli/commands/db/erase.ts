@@ -1,6 +1,5 @@
 import { Flags } from '@oclif/core';
-import { CLI, SgCommand } from '../../index.js';
-
+import { CLI, TextTools, SgCommand } from '../../../index.js';
 export default class Erase extends SgCommand {
   static description = 'Discard stored crawling data';
 
@@ -37,7 +36,7 @@ export default class Erase extends SgCommand {
     const dbName = graph.db.name;
     let message = `Empty the collection${
       argv.length > 1 ? 's' : ''
-    } ${CLI.oxfordJoin(argv)} from ${dbName}?`;
+    } ${TextTools.joinOxford(argv)} from ${dbName}?`;
     if (flags.all) {
       message = `Empty ${CLI.chalk.bold.red('all data')} from ${dbName}?`;
     }
