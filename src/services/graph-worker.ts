@@ -1,4 +1,4 @@
-import EventEmitter from 'node:events';
+import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import { AqlQuery } from 'arangojs/aql.js';
 import is from '@sindresorhus/is';
 import { JsonMap } from '@salesforce/ts-types';
@@ -25,7 +25,15 @@ export interface GraphWorkerOptions<T extends Vertice = Vertice> {
   task: GraphWorkerTask<T>;
 }
 
-export class GraphWorker<T extends Vertice = Vertice> extends EventEmitter {
+type GraphWorkerEvents = Record<PropertyKey, unknown[]> & {
+  progress: [status: JobStatus];
+  end: [status: JobStatus]
+}
+
+export class GraphWorker<
+  T extends Vertice = Vertice,
+  Events extends GraphWorkerEvents = GraphWorkerEvents
+> extends AsyncEventEmitter<Events> {
   readonly status: JobStatus;
   protected project!: Project;
   protected graph!: ArangoStore;
@@ -95,6 +103,7 @@ export class GraphWorker<T extends Vertice = Vertice> extends EventEmitter {
           const elapsed = this.status.finishTime - this.status.startTime;
           this.status.elapsed = elapsed;
           this.status.average = elapsed / this.status.total;
+          this.emit('end', this.status);
           return this.status;
         });
     } else {

@@ -97,7 +97,7 @@ export interface ScreenshotOptions {
   limit: number;
 }
 
-export class ScreenshotTool extends AsyncEventEmitter {
+export class ScreenshotTool extends AsyncEventEmitter<{ capture: [filename: string] }> {
   // Since this exists as a global const, new presets can
   // be added and removed at will. Knock yourself out.
   static ViewportPresets: Record<string, Viewport> = {
@@ -106,10 +106,6 @@ export class ScreenshotTool extends AsyncEventEmitter {
     hd: { width: 1360, height: 768 },
     fhd: { width: 1920, height: 1080 },
   };
-
-  eventNames(): (string | number | symbol)[] {
-    return ['capture', 'error'];
-  }
 
   protected defaults: ScreenshotOptions = {
     directory: 'screenshots',

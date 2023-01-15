@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import arrify from 'arrify';
-import { log, PlaywrightCrawlingContext } from 'crawlee';
+import { log, PlaywrightCrawlingContext, SystemInfo} from 'crawlee';
 import { FinalStatistics } from 'crawlee';
 import { UncrawledUrlOptions, UncrawledUrlQuery } from '../reports/index.js';
 import _ from 'lodash';
@@ -36,26 +36,24 @@ import {
   SpiderStatus,
 } from './index.js';
 
+type SpiderEventMap = Record<PropertyKey, unknown[]> & {
+  systemInfo: [status: SystemInfo & SpiderStatus];
+  requestComplete: [status: SpiderStatus, url: string]
+  crawlComplete: [status: SpiderStatus & FinalStatistics]
+  aborting: [reason: string],
+  exiting: [reason: string],
+}
+
+type SpiderEventType = keyof SpiderEventMap;
+type SpiderEventParams<T extends SpiderEventType> = SpiderEventMap[T];
+type SpiderEventListener<T extends SpiderEventType> = (...args: SpiderEventParams<T>) => unknown
+
 type RequestValue =
   | string
   | Request
   | RequestOptions
   | NormalizedUrl
   | UniqueUrl;
-
-export const enum SpiderEventType {
-  SYSTEM_INFO = 'systemInfo',
-  REQUEST_COMPLETE = 'requestComplete',
-  ABORTING = 'aborting',
-  EXIT = 'exit',
-}
-
-export type SpiderEventName =
-  | SpiderEventType
-  | 'systemInfo'
-  | 'aborting'
-  | 'exit'
-  | 'requestComplete';
 
 export class Spider extends PlaywrightCrawler {
   spiderOptions: InternalSpiderOptions;
@@ -71,7 +69,7 @@ export class Spider extends PlaywrightCrawler {
     requestsByHost: {},
     requestsByLabel: {},
   };
-  protected _events: AsyncEventEmitter;
+  protected _events: AsyncEventEmitter<SpiderEventMap>;
 
   constructor(options: Partial<SpiderOptions> = {}, config?: Configuration) {
     const { crawler, internal } = splitOptions(options);
@@ -125,6 +123,11 @@ export class Spider extends PlaywrightCrawler {
     this.crawlerOptions = crawler;
 
     this._events = new AsyncEventEmitter();
+    
+    // Intercept and re-map the Crawlee systemInfo event
+    this.events.on('systemInfo', (info: SystemInfo) => {
+      this._events.emit('systemInfo', { ...info, ...this.status });
+    });
   }
 
   protected override async _runRequestHandler(
@@ -135,23 +138,24 @@ export class Spider extends PlaywrightCrawler {
     await super._runRequestHandler(context);
   }
 
-  on(event: SpiderEventName, listener: (...args: unknown[]) => unknown): void {
-    this._events.on(event, listener);
+
+  /**
+   * Respond to an internal Spider event.
+   * 
+   * - `systemInfo`: Fired at regular intervals, summarizing memory and server load 
+   * - `requestComplete`: Fired when a specific reqest has been processed
+   * - `crawlComplete`: Fired when last request in the queue has been processed
+   */
+  on<T extends SpiderEventType>(event: T, listener: SpiderEventListener<T>): void {
+    this._events.on<T>(event, listener);
   }
 
-  off(
-    event: SpiderEventName,
-    listener?: (...args: unknown[]) => unknown,
-  ): void {
+  off<T extends SpiderEventType>(event: T, listener: SpiderEventListener<T>): void {
     if (listener) {
-      this._events.removeListener(event, listener);
+      this._events.removeListener<T>(event, listener);
     } else {
-      this._events.removeAllListeners(event);
+      this._events.removeAllListeners<T>(event);
     }
-  }
-
-  emit(event: SpiderEventName, ...args: unknown[]): void {
-    this._events.emit(event, ...args);
   }
 
   protected updateStats({ request, requestMeta }: SpiderContext) {
@@ -178,6 +182,7 @@ export class Spider extends PlaywrightCrawler {
   protected override async _cleanupContext(context: SpiderContext) {
     // This is pretty sketchy way of capturing a non-error; we need to verify that
     // a request that previously failed but then succeeded will still be noticed.
+    // Improving is on the to-do list when we stop subclassing PlaywrightCrawler.
     if (context.request.errorMessages.length === 0) {
       this.updateStats(context);
     } else {
@@ -187,11 +192,7 @@ export class Spider extends PlaywrightCrawler {
 
     // Even in the case of an error, we'll fire the event so that progress
     // indicators can be updated, etc.
-    this.emit(
-      SpiderEventType.REQUEST_COMPLETE,
-      this.status,
-      context.request.url,
-    );
+    this._events.emit('requestComplete', this.status, context.request.url);
 
     super._cleanupContext(context as PlaywrightCrawlingContext);
   }
@@ -275,6 +276,7 @@ export class Spider extends PlaywrightCrawler {
 
     return super.run().then(stats => {
       this.status.finishTime = Date.now();
+      this._events.emit('crawlComplete', { ...this.status, ...stats });
       return { ...this.status, ...stats };
     });
   }
@@ -326,6 +328,7 @@ export class Spider extends PlaywrightCrawler {
 async function playwrightPostNavigate(context: SpiderContext) {
   context.$ = await playwrightUtils.parseWithCheerio(context.page);
 }
+
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 function splitOptions(options: Partial<SpiderOptions> = {}) {
