@@ -1,6 +1,6 @@
 {
   "name": "spidergram",
-  "version": "0.7.2",
+  "version": "0.8.0",
   "description": "Structural analysis tools for complex web sites",
   "main": "./dist/index.js",
   "exports": "./dist/index.js",
@@ -21,7 +21,7 @@
     "prepublish": "npm run build",
     "build": "npm run clean; npm run compile",
     "compile": "tsc -p ./tsconfig.build.json",
-    "docs": "rm -rf ./docs/*; typedoc src/index.ts --out ./docs",
+    "docs": "rm -rf ./site/*; typedoc src/index.ts --out ./site",
     "test": "ava",
     "overage": "nyc --reporter=text ava"
   },
@@ -81,8 +81,6 @@
     "dot-prop": "^7.2.0",
     "dotenv": "^16.0.3",
     "filenamify": "^5.1.1",
-    "htmlmetaparser": "^2.1.2",
-    "htmlparser2": "^8.0.1",
     "humanize-url": "^3.0.0",
     "inquirer": "^9.1.4",
     "lodash": "^4.17.21",
@@ -95,6 +93,7 @@
     "prepend-http": "^4.0.0",
     "protocolify": "^4.0.0",
     "read-pkg-up": "^9.1.0",
+    "readability-scores": "^1.0.8",
     "reflect-metadata": "^0.1.13",
     "robots-parser": "^3.0.0",
     "terminal-link": "^3.0.0",
@@ -140,7 +139,6 @@
     "googleapis": "^108.0.1",
     "html-to-text": "^9.0.0",
     "playwright": "^1.27.1",
-    "readability-scores": "^1.0.8",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.18.12/xlsx-0.18.12.tgz"
   }
 }
