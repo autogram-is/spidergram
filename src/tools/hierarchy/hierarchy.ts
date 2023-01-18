@@ -59,8 +59,16 @@ export interface HierarchyOptions<T = unknown> {
 }
 
 export type HierarchyItem<T = unknown, UserData = Record<string, unknown>> = UserData & {
-  id: string,
-  inferred: boolean,
+  value: string,
   item?: T,
-  parent?: T
+  parent?: HierarchyItem<T, UserData>
+  children?: HierarchyItem<T, UserData>[]
+}
+
+export abstract class HierarchyBuilder<T = unknown, UserData = Record<string, unknown>> {
+  abstract pool?: T[];
+  abstract roots: HierarchyItem<T, UserData>[];
+  abstract orphans: HierarchyItem<T, UserData>[];
+  abstract addItems(items: T[]): HierarchyItem<T, UserData>[];
+  abstract buildTree(relationships: HierarchyItem<T, UserData>[]): boolean;
 }
