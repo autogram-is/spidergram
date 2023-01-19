@@ -22,12 +22,7 @@ export const enum GapStrategy {
   /**
    * Discard the item (and its children, if they exist).
    */
-  PRUNE = 'prune',
-
-  /**
-   * Treat the item (and its own children, if they exist) as a separate hierarchy.
-   */
-  SEPARATE = 'separate',
+  DISCARD = 'prune',
 }
 
 /**
@@ -59,16 +54,9 @@ export interface HierarchyOptions<T = unknown> {
 }
 
 export type HierarchyItem<T = unknown, UserData = Record<string, unknown>> = UserData & {
-  value: string,
-  item?: T,
+  key: string,
+  value?: T,
+  title?: string,
   parent?: HierarchyItem<T, UserData>
-  children?: HierarchyItem<T, UserData>[]
-}
-
-export abstract class HierarchyBuilder<T = unknown, UserData = Record<string, unknown>> {
-  abstract pool?: T[];
-  abstract roots: HierarchyItem<T, UserData>[];
-  abstract orphans: HierarchyItem<T, UserData>[];
-  abstract addItems(items: T[]): HierarchyItem<T, UserData>[];
-  abstract buildTree(relationships: HierarchyItem<T, UserData>[]): boolean;
+  children: HierarchyItem<T, UserData>[]
 }
