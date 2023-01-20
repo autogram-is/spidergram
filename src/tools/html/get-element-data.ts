@@ -103,7 +103,7 @@ export function getElementData($: cheerio.Cheerio, customOptions: ElementDataOpt
 
   for (const [name, value] of Object.entries($.first().attr())) {
     if (name === 'class') {
-      results.classes = value?.split(',').map(c => c.trim());
+      results.classes = value?.replace(/s+/, ' ').split(' ').map(c => c.trim());
     } else if (name.startsWith('data-')) {
       const data = valueToFlag(value, options.dropEmptyAttributes);
       if (data) {
