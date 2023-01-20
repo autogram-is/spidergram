@@ -1,0 +1,15 @@
+[
+  "https://example.com",
+  "https://example.com/about",
+  "https://example.com/help",
+  "https://example.com/news",
+  "https://example.com/news/2021",
+  "https://example.com/news/2021?page=2",
+  "https://example.com/news/2021?page=3",
+  "https://example.com/news/2021?page=4",
+  "https://example.com/news/2032",
+  "https://example.com/news/2023",
+  "https://subdomain.example.com",
+  "https://subdomain.example.com/deeply/nested/url",
+  "https://orphaned-site.biz/some-url"
+]

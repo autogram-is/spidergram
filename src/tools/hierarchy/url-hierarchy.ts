@@ -3,13 +3,13 @@ import { NormalizedUrl, NormalizedUrlSet, ParsedUrl } from "@autogram/url-tools"
 import {
   HierarchyItem,
   HierarchyOptions,
-  GapStrategy
+  GapStrategy,
+  HierarchyBuilder
 } from "./hierarchy.js";
 
 export interface UrlHierarchyOptions extends HierarchyOptions {
   base?: string,
   normalizer?: (url: ParsedUrl) => ParsedUrl,
-  filter?: (url: URL) => boolean,
 }
 
 const defaults: UrlHierarchyOptions = {
@@ -17,21 +17,49 @@ const defaults: UrlHierarchyOptions = {
   forceSingleRoot: true,
 }
 
-export class Url {
+/**
+ * Encapsulates a single NormalizedUrl and its hierarchical relationships to nearby URLs.
+ */
+export class UrlHierarchyItem extends HierarchyItem<NormalizedUrl> {
+  title: string;
+
+  constructor(value: NormalizedUrl, public inferred = false) {
+    // Trailing slashes mess us up something fierce.
+    if (value.href.endsWith('/')) value.href = value.href.slice(0, -1);
+
+    super(value);
+    let title = this.key.split('/').pop();
+    if (title === undefined || title.trim().length === 0) title = 'Root';
+    this.title = title;
+  }
+
+  makeKey(value: NormalizedUrl): string {
+    return makeKey(value);
+  }
+}
+
+/**
+ * Organize a collection of NormalizedUrls into one or more hierarchical tress
+ * to reflect their URL structure.
+ */
+export class UrlHierarchyBuilder extends HierarchyBuilder<NormalizedUrl, UrlHierarchyItem> {
   options: UrlHierarchyOptions;
-  items: HierarchyItem<NormalizedUrl>[];
 
   constructor(items: string[] | NormalizedUrl[], customOptions: UrlHierarchyOptions = {}) {
+    super();
     this.options = _.defaultsDeep(customOptions, defaults);
 
     const urls = new NormalizedUrlSet(items, {
       base: this.options.base,
-      urlFilter: this.options.filter,
       normalizer: this.options.normalizer
     });
 
-    this.items = [...urls].map(url => this.makeItem(url));
+    this.add([...urls])
     this.populateRelationships();
+  }
+
+  protected makeItem(value: NormalizedUrl): UrlHierarchyItem {
+    return new UrlHierarchyItem(value);
   }
 
   /**
@@ -40,52 +68,38 @@ export class Url {
    * If an ancestor but no direct parent can be found, it uses the {@link GapStrategy}
    * specified in {@link UrlHierarchyOptions.gaps}.
    */
-  protected populateRelationships() {
-    for (const item of this.items) {
-      if (item.value === undefined) continue;
+  populateRelationships(input: UrlHierarchyItem[] = this.items) {
+    this.sort();
+    for (const item of input) {
       const parent = this.findAncestor(item.value);
-      if (parent) {
-        item.parent = parent;
-        parent.children.push(item);
-      }
+      if (parent) item.setParent(parent);
     }
   }
 
-  protected sort() {
-    this.items.sort((a: HierarchyItem, b: HierarchyItem): number => 
-      a.key.localeCompare(b.key)
-    )
-  }
-
-  protected makeItem(input: NormalizedUrl): HierarchyItem<NormalizedUrl> {
-    const key = this.makeKey(input);
-    return {
-      key: key,
-      title: key.split('/').pop(),
-      value: input,
-      children: []
-    } as HierarchyItem<NormalizedUrl>;
-  }
-
-  protected makeKey(url: NormalizedUrl): string {
-    return this.makeKeys(url).join('/'); 
-  }
-
-  protected makeKeys(url: NormalizedUrl): string[] {
-    const key: string[] = [];
-    key.push(url.domain);
-    key.push(url.subdomain);
-    key.push(...url.path);
-    key.push(url.search);
-    key.push(url.hash);
-    return key;
-  }
-
   protected compareValues(a: NormalizedUrl, b: NormalizedUrl): number {
-    return this.makeKey(a).localeCompare(this.makeKey(b));
+    return makeKey(a).localeCompare(makeKey(b));
   }
-  
-  findAncestor(
+
+  combineRootItems(): UrlHierarchyItem | undefined {
+    const roots = this.getRoots();
+    if (roots.length) {
+      const root = this.makeItem(new NormalizedUrl('root:web'));
+      root.inferred = true;
+      root.addChildren(roots);
+      this.items.push(root);
+      return root;
+    } if (roots.length === 1) {
+      return roots[0];
+    }
+    return;
+  }
+
+  /**
+   * Find the closest ancestor for a given URL in the list of known URLs.
+   *
+   * @returns The HierarchyItem for the ancestor URL, if an ancestor exists.
+   */
+  protected findAncestor(
     url: NormalizedUrl,
   ): HierarchyItem<NormalizedUrl> | undefined {
     // Speculatively build a Parent URL for the current one. If we already
@@ -97,7 +111,7 @@ export class Url {
     // Scan the collection of HierarchyItems for one that matches our
     // parent URL. 
     const directParent = this.items.find(
-      potentialParent => potentialParent.key === this.makeKey(parentUrl)
+      potentialParent => potentialParent.value.href === parentUrl.href
     );
 
     // If it's populated, return the match.
@@ -155,4 +169,16 @@ export class Url {
   
     return parent;
   }
+}
+
+// We've split this helper function out because we use it
+// when creating the full list of ancestor URLs.
+function makeKey(url: NormalizedUrl): string {
+  const key: string[] = [];
+  key.push(url.domain);
+  key.push(url.subdomain);
+  key.push(...url.path);
+  if (url.search.length) key.push(url.search);
+  if (url.hash.length) key.push(url.hash);
+  return key.join('/'); 
 }
