@@ -1,6 +1,6 @@
 import test from 'ava';
 import { UniqueUrlSet } from '../src/index.js';
-import { testUrls } from './fixtures/urls.js';
+import { testUrls } from './fixtures/urls/urls.js';
 
 test('handles missing procotols', t => {
   const noProtocol = new UniqueUrlSet(testUrls.noProtocol);
