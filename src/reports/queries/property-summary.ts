@@ -234,7 +234,7 @@ function toProperty(input: string | PropertyDescriptor, options: ToPropertyOptio
       input.function = options.function;
     }
     input.prefix ??= 'item';
-    input.label ??= sanitizeLabel(input.property);
+    input.label = sanitizeLabel(input.label ?? input.property);
     return input;
   }
 }
