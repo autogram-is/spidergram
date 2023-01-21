@@ -8,7 +8,7 @@ import {
 } from "./hierarchy.js";
 import arrify from 'arrify';
 
-type Dictionary = Record<string, undefined>;
+type Dictionary = Record<string, unknown>;
 
 type WrappedValue<V = unknown, D extends Dictionary = Dictionary> = {
   value: V,
