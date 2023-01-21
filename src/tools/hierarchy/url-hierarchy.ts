@@ -1,12 +1,19 @@
 import _ from 'lodash';
-import { NormalizedUrl, NormalizedUrlSet, ParsedUrl } from "@autogram/url-tools";
+import { NormalizedUrl, ParsedUrl } from "@autogram/url-tools";
 import {
   HierarchyItem,
   HierarchyOptions,
   GapStrategy,
   HierarchyBuilder
 } from "./hierarchy.js";
+import arrify from 'arrify';
 
+type Dictionary = Record<string, undefined>;
+
+type WrappedValue<V = unknown, D extends Dictionary = Dictionary> = {
+  value: V,
+  data?: D
+}
 export interface UrlHierarchyOptions extends HierarchyOptions {
   base?: string,
   normalizer?: (url: ParsedUrl) => ParsedUrl,
@@ -20,17 +27,23 @@ const defaults: UrlHierarchyOptions = {
 /**
  * Encapsulates a single NormalizedUrl and its hierarchical relationships to nearby URLs.
  */
-export class UrlHierarchyItem extends HierarchyItem<NormalizedUrl> {
+export class UrlHierarchyItem<ExtraData extends Dictionary = Dictionary> extends HierarchyItem<NormalizedUrl, ExtraData> {
   title: string;
+  inferred = false;
 
-  constructor(value: NormalizedUrl, public inferred = false) {
+  constructor(value: NormalizedUrl, data?: ExtraData) {
     // Trailing slashes mess us up something fierce.
     if (value.href.endsWith('/')) value.href = value.href.slice(0, -1);
-
-    super(value);
-    let title = this.key.split('/').pop();
-    if (title === undefined || title.trim().length === 0) title = 'Root';
-    this.title = title;
+    
+    super(value, data);
+    
+    if (data?.title && typeof data.title === 'string') {
+      this.title = data.title
+    } else {
+      let title = this.key.split('/').pop();
+      if (title === undefined || title.trim().length === 0) title = 'Root';
+      this.title = title;  
+    }
   }
 
   makeKey(value: NormalizedUrl): string {
@@ -38,28 +51,69 @@ export class UrlHierarchyItem extends HierarchyItem<NormalizedUrl> {
   }
 }
 
+function isStringArray(input: unknown): input is string[] {
+  return (Array.isArray(input) && typeof input[0] === 'string');
+}
+
+function isNormalizedUrlArray(input: unknown): input is NormalizedUrl[] {
+  return (Array.isArray(input) && input[0] instanceof NormalizedUrl);
+}
+
+function isWrappedValueArray<T = unknown, D extends Dictionary = Dictionary>(input: unknown): input is WrappedValue<T, D>[] {
+  return (
+    Array.isArray(input) &&
+    typeof input[0] !== 'string' &&
+    !(input[0] instanceof NormalizedUrl) &&
+    'value' in input[0]
+  );
+}
+
 /**
  * Organize a collection of NormalizedUrls into one or more hierarchical tress
  * to reflect their URL structure.
  */
-export class UrlHierarchyBuilder extends HierarchyBuilder<NormalizedUrl, UrlHierarchyItem> {
+export class UrlHierarchyBuilder<ExtraData extends Dictionary = Dictionary> extends HierarchyBuilder<NormalizedUrl, ExtraData, UrlHierarchyItem<ExtraData>> {
   options: UrlHierarchyOptions;
 
-  constructor(items: string[] | NormalizedUrl[], customOptions: UrlHierarchyOptions = {}) {
+  constructor(urls: string[] | NormalizedUrl[] | WrappedValue<NormalizedUrl, ExtraData>[] = [], customOptions: UrlHierarchyOptions = {}) {
     super();
     this.options = _.defaultsDeep(customOptions, defaults);
 
-    const urls = new NormalizedUrlSet(items, {
-      base: this.options.base,
-      normalizer: this.options.normalizer
-    });
-
-    this.add([...urls])
-    this.populateRelationships();
+    if (urls.length > 0) {
+      this.add(urls);
+      this.populateRelationships();
+    }
   }
 
-  protected makeItem(value: NormalizedUrl): UrlHierarchyItem {
-    return new UrlHierarchyItem(value);
+  /**
+   * Add one or more items to the hierarchy.
+   */
+  add(input: string | string[] | NormalizedUrl | NormalizedUrl[] | WrappedValue<NormalizedUrl, ExtraData> | WrappedValue<NormalizedUrl, ExtraData>[]) {
+    const inputs = arrify(input);
+
+    if (isNormalizedUrlArray(inputs)) {
+      this.items.push(...inputs.map(value => this.makeItem(value)));
+    } else if (isStringArray(inputs)) {
+      this.items.push(...inputs.map(value => this.makeItem(
+        new NormalizedUrl(value, this.options.base, this.options.normalizer)))
+      );
+    } else if (isWrappedValueArray<NormalizedUrl, ExtraData>(inputs)) {
+      this.items.push(...inputs.map(wrapped => this.makeItem(wrapped)))
+    }
+  }
+
+  makeItem(value: string | NormalizedUrl | WrappedValue<NormalizedUrl, ExtraData>): UrlHierarchyItem<ExtraData> {
+    if (typeof value === 'string') {
+      const nu = new NormalizedUrl(value, this.options.base, this.options.normalizer);
+      return new UrlHierarchyItem<ExtraData>(nu);
+    } else if (value instanceof NormalizedUrl) {
+      return new UrlHierarchyItem<ExtraData>(value);
+    } else {
+      return new UrlHierarchyItem<ExtraData>(
+        value.value,
+        value.data
+      )
+    }
   }
 
   /**
@@ -68,7 +122,7 @@ export class UrlHierarchyBuilder extends HierarchyBuilder<NormalizedUrl, UrlHier
    * If an ancestor but no direct parent can be found, it uses the {@link GapStrategy}
    * specified in {@link UrlHierarchyOptions.gaps}.
    */
-  populateRelationships(input: UrlHierarchyItem[] = this.items) {
+  populateRelationships(input: UrlHierarchyItem<ExtraData>[] = this.items) {
     this.sort();
     for (const item of input) {
       const parent = this.findAncestor(item.value);
@@ -80,7 +134,7 @@ export class UrlHierarchyBuilder extends HierarchyBuilder<NormalizedUrl, UrlHier
     return makeKey(a).localeCompare(makeKey(b));
   }
 
-  combineRootItems(): UrlHierarchyItem | undefined {
+  combineRootItems(): UrlHierarchyItem<ExtraData> | undefined {
     const roots = this.getRoots();
     if (roots.length) {
       const root = this.makeItem(new NormalizedUrl('root:web'));
@@ -101,7 +155,7 @@ export class UrlHierarchyBuilder extends HierarchyBuilder<NormalizedUrl, UrlHier
    */
   protected findAncestor(
     url: NormalizedUrl,
-  ): HierarchyItem<NormalizedUrl> | undefined {
+  ): UrlHierarchyItem<ExtraData> | undefined {
     // Speculatively build a Parent URL for the current one. If we already
     // have a top-level domain, createParentUrl will return false and we
     // can shortcut any other comparisons — it's a root node by default.

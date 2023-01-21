@@ -53,33 +53,37 @@ export interface HierarchyOptions<T = unknown> {
   key?: string | ((input: T) => string),
 }
 
-export abstract class HierarchyItem<ItemValue = unknown> {
+type Dictionary = Record<string, unknown>;
+
+export abstract class HierarchyItem<ItemValue = unknown, ExtraData extends Dictionary = Dictionary> {
+  data?: ExtraData;
   key: string;
   value: ItemValue;
   parent?: HierarchyItem<ItemValue>;
   children: HierarchyItem<ItemValue>[];
   protected _descendents = -1;
 
-  constructor(value: ItemValue) {
+  constructor(value: ItemValue, data?: ExtraData) {
+    this.key = this.makeKey(value, data);
     this.value = value;
-    this.key = this.makeKey(value);
+    this.data = data;
     this.children = [];
   }
 
-  setParent(parent?: HierarchyItem<ItemValue>) {
+  setParent(parent?: HierarchyItem<ItemValue, ExtraData>) {
     if (this.parent?.key !== parent?.key) {
       this.parent?.removeChild(this);
       parent?.addChild(this);
     }
   }
 
-  addChildren(items: HierarchyItem<ItemValue>[]) {
+  addChildren(items: HierarchyItem<ItemValue, ExtraData>[]) {
     for(const item of items) {
       this.addChild(item);
     }
   }
 
-  addChild(item: HierarchyItem<ItemValue>) {
+  addChild(item: HierarchyItem<ItemValue, ExtraData>) {
     if (item.key === this.key) return;
 
     const index = this.children.findIndex(child => child.key === item.key);
@@ -94,7 +98,7 @@ export abstract class HierarchyItem<ItemValue = unknown> {
     item.parent = this;
   }
 
-  removeChild(item: HierarchyItem<ItemValue>) {
+  removeChild(item: HierarchyItem<ItemValue, ExtraData>) {
     if (item.key === this.key) return;
 
     const index = this.children.findIndex(child => child.key === item.key);
@@ -103,7 +107,7 @@ export abstract class HierarchyItem<ItemValue = unknown> {
     if (item.parent?.key === this.key) item.parent = undefined;
   }
 
-  abstract makeKey(value: ItemValue): string;
+  abstract makeKey(value: ItemValue, data?: ExtraData): string;
 
   get isOrphan(): boolean {
     return (this.parent === undefined && this.children.length === 0);
@@ -144,7 +148,11 @@ export abstract class HierarchyItem<ItemValue = unknown> {
  * Abstract base for classes that accept arbitrary objects and build
  * one of more hierarchies.  
  */
-export abstract class HierarchyBuilder<ItemValue = unknown, ItemType extends HierarchyItem = HierarchyItem<ItemValue>> {
+export abstract class HierarchyBuilder<
+  ItemValue = unknown,
+  ExtraData extends Dictionary = Dictionary,
+  ItemType extends HierarchyItem = HierarchyItem<ItemValue, ExtraData>, 
+> {
   items: ItemType[];
 
   constructor() {
