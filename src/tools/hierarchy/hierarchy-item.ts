@@ -73,8 +73,12 @@ export class HierarchyItem<UserData = Record<string, unknown>> {
     return [this.parent, ...this.parent.ancestors];
   }
   
+  get flattened(): this[] {
+    return [this, ...this.descendents];
+  }
+
   get descendents(): this[] {
-    return _.flattenDeep(this.children.map(child => child.descendents));
+    return _.flattenDeep([this.children, ...this.children.map(child => child.descendents)]);
   }
 
   get siblings(): this[] {

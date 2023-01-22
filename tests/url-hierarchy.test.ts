@@ -13,5 +13,8 @@ test('example hierarchy parsed', t => {
   const uhb = new HierarchyTools.UrlHierarchyBuilder(options).add(urls);
 
   t.assert(uhb.findRoots().length === 1);
+  
+  const root = uhb.findRoot();
+  t.assert(root !== undefined);
   t.assert(uhb.items.filter(item => item.gap !== 'filled').length === urls.length);
 });
