@@ -8,7 +8,7 @@ test('example hierarchy parsed', t => {
   
   const options: HierarchyTools.UrlHierarchyBuilderOptions = {
     gaps: 'fill',
-    subdomains: 'children'
+    subdomains: 'children',
   }
   const uhb = new HierarchyTools.UrlHierarchyBuilder(options).add(urls);
 

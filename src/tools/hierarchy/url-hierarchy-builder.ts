@@ -114,8 +114,10 @@ export class UrlHierarchyBuilder extends HierarchyBuilder<UrlHierarchyItem, Obje
   }
 
   protected urlToId(url: ParsedUrl): string {
-    // Trailing slashes mess things up something fierce. We kill 'em.
+    // Trailing slashes and double-slashes in the pathname mess things up something
+    // fierce. We kill 'em.
     if (url.pathname.endsWith('/')) url.pathname = url.pathname.slice(0, -1);
+    if (url.pathname.includes('//')) url.pathname = url.pathname.replaceAll(/\/+/,"/");
 
     const key: string[] = [];
     key.push(url.hostname);
