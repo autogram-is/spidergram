@@ -19,6 +19,10 @@ export class HierarchyItem<UserData = Record<string, unknown>> {
     this._id = input;
   }
 
+  get label(): string {
+    return this.id;
+  }
+
   setParent(newParent?: this) {
     const existingParent = this.parent;
 
@@ -91,7 +95,7 @@ export class HierarchyItem<UserData = Record<string, unknown>> {
   }
 
   toTreeString(indent = 0) {
-    let output = '  '.repeat(indent) + this.id + `\n`;
+    let output = '  '.repeat(indent) + this.label + `\n`;
     for (const child of this.children) {
       output += child.toTreeString(indent + 1);
     }
