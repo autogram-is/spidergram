@@ -117,7 +117,7 @@ export class UrlHierarchyBuilder extends HierarchyBuilder<UrlHierarchyItem, Obje
     // Trailing slashes and double-slashes in the pathname mess things up something
     // fierce. We kill 'em.
     if (url.pathname.endsWith('/')) url.pathname = url.pathname.slice(0, -1);
-    if (url.pathname.includes('//')) url.pathname = url.pathname.replaceAll(/\/+/,"/");
+    if (url.pathname.includes('//')) url.pathname = url.pathname.replaceAll(/\/+/ig,"/");
 
     const key: string[] = [];
     key.push(url.hostname);
