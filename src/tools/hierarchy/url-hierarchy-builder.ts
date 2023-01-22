@@ -84,9 +84,9 @@ export class UrlHierarchyBuilder extends HierarchyBuilder<UrlHierarchyItem, Obje
     } else if (input instanceof URL) {
       return new NormalizedUrl(input.href, this.options.base, this.options.normalizer);
     } else {
-      return this.normalizeUrlData(input.url.toString());
+      return this.normalizeUrlData(input.url);
     }
-  }  
+  }
 
   protected urlToId(url: ParsedUrl): string {
     const key: string[] = [];
@@ -95,5 +95,16 @@ export class UrlHierarchyBuilder extends HierarchyBuilder<UrlHierarchyItem, Obje
     if (!this.options.ignoreSearch && url.search.length) key.push(url.search);
     if (!this.options.ignoreHash && url.hash.length) key.push(url.hash);
     return key.join('/');
+  }
+
+  createRoot(rootName: string, children: UrlHierarchyItem[] = []) {
+    const id = 'root:' + rootName;
+    const root = new UrlHierarchyItem({ url: id });
+    root.id = id;
+    this._items.set(id, root);
+    for(const child of children) {
+      root.addChild(child);
+    }
+    return root;
   }
 }
