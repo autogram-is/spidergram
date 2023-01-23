@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+  arangodb_container:
+    image: arangodb/arangodb:3.10.2
+    restart: unless-stopped
+    environment:
+      ARANGO_ROOT_PASSWORD: your-password-here
+    ports:
+      - 8529:8529
+    volumes:
+      - ./storage/arango/data:/var/lib/arangodb3
+      - ./storage/arango/apps:/var/lib/arangodb3-apps
