@@ -1,0 +1,30 @@
+{
+  "simple": "http://www.example.com/index.html",
+  "noProtocol": "example.com",
+  "normalized": "https://example.com/",
+  "normalizedUrlVariations": [
+    "http://example.com/index.html?a=1&b=2",
+    "https://example.com:8080/index.html?a=1&b=2",
+    "https://EXAMPLE.COM/index.html?a=1&b=2",
+    "https://www.example.com/index.html?a=1&b=2",
+    "https://ww2.example.com/index.html?a=1&b=2",
+    "https://ww2.example.com/index.html?b=2&a=1",
+    "https://example.com/index.html?a=1&b=2",
+    "https://www.example.com/index.html?a=1&b=2",
+    "https://example.com/index.html?a=1&b=2&utm_src=ad",
+    "https://user:pass@example.com/index.html?a=1&b=2",
+    "https://example.com/index.html?a=1&b=2#anchor"
+  ],
+  "ip": "http://127.0.0.1",
+  "localhost": "http://localhost",
+  "nonWeb": [
+    "dict:///insoucient",
+    "mailto:test@spidergram.dev",
+    "rdar://problem/4255244",
+    "help:search=\"sound%20volume\"%20bookID=\"Mac%20Help\"",
+    "file:///Applications/Safari.app/Contents/Resources/AddLinkPressed.tif",
+    "javascript:;",
+    "tel:1-800-555-1212"
+  ],
+  "complex": "https://user:password@subdomain.subdomain.example.co.uk:8080/directory/filename.html?firstParam=1&secondParam=2#anchor"
+}
