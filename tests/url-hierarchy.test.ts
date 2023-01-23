@@ -7,14 +7,15 @@ test('example hierarchy parsed', t => {
   const urls = JSON.parse(buffer.toString()) as string[];
   
   const options: HierarchyTools.UrlHierarchyBuilderOptions = {
-    gaps: 'fill',
+    gaps: 'adopt',
     subdomains: 'children',
   }
+  
   const uhb = new HierarchyTools.UrlHierarchyBuilder(options).add(urls);
 
   t.assert(uhb.findRoots().length === 1);
   
-  const root = uhb.findRoot();
+  const root = uhb.findLargestRoot();
   t.assert(root !== undefined);
   t.assert(uhb.items.filter(item => item.gap !== 'filled').length === urls.length);
 });
