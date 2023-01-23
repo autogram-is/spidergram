@@ -4,6 +4,7 @@ services:
     image: arangodb/arangodb:3.10.2
     restart: unless-stopped
     environment:
+      ARANGO_NO_AUTH: 1
       ARANGO_ROOT_PASSWORD: your-password-here
     ports:
       - 8529:8529
