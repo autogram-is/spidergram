@@ -49,7 +49,7 @@ export default class Analyze extends SgCommand {
 
           if (flags.text) {
             const content = HtmlTools.getPageContent( resource, {
-              selectors: flags.body,
+              selector: flags.body,
               readability: flags.readability
             });
   

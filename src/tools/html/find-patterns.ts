@@ -1,4 +1,4 @@
-import { parseWithCheerio } from './parse-with-cheerio.js';
+import { getCheerio } from './get-cheerio.js';
 import arrify from 'arrify';
 
 /**
@@ -46,7 +46,7 @@ export function findPatterns(
   patterns: PatternDefinition | PatternDefinition[],
 ): FoundPattern[] {
   const results: FoundPattern[] = [];
-  const $ = typeof html === 'string' ? parseWithCheerio(html) : html;
+  const $ = typeof html === 'string' ? getCheerio(html) : html;
 
   for (const pattern of arrify(patterns)) {
     const search = $(pattern.selector)
