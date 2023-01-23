@@ -1,4 +1,4 @@
-import { parseWithCheerio } from './parse-with-cheerio.js';
+import { getCheerio } from './get-cheerio.js';
 import arrify from 'arrify';
 
 export interface FoundLink {
@@ -25,7 +25,7 @@ export function findLinks(
   input: string | cheerio.Root,
   selectors: string | string[] = LinkSelector.anchor,
 ) {
-  const $ = typeof input === 'string' ? parseWithCheerio(input) : input;
+  const $ = typeof input === 'string' ? getCheerio(input) : input;
   const results: FoundLink[] = [];
   for (const selector of arrify(selectors)) {
     $(selector)
@@ -56,7 +56,7 @@ export function findHeadLinks(input: string | cheerio.Root) {
 export function findSitempLinks(input: string | cheerio.Root) {
   const $ =
     typeof input === 'string'
-      ? parseWithCheerio(input, { xmlMode: true })
+      ? getCheerio(input, { xmlMode: true })
       : input;
   const results: FoundLink[] = [];
   $('urlset url')
@@ -90,7 +90,7 @@ export function findSitempLinks(input: string | cheerio.Root) {
 export function findFeedLinks(input: string | cheerio.Root) {
   const $ =
     typeof input === 'string'
-      ? parseWithCheerio(input, { xmlMode: true })
+      ? getCheerio(input, { xmlMode: true })
       : input;
   const results: FoundLink[] = [];
   $('channel item')

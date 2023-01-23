@@ -1,7 +1,7 @@
 import { htmlToText, HtmlToTextOptions } from 'html-to-text';
 import _ from 'lodash';
 
-export { HtmlToTextOptions as PlainTextOptions } from 'html-to-text';
+export { HtmlToTextOptions } from 'html-to-text';
 
 const defaults: HtmlToTextOptions = {
   wordwrap: false,
@@ -17,7 +17,7 @@ const defaults: HtmlToTextOptions = {
  * @param options.baseElements.selectors - An array of CSS selectors to identify the page's primary content.
  * @param options.limits.maxBaseElements - Increase to allow multiple primary content elements 
  */
-export function convertHtmlToText(
+export function getPlaintext(
   html: string,
   options?: HtmlToTextOptions,
 ): string {

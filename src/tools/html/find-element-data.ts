@@ -93,7 +93,7 @@ const defaults: ElementDataOptions = {
  * @param $ - A Cheerio node, usually the result of a query run on a larger document
  * @param options - An {ElementDataOptions} object with flags and settings to control formatting of the returned data.
  */
-export function getElementData($: cheerio.Cheerio, customOptions: ElementDataOptions = {}) {
+export function findElementData($: cheerio.Cheerio, customOptions: ElementDataOptions = {}) {
   const options: ElementDataOptions = _.defaultsDeep(customOptions, defaults);
   const results: ElementData = { ...options.userData };
 

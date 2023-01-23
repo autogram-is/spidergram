@@ -1,10 +1,10 @@
 import _ from "lodash";
 
 import { Resource } from "../../model/index.js";
-import { parseWithCheerio } from "./parse-with-cheerio.js";
+import { getCheerio } from "./get-cheerio.js";
 import { parseElementsToArray, parseElementsToDictionary } from './parse-elements.js';
 import { parseMetaTags, MetaValues } from "./parse-meta-tags.js";
-import { getElementData, ElementData } from "./get-element-data.js";
+import { findElementData, ElementData } from "./find-element-data.js";
 
 /**
  * Options to control extraction of structured data from HTML pages
@@ -96,12 +96,12 @@ export interface PageData {
 }
 
 export function getPageData(input: string | cheerio.Root | Resource, customOptions: PageDataOptions = {}): PageData {
-  const $ = getCheerioFromInput(input);
+  const $ = getCheerio(input);
   const results: PageData = { };
   const options = _.defaultsDeep(customOptions, defaults);
   
   if (options.attributes || options.all) {
-    const attributes = getElementData($('body'));
+    const attributes = findElementData($('body'));
     if (Object.entries(attributes).length) {
       results.attributes = attributes;
     }
@@ -179,14 +179,4 @@ export function getPageData(input: string | cheerio.Root | Resource, customOptio
   }
 
   return results;
-}
-
-function getCheerioFromInput(input: string | cheerio.Root | Resource): cheerio.Root {
-  if (typeof input === 'string') {
-    return parseWithCheerio(input);
-  } else if (input instanceof Resource) {
-    return parseWithCheerio(input.body ?? '')
-  } else {
-    return input;
-  }
 }
