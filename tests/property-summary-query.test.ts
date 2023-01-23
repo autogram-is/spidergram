@@ -8,6 +8,5 @@ test('grouped query runs', async t => {
     includeTotal: true
   });
   const results = await Query.run(query);
-  console.log(results);
   t.assert(results.length > 0);
 });
