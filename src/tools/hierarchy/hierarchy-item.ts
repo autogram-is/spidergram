@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { render, RenderOptions } from './render.js';
 
 /**
  * An individual node in a hierarchy, responsible for its own identity and
@@ -6,7 +7,7 @@ import _ from 'lodash';
  * 
  * @typeParam UserData - Payload data for the hierarchy item
  */
-export class HierarchyItem<UserData = Record<string, unknown>> {
+export class HierarchyItem<UserData extends Record<string, unknown> = Record<string, unknown>> {
   protected static _idCounter = 0;
   protected _name?: string;
   protected _hierarchyId = HierarchyItem._idCounter++;
@@ -173,5 +174,9 @@ export class HierarchyItem<UserData = Record<string, unknown>> {
    */
   get isLeaf(): boolean {
     return (this.parent !== undefined && this.children.length === 0);
+  }
+
+  render(options: string | RenderOptions = {}): string {
+    return render(this, options);
   }
 }

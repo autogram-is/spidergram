@@ -6,13 +6,11 @@ import { NormalizedUrl, ParsedUrl } from '@autogram/url-tools';
 type ObjectWithUrl = Record<string, unknown> & { url: string | ParsedUrl };
 type UrlInput = string | URL | ObjectWithUrl;
 
-class UrlHierarchyItem extends HierarchyItem<ObjectWithUrl> {
+export class UrlHierarchyItem extends HierarchyItem<ObjectWithUrl> {
   inferred = false;
   adopted = false;
   get name(): string {
-    let name = this._name ?? this.id.split('/').pop() ?? this.hierarchyId.toString();
-    if (this.inferred) name += ` (inferred)`;
-    return name;
+    return this._name ?? this.id.split('/').pop() ?? this.hierarchyId.toString();
   }
 }
 

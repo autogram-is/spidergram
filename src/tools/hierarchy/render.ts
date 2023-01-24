@@ -20,74 +20,183 @@ export interface RenderOptions {
   maxChildren?: number,
 
   /**
-   * Optional predicate function to filter hierarchy items before they're displayed.
-   */
-  filter?: (item: HierarchyItem) => boolean,
-
-  /**
    * Optional formatting function to control how the name of a hierarchy item is
    * displayed in the tree; defaults to the item's ID property.
    */
-  name?: (item: HierarchyItem) => string,
+  name?: (item: HierarchyItem, options: RenderOptions, depth: number) => string,
 
-  prefix?: string,
+  /**
+   * Optional formatting function to control how truncated lists or collapsed branch
+   * items are displayed.
+   */
+  summary?: (items: HierarchyItem[], inline: boolean, options: RenderOptions, depth: number) => string,
+
+  /**
+   * Optional predicate function to conditionally collapse branches. Can be used to
+   * expand or collapse individual branches of trees; useful when displaying extremely
+   * large trees.
+   */
+  collapse?: (item: HierarchyItem, options: RenderOptions, depth: number) => boolean
+
+  /**
+   * Optional predicate function to conditionally filter the displayed children of an item.
+   * Can be used to alter the sorting order of child items, hide leaf nodes but display
+   * branches, etc.
+   */
+  children?: (item: HierarchyItem, options: RenderOptions, depth: number) => HierarchyItem[],
+
+  characters?: {
+    root: string,
+    parent: string,
+    item: string;
+    itemLast: string,
+    parentLast: string,
+  }
+}
+
+const defaultChars = {
+  root:       '',
+  parent:     ' │  ',
+  item:       ' ├─ ',
+  itemLast:   ' ╰─ ',
+  parentLast: '    ',
 }
 
 const presets: Record<string, RenderOptions> = {
-  default: {}
+  default: {
+    maxDepth: Infinity,
+    maxChildren: Infinity,
+    characters: defaultChars,
+    collapse: (item, options, depth) =>  {
+      if (depth >= (options.maxDepth ?? Infinity)) {
+        return true;
+      } else if (options.maxChildren === 0) {
+        return true;
+      }
+      return false;
+    },
+    children: (item) => item.children.sort((a, b) => a.name.localeCompare(b.name)),
+    summary: (items, inline) => {
+      if (items.length === 0) {
+        return '';
+      } else if (inline) {
+        return ' (' + items.flatMap(child => child.flattened).length.toString() + ' descendants)';
+      } else {
+        const descendants = items.map(item => item.descendants).flat().length;
+        return (`…${items.length} additional children`) + (descendants ? ` with ${descendants} descendants` : '');
+      }
+    }
+  },
+  branches: {
+    name: item => {
+      const leaves = item.children.filter(child => child.isLeaf).length;
+      let name = item.name;
+      if (leaves) {
+        name += ` (${leaves} ${ leaves > 1 ? 'children' : 'child'})`
+      }
+      return name;
+    },
+    collapse: () => false,
+    children: item => item.children.filter(child => !child.isLeaf)
+  },
+  tsv: {
+    collapse: () => false,
+    children: item => item.children,
+    characters: {
+      root:       '',
+      parent:     '\t',
+      item:       '\t',
+      itemLast:   '\t',
+      parentLast: '\t',    
+    }
+  }
 };
 
-const defaults: RenderOptions = {
-  maxDepth: Infinity,
-  maxChildren: Infinity,
-  prefix: '  ',
-};
+const defaults: RenderOptions = presets.default;
 
 type RenderPreset = Extract<keyof typeof presets, string>
 
-export function render(item: HierarchyItem, customOptions: RenderPreset | RenderOptions = 'default'): string {
+export function render(item: HierarchyItem, customOptions: RenderPreset | RenderOptions = { }): string {
   let options: RenderOptions = {};
   if (typeof customOptions === 'string') {
     options = _.defaultsDeep(presets[customOptions], defaults);
   } else {
     options = _.defaultsDeep(customOptions, defaults);
   }
-  return formatItem(item, options);
+  return renderItem(item, options);
 }
 
-function formatItem(item: HierarchyItem, options: RenderOptions, depth = 0): string {
-  const maxDepth = options.maxDepth ?? Infinity;
+function renderItem(item: HierarchyItem, options: RenderOptions, depth = 0, last = false): string {
   const maxChildren = options.maxChildren ?? Infinity;
 
-  if (item.children.length === 0) return format(item, options, depth);
-  if (depth >= maxDepth) {
-    return `${format(item, options, depth)} (${item.descendants.length} descendants)`;
+  if (shouldCollapse(item, options, depth)) {
+    return prefix(depth, last, options) + formatName(item, options, depth) + getSummary(item.children, false, options);
   }
+  
+  const children = getChildren(item, options, depth);
+  const lines = [prefix(depth, last, options) + formatName(item, options, depth)];
 
-  const children = item.children.sort((a, b) => a.name.localeCompare(b.name));
-
-  const lines: string[] = [];
-  const displayChildren = children.slice(0, maxChildren - 1);
-  const summarizedChildren = children.slice(maxChildren - 1, -1);
-
-  lines.push(format(item, options, depth));
-  for (const child of displayChildren) {
-    lines.push(formatItem(child, options, depth + 1));
-  }
-  if (summarizedChildren.length > 0) {
-    const descendants = summarizedChildren.map(item => item.descendants).flat().length;
-    let summary = prefix(options, depth + 1);
-    summary += `…${summarizedChildren.length} additional children`;
-    if (descendants > 0) summary += `, with ${descendants} descendants`;
-    lines.push(summary);
-  }
-  return lines.join(`\n`);
+  do {
+    if (lines.length > maxChildren) {
+      if (children.length === 1) {
+        lines.push(prefix(depth + 1, true, options) + formatName(children[0], options, depth) + getSummary(children[0].children, true, options));
+      } else {
+        lines.push(prefix(depth + 1, true, options) + getSummary(children, false, options));
+      }
+      break;
+    }
+    const child = children.shift();
+    if (child) {
+      const isLastChild = children.length === 0;
+      lines.push(renderItem(child, options, depth + 1, isLastChild));
+    }
+  } while (children.length > 0);
+  
+  return lines.join('\n');
 }
 
-function format(item: HierarchyItem, options: RenderOptions, depth = 0): string {
-  return prefix(options, depth) + (options.name ? options.name(item) : item.name);
+function shouldCollapse(item: HierarchyItem, options: RenderOptions = {}, depth = 0) {
+  return (options.collapse ? options.collapse(item, options, depth) : false);
 }
 
-function prefix(options: RenderOptions, depth = 0) {
-  return (options.prefix ?? '  ').repeat(depth);
+function formatName(item: HierarchyItem, options: RenderOptions = {}, depth = 0): string {
+  return (options.name ? options.name(item, options, depth) : item.name);
+}
+
+function getSummary(items: HierarchyItem[], inline: boolean, options: RenderOptions = {}, depth = 0): string {
+  return options.summary ? options.summary(items, inline, options, depth) : ` (${items.length} children)`;
+}
+
+function getChildren(item: HierarchyItem, options: RenderOptions = {}, depth = 0) {
+  return options.children ? options.children(item, options, depth) : item.children;
+}
+
+let prefixes: string[] = [];
+
+function prefix(depth = 0, last = false, options: RenderOptions) {
+  const { root, parent, item, itemLast, parentLast } = options.characters ?? defaultChars;
+
+  if (depth === 0) {
+    prefixes = [];
+    return root;
+  }
+
+  let currentPrefix = item;
+  if (last) {
+    currentPrefix = itemLast;
+  }
+
+  if (depth === prefixes.length + 1) {
+    const previous = prefixes[prefixes.length - 1];
+    if (previous === itemLast) prefixes[prefixes.length - 1] = parentLast;
+    if (previous === item) prefixes[prefixes.length - 1] = parent;
+    prefixes.push(currentPrefix);
+  } else if (depth === prefixes.length) {
+    prefixes[prefixes.length - 1] = currentPrefix;
+  } else if (depth < prefixes.length) {
+    prefixes.splice(depth);
+    prefixes[prefixes.length - 1] = currentPrefix;
+  }
+
+  return prefixes.join('');
 }
