@@ -38,8 +38,8 @@ const presets: Record<string, RenderOptions> = {
 };
 
 const defaults: RenderOptions = {
-  maxDepth: 1,
-  maxChildren: 20,
+  maxDepth: Infinity,
+  maxChildren: Infinity,
   prefix: '  ',
 };
 
