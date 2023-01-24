@@ -7,9 +7,12 @@ type ObjectWithUrl = Record<string, unknown> & { url: string | ParsedUrl };
 type UrlInput = string | URL | ObjectWithUrl;
 
 class UrlHierarchyItem extends HierarchyItem<ObjectWithUrl> {
-  gap?: string;
-  get label() {
-    return this.data.name?.toString() ?? this.name ?? this.id.split('/').pop() ?? this.hierarchyId;
+  inferred = false;
+  adopted = false;
+  get name(): string {
+    let name = this._name ?? this.id.split('/').pop() ?? this.hierarchyId.toString();
+    if (this.inferred) name += ` (inferred)`;
+    return name;
   }
 }
 
@@ -133,7 +136,7 @@ export class UrlHierarchyBuilder extends HierarchyBuilder<UrlHierarchyItem, Obje
     const id = 'root:' + rootName;
     const root = new UrlHierarchyItem({ url: id });
     root.id = id;
-    root.gap = 'filled';
+    root.inferred = true;
     this._items.set(id, root);
     for(const child of children) {
       root.addChild(child);
@@ -162,7 +165,10 @@ export class UrlHierarchyBuilder extends HierarchyBuilder<UrlHierarchyItem, Obje
       ) {
         const url = new ParsedUrl('https://' + child.id);
         if (child.id === url.domain) return undefined;
-        if (this._items.has(url.domain)) return this._items.get(url.domain);
+        if (this._items.has(url.domain)) {
+          child.adopted = true;
+          return this._items.get(url.domain);
+        }
       }
     }
 
@@ -217,7 +223,7 @@ export class UrlHierarchyBuilder extends HierarchyBuilder<UrlHierarchyItem, Obje
         const newId = [currentParent.id, gapSegments.shift()].join('/');
         const filler = new UrlHierarchyItem({ url: 'https://' + newId });
         filler.id = newId;
-        filler.gap = 'bridge';
+        filler.inferred = true;
         filler.setParent(currentParent)
         this._items.set(filler.id, filler);
         currentParent = filler;
@@ -226,7 +232,7 @@ export class UrlHierarchyBuilder extends HierarchyBuilder<UrlHierarchyItem, Obje
     } else if (this.options.gaps === 'adopt') {
       // When bridging gaps, the ancestor is treated as the direct parent
       // regardless of its distance from the descendant.
-      descendant.gap = 'adopted';
+      descendant.adopted = true;
       return ancestor;
     } else {
       return undefined;

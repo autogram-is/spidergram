@@ -98,7 +98,7 @@ export class HierarchyItem<UserData = Record<string, unknown>> {
 
     // No ancestors as children
     if (this.ancestors.map(ancestor => ancestor.id).includes(newChild.id)) {
-      throw new Error('Item cannot have an ancestor as a descendent');
+      throw new Error('Item cannot have an ancestor as a descendant');
     }
 
     // If the item is already a child, return.
@@ -131,17 +131,17 @@ export class HierarchyItem<UserData = Record<string, unknown>> {
   }
   
   /**
-   * An array of nodes containing the current item and all of its descendents
+   * An array of nodes containing the current item and all of its descendants
    */
   get flattened(): this[] {
-    return [this, ...this.descendents];
+    return [this, ...this.descendants];
   }
 
   /**
-   * An array of nodes containing all of the current item's descendents
+   * An array of nodes containing all of the current item's descendants
    */
-  get descendents(): this[] {
-    return _.flattenDeep([this.children, ...this.children.map(child => child.descendents)]);
+  get descendants(): this[] {
+    return _.flattenDeep([this.children, ...this.children.map(child => child.descendants)]);
   }
 
   /**
@@ -171,19 +171,7 @@ export class HierarchyItem<UserData = Record<string, unknown>> {
   /**
    * A Leaf node has a parent, but no children.
    */
-  get isLeaf() {
-    return (this.parent && this.children.length === 0);
-  }
-
-
-  /**
-   * Builds a simple string representation of the node and all of its children. 
-   */
-  toTreeString(indent = 0) {
-    let output = '  '.repeat(indent) + this.name + `\n`;
-    for (const child of this.children) {
-      output += child.toTreeString(indent + 1);
-    }
-    return output;
+  get isLeaf(): boolean {
+    return (this.parent !== undefined && this.children.length === 0);
   }
 }

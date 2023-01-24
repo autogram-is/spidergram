@@ -89,14 +89,15 @@ export abstract class HierarchyBuilder<
    * The root node with the largest number of descendants, if one exists.
    */
   findLargestRoot(): ItemType | undefined {
-    return this.findRoots()
-      .sort((a, b) => a.descendents.length - b.descendents.length)[0];
+    return this.findRoots()[0];
   }
 
   /**
    * An array of all root nodes in the Hierarchy pool
    */
   findRoots(): ItemType[] {
-    return this.items.filter(item => item.isRoot);
+    return this.items.filter(item => item.isRoot)
+      .sort((a, b) => a.descendants.length - b.descendants.length)
+      .reverse();
   }
 }
