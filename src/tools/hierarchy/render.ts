@@ -5,6 +5,20 @@ import _ from 'lodash';
  * Options to control how trees are rendered to text
  */
 export interface RenderOptions<T extends HierarchyItem = HierarchyItem> {
+  [key: string]: unknown;
+
+  /**
+   * The name of a rendering preset to use; built-in options include:
+   * 
+   * - default: Render the full tree, sorted alphabetically, with no limits
+   * - branches: Hide and summarize leaf nodes, rendering only branches
+   * - plain: Expand and display all options with minimal formatting;
+   *     indent using tabs rather than ASCII tree art.
+   *
+   * Additional option flags and values will override the preset defaults.
+   * 
+   * @type {?Extract<keyof typeof presets, string>}
+   */
   preset?: Extract<keyof typeof presets, string>;
 
   /**
@@ -101,7 +115,7 @@ const presets: Record<string, RenderOptions<HierarchyItem>> = {
     collapse: () => false,
     children: item => item.children.filter(child => !child.isLeaf)
   },
-  tsv: {
+  plain: {
     collapse: () => false,
     children: item => item.children,
     characters: {
@@ -117,12 +131,8 @@ const presets: Record<string, RenderOptions<HierarchyItem>> = {
 const defaults: RenderOptions<HierarchyItem> = presets.default;
 
 export function render<T extends HierarchyItem>(item: T, customOptions: RenderOptions<T> = { }): string {
-  let options: RenderOptions<T> = {};
-  if (typeof customOptions === 'string') {
-    options = _.defaultsDeep(presets[customOptions], defaults);
-  } else {
-    options = _.defaultsDeep(customOptions, defaults);
-  }
+  const preset = customOptions.preset ? presets[customOptions.preset] ?? {} : {};
+  const options: RenderOptions<T> = _.defaultsDeep(customOptions, preset, defaults);
   return renderItem(item, options);
 }
 
