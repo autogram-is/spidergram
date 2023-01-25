@@ -1,13 +1,15 @@
 import _ from 'lodash';
 import { render, RenderOptions } from './render.js';
 
+type UserDataDefault = Record<string, unknown>
+
 /**
  * An individual node in a hierarchy, responsible for its own identity and
  * parent/child relationships.
  * 
  * @typeParam UserData - Payload data for the hierarchy item
  */
-export class HierarchyItem<UserData extends Record<string, unknown> = Record<string, unknown>> {
+export class HierarchyItem<UserData extends UserDataDefault = UserDataDefault> {
   protected static _idCounter = 0;
   protected _name?: string;
   protected _hierarchyId = HierarchyItem._idCounter++;
@@ -26,7 +28,7 @@ export class HierarchyItem<UserData extends Record<string, unknown> = Record<str
   /**
    * Create a new hierarchy item with the passed-in data, but no parents or children 
    */
-  constructor(public data: UserData) {
+  constructor(public data?: UserData) {
     this.children = [];
   }
   
@@ -57,7 +59,7 @@ export class HierarchyItem<UserData extends Record<string, unknown> = Record<str
   }
 
   /**
-   * A descriptive label for the node; if none exists, falls back to the ID.
+   * A descriptive label for the node; if none exists, fall back to the ID.
    */
   get name(): string {
     return this._name ?? this.id;
@@ -66,7 +68,6 @@ export class HierarchyItem<UserData extends Record<string, unknown> = Record<str
   set name(input: string) {
     this._name = input;
   }
-
 
   /**
    * Set or remove the item's parent, removing it from the previous parent's children
@@ -154,7 +155,6 @@ export class HierarchyItem<UserData extends Record<string, unknown> = Record<str
     return [...this.parent.children].filter(item => item.id !== this.id);
   }
 
-
   /**
    * A Root node has children but no parent.
    */
@@ -176,7 +176,7 @@ export class HierarchyItem<UserData extends Record<string, unknown> = Record<str
     return (this.parent !== undefined && this.children.length === 0);
   }
 
-  render(options: string | RenderOptions = {}): string {
+  render(options: RenderOptions<HierarchyItem> = {}): string {
     return render(this, options);
   }
 }
