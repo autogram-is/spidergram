@@ -17,7 +17,6 @@ export class UrlHierarchyItem extends HierarchyItem<ObjectWithUrl> {
     this._name = input;
   }
 
-
   constructor(public data: ObjectWithUrl) {
     super(data);
   }

@@ -69,7 +69,7 @@ export default class Urls extends SgCommand {
     preset: Flags.enum({
       summary: 'A URL display preset',
       default: 'default',
-      options: ['default', 'expand', 'collapse', 'plain']
+      options: ['default', 'expand', 'collapse', 'markdown']
     }),
     maxChildren: Flags.integer({
       char: 'm',
@@ -156,6 +156,15 @@ export default class Urls extends SgCommand {
           return item.name;
         }
       };
+
+      if (flags.preset === 'markdown') {
+        renderOptions.label = item => {
+          if (item instanceof HierarchyTools.UrlHierarchyItem) {
+            return `${item.isRoot ? '# ' : ''}[${item.name}](${item.data.url.toString()})`
+          }
+          return item.name;
+        };
+      }
 
       const hierarchy = new HierarchyTools.UrlHierarchyBuilder(treeOptions).add(webUrls);
       const orphans = hierarchy.items.filter(item => item.isOrphan).length;

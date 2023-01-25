@@ -13,7 +13,7 @@ export interface RenderOptions<T extends HierarchyItem = HierarchyItem> {
    * - default: Only display the first 10 items from each directory; summarize the rest.
    * - expand: Display the full tree, sorted alphabetically, with no limits
    * - collapse: Hide and summarize leaf nodes, displaying only branches
-   * - plain: Expand and display all items with minimal formatting; indent using tabs rather than ASCII tree art.
+   * - markdown: Expand and display all items with minimal formatting; indent using markdown list syntax.
    *
    * Additional option flags and values will override the preset defaults.
    * 
@@ -65,6 +65,7 @@ export interface RenderOptions<T extends HierarchyItem = HierarchyItem> {
 
   characters?: {
     root: string,
+    spacer: string,
     parent: string,
     item: string;
     itemLast: string,
@@ -74,6 +75,7 @@ export interface RenderOptions<T extends HierarchyItem = HierarchyItem> {
 
 const defaultChars = {
   root:       '',
+  spacer:     '',
   parent:     ' │  ',
   item:       ' ├─ ',
   itemLast:   ' ╰─ ',
@@ -123,15 +125,17 @@ const presets: Record<string, RenderOptions<HierarchyItem>> = {
     collapse: () => false,
     visibleChildren: item => item.children.filter(child => !child.isLeaf)
   },
-  plain: {
+  markdown: {
     collapse: () => false,
     visibleChildren: item => item.children,
+    label: item => item.isRoot ? `# ${item.name}` : item.name,
     characters: {
       root:       '',
-      parent:     '\t',
-      item:       '\t',
-      itemLast:   '\t',
-      parentLast: '\t',    
+      spacer:     '- ',
+      parent:     '  ',
+      item:       '  ',
+      itemLast:   '  ',
+      parentLast: '  ',    
     }
   }
 };
@@ -194,7 +198,7 @@ function getChildren<T extends HierarchyItem>(item: T, options: RenderOptions<T>
 let prefixes: string[] = [];
 
 function prefix<T extends HierarchyItem>(depth = 0, last = false, options: RenderOptions<T>) {
-  const { root, parent, item, itemLast, parentLast } = options.characters ?? defaultChars;
+  const { root, spacer, parent, item, itemLast, parentLast } = options.characters ?? defaultChars;
 
   if (depth === 0) {
     prefixes = [];
@@ -218,7 +222,7 @@ function prefix<T extends HierarchyItem>(depth = 0, last = false, options: Rende
     prefixes[prefixes.length - 1] = currentPrefix;
   }
 
-  return prefixes.join('');
+  return [...prefixes, spacer].join('');
 }
 
 function pluralize(input: number | unknown[], singular: string, plural: string) {
