@@ -89,7 +89,7 @@ export default class Urls extends SgCommand {
     subdomains: Flags.boolean({
       char: 'd',
       summary: 'Treat subdomains as children of their TLD',
-      default: true,
+      default: false,
     })
   };
 
@@ -128,12 +128,12 @@ export default class Urls extends SgCommand {
     }
     
     const summary: Record<string, number| string[]> = {
-      'Total URLs': rawUrls.length,
-      'Unique Hosts': flags.hosts ? [...hosts] : [...hosts].length,
-      'Hidden URLs': rawUrls.length - filteredUrls.length,
-      'Unparsable Urls': urls.unparsable.size,
-      'Non-Web URLs': urls.size - webUrls.length,
+      'Total URLs': rawUrls.length
     };
+    if (hosts.size > 1) summary['Unique Hosts'] = flags.hosts ? [...hosts] : [...hosts].length;
+    if (flags.hide) summary['Hidden URLs'] = rawUrls.length - filteredUrls.length;
+    if (urls.unparsable.size) summary['Unparsable Urls'] = urls.unparsable.size;
+    if (flags.nonweb) summary['Non-Web URLs'] = urls.size - webUrls.length;
 
     const output: string[] = [];
     if (flags.tree) {
@@ -158,10 +158,10 @@ export default class Urls extends SgCommand {
       };
 
       const hierarchy = new HierarchyTools.UrlHierarchyBuilder(treeOptions).add(webUrls);
-      summary['Orphaned URLs'] = hierarchy.items.filter(item => item.isOrphan).length;
-      const roots = hierarchy.findRoots();
+      const orphans = hierarchy.items.filter(item => item.isOrphan).length;
+      if (orphans) summary['Orphaned URLs'] = orphans;
 
-      for (const root of roots) {
+      for (const root of hierarchy.findRoots()) {
         output.push(root.render(renderOptions));
       }
     }
