@@ -10,10 +10,10 @@ export interface RenderOptions<T extends HierarchyItem = HierarchyItem> {
   /**
    * The name of a rendering preset to use; built-in options include:
    * 
-   * - default: Render the full tree, sorted alphabetically, with no limits
-   * - branches: Hide and summarize leaf nodes, rendering only branches
-   * - plain: Expand and display all options with minimal formatting;
-   *     indent using tabs rather than ASCII tree art.
+   * - default: Only display the first 10 items from each directory; summarize the rest.
+   * - expand: Display the full tree, sorted alphabetically, with no limits
+   * - collapse: Hide and summarize leaf nodes, displaying only branches
+   * - plain: Expand and display all items with minimal formatting; indent using tabs rather than ASCII tree art.
    *
    * Additional option flags and values will override the preset defaults.
    * 
@@ -36,21 +36,23 @@ export interface RenderOptions<T extends HierarchyItem = HierarchyItem> {
   maxChildren?: number,
 
   /**
-   * Optional formatting function to control how the name of a hierarchy item is
-   * displayed in the tree; defaults to the item's ID property.
+   * Formats the name of a hierarchy item when displayed in the tree
    */
-  name?: (item: T, options: RenderOptions<T>, depth: number) => string,
+  label?: (item: T, options: RenderOptions<T>, depth: number) => string,
 
   /**
-   * Optional formatting function to control how truncated lists or collapsed branch
-   * items are displayed.
+   * Formats the short summary of a collapsed branch's children
    */
-  summary?: (items: T[], inline: boolean, options: RenderOptions<T>, depth: number) => string,
+  summary?: (items: T, options: RenderOptions<T>, depth: number) => string,
 
   /**
-   * Optional predicate function to conditionally collapse branches. Can be used to
-   * expand or collapse individual branches of trees; useful when displaying extremely
-   * large trees.
+   * Formats a summary of truncated children when maxChildren is readched
+   */
+  truncated?: (items: T[], options: RenderOptions<T>, depth: number) => string,
+
+  /**
+   * Whether a branch should be collapsed or expanded. By default, this is TRUE when
+   * depth >= options.maxDepth.
    */
   collapse?: (item: T, options: RenderOptions<T>, depth: number) => boolean
 
@@ -59,7 +61,7 @@ export interface RenderOptions<T extends HierarchyItem = HierarchyItem> {
    * Can be used to alter the sorting order of child items, hide leaf nodes but display
    * branches, etc.
    */
-  children?: (item: T, options: RenderOptions<T>, depth: number) => T[],
+  visibleChildren?: (item: T, options: RenderOptions<T>, depth: number) => T[],
 
   characters?: {
     root: string,
@@ -80,44 +82,50 @@ const defaultChars = {
 
 const presets: Record<string, RenderOptions<HierarchyItem>> = {
   default: {
-    maxDepth: Infinity,
-    maxChildren: Infinity,
+    maxDepth: 5,
+    maxChildren: 10,
     characters: defaultChars,
     collapse: (item, options, depth) =>  {
-      if (depth >= (options.maxDepth ?? Infinity)) {
-        return true;
-      } else if (options.maxChildren === 0) {
-        return true;
-      }
+      if (depth >= (options.maxDepth ?? Infinity)) return true;
+      if (options.maxChildren === 0) return true;
       return false;
     },
-    children: (item) => item.children.sort((a, b) => a.name.localeCompare(b.name)),
-    summary: (items, inline) => {
-      if (items.length === 0) {
-        return '';
-      } else if (inline) {
-        return ' (' + items.flatMap(child => child.flattened).length.toString() + ' descendants)';
-      } else {
-        const descendants = items.map(item => item.descendants).flat().length;
-        return (`…${items.length} additional children`) + (descendants ? ` with ${descendants} descendants` : '');
-      }
+    visibleChildren: (item) => item.children.sort((a, b) => a.name.localeCompare(b.name)),
+    summary: (item, options) => {
+      const children = item.children.length;
+      if (children === 0 || children <= (options.maxChildren ?? Infinity)) return '';
+      let output = `${item.children.length} ${pluralize(item.children, 'child', 'children')}`;
+      const descendants = item.descendants.length;
+      if (descendants > children) output += `, ${descendants.toLocaleString()} descendants`;
+      return (` (${output})`);
+    },
+    truncated: (items) => {
+      const descendants = items.map(item => item.descendants).flat().length;
+      return (`…${items.length} additional ${pluralize(items.length, 'child', 'children')}`) + (descendants ? ` with ${descendants} ${pluralize(descendants, 'descendant', 'descendant')}` : '');
     }
   },
-  branches: {
-    name: item => {
-      const leaves = item.children.filter(child => child.isLeaf).length;
-      let name = item.name;
-      if (leaves) {
-        name += ` (${leaves} ${ leaves > 1 ? 'children' : 'child'})`
+  expand: {
+    maxDepth: Infinity,
+    maxChildren: Infinity,
+    collapse: () => false
+  },
+  collapse: {
+    summary: (item) => {
+      const leaves = item.children.filter(item => item.isLeaf).length;
+      if (leaves === 0) return '';
+      let output = `${leaves.toLocaleString()} hidden ${pluralize(leaves, 'child', 'children')}`;
+      if (item.isRoot) {
+        const descendants = item.descendants.length;
+        if (descendants > item.children.length) output += `${descendants.toLocaleString()} total descendants`;
       }
-      return name;
+      return (` (${output})`);
     },
     collapse: () => false,
-    children: item => item.children.filter(child => !child.isLeaf)
+    visibleChildren: item => item.children.filter(child => !child.isLeaf)
   },
   plain: {
     collapse: () => false,
-    children: item => item.children,
+    visibleChildren: item => item.children,
     characters: {
       root:       '',
       parent:     '\t',
@@ -137,48 +145,50 @@ export function render<T extends HierarchyItem>(item: T, customOptions: RenderOp
 }
 
 function renderItem<T extends HierarchyItem>(item: T, options: RenderOptions<T>, depth = 0, last = false): string {
-  const maxChildren = options.maxChildren ?? Infinity;
+  const label = prefix<T>(depth, last, options) + getLabel(item, options, depth) + getSummary(item, options, depth);
+  const lines = [label];
 
-  if (shouldCollapse(item, options, depth)) {
-    return prefix<T>(depth, last, options) + formatName(item, options, depth) + getSummary(item.children, false, options);
+  if (!shouldCollapse(item, options, depth)) {
+    const maxChildren = options.maxChildren ?? Infinity;
+    const visibleChildren = getChildren(item, options, depth);
+    do {
+      if (lines.length > maxChildren) {
+        if (visibleChildren.length === 1) {
+          lines.push(prefix<T>(depth + 1, true, options) + getLabel(visibleChildren[0], options, depth) + getSummary(visibleChildren[0], options, depth));
+        } else {
+          lines.push(prefix<T>(depth + 1, true, options) + getTruncated(visibleChildren, options, depth));
+        }
+        break;
+      }
+      const child = visibleChildren.shift();
+      if (child) {
+        const isLastChild = visibleChildren.length === 0;
+        lines.push(renderItem(child, options, depth + 1, isLastChild));
+      }
+    } while (visibleChildren.length > 0);
   }
   
-  const children = getChildren(item, options, depth);
-  const lines = [prefix<T>(depth, last, options) + formatName(item, options, depth)];
-
-  do {
-    if (lines.length > maxChildren) {
-      if (children.length === 1) {
-        lines.push(prefix<T>(depth + 1, true, options) + formatName(children[0], options, depth) + getSummary(children[0].children, true, options));
-      } else {
-        lines.push(prefix<T>(depth + 1, true, options) + getSummary(children, false, options));
-      }
-      break;
-    }
-    const child = children.shift();
-    if (child) {
-      const isLastChild = children.length === 0;
-      lines.push(renderItem(child, options, depth + 1, isLastChild));
-    }
-  } while (children.length > 0);
-  
   return lines.join('\n');
+}
+
+function getLabel<T extends HierarchyItem>(item: T, options: RenderOptions<T> = {}, depth = 0): string {
+  return (options.label ? options.label(item, options, depth) : item.name);
 }
 
 function shouldCollapse<T extends HierarchyItem>(item: T, options: RenderOptions<T> = {}, depth = 0) {
   return (options.collapse ? options.collapse(item, options, depth) : false);
 }
 
-function formatName<T extends HierarchyItem>(item: T, options: RenderOptions<T> = {}, depth = 0): string {
-  return (options.name ? options.name(item, options, depth) : item.name);
+function getSummary<T extends HierarchyItem>(item: T, options: RenderOptions<T> = {}, depth = 0): string {
+  return options.summary ? options.summary(item, options, depth) : ` (${item.children.length} children)`;
 }
 
-function getSummary<T extends HierarchyItem>(items: T[], inline: boolean, options: RenderOptions<T> = {}, depth = 0): string {
-  return options.summary ? options.summary(items, inline, options, depth) : ` (${items.length} children)`;
+function getTruncated<T extends HierarchyItem>(items: T[], options: RenderOptions<T> = {}, depth = 0): string {
+  return options.truncated ? options.truncated(items, options, depth) : ` additional (${items.length} children)`;
 }
 
 function getChildren<T extends HierarchyItem>(item: T, options: RenderOptions<T> = {}, depth = 0) {
-  return options.children ? options.children(item, options, depth) : item.children;
+  return options.visibleChildren ? options.visibleChildren(item, options, depth) : item.children;
 }
 
 let prefixes: string[] = [];
@@ -209,4 +219,9 @@ function prefix<T extends HierarchyItem>(depth = 0, last = false, options: Rende
   }
 
   return prefixes.join('');
+}
+
+function pluralize(input: number | unknown[], singular: string, plural: string) {
+  const count = Array.isArray(input) ? input.length : input; 
+  return (count === 1) ? singular : plural;
 }

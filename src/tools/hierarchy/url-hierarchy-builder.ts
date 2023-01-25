@@ -13,6 +13,10 @@ export class UrlHierarchyItem extends HierarchyItem<ObjectWithUrl> {
   get name(): string {
     return this._name ?? this.id.split('/').pop() ?? this.hierarchyId.toString();
   }
+  set name(input: string) {
+    this._name = input;
+  }
+
 
   constructor(public data: ObjectWithUrl) {
     super(data);
@@ -76,10 +80,10 @@ export interface UrlHierarchyBuilderOptions {
 }
 
 const defaults: UrlHierarchyBuilderOptions = {
-  subdomains: 'ignore',
   ignoreSearch: false,
   ignoreHash: true,
-  gaps: 'adopt'
+  gaps: 'adopt',
+  subdomains: 'ignore',
 }
 
 /**
@@ -139,6 +143,7 @@ export class UrlHierarchyBuilder<UserData extends ObjectWithUrl = ObjectWithUrl>
     const id = 'root:' + rootName;
     const root = new UrlHierarchyItem({ url: id });
     root.id = id;
+    root.name = rootName;
     root.inferred = true;
     this.pool.set(id, root);
     for(const child of children) {
