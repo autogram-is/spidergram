@@ -14,10 +14,14 @@ export abstract class HierarchyBuilder<
   UserData = Record<string, unknown>,
   InputType = UserData
 > {
-  _items: Map<string, ItemType>;
+  /**
+   * An ID-keyed map of all items in the hierarchy, including root nodes, orphans,
+   * leaf nodes, and so on.
+   */
+  readonly pool: Map<string, ItemType>;
   
   constructor() {
-    this._items = new Map<string, ItemType>();
+    this.pool = new Map<string, ItemType>();
   }
   
   /**
@@ -28,9 +32,8 @@ export abstract class HierarchyBuilder<
    * InputType is specified, however, this function is reponsible for transforming it
    * into the UserData required by the HierarchyItem class before creating the instance.
    */
-  abstract makeItem(input: InputType): ItemType;
+  abstract makeItem(input?: InputType | UserData): ItemType;
   
-
   /**
    * HierarchyBuilder implementations use this function to iterate though the full list
    * of items and populate their parent/child relationships.
@@ -42,7 +45,7 @@ export abstract class HierarchyBuilder<
    * leaf nodes, and so on.
    */
   get items() {
-    return [...this._items.values()];
+    return [...this.pool.values()];
   }
 
   /**
@@ -52,11 +55,11 @@ export abstract class HierarchyBuilder<
    * @param input - One or more data objects to be turned into HierarchyItems
    * @param populateRelationships - Set to `false` to suppress recalculating relationships
    */
-  add(input: InputType | InputType[], populateRelationships = true): this {
+  add(input: (InputType | UserData) | (InputType | UserData)[], populateRelationships = true): this {
     const inputs = Array.isArray(input) ? input : [input];
     for (const i of inputs) {
       const item = this.makeItem(i);
-      this._items.set(item.id, item);
+      this.pool.set(item.id, item);
     }
     if (populateRelationships) this.populateRelationships();
     return this;
@@ -78,7 +81,7 @@ export abstract class HierarchyBuilder<
       for (const child of item.children) {
         child.setParent(undefined)
       }
-      this._items.delete(item.id);
+      this.pool.delete(item.id);
     }
 
     if (populateRelationships) this.populateRelationships();
@@ -89,14 +92,15 @@ export abstract class HierarchyBuilder<
    * The root node with the largest number of descendants, if one exists.
    */
   findLargestRoot(): ItemType | undefined {
-    return this.findRoots()
-      .sort((a, b) => a.descendents.length - b.descendents.length)[0];
+    return this.findRoots()[0];
   }
 
   /**
    * An array of all root nodes in the Hierarchy pool
    */
   findRoots(): ItemType[] {
-    return this.items.filter(item => item.isRoot);
+    return this.items.filter(item => item.isRoot)
+      .sort((a, b) => a.descendants.length - b.descendants.length)
+      .reverse();
   }
 }

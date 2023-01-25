@@ -1,105 +1,186 @@
 import { Flags } from '@oclif/core';
-import { NormalizedUrl } from '@autogram/url-tools';
-import { CLI, SgCommand, aql } from '../../index.js';
+import { NormalizedUrlSet } from '@autogram/url-tools';
+import { CLI, Query, SgCommand, aql, HierarchyTools } from '../../index.js';
+import { URL_NO_COMMAS_REGEX, URL_WITH_COMMAS_REGEX } from 'crawlee';
+import { readFile } from 'fs/promises';
+import minimatch from 'minimatch';
 
 export default class Urls extends SgCommand {
-  static summary = 'Test URL normalization and filtering';
+  static summary = 'Summarize a list of URLs';
 
   static usage = '<%= config.bin %> <%= command.id %> [urls]';
 
   static examples = [
-    '<%= config.bin %> <%= command.id %> https://example.com',
-    '<%= config.bin %> <%= command.id %> --un --limit=100',
+    '<%= config.bin %> <%= command.id %>',
+    '<%= config.bin %> <%= command.id %> --input=urls.txt',
+    '<%= config.bin %> <%= command.id %> --preset=collapse',
+    "<%= config.bin %> <%= command.id %> --depth=5 --maxChildren=10 --highlight='**/*.pdf'",
   ];
 
   static flags = {
     ...CLI.globalFlags,
-    limit: Flags.integer({
-      summary: 'Limit the number of URLs tested',
-      default: 20,
+    input: Flags.string({
+      char: 'i',
+      summary: 'A database collection or filename.',
+      default: 'resources',
     }),
-    unfiltered: Flags.boolean({
-      summary: 'Show both changed and unchanged urls',
+    csv: Flags.boolean({
+      char: 'c',
+      summary: 'Treat input files as CSV',
       default: false,
     }),
+    summary: Flags.boolean({
+      char: 's',
+      summary: 'Display summary information about the full pool of URLs',
+      default: true,
+    }),
+    nonweb: Flags.boolean({
+      char: 'n',
+      summary: 'Include non-web URLs in the summary',
+      dependsOn: ['summary'],
+      default: false
+    }),
+    unparsable: Flags.boolean({
+      char: 'u',
+      summary: 'Include unparsable URLs in the summary',
+      dependsOn: ['summary'],
+      default: false
+    }),
+    hosts: Flags.boolean({
+      char: 'h',
+      summary: 'List the unique hostnames in the URL set',
+      dependsOn: ['summary'],
+      default: false
+    }),
+    hide: Flags.string({
+      summary: 'URLs matching this string will be hidden from view',
+      description: "Both --hide and --highlight use glob-style wildcards; '**/*cnn.com*' will match content on CNN or one of its domains; '**/news*' would only display the news directory and its descendents, and so on.",
+      required: false
+    }),
+    highlight: Flags.string({
+      summary: 'URLs matching this string will be highlighted',
+      required: false
+    }),
+    tree: Flags.boolean({
+      char: 't',
+      summary: 'Display a visual tree view of the parsable web URLs',
+      default: true,
+    }),
+    preset: Flags.enum({
+      summary: 'A URL display preset',
+      default: 'default',
+      options: ['default', 'expand', 'collapse', 'markdown']
+    }),
+    maxChildren: Flags.integer({
+      char: 'm',
+      summary: "Truncate lists of children longer than this limit",
+      required: false,
+    }),
+    depth: Flags.integer({
+      summary: 'Summarize branches deeper than this level',
+      required: false,
+    }),
+    gaps: Flags.enum({
+      summary: 'Gap resolution strategy',
+      description: "How to deal with URL gaps, where a URL is implied by another URL's path but does not itself exist in the list of URLs. 'ignore' will discard URLs with gaps; 'adopt' will treat them as direct children of their closest ancestor, and 'bridge' will create intermediary URLs to accuratly represent the full path.",
+      options: ['ignore', 'adopt', 'bridge'],
+      default: 'bridge',
+    }),
+    subdomains: Flags.boolean({
+      char: 'd',
+      summary: 'Treat subdomains as children of their TLD',
+      default: false,
+    })
   };
 
-  static args = [
-    {
-      name: 'urls',
-      description: 'One or more URLs to crawl',
-      multiple: true,
-    },
-  ];
-
-  static strict = false;
-
   async run() {
+    const { flags } = await this.parse(Urls);
     const { graph } = await this.getProjectContext();
-    const { argv: urls, flags } = await this.parse(Urls);
 
-    const columns = {
-      original: { header: 'Original' },
-      normalized: { header: 'Normalized' },
-    };
+    let rawUrls: string[] = [];
+    let filteredUrls: string[] = [];
 
-    const data: { original: string; normalized: string }[] = [];
-    if (urls.length === 0) {
-      const query = aql`
-        FOR uu IN unique_urls
-        RETURN (uu.parsed.original == null) ? uu.url : uu.parsed.original
-      `;
-      const dbUrls = await graph
-        .query<string>(query)
-        .then(cursor => cursor.all());
-      urls.push(...dbUrls);
+    if (flags.input.indexOf('.') !== -1) {
+      const urlFile = await readFile(flags.input)
+        .then(buffer => buffer.toString())
+        .catch(() => this.error(`File ${flags.input} couldn't be opened`));
+      rawUrls = urlFile.match(flags.csv ? URL_NO_COMMAS_REGEX : URL_WITH_COMMAS_REGEX) || [];
+    } else {
+      const collection = graph.collection(flags.input);
+      if (await collection.exists() === false) {
+        this.error(`Collection ${flags.input} doesn't exist`);
+      }
+      rawUrls = await Query.run<string>(aql`FOR item IN ${collection} FILTER item.url != null RETURN item.url`);
     }
 
-    const results = {
-      total: urls.length,
-      altered: 0,
-      unparsable: 0,
-    };
+    if (rawUrls.length === 0) {
+      this.error('No URLs were found.');
+    }
 
-    for (const url of urls) {
-      try {
-        const normal = new NormalizedUrl(url).href;
-        if (normal === url) {
-          if (flags.unfiltered) {
-            data.push({
-              original: this.format.info(url),
-              normalized: this.format.info('unchanged'),
-            });
+    filteredUrls = flags.hide ? rawUrls.filter(url => !minimatch(url, flags.hide ?? '')) : rawUrls;
+    const urls = new NormalizedUrlSet(filteredUrls, { strict: false });
+    
+    const webUrls = [...urls].filter(url => ['http:', 'https:'].includes(url.protocol));
+
+    const hosts = new Set<string>();
+    for (const url of webUrls) {
+      hosts.add(url.hostname);
+    }
+    
+    const summary: Record<string, number| string[]> = {
+      'Total URLs': rawUrls.length
+    };
+    if (hosts.size > 1) summary['Unique Hosts'] = flags.hosts ? [...hosts] : [...hosts].length;
+    if (flags.hide) summary['Hidden URLs'] = rawUrls.length - filteredUrls.length;
+    if (urls.unparsable.size) summary['Unparsable Urls'] = urls.unparsable.size;
+    if (flags.nonweb) summary['Non-Web URLs'] = urls.size - webUrls.length;
+
+    const output: string[] = [];
+    if (flags.tree) {
+      const treeOptions: HierarchyTools.UrlHierarchyBuilderOptions = { 
+        subdomains: flags.subdomains ? 'children' : undefined
+      };
+      if (flags.gaps === 'adopt') treeOptions.gaps = 'adopt';
+      if (flags.gaps === 'bridge') treeOptions.gaps = 'bridge';
+
+      const renderOptions: HierarchyTools.RenderOptions = {
+        preset: flags.preset,
+        maxChildren: flags.childern,
+        maxDepth: flags.depth,
+        label: (item) => {
+          if (item instanceof HierarchyTools.UrlHierarchyItem) {
+            if (flags.highlight && minimatch(item.data.url.toString(), flags.highlight)) return this.chalk.bold(item.name);
+            if (item.inferred) return this.chalk.dim(item.name); 
           }
-        } else {
-          results.altered++;
-          data.push({
-            original: url,
-            normalized: normal,
-          });
+          if (item.isRoot && flags.highlight === undefined) return this.chalk.bold(item.name);
+          return item.name;
         }
-      } catch {
-        results.unparsable++;
-        data.push({
-          original: url,
-          normalized: this.format.error('unparsable'),
-        });
+      };
+
+      if (flags.preset === 'markdown') {
+        renderOptions.label = item => {
+          if (item instanceof HierarchyTools.UrlHierarchyItem) {
+            return `${item.isRoot ? '# ' : ''}[${item.name}](${item.data.url.toString()})`
+          }
+          return item.name;
+        };
+      }
+
+      const hierarchy = new HierarchyTools.UrlHierarchyBuilder(treeOptions).add(webUrls);
+      const orphans = hierarchy.items.filter(item => item.isOrphan).length;
+      if (orphans) summary['Orphaned URLs'] = orphans;
+
+      for (const root of hierarchy.findRoots()) {
+        output.push(root.render(renderOptions));
       }
     }
 
-    this.ux.table(data.slice(0, flags.limit - 1), columns);
-    let message = `${this.format.success(
-      results.total,
-    )} URLs total (${this.format.success(
-      results.altered,
-    )} altered by normalizer`;
-    if (results.unparsable > 0) {
-      message += `, ${this.format.success(results.unparsable)} unparsable)`;
-    } else {
-      message += ')';
+    if (flags.summary) {
+      this.infoList(summary);
     }
-
-    this.log();
-    this.log(message);
+    if (flags.summary && flags.tree) this.log();
+    if (flags.tree) {
+      this.log(output.join('\n\n'));
+    }
   }
 }

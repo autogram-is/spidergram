@@ -1,4 +1,7 @@
 import _ from 'lodash';
+import { render, RenderOptions } from './render.js';
+
+type UserDataDefault = Record<string, unknown>
 
 /**
  * An individual node in a hierarchy, responsible for its own identity and
@@ -6,7 +9,7 @@ import _ from 'lodash';
  * 
  * @typeParam UserData - Payload data for the hierarchy item
  */
-export class HierarchyItem<UserData = Record<string, unknown>> {
+export class HierarchyItem<UserData extends UserDataDefault = UserDataDefault> {
   protected static _idCounter = 0;
   protected _name?: string;
   protected _hierarchyId = HierarchyItem._idCounter++;
@@ -25,7 +28,7 @@ export class HierarchyItem<UserData = Record<string, unknown>> {
   /**
    * Create a new hierarchy item with the passed-in data, but no parents or children 
    */
-  constructor(public data: UserData) {
+  constructor(public data?: UserData) {
     this.children = [];
   }
   
@@ -56,7 +59,7 @@ export class HierarchyItem<UserData = Record<string, unknown>> {
   }
 
   /**
-   * A descriptive label for the node; if none exists, falls back to the ID.
+   * A descriptive label for the node; if none exists, fall back to the ID.
    */
   get name(): string {
     return this._name ?? this.id;
@@ -65,7 +68,6 @@ export class HierarchyItem<UserData = Record<string, unknown>> {
   set name(input: string) {
     this._name = input;
   }
-
 
   /**
    * Set or remove the item's parent, removing it from the previous parent's children
@@ -98,7 +100,7 @@ export class HierarchyItem<UserData = Record<string, unknown>> {
 
     // No ancestors as children
     if (this.ancestors.map(ancestor => ancestor.id).includes(newChild.id)) {
-      throw new Error('Item cannot have an ancestor as a descendent');
+      throw new Error('Item cannot have an ancestor as a descendant');
     }
 
     // If the item is already a child, return.
@@ -131,17 +133,17 @@ export class HierarchyItem<UserData = Record<string, unknown>> {
   }
   
   /**
-   * An array of nodes containing the current item and all of its descendents
+   * An array of nodes containing the current item and all of its descendants
    */
   get flattened(): this[] {
-    return [this, ...this.descendents];
+    return [this, ...this.descendants];
   }
 
   /**
-   * An array of nodes containing all of the current item's descendents
+   * An array of nodes containing all of the current item's descendants
    */
-  get descendents(): this[] {
-    return _.flattenDeep([this.children, ...this.children.map(child => child.descendents)]);
+  get descendants(): this[] {
+    return _.flattenDeep([this.children, ...this.children.map(child => child.descendants)]);
   }
 
   /**
@@ -152,7 +154,6 @@ export class HierarchyItem<UserData = Record<string, unknown>> {
     if (this.parent === undefined) return [];
     return [...this.parent.children].filter(item => item.id !== this.id);
   }
-
 
   /**
    * A Root node has children but no parent.
@@ -171,19 +172,11 @@ export class HierarchyItem<UserData = Record<string, unknown>> {
   /**
    * A Leaf node has a parent, but no children.
    */
-  get isLeaf() {
-    return (this.parent && this.children.length === 0);
+  get isLeaf(): boolean {
+    return (this.parent !== undefined && this.children.length === 0);
   }
 
-
-  /**
-   * Builds a simple string representation of the node and all of its children. 
-   */
-  toTreeString(indent = 0) {
-    let output = '  '.repeat(indent) + this.name + `\n`;
-    for (const child of this.children) {
-      output += child.toTreeString(indent + 1);
-    }
-    return output;
+  render(options: RenderOptions<HierarchyItem> = {}): string {
+    return render(this, options);
   }
 }
