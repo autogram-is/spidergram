@@ -118,7 +118,7 @@ const presets: Record<string, RenderOptions<HierarchyItem>> = {
       let output = `${leaves.toLocaleString()} hidden ${pluralize(leaves, 'child', 'children')}`;
       if (item.isRoot) {
         const descendants = item.descendants.length;
-        if (descendants > item.children.length) output += `${descendants.toLocaleString()} total descendants`;
+        if (descendants > item.children.length) output += `, ${descendants.toLocaleString()} total descendants`;
       }
       return (` (${output})`);
     },
