@@ -1,10 +1,11 @@
-import { getCheerio } from './get-cheerio.js';
+import { HtmlTools } from '../index.js';
 import arrify from 'arrify';
+import _ from 'lodash';
 
 /**
  * Description of a specific markup pattern, like design element or page component.
  */
-export interface PatternDefinition {
+export interface PatternDefinition extends HtmlTools.ElementDataOptions {
   /**
    * A unique name for the pattern
    */
@@ -14,25 +15,18 @@ export interface PatternDefinition {
    * A CSS selector used to identify the pattern
    */
   selector: string;
-
-  /**
-   * A function to extract additional data from each pattern instance.
-   * This can be usd to capture data inside the pattern markup, like
-   * a Card's headline and summary text, a CTA Button's link text and
-   * icon, or the number of items in a Rotator.
-   */
-  extractor?: (
-    element: cheerio.Element,
-    $: cheerio.Root,
-  ) => Record<string, unknown>;
 }
 
-export interface FoundPattern {
-  [keyof: string]: unknown;
+export interface FoundPattern extends HtmlTools.ElementData {
   pattern: string;
-  tagName: string;
-  attributes?: Record<string, string>;
-  data?: Record<string, unknown>;
+  selector: string;
+}
+
+const defaults: HtmlTools.ElementDataOptions = {
+  includeTagName: true,
+  contentIsAttribute: true,
+  dataIsDictionary: true,
+  classIsArray: true
 }
 
 /**
@@ -46,20 +40,16 @@ export function findPatterns(
   patterns: PatternDefinition | PatternDefinition[],
 ): FoundPattern[] {
   const results: FoundPattern[] = [];
-  const $ = typeof html === 'string' ? getCheerio(html) : html;
+  const $ = typeof html === 'string' ? HtmlTools.getCheerio(html) : html;
 
   for (const pattern of arrify(patterns)) {
-    const search = $(pattern.selector)
-      .toArray()
-      .map(el => {
+    const search: FoundPattern[] = $(pattern.selector).toArray().map(element => {
         return {
           pattern: pattern.name,
-          tagName: $(el).get(0).tagName,
-          attributes: $(el).attr() ?? undefined,
-          data: $(el).data() ?? undefined,
-          ...(pattern.extractor ? pattern.extractor(el, $) : {}),
-        };
-      });
+          selector: pattern.selector,
+          ...HtmlTools.findElementData($(element), _.defaultsDeep(pattern, defaults))
+        }
+    });
     results.push(...search);
   }
   return results;

@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { HtmlTools } from '../index.js';
 
 /**
  * Properties and attributes of a given DOM element.
@@ -9,7 +10,7 @@ export interface ElementData {
   id?: string,
   classes?: string[],
   data?: Record<string, string>
-  content?: string,
+  content?: string
 }
 
 /**
@@ -90,10 +91,11 @@ const defaults: ElementDataOptions = {
  *   whitespace surrounding individual classnames is stripped.
  * - 'data-' attributes are moved to a dictionary in the 'data' property.
  * 
- * @param $ - A Cheerio node, usually the result of a query run on a larger document
+ * @param input - An HTML fragment or a Cheerio node, usually the result of a query run on a larger document
  * @param options - An {ElementDataOptions} object with flags and settings to control formatting of the returned data.
  */
-export function findElementData($: cheerio.Cheerio, customOptions: ElementDataOptions = {}) {
+export function findElementData(input: cheerio.Cheerio | string, customOptions: ElementDataOptions = {}) {
+  const $ = typeof input === 'string' ? HtmlTools.getCheerio(input).root() : input;
   const options: ElementDataOptions = _.defaultsDeep(customOptions, defaults);
   const results: ElementData = { ...options.userData };
 
@@ -103,12 +105,14 @@ export function findElementData($: cheerio.Cheerio, customOptions: ElementDataOp
 
   for (const [name, value] of Object.entries($.first().attr())) {
     if (name === 'class') {
-      results.classes = value?.replace(/s+/, ' ').split(' ').map(c => c.trim());
+      delete results.class;
+      results.classes = value?.replace(/\s+/, ' ').split(' ').map(c => c.trim());
     } else if (name.startsWith('data-')) {
       const data = valueToFlag(value, options.dropEmptyAttributes);
       if (data) {
         results.data ??= {};
         results.data[name.replace('data-', '')] = data;
+        delete results[name];
       }
     } else {
       const data = valueToFlag(value, options.dropEmptyAttributes);
