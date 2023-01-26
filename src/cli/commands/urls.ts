@@ -100,6 +100,8 @@ export default class Urls extends SgCommand {
     let rawUrls: string[] = [];
     let filteredUrls: string[] = [];
 
+    this.ux.action.start('Loading URLs');
+
     if (flags.input.indexOf('.') !== -1) {
       const urlFile = await readFile(flags.input)
         .then(buffer => buffer.toString())
@@ -116,6 +118,10 @@ export default class Urls extends SgCommand {
     if (rawUrls.length === 0) {
       this.error('No URLs were found.');
     }
+
+    this.ux.action.stop();
+
+    this.ux.action.start('Building tree');
 
     filteredUrls = flags.hide ? rawUrls.filter(url => !minimatch(url, flags.hide ?? '')) : rawUrls;
     const urls = new NormalizedUrlSet(filteredUrls, { strict: false });
@@ -174,6 +180,9 @@ export default class Urls extends SgCommand {
         output.push(root.render(renderOptions));
       }
     }
+
+    this.ux.action.stop();
+    this.log();
 
     if (flags.summary) {
       this.infoList(summary);
