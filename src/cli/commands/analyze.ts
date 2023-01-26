@@ -4,7 +4,7 @@ import {
   HtmlTools,
   GraphWorker,
   OutputLevel,
-  aql
+  aql,
 } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
 
@@ -41,18 +41,17 @@ export default class Analyze extends SgCommand {
       filter: aql`FILTER item.code == 200 AND item.mime == 'text/html'`,
       task: async resource => {
         if (is.nonEmptyString(resource.body)) {
-
           if (flags.metadata) {
             const data = HtmlTools.getPageData(resource);
             if (data) resource.data = data;
           }
 
           if (flags.text) {
-            const content = HtmlTools.getPageContent( resource, {
+            const content = HtmlTools.getPageContent(resource, {
               selector: flags.body,
-              readability: flags.readability
+              readability: flags.readability,
             });
-  
+
             resource.content = content;
           }
 

@@ -5,7 +5,7 @@ export * from './render.js';
 
 /**
  * Tools for building and working with parent/child hierarchies
- * 
+ *
  * @remarks
  * Spidergram's hierachy tools are all designed around a core scenario: you have
  * a flat list of data objects, and you want to turn 'em into a tree. They have
@@ -17,11 +17,11 @@ export * from './render.js';
  * - Page Resources with Schema.org 'breadcrumb' metadata
  * - Page Resources with metadata, and a hand-crafted hierarchy with metadata
  *   based rules
- * 
+ *
  * Each different HierarchyBuilder is meant to handle a specific scenario like the
  * ones above; all of them descend from the core {@link HierarchyBuilder} class,
  * and thus share some basic structure:
- * 
+ *
  * - A HierarchyBuilder implementation is responsible for turning UserData records
  *   into HierarchyItems, implementing the algorithm that matches HierarchyItems
  *   with their relatives, and holding onto the complete list of all HierarchyItems,

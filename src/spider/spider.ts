@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import arrify from 'arrify';
-import { log, PlaywrightCrawlingContext, SystemInfo} from 'crawlee';
+import { log, PlaywrightCrawlingContext, SystemInfo } from 'crawlee';
 import { FinalStatistics } from 'crawlee';
 import { UncrawledUrlOptions, UncrawledUrlQuery } from '../reports/index.js';
 import _ from 'lodash';
@@ -38,15 +38,17 @@ import {
 
 type SpiderEventMap = Record<PropertyKey, unknown[]> & {
   systemInfo: [status: SystemInfo & SpiderStatus];
-  requestComplete: [status: SpiderStatus, url: string]
-  crawlComplete: [status: SpiderStatus & FinalStatistics]
-  aborting: [reason: string],
-  exiting: [reason: string],
-}
+  requestComplete: [status: SpiderStatus, url: string];
+  crawlComplete: [status: SpiderStatus & FinalStatistics];
+  aborting: [reason: string];
+  exiting: [reason: string];
+};
 
 type SpiderEventType = keyof SpiderEventMap;
 type SpiderEventParams<T extends SpiderEventType> = SpiderEventMap[T];
-type SpiderEventListener<T extends SpiderEventType> = (...args: SpiderEventParams<T>) => unknown
+type SpiderEventListener<T extends SpiderEventType> = (
+  ...args: SpiderEventParams<T>
+) => unknown;
 
 type RequestValue =
   | string
@@ -123,7 +125,7 @@ export class Spider extends PlaywrightCrawler {
     this.crawlerOptions = crawler;
 
     this._events = new AsyncEventEmitter();
-    
+
     // Intercept and re-map the Crawlee systemInfo event
     this.events.on('systemInfo', (info: SystemInfo) => {
       this._events.emit('systemInfo', { ...info, ...this.status });
@@ -138,19 +140,24 @@ export class Spider extends PlaywrightCrawler {
     await super._runRequestHandler(context);
   }
 
-
   /**
    * Respond to an internal Spider event.
-   * 
-   * - `systemInfo`: Fired at regular intervals, summarizing memory and server load 
+   *
+   * - `systemInfo`: Fired at regular intervals, summarizing memory and server load
    * - `requestComplete`: Fired when a specific reqest has been processed
    * - `crawlComplete`: Fired when last request in the queue has been processed
    */
-  on<T extends SpiderEventType>(event: T, listener: SpiderEventListener<T>): void {
+  on<T extends SpiderEventType>(
+    event: T,
+    listener: SpiderEventListener<T>,
+  ): void {
     this._events.on<T>(event, listener);
   }
 
-  off<T extends SpiderEventType>(event: T, listener: SpiderEventListener<T>): void {
+  off<T extends SpiderEventType>(
+    event: T,
+    listener: SpiderEventListener<T>,
+  ): void {
     if (listener) {
       this._events.removeListener<T>(event, listener);
     } else {
@@ -217,9 +224,13 @@ export class Spider extends PlaywrightCrawler {
     const queue = await this.getRequestQueue();
 
     // Normalize and deduplicate any incoming URLs.
-    const currentNormalizer = this.spiderOptions.urlOptions.normalizer ?? NormalizedUrl.normalizer;
-    const uniques = new UniqueUrlSet(undefined, { normalizer: currentNormalizer, guessProtocol: true });
-    
+    const currentNormalizer =
+      this.spiderOptions.urlOptions.normalizer ?? NormalizedUrl.normalizer;
+    const uniques = new UniqueUrlSet(undefined, {
+      normalizer: currentNormalizer,
+      guessProtocol: true,
+    });
+
     for (const value of requests) {
       if (is.string(value)) {
         uniques.add(value);
@@ -242,8 +253,8 @@ export class Spider extends PlaywrightCrawler {
           url.pathname = '/robots.txt';
           return url;
         },
-        userData: { handler: 'robotstxt' }
-      }
+        userData: { handler: 'robotstxt' },
+      };
       const domains = new UniqueUrlSet([...uniques], rOptions);
       await graph.push([...domains], false);
       await queue.addRequests(
@@ -260,8 +271,8 @@ export class Spider extends PlaywrightCrawler {
           url.pathname = '/sitemap.xml';
           return url;
         },
-        userData: { handler: 'sitemap' }
-      }
+        userData: { handler: 'sitemap' },
+      };
       const domains = new UniqueUrlSet([...uniques], sOptions);
       await graph.push([...domains], false);
       await queue.addRequests(
@@ -303,7 +314,7 @@ export class Spider extends PlaywrightCrawler {
       }
       urls = await new UncrawledUrlQuery(options).run();
     }
-    
+
     // The resume method currently DOES NOT retrieve robots files
     // that had previously been parsed and processed.
 
@@ -328,7 +339,6 @@ export class Spider extends PlaywrightCrawler {
 async function playwrightPostNavigate(context: SpiderContext) {
   context.$ = await playwrightUtils.parseWithCheerio(context.page);
 }
-
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 function splitOptions(options: Partial<SpiderOptions> = {}) {

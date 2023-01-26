@@ -6,7 +6,7 @@ import prependHttp from 'prepend-http';
 import { JsonMap } from '@salesforce/ts-types';
 import arrify from 'arrify';
 
-type ValidUniqueUrlInput = UniqueUrl | NormalizedUrl | string
+type ValidUniqueUrlInput = UniqueUrl | NormalizedUrl | string;
 
 /**
  * Behavioral options for a UniqueUrlSet
@@ -21,10 +21,10 @@ export interface UniqueUrlSetOptions {
 
   /**
    * A UrlMutator function to transform any parsed URLs.
-   * 
+   *
    * NOTE: This function *will not* be applied to NormalizedUrl and UniqueUrl objects,
    * on the assumption that they've both been normalized already.
-   * 
+   *
    * If no Mutator is specified, the default NormalizedUrl.normalizer will be used.
    */
   normalizer?: UrlMutator;
@@ -38,13 +38,13 @@ export interface UniqueUrlSetOptions {
   /**
    * A dictionary of additional data to set on all UniqueUrl objects in the set.
    * This can be useful for bulk-transforming strings to UniqueUrls.
-   * 
+   *
    * NOTE: Values will be overwritten if the keys in userData already exist on
    * the UniqueUrl.
    *
    * @type {?JsonMap}
    */
-  userData?: JsonMap
+  userData?: JsonMap;
 }
 
 export class UniqueUrlSet extends Set<UniqueUrl> {
@@ -58,10 +58,10 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
 
   public constructor(
     input?: ValidUniqueUrlInput[] | ValidUniqueUrlInput,
-    options: UniqueUrlSetOptions = {}
+    options: UniqueUrlSetOptions = {},
   ) {
     super();
-    
+
     this.keepUnparsable = options.keepUnparsable ?? false;
     this.normalizer = options.normalizer ?? NormalizedUrl.normalizer;
     this.guessProtocol = options.guessProtocol ?? false;

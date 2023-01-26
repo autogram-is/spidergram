@@ -12,28 +12,28 @@ import { HierarchyItem } from './hierarchy-item.js';
 export abstract class HierarchyBuilder<
   ItemType extends HierarchyItem = HierarchyItem,
   UserData = Record<string, unknown>,
-  InputType = UserData
+  InputType = UserData,
 > {
   /**
    * An ID-keyed map of all items in the hierarchy, including root nodes, orphans,
    * leaf nodes, and so on.
    */
   readonly pool: Map<string, ItemType>;
-  
+
   constructor() {
     this.pool = new Map<string, ItemType>();
   }
-  
+
   /**
    * Construct a new Hierarchy Item and return it *without* inserting it into the Hierarchy.
-   * 
+   *
    * @remarks
    * In most cases, this will be a wrapper for `new HierarchyItem(input)`. If a custom
    * InputType is specified, however, this function is reponsible for transforming it
    * into the UserData required by the HierarchyItem class before creating the instance.
    */
   abstract makeItem(input?: InputType | UserData): ItemType;
-  
+
   /**
    * HierarchyBuilder implementations use this function to iterate though the full list
    * of items and populate their parent/child relationships.
@@ -51,11 +51,14 @@ export abstract class HierarchyBuilder<
   /**
    * Takes one or more records, creates new HierarchyItems, adds them to the hierarchy,
    * then optionall recalculates the parent/child relationships of the full hierarchy.
-   * 
+   *
    * @param input - One or more data objects to be turned into HierarchyItems
    * @param populateRelationships - Set to `false` to suppress recalculating relationships
    */
-  add(input: (InputType | UserData) | (InputType | UserData)[], populateRelationships = true): this {
+  add(
+    input: (InputType | UserData) | (InputType | UserData)[],
+    populateRelationships = true,
+  ): this {
     const inputs = Array.isArray(input) ? input : [input];
     for (const i of inputs) {
       const item = this.makeItem(i);
@@ -64,7 +67,6 @@ export abstract class HierarchyBuilder<
     if (populateRelationships) this.populateRelationships();
     return this;
   }
-
 
   /**
    * Remove one or more existing items from the hiearchy pool, optionally recalculating
@@ -79,7 +81,7 @@ export abstract class HierarchyBuilder<
     for (const item of inputs) {
       item.setParent(undefined);
       for (const child of item.children) {
-        child.setParent(undefined)
+        child.setParent(undefined);
       }
       this.pool.delete(item.id);
     }
@@ -87,7 +89,7 @@ export abstract class HierarchyBuilder<
     if (populateRelationships) this.populateRelationships();
     return this;
   }
-  
+
   /**
    * The root node with the largest number of descendants, if one exists.
    */
@@ -99,7 +101,8 @@ export abstract class HierarchyBuilder<
    * An array of all root nodes in the Hierarchy pool
    */
   findRoots(): ItemType[] {
-    return this.items.filter(item => item.isRoot)
+    return this.items
+      .filter(item => item.isRoot)
       .sort((a, b) => a.descendants.length - b.descendants.length)
       .reverse();
   }

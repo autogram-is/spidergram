@@ -26,8 +26,8 @@ const defaults: HtmlTools.ElementDataOptions = {
   includeTagName: true,
   contentIsAttribute: true,
   dataIsDictionary: true,
-  classIsArray: true
-}
+  classIsArray: true,
+};
 
 /**
  * Identify and extract instances of markup patterns inside an HTML page.
@@ -43,13 +43,18 @@ export function findPatterns(
   const $ = typeof html === 'string' ? HtmlTools.getCheerio(html) : html;
 
   for (const pattern of arrify(patterns)) {
-    const search: FoundPattern[] = $(pattern.selector).toArray().map(element => {
+    const search: FoundPattern[] = $(pattern.selector)
+      .toArray()
+      .map(element => {
         return {
           pattern: pattern.name,
           selector: pattern.selector,
-          ...HtmlTools.findElementData($(element), _.defaultsDeep(pattern, defaults))
-        }
-    });
+          ...HtmlTools.findElementData(
+            $(element),
+            _.defaultsDeep(pattern, defaults),
+          ),
+        };
+      });
     results.push(...search);
   }
   return results;

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { HierarchyBuilder } from "./hierarchy-builder.js";
+import { HierarchyBuilder } from './hierarchy-builder.js';
 import { HierarchyItem } from './hierarchy-item.js';
 import { NormalizedUrl, ParsedUrl } from '@autogram/url-tools';
 
@@ -11,7 +11,9 @@ export class UrlHierarchyItem extends HierarchyItem<ObjectWithUrl> {
   adopted = false;
 
   get name(): string {
-    return this._name ?? this.id.split('/').pop() ?? this.hierarchyId.toString();
+    return (
+      this._name ?? this.id.split('/').pop() ?? this.hierarchyId.toString()
+    );
   }
   set name(input: string) {
     this._name = input;
@@ -29,7 +31,7 @@ export interface UrlHierarchyBuilderOptions {
   /**
    * Ignore URL search parameters when constructing the hierarchy; multiple
    * records with the same url will be collapsed into a single Hierarchy Item.
-   * 
+   *
    * @defaultValue `false`
    */
   ignoreSearch?: boolean;
@@ -37,37 +39,37 @@ export interface UrlHierarchyBuilderOptions {
   /**
    * Ignore URL hashtags/fragments when constructing the hierarchy; multiple
    * records with the same url will be collapsed into a single Hierarchy Item.
-   * 
+   *
    * @defaultValue `false`
    */
   ignoreHash?: boolean;
 
   /**
    * A strategy for resolving gaps in the URL hierarchy.
-   * 
+   *
    * If example.com and example.com/assets/image.jpg both exist, but example.com/assets
    * does not, a gap in the URL hierarchy exists.
-   * 
+   *
    * - ignore: Do not attempt to fix the gap; example.com/assets/image.jpg will become an orphan node, or a new root node if it has its own children.
    * - adopt: Set the child's parent to its closest ancestor, if one can be found.
-   * - bridge: Fill the gap with new HierarchyItem records 
-   * 
+   * - bridge: Fill the gap with new HierarchyItem records
+   *
    * @defaultValue `adopt`
    */
   gaps?: 'ignore' | 'adopt' | 'bridge';
 
   /**
    * A strategy for dealing with multiple related subdomains in a URL pool
-   * 
+   *
    * - ignore: Subdomains are treated as standalone hosts and will form their own root nodes.
    * - children: Subdomains are treated as children of their TLD, if it exists as a root node.
-   * 
+   *
    * @defaultValue `ignore`
    */
-  subdomains?: 'ignore' | 'children'
+  subdomains?: 'ignore' | 'children';
 
   /**
-   * An optional base URL to use with incomplete or relative URLs 
+   * An optional base URL to use with incomplete or relative URLs
    */
   base?: string;
 
@@ -83,12 +85,14 @@ const defaults: UrlHierarchyBuilderOptions = {
   ignoreHash: true,
   gaps: 'adopt',
   subdomains: 'ignore',
-}
+};
 
 /**
  * Constructs a hierarchy of nodes based on URL path structures.
  */
-export class UrlHierarchyBuilder<UserData extends ObjectWithUrl = ObjectWithUrl> extends HierarchyBuilder<UrlHierarchyItem, UserData, UrlInput> {
+export class UrlHierarchyBuilder<
+  UserData extends ObjectWithUrl = ObjectWithUrl,
+> extends HierarchyBuilder<UrlHierarchyItem, UserData, UrlInput> {
   options: UrlHierarchyBuilderOptions;
 
   /**
@@ -123,7 +127,7 @@ export class UrlHierarchyBuilder<UserData extends ObjectWithUrl = ObjectWithUrl>
   /**
    * Iterate through the HierarchyBuilder's pool of items, and build parent/child
    * relationships between them.
-   * 
+   *
    * @returns A copy of the HierarchyBuilder object, appropriate for chaining.
    */
   populateRelationships(): this {
@@ -145,19 +149,21 @@ export class UrlHierarchyBuilder<UserData extends ObjectWithUrl = ObjectWithUrl>
     root.name = rootName;
     root.inferred = true;
     this.pool.set(id, root);
-    for(const child of children) {
+    for (const child of children) {
       root.addChild(child);
     }
     return root;
   }
 
-  protected findAncestor(child: UrlHierarchyItem): UrlHierarchyItem | undefined {
+  protected findAncestor(
+    child: UrlHierarchyItem,
+  ): UrlHierarchyItem | undefined {
     const segments = child.id.split('/');
     let ancestor: UrlHierarchyItem | undefined;
 
-    while(ancestor === undefined && segments.length > 0) {
+    while (ancestor === undefined && segments.length > 0) {
       segments.pop();
-      ancestor = this.pool.get(segments.join('/'))
+      ancestor = this.pool.get(segments.join('/'));
     }
 
     if (ancestor) {
@@ -167,7 +173,7 @@ export class UrlHierarchyBuilder<UserData extends ObjectWithUrl = ObjectWithUrl>
       if (distance > 1) return this.getDirectParent(ancestor, child);
     } else {
       if (
-        child.id.split('/').length === 1 && 
+        child.id.split('/').length === 1 &&
         this.options.subdomains === 'children'
       ) {
         const url = new NormalizedUrl('https://' + child.id);
@@ -186,9 +192,17 @@ export class UrlHierarchyBuilder<UserData extends ObjectWithUrl = ObjectWithUrl>
     if (input instanceof NormalizedUrl) {
       return input;
     } else if (typeof input === 'string') {
-      return new NormalizedUrl(input, this.options.base, this.options.normalizer);
+      return new NormalizedUrl(
+        input,
+        this.options.base,
+        this.options.normalizer,
+      );
     } else if (input instanceof URL) {
-      return new NormalizedUrl(input.href, this.options.base, this.options.normalizer);
+      return new NormalizedUrl(
+        input.href,
+        this.options.base,
+        this.options.normalizer,
+      );
     } else {
       return this.normalizeUrlData(input.url);
     }
@@ -198,7 +212,8 @@ export class UrlHierarchyBuilder<UserData extends ObjectWithUrl = ObjectWithUrl>
     // Trailing slashes and double-slashes in the pathname mess things up something
     // fierce. We kill 'em.
     if (url.pathname.endsWith('/')) url.pathname = url.pathname.slice(0, -1);
-    if (url.pathname.includes('//')) url.pathname = url.pathname.replaceAll(/\/+/ig,"/");
+    if (url.pathname.includes('//'))
+      url.pathname = url.pathname.replaceAll(/\/+/gi, '/');
 
     const key: string[] = [];
     key.push(url.hostname);
@@ -208,32 +223,41 @@ export class UrlHierarchyBuilder<UserData extends ObjectWithUrl = ObjectWithUrl>
     return key.join('/');
   }
 
-  protected getDistance(ancestor: UrlHierarchyItem, descendant: UrlHierarchyItem): number {
+  protected getDistance(
+    ancestor: UrlHierarchyItem,
+    descendant: UrlHierarchyItem,
+  ): number {
     if (descendant.id === ancestor.id) {
       return 0;
     } else if (descendant.id.startsWith(ancestor.id)) {
-      return descendant.id.split('/').length - ancestor.id.split('/').length
+      return descendant.id.split('/').length - ancestor.id.split('/').length;
     } else {
       return -1;
     }
   }
 
-  protected getDirectParent(ancestor: UrlHierarchyItem, descendant: UrlHierarchyItem): UrlHierarchyItem | undefined {
+  protected getDirectParent(
+    ancestor: UrlHierarchyItem,
+    descendant: UrlHierarchyItem,
+  ): UrlHierarchyItem | undefined {
     if (!descendant.id.startsWith(ancestor.id)) return undefined;
 
     if (this.options.gaps === 'bridge') {
       // When filling gaps, we start with the ancestor, build our way 'down' until
       // we've created the direct parent, then return the direct parent.
       let currentParent = ancestor;
-      const gapSegments = descendant.id.slice(ancestor.id.length+1).split('/').slice(0,-1);
+      const gapSegments = descendant.id
+        .slice(ancestor.id.length + 1)
+        .split('/')
+        .slice(0, -1);
       if (gapSegments.length < 1) return;
-  
+
       while (gapSegments.length > 0) {
         const newId = [currentParent.id, gapSegments.shift()].join('/');
         const filler = new UrlHierarchyItem({ url: 'https://' + newId });
         filler.id = newId;
         filler.inferred = true;
-        filler.setParent(currentParent)
+        filler.setParent(currentParent);
         this.pool.set(filler.id, filler);
         currentParent = filler;
       }

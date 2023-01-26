@@ -2,8 +2,8 @@ import readabilityScores from 'readability-scores';
 import _ from 'lodash';
 
 export interface ReadabilityScore extends Record<string, unknown> {
-	words?: number
-	sentences?: number
+  words?: number;
+  sentences?: number;
   difficultWords?: string[];
   score?: number;
   formula?: string;
@@ -12,25 +12,38 @@ export interface ReadabilityScore extends Record<string, unknown> {
 export interface ReadabilityScoreOptions {
   stats?: boolean;
   difficultWords?: boolean;
-  formula?: 'ARI' | 'DaleChall' | 'ColemanLiau' | 'FleschKincaid' | 'GunningFog' | 'SMOG' | 'Spache';
+  formula?:
+    | 'ARI'
+    | 'DaleChall'
+    | 'ColemanLiau'
+    | 'FleschKincaid'
+    | 'GunningFog'
+    | 'SMOG'
+    | 'Spache';
 }
 
 const defaults: Required<ReadabilityScoreOptions> = {
   stats: true,
   difficultWords: true,
-  formula: 'FleschKincaid'
-}
+  formula: 'FleschKincaid',
+};
 
-export function getReadabilityScore(input: string, customOptions: ReadabilityScoreOptions = {}) {
-  const options: Required<ReadabilityScoreOptions> = _.defaultsDeep(customOptions, defaults);
+export function getReadabilityScore(
+  input: string,
+  customOptions: ReadabilityScoreOptions = {},
+) {
+  const options: Required<ReadabilityScoreOptions> = _.defaultsDeep(
+    customOptions,
+    defaults,
+  );
   const results: ReadabilityScore = { formula: options.formula };
 
   const scoreConfig: Record<string, boolean> = {
-    difficultWords: options.difficultWords
+    difficultWords: options.difficultWords,
   };
   scoreConfig[`${options.formula}`] = true;
   const rawScores = readabilityScores(input, scoreConfig);
-  
+
   switch (options.formula) {
     case 'ARI':
       results.score = rawScores.ari;
@@ -40,13 +53,17 @@ export function getReadabilityScore(input: string, customOptions: ReadabilitySco
       break;
     case 'DaleChall':
       results.score = rawScores.daleChall;
-      if (options.difficultWords) results.difficultWords = rawScores.daleChallDifficultWords;
+      if (options.difficultWords)
+        results.difficultWords = rawScores.daleChallDifficultWords;
       break;
     case 'FleschKincaid':
       // We calculate the Reading Level rather than the Grade Level.
       // See https://github.com/words/flesch for a standalone implementation.
-      results.score = 206.835 - 1.015 * (rawScores.wordCount / rawScores.sentenceCount) - 84.6 * (rawScores.syllableCount / rawScores.wordCount)
-      results.score = Math.round((results.score * 100)) / 100;
+      results.score =
+        206.835 -
+        1.015 * (rawScores.wordCount / rawScores.sentenceCount) -
+        84.6 * (rawScores.syllableCount / rawScores.wordCount);
+      results.score = Math.round(results.score * 100) / 100;
       break;
     case 'GunningFog':
       results.score = rawScores.gunningFog;
@@ -56,7 +73,8 @@ export function getReadabilityScore(input: string, customOptions: ReadabilitySco
       break;
     case 'Spache':
       results.score = rawScores.spache;
-      if (options.difficultWords) results.difficultWords = rawScores.spacheUniqueUnfamiliarWords;
+      if (options.difficultWords)
+        results.difficultWords = rawScores.spacheUniqueUnfamiliarWords;
       break;
   }
 

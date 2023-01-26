@@ -36,9 +36,9 @@ function singleFilter(
   if (is.enumCase(filter, UrlMatchStrategy)) {
     // We're much lazier than crawlee, and ignore ugly IP address scenarios.
     switch (filter) {
-      case UrlMatchStrategy.None: 
+      case UrlMatchStrategy.None:
         return false;
-        
+
       case UrlMatchStrategy.SameDomain:
         if (currentUrl === undefined) {
           return false;

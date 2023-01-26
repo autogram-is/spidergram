@@ -83,9 +83,7 @@ export default class Crawl extends SgCommand {
       },
     });
 
-    spider.on('requestComplete', status =>
-      this.updateProgress(status),
-    );
+    spider.on('requestComplete', status => this.updateProgress(status));
     this.startProgress('Crawling...');
 
     await spider.run(urls).then(status => {

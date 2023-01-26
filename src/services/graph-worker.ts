@@ -27,12 +27,12 @@ export interface GraphWorkerOptions<T extends Vertice = Vertice> {
 
 type GraphWorkerEvents = Record<PropertyKey, unknown[]> & {
   progress: [status: JobStatus];
-  end: [status: JobStatus]
-}
+  end: [status: JobStatus];
+};
 
 export class GraphWorker<
   T extends Vertice = Vertice,
-  Events extends GraphWorkerEvents = GraphWorkerEvents
+  Events extends GraphWorkerEvents = GraphWorkerEvents,
 > extends AsyncEventEmitter<Events> {
   readonly status: JobStatus;
   protected project!: Project;

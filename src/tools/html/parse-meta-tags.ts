@@ -3,21 +3,24 @@ import _ from 'lodash';
 export type MetaValues = Record<string, string | string[]>;
 
 type Tag = Record<string, unknown> & {
-  name?: string,
-  itemprop?: string,
-  property?: string,
-  content?: string
-}
+  name?: string;
+  itemprop?: string;
+  property?: string;
+  content?: string;
+};
 
 type MetaTagOptions = {
-  arrayTags?: string[],
-}
+  arrayTags?: string[];
+};
 
 const defaults: MetaTagOptions = {
   arrayTags: ['keywords'],
-}
+};
 
-export function parseMetaTags(tags: Tag[], customOptions: MetaTagOptions = {}): MetaValues {
+export function parseMetaTags(
+  tags: Tag[],
+  customOptions: MetaTagOptions = {},
+): MetaValues {
   const options = _.defaultsDeep(customOptions, defaults);
   const output: Record<string, string | string[]> = {};
 
@@ -27,7 +30,7 @@ export function parseMetaTags(tags: Tag[], customOptions: MetaTagOptions = {}): 
       if (key !== undefined) {
         const path = key.split(':');
         if (options.arrayMetaTags?.includes(key.toLocaleLowerCase())) {
-          const existingValues  = _.get(output, key) ?? [];
+          const existingValues = _.get(output, key) ?? [];
           const newValues = tag.content.split(',').map(v => v.trim());
           _.set(output, path, [...existingValues, ...newValues]);
         } else {

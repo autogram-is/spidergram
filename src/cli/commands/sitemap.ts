@@ -1,4 +1,11 @@
-import { CLI, SgCommand, Spider, OutputLevel, UrlMatchStrategy, UniqueUrlSet } from '../../index.js';
+import {
+  CLI,
+  SgCommand,
+  Spider,
+  OutputLevel,
+  UrlMatchStrategy,
+  UniqueUrlSet,
+} from '../../index.js';
 import { ParsedUrl } from '@autogram/url-tools';
 
 export default class GetSitemap extends SgCommand {
@@ -35,8 +42,8 @@ export default class GetSitemap extends SgCommand {
       normalizer: (url: ParsedUrl) => {
         url.pathname = '/robots.txt';
         return url;
-      }
-    }
+      },
+    };
     const robots = new UniqueUrlSet([...urls], rOptions);
 
     const sOptions = {
@@ -46,8 +53,8 @@ export default class GetSitemap extends SgCommand {
       normalizer: (url: ParsedUrl) => {
         url.pathname = '/sitemap.xml';
         return url;
-      }
-    }
+      },
+    };
     const sitemaps = new UniqueUrlSet([...urls], sOptions);
 
     const spider = new Spider({

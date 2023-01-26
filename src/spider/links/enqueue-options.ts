@@ -7,23 +7,23 @@ export enum UrlMatchStrategy {
   /**
    * Matches any URLs found
    */
-  All = "all",
+  All = 'all',
   /**
    * Matches any URLs that have the same hostname.
    * For example, `https://wow.example.com/hello` will be matched for a base url of `https://example.com/`, but
    * `https://example.com/hello` will not be matched.
    */
-  SameHostname = "same-hostname",
+  SameHostname = 'same-hostname',
   /**
    * Matches any URLs that have the same (sub-)domain as the base URL.
    * For example, `https://wow.an.example.com` and `https://example.com` will both be matched for a base url of
    * `https://example.com`.
    */
-  SameDomain = "same-domain",
+  SameDomain = 'same-domain',
   /**
    * Matches no URLs; useful when all or some URLs should be saved, but none should be enqueued.
    */
-  None = "none"
+  None = 'none',
 }
 
 /**

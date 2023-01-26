@@ -55,9 +55,7 @@ export function findHeadLinks(input: string | cheerio.Root) {
  */
 export function findSitempLinks(input: string | cheerio.Root) {
   const $ =
-    typeof input === 'string'
-      ? getCheerio(input, { xmlMode: true })
-      : input;
+    typeof input === 'string' ? getCheerio(input, { xmlMode: true }) : input;
   const results: FoundLink[] = [];
   $('urlset url')
     .toArray()
@@ -89,9 +87,7 @@ export function findSitempLinks(input: string | cheerio.Root) {
  */
 export function findFeedLinks(input: string | cheerio.Root) {
   const $ =
-    typeof input === 'string'
-      ? getCheerio(input, { xmlMode: true })
-      : input;
+    typeof input === 'string' ? getCheerio(input, { xmlMode: true }) : input;
   const results: FoundLink[] = [];
   $('channel item')
     .toArray()

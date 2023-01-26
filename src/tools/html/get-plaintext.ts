@@ -15,7 +15,7 @@ const defaults: HtmlToTextOptions = {
  * @param options - Flags to control HTML traversal and formatting
  * @param options.wordwrap - Set the line length or disable wrapping entirely with 'false'
  * @param options.baseElements.selectors - An array of CSS selectors to identify the page's primary content.
- * @param options.limits.maxBaseElements - Increase to allow multiple primary content elements 
+ * @param options.limits.maxBaseElements - Increase to allow multiple primary content elements
  */
 export function getPlaintext(
   html: string,

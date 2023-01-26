@@ -38,28 +38,29 @@ export default class Urls extends SgCommand {
       char: 'n',
       summary: 'Include non-web URLs in the summary',
       dependsOn: ['summary'],
-      default: false
+      default: false,
     }),
     unparsable: Flags.boolean({
       char: 'u',
       summary: 'Include unparsable URLs in the summary',
       dependsOn: ['summary'],
-      default: false
+      default: false,
     }),
     hosts: Flags.boolean({
       char: 'h',
       summary: 'List the unique hostnames in the URL set',
       dependsOn: ['summary'],
-      default: false
+      default: false,
     }),
     hide: Flags.string({
       summary: 'URLs matching this string will be hidden from view',
-      description: "Both --hide and --highlight use glob-style wildcards; '**/*cnn.com*' will match content on CNN or one of its domains; '**/news*' would only display the news directory and its descendents, and so on.",
-      required: false
+      description:
+        "Both --hide and --highlight use glob-style wildcards; '**/*cnn.com*' will match content on CNN or one of its domains; '**/news*' would only display the news directory and its descendents, and so on.",
+      required: false,
     }),
     highlight: Flags.string({
       summary: 'URLs matching this string will be highlighted',
-      required: false
+      required: false,
     }),
     tree: Flags.boolean({
       char: 't',
@@ -69,11 +70,11 @@ export default class Urls extends SgCommand {
     preset: Flags.enum({
       summary: 'A URL display preset',
       default: 'default',
-      options: ['default', 'expand', 'collapse', 'markdown']
+      options: ['default', 'expand', 'collapse', 'markdown'],
     }),
     maxChildren: Flags.integer({
       char: 'm',
-      summary: "Truncate lists of children longer than this limit",
+      summary: 'Truncate lists of children longer than this limit',
       required: false,
     }),
     depth: Flags.integer({
@@ -82,7 +83,8 @@ export default class Urls extends SgCommand {
     }),
     gaps: Flags.enum({
       summary: 'Gap resolution strategy',
-      description: "How to deal with URL gaps, where a URL is implied by another URL's path but does not itself exist in the list of URLs. 'ignore' will discard URLs with gaps; 'adopt' will treat them as direct children of their closest ancestor, and 'bridge' will create intermediary URLs to accuratly represent the full path.",
+      description:
+        "How to deal with URL gaps, where a URL is implied by another URL's path but does not itself exist in the list of URLs. 'ignore' will discard URLs with gaps; 'adopt' will treat them as direct children of their closest ancestor, and 'bridge' will create intermediary URLs to accuratly represent the full path.",
       options: ['ignore', 'adopt', 'bridge'],
       default: 'bridge',
     }),
@@ -90,7 +92,7 @@ export default class Urls extends SgCommand {
       char: 'd',
       summary: 'Treat subdomains as children of their TLD',
       default: false,
-    })
+    }),
   };
 
   async run() {
@@ -106,13 +108,18 @@ export default class Urls extends SgCommand {
       const urlFile = await readFile(flags.input)
         .then(buffer => buffer.toString())
         .catch(() => this.error(`File ${flags.input} couldn't be opened`));
-      rawUrls = urlFile.match(flags.csv ? URL_NO_COMMAS_REGEX : URL_WITH_COMMAS_REGEX) || [];
+      rawUrls =
+        urlFile.match(
+          flags.csv ? URL_NO_COMMAS_REGEX : URL_WITH_COMMAS_REGEX,
+        ) || [];
     } else {
       const collection = graph.collection(flags.input);
-      if (await collection.exists() === false) {
+      if ((await collection.exists()) === false) {
         this.error(`Collection ${flags.input} doesn't exist`);
       }
-      rawUrls = await Query.run<string>(aql`FOR item IN ${collection} FILTER item.url != null RETURN item.url`);
+      rawUrls = await Query.run<string>(
+        aql`FOR item IN ${collection} FILTER item.url != null RETURN item.url`,
+      );
     }
 
     if (rawUrls.length === 0) {
@@ -123,28 +130,34 @@ export default class Urls extends SgCommand {
 
     this.ux.action.start('Building tree');
 
-    filteredUrls = flags.hide ? rawUrls.filter(url => !minimatch(url, flags.hide ?? '')) : rawUrls;
+    filteredUrls = flags.hide
+      ? rawUrls.filter(url => !minimatch(url, flags.hide ?? ''))
+      : rawUrls;
     const urls = new NormalizedUrlSet(filteredUrls, { strict: false });
-    
-    const webUrls = [...urls].filter(url => ['http:', 'https:'].includes(url.protocol));
+
+    const webUrls = [...urls].filter(url =>
+      ['http:', 'https:'].includes(url.protocol),
+    );
 
     const hosts = new Set<string>();
     for (const url of webUrls) {
       hosts.add(url.hostname);
     }
-    
-    const summary: Record<string, number| string[]> = {
-      'Total URLs': rawUrls.length
+
+    const summary: Record<string, number | string[]> = {
+      'Total URLs': rawUrls.length,
     };
-    if (hosts.size > 1) summary['Unique Hosts'] = flags.hosts ? [...hosts] : [...hosts].length;
-    if (flags.hide) summary['Hidden URLs'] = rawUrls.length - filteredUrls.length;
+    if (hosts.size > 1)
+      summary['Unique Hosts'] = flags.hosts ? [...hosts] : [...hosts].length;
+    if (flags.hide)
+      summary['Hidden URLs'] = rawUrls.length - filteredUrls.length;
     if (urls.unparsable.size) summary['Unparsable Urls'] = urls.unparsable.size;
     if (flags.nonweb) summary['Non-Web URLs'] = urls.size - webUrls.length;
 
     const output: string[] = [];
     if (flags.tree) {
-      const treeOptions: HierarchyTools.UrlHierarchyBuilderOptions = { 
-        subdomains: flags.subdomains ? 'children' : undefined
+      const treeOptions: HierarchyTools.UrlHierarchyBuilderOptions = {
+        subdomains: flags.subdomains ? 'children' : undefined,
       };
       if (flags.gaps === 'adopt') treeOptions.gaps = 'adopt';
       if (flags.gaps === 'bridge') treeOptions.gaps = 'bridge';
@@ -153,26 +166,35 @@ export default class Urls extends SgCommand {
         preset: flags.preset,
         maxChildren: flags.childern,
         maxDepth: flags.depth,
-        label: (item) => {
+        label: item => {
           if (item instanceof HierarchyTools.UrlHierarchyItem) {
-            if (flags.highlight && minimatch(item.data.url.toString(), flags.highlight)) return this.chalk.bold(item.name);
-            if (item.inferred) return this.chalk.dim(item.name); 
+            if (
+              flags.highlight &&
+              minimatch(item.data.url.toString(), flags.highlight)
+            )
+              return this.chalk.bold(item.name);
+            if (item.inferred) return this.chalk.dim(item.name);
           }
-          if (item.isRoot && flags.highlight === undefined) return this.chalk.bold(item.name);
+          if (item.isRoot && flags.highlight === undefined)
+            return this.chalk.bold(item.name);
           return item.name;
-        }
+        },
       };
 
       if (flags.preset === 'markdown') {
         renderOptions.label = item => {
           if (item instanceof HierarchyTools.UrlHierarchyItem) {
-            return `${item.isRoot ? '# ' : ''}[${item.name}](${item.data.url.toString()})`
+            return `${item.isRoot ? '# ' : ''}[${
+              item.name
+            }](${item.data.url.toString()})`;
           }
           return item.name;
         };
       }
 
-      const hierarchy = new HierarchyTools.UrlHierarchyBuilder(treeOptions).add(webUrls);
+      const hierarchy = new HierarchyTools.UrlHierarchyBuilder(treeOptions).add(
+        webUrls,
+      );
       const orphans = hierarchy.items.filter(item => item.isOrphan).length;
       if (orphans) summary['Orphaned URLs'] = orphans;
 
