@@ -1,13 +1,13 @@
 {
   "name": "spidergram",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "Structural analysis tools for complex web sites",
   "main": "./dist/index.js",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",
   "engines": {
-    "node": "^18.0.0"
+    "node": "^18.1.0"
   },
   "bin": {
     "spidergram": "./bin/run.js"

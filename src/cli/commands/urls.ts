@@ -1,6 +1,13 @@
 import { Flags } from '@oclif/core';
 import { NormalizedUrlSet } from '@autogram/url-tools';
-import { CLI, Query, SgCommand, aql, HierarchyTools, TextTools } from '../../index.js';
+import {
+  CLI,
+  Query,
+  SgCommand,
+  aql,
+  HierarchyTools,
+  TextTools,
+} from '../../index.js';
 import { URL_WITH_COMMAS_REGEX } from 'crawlee';
 import { readFile } from 'fs/promises';
 import minimatch from 'minimatch';
@@ -61,7 +68,8 @@ export default class Urls extends SgCommand {
     }),
     hide: Flags.string({
       summary: 'URLs matching this string will be hidden from view',
-      description: "Both --hide and --highlight use glob-style wildcards; '**/*cnn.com*' will match content on CNN or one of its domains; '**/news*' would only display the news directory and its descendents, and so on.",
+      description:
+        "Both --hide and --highlight use glob-style wildcards; '**/*cnn.com*' will match content on CNN or one of its domains; '**/news*' would only display the news directory and its descendents, and so on.",
       dependsOn: ['tree'],
       required: false,
       helpGroup: 'FORMAT',
@@ -109,11 +117,13 @@ export default class Urls extends SgCommand {
     }),
   };
 
-  static args = [{
-    name: 'input',
-    description: 'A database collection, local filename, or remote URL',
-    default: 'resources'
-  }]
+  static args = [
+    {
+      name: 'input',
+      description: 'A database collection, local filename, or remote URL',
+      default: 'resources',
+    },
+  ];
 
   async run() {
     const { args, flags } = await this.parse(Urls);
@@ -126,13 +136,13 @@ export default class Urls extends SgCommand {
 
     if (isParsableUrl(args.input)) {
       const responseData = await fetch(new URL(args.input))
-        .then(response => response.text() )
+        .then(response => response.text())
         .catch(reason => {
           if (reason instanceof Error) this.error(reason.message);
-          else this.error("An error occurred loading the URL.");
+          else this.error('An error occurred loading the URL.');
         });
-        rawUrls = responseData.match(URL_WITH_COMMAS_REGEX) || [];
-      } else if (args.input.indexOf('.') !== -1) {
+      rawUrls = responseData.match(URL_WITH_COMMAS_REGEX) || [];
+    } else if (args.input.indexOf('.') !== -1) {
       const urlFile = await readFile(args.input)
         .then(buffer => buffer.toString())
         .catch(() => this.error(`File ${args.input} couldn't be opened`));
@@ -177,10 +187,16 @@ export default class Urls extends SgCommand {
       summary['Hidden URLs'] = rawUrls.length - filteredUrls.length;
     }
     if (urls.unparsable.size) {
-      summary['Unparsable Urls'] = flags.unparsable ? [...urls.unparsable] : urls.unparsable.size;
+      summary['Unparsable Urls'] = flags.unparsable
+        ? [...urls.unparsable]
+        : urls.unparsable.size;
     }
-    if ((urls.size - webUrls.length) > 0) {
-      summary['Non-Web URLs'] = flags.nonweb ? [...urls].filter(url => !['https:', 'http:'].includes(url.protocol)).map(url => url.href) : urls.size - webUrls.length;
+    if (urls.size - webUrls.length > 0) {
+      summary['Non-Web URLs'] = flags.nonweb
+        ? [...urls]
+            .filter(url => !['https:', 'http:'].includes(url.protocol))
+            .map(url => url.href)
+        : urls.size - webUrls.length;
     }
 
     const output: string[] = [];
@@ -222,11 +238,15 @@ export default class Urls extends SgCommand {
       };
     }
 
-    const hierarchy = new HierarchyTools.UrlHierarchyBuilder(treeOptions).add(webUrls);
+    const hierarchy = new HierarchyTools.UrlHierarchyBuilder(treeOptions).add(
+      webUrls,
+    );
     const orphans = hierarchy.items.filter(item => item.isOrphan).length;
     if (orphans > 0) {
       if (flags.orphans) {
-        summary['Orphaned URLs'] = hierarchy.items.filter(item => item.isOrphan).map(orphan => orphan.data.url.toString());
+        summary['Orphaned URLs'] = hierarchy.items
+          .filter(item => item.isOrphan)
+          .map(orphan => orphan.data.url.toString());
       } else {
         summary['Orphaned URLs'] = orphans;
       }
@@ -238,9 +258,13 @@ export default class Urls extends SgCommand {
         summaryLines.push('# URL Summary');
         for (const [bullet, content] of Object.entries(summary)) {
           if (typeof content === 'number') {
-            summaryLines.push(`- **${bullet}**: ${content.toLocaleString().trim()}`);
+            summaryLines.push(
+              `- **${bullet}**: ${content.toLocaleString().trim()}`,
+            );
           } else {
-            summaryLines.push(`- **${bullet}**: ${TextTools.joinOxford(content).trim()}`);
+            summaryLines.push(
+              `- **${bullet}**: ${TextTools.joinOxford(content).trim()}`,
+            );
           }
         }
         output.push(summaryLines.join('\n'));
