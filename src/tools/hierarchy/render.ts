@@ -133,6 +133,7 @@ const presets: Record<string, RenderOptions<HierarchyItem>> = {
   },
   collapse: {
     maxChildren: Infinity,
+    maxDepth: Infinity,
     summary: item => {
       const leaves = item.children.filter(item => item.isLeaf).length;
       if (leaves === 0) return '';

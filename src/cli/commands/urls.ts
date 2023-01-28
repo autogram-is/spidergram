@@ -1,85 +1,95 @@
 import { Flags } from '@oclif/core';
 import { NormalizedUrlSet } from '@autogram/url-tools';
-import { CLI, Query, SgCommand, aql, HierarchyTools } from '../../index.js';
-import { URL_NO_COMMAS_REGEX, URL_WITH_COMMAS_REGEX } from 'crawlee';
+import { CLI, Query, SgCommand, aql, HierarchyTools, TextTools } from '../../index.js';
+import { URL_WITH_COMMAS_REGEX } from 'crawlee';
 import { readFile } from 'fs/promises';
 import minimatch from 'minimatch';
 
 export default class Urls extends SgCommand {
   static summary = 'Summarize a list of URLs';
 
-  static usage = '<%= config.bin %> <%= command.id %> [urls]';
+  static usage = '<%= config.bin %> <%= command.id %> [options] <filename.txt>';
 
   static examples = [
     '<%= config.bin %> <%= command.id %>',
-    '<%= config.bin %> <%= command.id %> --input=urls.txt',
+    '<%= config.bin %> <%= command.id %> urls.txt',
     '<%= config.bin %> <%= command.id %> --preset=collapse',
     "<%= config.bin %> <%= command.id %> --depth=5 --maxChildren=10 --highlight='**/*.pdf'",
   ];
 
   static flags = {
-    ...CLI.globalFlags,
-    input: Flags.string({
-      char: 'i',
-      summary: 'A database collection or filename.',
-      default: 'resources',
-    }),
-    csv: Flags.boolean({
-      char: 'c',
-      summary: 'Treat input files as CSV',
-      default: false,
-    }),
+    config: CLI.globalFlags.config,
     summary: Flags.boolean({
-      char: 's',
       summary: 'Display summary information about the full pool of URLs',
       default: true,
+      allowNo: true,
+      helpGroup: 'SUMMARY',
     }),
     nonweb: Flags.boolean({
       char: 'n',
-      summary: 'Include non-web URLs in the summary',
+      summary: 'List non-web URLs',
       dependsOn: ['summary'],
       default: false,
+      helpGroup: 'SUMMARY',
+    }),
+    orphans: Flags.boolean({
+      char: 'o',
+      summary: 'List orphaned URLs',
+      dependsOn: ['summary'],
+      default: false,
+      helpGroup: 'SUMMARY',
     }),
     unparsable: Flags.boolean({
       char: 'u',
-      summary: 'Include unparsable URLs in the summary',
+      summary: 'List unparsable URLs',
       dependsOn: ['summary'],
       default: false,
+      helpGroup: 'SUMMARY',
     }),
     hosts: Flags.boolean({
       char: 'h',
-      summary: 'List the unique hostnames in the URL set',
+      summary: 'List the unique hostnames',
       dependsOn: ['summary'],
       default: false,
+      helpGroup: 'SUMMARY',
+    }),
+    tree: Flags.boolean({
+      summary: 'Display a visual tree view of the parsable web URLs',
+      default: true,
+      allowNo: true,
+      helpGroup: 'FORMAT',
     }),
     hide: Flags.string({
       summary: 'URLs matching this string will be hidden from view',
-      description:
-        "Both --hide and --highlight use glob-style wildcards; '**/*cnn.com*' will match content on CNN or one of its domains; '**/news*' would only display the news directory and its descendents, and so on.",
+      description: "Both --hide and --highlight use glob-style wildcards; '**/*cnn.com*' will match content on CNN or one of its domains; '**/news*' would only display the news directory and its descendents, and so on.",
+      dependsOn: ['tree'],
       required: false,
+      helpGroup: 'FORMAT',
     }),
     highlight: Flags.string({
       summary: 'URLs matching this string will be highlighted',
       required: false,
-    }),
-    tree: Flags.boolean({
-      char: 't',
-      summary: 'Display a visual tree view of the parsable web URLs',
-      default: true,
+      dependsOn: ['tree'],
+      helpGroup: 'FORMAT',
     }),
     preset: Flags.enum({
       summary: 'A URL display preset',
       default: 'default',
       options: ['default', 'expand', 'collapse', 'markdown'],
+      dependsOn: ['tree'],
+      helpGroup: 'FORMAT',
     }),
-    maxChildren: Flags.integer({
-      char: 'm',
-      summary: 'Truncate lists of children longer than this limit',
+    children: Flags.integer({
+      summary: 'Max number of children to display in a directory',
+      dependsOn: ['tree'],
       required: false,
+      helpGroup: 'FORMAT',
     }),
     depth: Flags.integer({
-      summary: 'Summarize branches deeper than this level',
+      summary: 'Summarize directories deeper than this level',
       required: false,
+      dependsOn: ['tree'],
+      helpGroup: 'FORMAT',
     }),
     gaps: Flags.enum({
       summary: 'Gap resolution strategy',
@@ -87,16 +97,26 @@ export default class Urls extends SgCommand {
         "How to deal with URL gaps, where a URL is implied by another URL's path but does not itself exist in the list of URLs. 'ignore' will discard URLs with gaps; 'adopt' will treat them as direct children of their closest ancestor, and 'bridge' will create intermediary URLs to accuratly represent the full path.",
       options: ['ignore', 'adopt', 'bridge'],
       default: 'bridge',
+      dependsOn: ['tree'],
+      helpGroup: 'FORMAT',
     }),
     subdomains: Flags.boolean({
-      char: 'd',
+      char: 's',
       summary: 'Treat subdomains as children of their TLD',
       default: false,
+      dependsOn: ['tree'],
+      helpGroup: 'FORMAT',
     }),
   };
 
+  static args = [{
+    name: 'input',
+    description: 'A database collection, local filename, or remote URL',
+    default: 'resources'
+  }]
+
   async run() {
-    const { flags } = await this.parse(Urls);
+    const { args, flags } = await this.parse(Urls);
     const { graph } = await this.getProjectContext();
 
     let rawUrls: string[] = [];
@@ -104,18 +124,23 @@ export default class Urls extends SgCommand {
 
     this.ux.action.start('Loading URLs');
 
-    if (flags.input.indexOf('.') !== -1) {
-      const urlFile = await readFile(flags.input)
+    if (isParsableUrl(args.input)) {
+      const responseData = await fetch(new URL(args.input))
+        .then(response => response.text() )
+        .catch(reason => {
+          if (reason instanceof Error) this.error(reason.message);
+          else this.error("An error occurred loading the URL.");
+        });
+        rawUrls = responseData.match(URL_WITH_COMMAS_REGEX) || [];
+      } else if (args.input.indexOf('.') !== -1) {
+      const urlFile = await readFile(args.input)
         .then(buffer => buffer.toString())
-        .catch(() => this.error(`File ${flags.input} couldn't be opened`));
-      rawUrls =
-        urlFile.match(
-          flags.csv ? URL_NO_COMMAS_REGEX : URL_WITH_COMMAS_REGEX,
-        ) || [];
+        .catch(() => this.error(`File ${args.input} couldn't be opened`));
+      rawUrls = urlFile.match(URL_WITH_COMMAS_REGEX) || [];
     } else {
-      const collection = graph.collection(flags.input);
+      const collection = graph.collection(args.input);
       if ((await collection.exists()) === false) {
-        this.error(`Collection ${flags.input} doesn't exist`);
+        this.error(`Collection ${args.input} doesn't exist`);
       }
       rawUrls = await Query.run<string>(
         aql`FOR item IN ${collection} FILTER item.url != null RETURN item.url`,
@@ -127,8 +152,6 @@ export default class Urls extends SgCommand {
     }
 
     this.ux.action.stop();
-
-    this.ux.action.start('Building tree');
 
     filteredUrls = flags.hide
       ? rawUrls.filter(url => !minimatch(url, flags.hide ?? ''))
@@ -147,71 +170,102 @@ export default class Urls extends SgCommand {
     const summary: Record<string, number | string[]> = {
       'Total URLs': rawUrls.length,
     };
-    if (hosts.size > 1)
+    if (hosts.size > 1) {
       summary['Unique Hosts'] = flags.hosts ? [...hosts] : [...hosts].length;
-    if (flags.hide)
+    }
+    if (filteredUrls.length > 0) {
       summary['Hidden URLs'] = rawUrls.length - filteredUrls.length;
-    if (urls.unparsable.size) summary['Unparsable Urls'] = urls.unparsable.size;
-    if (flags.nonweb) summary['Non-Web URLs'] = urls.size - webUrls.length;
+    }
+    if (urls.unparsable.size) {
+      summary['Unparsable Urls'] = flags.unparsable ? [...urls.unparsable] : urls.unparsable.size;
+    }
+    if ((urls.size - webUrls.length) > 0) {
+      summary['Non-Web URLs'] = flags.nonweb ? [...urls].filter(url => !['https:', 'http:'].includes(url.protocol)).map(url => url.href) : urls.size - webUrls.length;
+    }
 
     const output: string[] = [];
-    if (flags.tree) {
-      const treeOptions: HierarchyTools.UrlHierarchyBuilderOptions = {
-        subdomains: flags.subdomains ? 'children' : undefined,
-      };
-      if (flags.gaps === 'adopt') treeOptions.gaps = 'adopt';
-      if (flags.gaps === 'bridge') treeOptions.gaps = 'bridge';
 
-      const renderOptions: HierarchyTools.RenderOptions = {
-        preset: flags.preset,
-        maxChildren: flags.childern,
-        maxDepth: flags.depth,
-        label: item => {
-          if (item instanceof HierarchyTools.UrlHierarchyItem) {
-            if (
-              flags.highlight &&
-              minimatch(item.data.url.toString(), flags.highlight)
-            )
-              return this.chalk.bold(item.name);
-            if (item.inferred) return this.chalk.dim(item.name);
-          }
-          if (item.isRoot && flags.highlight === undefined)
+    const treeOptions: HierarchyTools.UrlHierarchyBuilderOptions = {
+      subdomains: flags.subdomains ? 'children' : undefined,
+    };
+
+    if (flags.gaps === 'adopt') treeOptions.gaps = 'adopt';
+    if (flags.gaps === 'bridge') treeOptions.gaps = 'bridge';
+
+    const renderOptions: HierarchyTools.RenderOptions = {
+      preset: flags.preset,
+      maxChildren: flags.childern,
+      maxDepth: flags.depth,
+      label: item => {
+        if (item instanceof HierarchyTools.UrlHierarchyItem) {
+          if (
+            flags.highlight &&
+            minimatch(item.data.url.toString(), flags.highlight)
+          )
             return this.chalk.bold(item.name);
-          return item.name;
-        },
+          if (item.inferred) return this.chalk.dim(item.name);
+        }
+        if (item.isRoot && flags.highlight === undefined)
+          return this.chalk.bold(item.name);
+        return item.name;
+      },
+    };
+
+    if (flags.preset === 'markdown') {
+      renderOptions.label = item => {
+        if (item instanceof HierarchyTools.UrlHierarchyItem) {
+          return `${item.isRoot ? '## ' : ''}[${
+            item.name
+          }](${item.data.url.toString()})`;
+        }
+        return item.name;
       };
+    }
 
-      if (flags.preset === 'markdown') {
-        renderOptions.label = item => {
-          if (item instanceof HierarchyTools.UrlHierarchyItem) {
-            return `${item.isRoot ? '# ' : ''}[${
-              item.name
-            }](${item.data.url.toString()})`;
-          }
-          return item.name;
-        };
+    const hierarchy = new HierarchyTools.UrlHierarchyBuilder(treeOptions).add(webUrls);
+    const orphans = hierarchy.items.filter(item => item.isOrphan).length;
+    if (orphans > 0) {
+      if (flags.orphans) {
+        summary['Orphaned URLs'] = hierarchy.items.filter(item => item.isOrphan).map(orphan => orphan.data.url.toString());
+      } else {
+        summary['Orphaned URLs'] = orphans;
       }
+    }
 
-      const hierarchy = new HierarchyTools.UrlHierarchyBuilder(treeOptions).add(
-        webUrls,
-      );
-      const orphans = hierarchy.items.filter(item => item.isOrphan).length;
-      if (orphans) summary['Orphaned URLs'] = orphans;
+    if (flags.summary) {
+      if (flags.preset === 'markdown') {
+        const summaryLines: string[] = [];
+        summaryLines.push('# URL Summary');
+        for (const [bullet, content] of Object.entries(summary)) {
+          if (typeof content === 'number') {
+            summaryLines.push(`- **${bullet}**: ${content.toLocaleString().trim()}`);
+          } else {
+            summaryLines.push(`- **${bullet}**: ${TextTools.joinOxford(content).trim()}`);
+          }
+        }
+        output.push(summaryLines.join('\n'));
+      } else {
+        this.ux.styledHeader('URL Summary');
+        this.infoList(summary);
+      }
+    }
 
+    if (flags.tree) {
       for (const root of hierarchy.findRoots()) {
         output.push(root.render(renderOptions));
       }
     }
 
-    this.ux.action.stop();
     this.log();
+    this.log(output.join('\n\n'));
+  }
+}
 
-    if (flags.summary) {
-      this.infoList(summary);
-    }
-    if (flags.summary && flags.tree) this.log();
-    if (flags.tree) {
-      this.log(output.join('\n\n'));
-    }
+function isParsableUrl(input: string) {
+  try {
+    new URL(input.trim());
+    return true;
+  } catch {
+    return false;
   }
 }
