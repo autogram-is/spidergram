@@ -14,7 +14,7 @@ export default class Urls extends SgCommand {
     '<%= config.bin %> <%= command.id %>',
     '<%= config.bin %> <%= command.id %> urls.txt',
     '<%= config.bin %> <%= command.id %> --preset=collapse',
-    "<%= config.bin %> <%= command.id %> --depth=5 --maxChildren=10 --highlight='**/*.pdf'",
+    "<%= config.bin %> <%= command.id %> --depth=5 --children=10 --highlight='**/*.pdf'",
   ];
 
   static flags = {
@@ -173,7 +173,7 @@ export default class Urls extends SgCommand {
     if (hosts.size > 1) {
       summary['Unique Hosts'] = flags.hosts ? [...hosts] : [...hosts].length;
     }
-    if (filteredUrls.length > 0) {
+    if (rawUrls.length - filteredUrls.length > 0) {
       summary['Hidden URLs'] = rawUrls.length - filteredUrls.length;
     }
     if (urls.unparsable.size) {
@@ -194,7 +194,7 @@ export default class Urls extends SgCommand {
 
     const renderOptions: HierarchyTools.RenderOptions = {
       preset: flags.preset,
-      maxChildren: flags.childern,
+      maxChildren: flags.children,
       maxDepth: flags.depth,
       label: item => {
         if (item instanceof HierarchyTools.UrlHierarchyItem) {
