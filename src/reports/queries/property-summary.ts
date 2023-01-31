@@ -251,7 +251,7 @@ function toProperty(
 }
 
 function sanitizeLabel(input: string) {
-  return input.replaceAll('.', '_').replaceAll('[', '_').replaceAll(']', '_');
+  return input.replaceAll(/\[\]\.\s/, '_');
 }
 
 function arrayToClause(
