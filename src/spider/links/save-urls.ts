@@ -93,7 +93,7 @@ export async function saveUrls(
     //
     // On a single continuous crawl this doesn't make much difference, but
     // in situations where a *second crawl* is being conducted on top of an
-    // old dataset, it prevents already-visited URL from being recrawled.
+    // old dataset, it prevents already-visited URLs from being recrawled.
     // This makes it possible to do a crawl with an agressive UrlNormalizer,
     // find cases where it should be loosened, and add the new URL permutations
     // in a second pass.
@@ -119,7 +119,7 @@ export async function saveUrls(
   // This is a little complicated; when we're about to save new link_to records,
   // we need to make sure the old ones aren't cluttering things up. This is
   // about as clean as it gets, sadly.
-  if (resource !== undefined && results.links.length > 0) {
+  if (resource !== undefined && results.links.length > 0 && options.discardExistingLinks) {
     const deleteLinkTos = aql`
       FOR lt IN links_to
       FILTER lt._from == ${resource.documentId}
