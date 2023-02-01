@@ -1,6 +1,6 @@
 {
   "name": "spidergram",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "description": "Structural analysis tools for complex web sites",
   "main": "./dist/index.js",
   "exports": "./dist/index.js",
@@ -18,12 +18,12 @@
     "lint-and-fix": "eslint . --ext .ts --fix",
     "clean": "rm -rf ./dist; rm ./*.tsbuildinfo",
     "nuke": "npm run clean; rm -rf ./node_modules; rm package-lock.json; npm install",
+    "publish": "npm publish",
     "prepublish": "npm run build",
     "build": "npm run clean; npm run compile",
     "compile": "tsc -p ./tsconfig.build.json",
     "docs": "rm -rf ./site/*; typedoc src/index.ts --out ./site",
-    "test": "ava",
-    "overage": "nyc --reporter=text ava"
+    "test": "ava"
   },
   "files": [
     "dist/**/*",
@@ -66,7 +66,7 @@
     ]
   },
   "dependencies": {
-    "@autogram/url-tools": "^2.5.3",
+    "@autogram/url-tools": "^2.5.4",
     "@oclif/plugin-help": "^5",
     "@oclif/plugin-plugins": "^2.1.6",
     "@salesforce/ts-types": "^1.7.1",
