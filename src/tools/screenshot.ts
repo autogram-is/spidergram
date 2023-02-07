@@ -4,7 +4,7 @@ import is from '@sindresorhus/is';
 import filenamify from 'filenamify';
 import humanizeUrl from 'humanize-url';
 import { Readable } from 'node:stream';
-import { TDiskDriver } from 'typefs';
+import { DiskDriver } from 'typefs';
 import arrify from 'arrify';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 
@@ -26,9 +26,9 @@ export interface ScreenshotOptions {
    *
    * If no storage bucket is passed in, the project's default bucket is used.
    *
-   * @type {?TDiskDriver}
+   * @type {?DiskDriver}
    */
-  storage?: TDiskDriver;
+  storage?: DiskDriver;
 
   /**
    * An optional subdirectory inside the storage bucket to use when saving the screenshots.
@@ -120,7 +120,7 @@ export class ScreenshotTool extends AsyncEventEmitter<{
   };
 
   async capture(page: Page, options: Partial<ScreenshotOptions> = {}) {
-    const settings: ScreenshotOptions & { storage: TDiskDriver } = {
+    const settings: ScreenshotOptions & { storage: DiskDriver } = {
       ...this.defaults,
       storage: await Project.config().then(project => project.files()),
       ...options,

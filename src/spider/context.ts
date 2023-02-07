@@ -7,7 +7,7 @@ import {
   PlaywrightRequestHandler,
   PlaywrightHook,
 } from 'crawlee';
-import { TDiskDriver } from 'typefs';
+import { DiskDriver } from 'typefs';
 import { UniqueUrl, Resource } from '../model/index.js';
 import { ArangoStore } from '../services/arango-store.js';
 import { EnqueueUrlOptions } from './links/index.js';
@@ -160,7 +160,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    *
    * @type {Function}
    */
-  files: (bucket?: string) => TDiskDriver;
+  files: (bucket?: string) => DiskDriver;
 }
 
 export interface RequestMeta {

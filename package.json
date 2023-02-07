@@ -97,7 +97,7 @@
     "reflect-metadata": "^0.1.13",
     "robots-parser": "^3.0.0",
     "terminal-link": "^3.0.0",
-    "typefs": "^1.1.147",
+    "typefs": "^2.0.0",
     "uuid": "^9.0.0",
     "vega": "^5.22.1",
     "vega-lite": "^5.6.0"
