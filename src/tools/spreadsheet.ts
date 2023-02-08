@@ -1,7 +1,7 @@
 // Sheets.js setup
 import * as fs from 'node:fs';
 import { Readable } from 'node:stream';
-import * as XLSX from 'xlsx-js-style';
+import * as XLSX from 'xlsx';
 import {
   JsonPrimitive,
   isJsonMap,
@@ -52,13 +52,13 @@ export class Spreadsheet {
 
   addSheet(input: unknown, name?: string) {
     if (isSimpleSheet(input)) {
-      Spreadsheet.utils.book_append_sheet(
+      name = Spreadsheet.utils.book_append_sheet(
         this.workbook,
         XLSX.utils.json_to_sheet(input),
         name,
       );
     } else if (isStructuredSheet(input)) {
-      Spreadsheet.utils.book_append_sheet(
+      name = Spreadsheet.utils.book_append_sheet(
         this.workbook,
         XLSX.utils.json_to_sheet(input.data, {
           header: input.header,

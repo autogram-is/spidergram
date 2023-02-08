@@ -139,6 +139,6 @@
     "googleapis": "^108.0.1",
     "html-to-text": "^9.0.0",
     "playwright": "^1.27.1",
-    "xlsx-js-style": "^1.2.0"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.2/xlsx-0.19.2.tgz"
   }
 }
