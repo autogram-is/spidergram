@@ -27,6 +27,7 @@
     "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
     "strict": true,                                      /* Enable all strict type-checking options. */
     "alwaysStrict": false,                               /* OCLIF conflict; look into it later. */
-    "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
+    "skipLibCheck": true,                                /* Skip type checking all .d.ts files. */
+    "typeRoots": ["./types", "./node_modules/@types"]
   },
 }
