@@ -1,17 +1,15 @@
 import { Project } from '../../index.js';
 import { QueryOptions, Database } from 'arangojs/database.js';
-import { GeneratedAqlQuery } from 'arangojs/aql.js';
+import { GeneratedAqlQuery, isGeneratedAqlQuery } from 'arangojs/aql.js';
 import { AnyJson } from '@salesforce/ts-types';
-
+import { Query as QueryBuilder, QuerySpec } from 'aql-builder';
 export { QueryOptions } from 'arangojs/database.js';
 
-export class Query {
-  constructor(protected _query: GeneratedAqlQuery) {}
-
+export class Query extends QueryBuilder {
   static db?: Database;
 
   static async run<T = AnyJson>(
-    query: GeneratedAqlQuery,
+    query: GeneratedAqlQuery | QuerySpec,
     options: QueryOptions = {},
   ) {
     if (this.db === undefined) {
@@ -19,14 +17,11 @@ export class Query {
         .then(project => project.graph())
         .then(graph => graph.db);
     }
-    return this.db.query<T>(query, options).then(cursor => cursor.all());
-  }
-
-  get query() {
-    return this._query;
+    const aql = isGeneratedAqlQuery(query) ? query : QueryBuilder.build(query);
+    return this.db.query<T>(aql, options).then(cursor => cursor.all());
   }
 
   async run<T = AnyJson>(options: QueryOptions = {}) {
-    return Query.run<T>(this.query, options);
+    return Query.run<T>(this.build(), options);
   }
 }
