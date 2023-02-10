@@ -79,7 +79,6 @@
     "class-transformer": "^0.5.1",
     "cli-progress": "^3.11.2",
     "content-type": "^1.0.4",
-    "dot-prop": "^7.2.0",
     "dotenv": "^16.0.3",
     "filenamify": "^5.1.1",
     "humanize-url": "^3.0.0",

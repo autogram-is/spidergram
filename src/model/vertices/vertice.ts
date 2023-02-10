@@ -1,13 +1,6 @@
 import 'reflect-metadata';
 import is from '@sindresorhus/is';
 import {
-  getProperty,
-  setProperty,
-  hasProperty,
-  deleteProperty,
-  deepKeys,
-} from 'dot-prop';
-import {
   Exclude,
   plainToInstance,
   instanceToPlain,
@@ -17,6 +10,7 @@ import {
 } from 'class-transformer';
 import { Uuid, UuidFactory } from '../helpers/uuid.js';
 import { ensureJsonMap, JsonMap, has } from '@salesforce/ts-types';
+import _ from 'lodash';
 
 export { Transform, Exclude, Expose } from 'class-transformer';
 export type Reference<T extends Vertice = Vertice> =
@@ -160,23 +154,19 @@ export abstract class Vertice {
    * arbitarily deep property values by path, useful for making
    * deep property references in reporting scripts.
    */
-  get(path: string): unknown {
-    return getProperty(this, path);
+  get(path: string, fallback: undefined) {
+    return _.get(this, path, fallback);
   }
 
   set(path: string, value: unknown) {
-    return setProperty(this, path, value);
+    return _.set(this, path, value);
   }
 
   has(path: string): boolean {
-    return hasProperty(this, path);
+    return _.has(this, path);
   }
 
   delete(path: string): boolean {
-    return deleteProperty(this, path);
-  }
-
-  deepKeys(): string[] {
-    return deepKeys(this);
+    return _.unset(this, path);
   }
 }
