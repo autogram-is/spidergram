@@ -3,6 +3,7 @@ import { QueryOptions, Database } from 'arangojs/database.js';
 import { GeneratedAqlQuery, isGeneratedAqlQuery } from 'arangojs/aql.js';
 import { AnyJson } from '@salesforce/ts-types';
 import { Query as QueryBuilder, QuerySpec } from 'aql-builder';
+
 export { QueryOptions } from 'arangojs/database.js';
 
 export class Query extends QueryBuilder {
