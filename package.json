@@ -73,7 +73,7 @@
     "@sindresorhus/is": "^5.3.0",
     "@sindresorhus/slugify": "^2.1.1",
     "@vladfrangu/async_event_emitter": "^2.1.2",
-    "aql-builder": "^0.1.4",
+    "aql-builder": "^0.2.0",
     "arrify": "^3.0.0",
     "chalk": "^5.1.2",
     "class-transformer": "^0.5.1",
