@@ -91,6 +91,7 @@
     "minimatch": "^5.1.0",
     "object-hash": "^3.0.0",
     "open": "^8.4.0",
+    "pdf-parse": "autogram-is/pdf-parse",
     "prepend-http": "^4.0.0",
     "protocolify": "^4.0.0",
     "read-pkg-up": "^9.1.0",
