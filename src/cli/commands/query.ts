@@ -6,6 +6,7 @@ import { Spreadsheet } from '../../index.js';
 import { JsonMap } from '@salesforce/ts-types';
 import _ from 'lodash';
 import { readFile } from 'fs/promises';
+import { aql, literal, GeneratedAqlQuery } from 'arangojs/aql.js'
 
 export default class Query extends SgCommand {
   static summary = 'Query the Spidergram crawl data';
@@ -153,70 +154,37 @@ export default class Query extends SgCommand {
       this.output = OutputLevel.interactive;
     }
 
-    let q: QueryBuilder | undefined;
+    let qb: QueryBuilder | undefined;
+    let q: GeneratedAqlQuery | undefined;
 
     if (flags.input) {
-      const spec = await readFile(flags.input).then(buffer => JSON.parse(buffer.toString()));
-      q = new QueryBuilder(spec);
-    } else {
-      q = new QueryBuilder(flags.collection);
-
-      // Return properties
-      for (const r of flags.return ?? []) {
-        if (r.indexOf(':') >= 0) {
-          q.return(r.split(':')[1], r.split(':')[0]);
-        } else {
-          q.return(r);
-        }
+      if (flags.input.endsWith('.aql')) {
+        const aqlString = await readFile(flags.input).then(buffer => buffer.toString());
+        q = aql`${literal(aqlString)}`;
+      } else {
+        const spec = await readFile(flags.input).then(buffer => JSON.parse(buffer.toString()));
+        qb = new QueryBuilder(spec);
+        qb = await this.buildQueryFromFlags(qb);
       }
-
-      // Group/Collect
-      for (const r of flags.group ?? []) {
-        if (r.indexOf(':') >= 0) {
-          q.groupBy(r.split(':')[1], r.split(':')[0]);
-        } else {
-          q.groupBy(r);
-        }
-      }
-
-      // Aggregates
-      // TODO
-
-      // Filters
-      // TODO
-
-      // Sort
-      for (const r of flags.asc ?? []) {
-        q.sortBy(r, 'asc');
-      }
-      for (const r of flags.desc ?? []) {
-        q.sortBy(r, 'desc');
-      }
-
-      q.limit(flags.limit);
     }
+
+    q ??= qb?.build();
     
     if (flags.output === 'debug') {
-      this.ux.info('');
-      this.ux.styledHeader('Query spec');
-      this.ux.styledJSON(q.spec);
-
-      this.ux.info('');
-      this.ux.styledHeader('Generated query');
-      this.ux.info(q.build().query);
-
-      if (Object.entries(q.build().bindVars).length) {
-        this.ux.info('');
-        this.ux.styledHeader('Bound variables');
-        this.ux.styledObject(q.build().bindVars);
-      }
+      await this.printDebugData(qb, q);
     } else if (flags.output === 'spec') {
-      this.ux.styledJSON(q.spec);
+      await this.printSpec(qb);
     } else {
-      this.ux.action.start('Running query');
-      const results = await q.run<JsonMap>();
-      this.ux.action.stop();
+      let results: JsonMap[] = [];
 
+      if (q === undefined) {
+        this.ux.error(`Couldn't build qu`)
+      } else {
+        this.ux.action.start('Running query');
+        results = await QueryBuilder.run<JsonMap>(q);
+        this.ux.action.stop();
+      }
+  
       if (flags.output?.toLocaleLowerCase() === 'json') {
         this.log(JSON.stringify(results));
 
@@ -245,5 +213,73 @@ export default class Query extends SgCommand {
         this.ux.info(`Wrote file to ./storage/output/${flags.output}`);
       }
     }
+  }
+
+  async buildQueryFromFlags(qb?: QueryBuilder) {
+    const { flags } = await this.parse(Query);
+
+    if (qb === undefined) qb = new QueryBuilder(flags.collection);
+
+    // Return properties
+    for (const r of flags.return ?? []) {
+      if (r.indexOf(':') >= 0) {
+        qb.return(r.split(':')[1], r.split(':')[0]);
+      } else {
+        qb.return(r);
+      }
+    }
+
+    // Group/Collect
+    for (const r of flags.group ?? []) {
+      if (r.indexOf(':') >= 0) {
+        qb.groupBy(r.split(':')[1], r.split(':')[0]);
+      } else {
+        qb.groupBy(r);
+      }
+    }
+
+    // Aggregates
+    // TODO
+
+    // Filters
+    // TODO
+
+    // Sort
+    for (const r of flags.asc ?? []) {
+      qb.sortBy(r, 'asc');
+    }
+    for (const r of flags.desc ?? []) {
+      qb.sortBy(r, 'desc');
+    }
+
+    qb.limit(flags.limit);
+
+    return Promise.resolve(qb);
+  }
+
+  async printSpec(qb?: QueryBuilder) {
+    this.ux.styledJSON(qb?.spec);
+    return Promise.resolve();
+  }
+
+  async printDebugData(qb?: QueryBuilder, q?: GeneratedAqlQuery) {
+    if (qb) {
+      this.ux.info('');
+      this.ux.styledHeader('Query spec');
+      this.ux.styledJSON(qb.spec);
+    }
+
+    if (q) {
+      this.ux.info('');
+      this.ux.styledHeader('Raw query');
+      this.ux.info(q.query);
+
+      if (Object.entries(q.bindVars).length) {
+        this.ux.info('');
+        this.ux.styledHeader('Bound variables');
+        this.ux.styledObject(q.bindVars);
+      }
+    }
+    return Promise.resolve();
   }
 }
