@@ -258,13 +258,15 @@ export default class Query extends SgCommand {
     }
 
     // Aggregates
-    const averageFuncs = ['distinct', 'empty', 'nonempty', 'sum', 'avg', 'min', 'max'] as const;
-    for (const fnc of averageFuncs) {
-      for (const r of flags[fnc] ?? []) {
-        if (r.indexOf(':') >= 0) {
-          qb.aggregate(r.split(':')[0], fnc, r.split(':')[1]);
+    const aggregateFuncs = ['distinct', 'empty', 'nonempty', 'sum', 'avg', 'min', 'max'] as const;
+    const numericFuncs = ['sum', 'avg', 'min', 'max'];
+    for (const fnc of aggregateFuncs) {
+      for (const a of flags[fnc] ?? []) {
+        const [name, path] = a.split(':');
+        if (numericFuncs.includes(a)) {
+          qb.aggregate({ name, aggregate: fnc}, fnc, path);
         } else {
-          qb.aggregate(r, fnc);
+          qb.aggregate({ name, aggregate: fnc, type: 'number'  }, fnc, path);
         }
       }
     }
