@@ -8,8 +8,11 @@ import _ from 'lodash';
 import { readFile } from 'fs/promises';
 import { aql, literal, GeneratedAqlQuery } from 'arangojs/aql.js'
 import * as csv from 'fast-csv';
+import is from '@sindresorhus/is';
 
 export default class Query extends SgCommand {
+  static aliases = ['report'];
+
   static summary = 'Query the Spidergram crawl data';
 
   static flags = {
@@ -27,52 +30,24 @@ export default class Query extends SgCommand {
       summary: 'The Arango collection to be queried',
       default: 'resources'
     }),
+    filter: Flags.string({
+      char: 'f',
+      summary: '-',
+      multiple: true,
+    }),
     return: Flags.string({
       char: 'r',
       summary: 'Properties to include in the return value',
       multiple: true
     }),
+    returnFilter: Flags.string({
+      aliases: ['rf'],
+      summary: '-',
+      multiple: true,
+    }),
     limit: Flags.integer({
       summary: 'The Arango collection to be queried',
       default: 20
-    }),
-
-    // Filters
-    empty: Flags.string({
-      aliases: ['null'],
-      summary: '-',
-      multiple: true,
-      helpGroup: 'Filters'
-    }),
-    equals: Flags.string({
-      aliases: ['eq'],
-      summary: '-',
-      multiple: true,
-      helpGroup: 'Filters'
-    }),
-    greater: Flags.string({
-      aliases: ['gt'],
-      summary: '-',
-      multiple: true,
-      helpGroup: 'Filters'
-    }),
-    less: Flags.string({
-      aliases: ['lt'],
-      summary: '-',
-      multiple: true,
-      helpGroup: 'Filters'
-    }),
-    notempty: Flags.string({
-      aliases: ['exists'],
-      summary: '-',
-      multiple: true,
-      helpGroup: 'Filters'
-    }),
-    notequals: Flags.string({
-      aliases: ['neq'],
-      summary: '-',
-      multiple: true,
-      helpGroup: 'Filters'
     }),
 
     // Sorting
@@ -94,8 +69,18 @@ export default class Query extends SgCommand {
       multiple: true,
       helpGroup: 'Aggregation'
     }),
-    unique: Flags.string({
-      summary: 'COUNT_UNIQUE() a property when grouping results',
+    empty: Flags.string({
+      summary: 'COUNT_EMPTY() a property when grouping results',
+      multiple: true,
+      helpGroup: 'Aggregation'
+    }),
+    nonempty: Flags.string({
+      summary: 'COUNT_EMPTY() a property when grouping results',
+      multiple: true,
+      helpGroup: 'Aggregation'
+    }),
+    distinct: Flags.string({
+      summary: 'COUNT_DISTINCT() a property when grouping results',
       multiple: true,
       helpGroup: 'Aggregation'
     }),
@@ -147,13 +132,15 @@ export default class Query extends SgCommand {
       } else {
         const spec = await readFile(flags.input).then(buffer => JSON.parse(buffer.toString()));
         qb = new QueryBuilder(spec);
-        qb = await this.buildQueryFromFlags(qb);
       }
     }
 
     // If there's no GeneratedAqlQuery yet, try building it from the QueryBuilder,
     // if it exists. Very speculative stuff. Also set up an empty result set.
-    q ??= qb?.build();
+    if (q === undefined) {
+      qb = await this.buildQueryFromFlags(qb);
+      q = qb?.build();
+    }
     let results: JsonMap[] = [];
 
     // Now we start handling output; 'debug' and 'spec' mode are meant to help
@@ -181,7 +168,7 @@ export default class Query extends SgCommand {
 
       } else if (flags.output?.toLocaleLowerCase() === 'csv') {
         // This is just a direct-to-screen version of the '*.csv' case below.
-        const csvStream = csv.format();
+        const csvStream = csv.format({ headers: true });
         csvStream.pipe(process.stdout);
         for (const row of results) {
           csvStream.write(row);
@@ -209,7 +196,7 @@ export default class Query extends SgCommand {
         this.ux.info(`Wrote file to ./storage/output/${flags.output}`);
 
       } else if (flags.output?.toLocaleLowerCase().endsWith('.csv')) {
-        const csvStream = csv.format();
+        const csvStream = csv.format({ headers: true });
         project.files('output').writeStream(flags.output, csvStream);
         for (const row of results) {
           csvStream.write(row);
@@ -237,34 +224,82 @@ export default class Query extends SgCommand {
     }
   }
 
+  /**
+   * Given the assorted flags that have been passed in, uses the QueryBuilder's
+   * fluent methods to build out a full query spec.
+   * 
+   * NOTE: Due to the way flags are grouped by OCLIF, there's no way to put
+   * one filter *before* the group-by commands. Thus, all filters must be
+   * applied before grouping/aggregation. This makes it impossible to build, for
+   * example, a query that counts the number of items in a category, but hides
+   * categoies with fewer than 10 items.
+   * 
+   * We're working on it.
+   */
   async buildQueryFromFlags(qb?: QueryBuilder) {
     const { flags } = await this.parse(Query);
 
     if (qb === undefined) qb = new QueryBuilder(flags.collection);
 
-    // Return properties
-    for (const r of flags.return ?? []) {
-      if (r.indexOf(':') >= 0) {
-        qb.return(r.split(':')[1], r.split(':')[0]);
+    // Filters
+    for (const f of flags.filter ?? []) {
+      if (f.indexOf(':') >= 0) {
+        const [prop, value] = f.split(':');
+        const multiValues: (string | number)[] = value.split(',').map(item => item.trim()).map(item => is.numericString(item) ? Number.parseInt(item) : item)
+        if (multiValues.length > 1) {
+          qb.filterBy(prop, multiValues);
+        } else {
+          qb.filterBy(prop, is.numericString(value) ? Number.parseInt(value) : value);
+        }
       } else {
-        qb.return(r);
+        qb.filterBy(f);
       }
     }
 
     // Group/Collect
     for (const r of flags.group ?? []) {
       if (r.indexOf(':') >= 0) {
-        qb.groupBy(r.split(':')[1], r.split(':')[0]);
+        qb.groupBy(r.split(':')[0], r.split(':')[1]);
       } else {
         qb.groupBy(r);
       }
     }
 
     // Aggregates
-    // TODO
+    const averageFuncs = ['distinct', 'empty', 'nonempty', 'sum', 'avg', 'min', 'max'] as const;
+    for (const fnc of averageFuncs) {
+      for (const r of flags[fnc] ?? []) {
+        if (r.indexOf(':') >= 0) {
+          qb.aggregate(r.split(':')[0], fnc, r.split(':')[1]);
+        } else {
+          qb.aggregate(r, fnc);
+        }
+      }
+    }
 
-    // Filters
-    // TODO
+    // Return properties
+    for (const r of flags.return ?? []) {
+      if (r.indexOf(':') >= 0) {
+        qb.return(r.split(':')[0], r.split(':')[1]);
+      } else {
+        qb.return(r);
+      }
+    }
+  
+    // Post-collect filters
+    for (const f of flags.returnFilter ?? []) {
+      if (f.indexOf(':') >= 0) {
+        const [prop, value] = f.split(':');
+        const multiValues: (string | number)[] = value.split(',').map(item => item.trim()).map(item => is.numericString(item) ? Number.parseInt(item) : item)
+        if (multiValues.length > 1) {
+          qb.filterBy(prop, multiValues);
+        } else {
+          qb.filterBy(prop, is.numericString(value) ? Number.parseInt(value) : value);
+        }
+      } else {
+        qb.filterBy(f);
+      }
+    }
 
     // Sort
     for (const r of flags.asc ?? []) {
