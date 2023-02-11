@@ -45,21 +45,13 @@ export default class Query extends SgCommand {
       summary: '-',
       multiple: true,
     }),
+    sort: Flags.string({
+      summary: 'Sort results by a property',
+      multiple: true,
+    }),
     limit: Flags.integer({
       summary: 'The Arango collection to be queried',
       default: 20
-    }),
-
-    // Sorting
-    asc: Flags.string({
-      summary: 'Sort results by a property (ascending)',
-      multiple: true,
-      helpGroup: 'Sorting'
-    }),
-    desc: Flags.string({
-      summary: 'Sort results by a property (descending)',
-      multiple: true,
-      helpGroup: 'Sorting'
     }),
 
     // Collect/aggregate
@@ -302,11 +294,13 @@ export default class Query extends SgCommand {
     }
 
     // Sort
-    for (const r of flags.asc ?? []) {
-      qb.sortBy(r, 'asc');
-    }
-    for (const r of flags.desc ?? []) {
-      qb.sortBy(r, 'desc');
+    for (const s of flags.sort ?? []) {
+      const [prop, direction] = s.split(':');
+      if (direction === 'asc' || direction === 'desc') {
+        qb.sortBy(prop, direction);
+      } else {
+        qb.sortBy(prop);
+      }
     }
 
     qb.limit(flags.limit);
