@@ -80,6 +80,7 @@
     "cli-progress": "^3.11.2",
     "content-type": "^1.0.4",
     "dotenv": "^16.0.3",
+    "fast-csv": "^4.3.6",
     "filenamify": "^5.1.1",
     "humanize-url": "^3.0.0",
     "inquirer": "^9.1.4",
