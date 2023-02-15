@@ -8,7 +8,7 @@ export async function failureHandler(context: SpiderContext, error: Error) {
 
   const rs = new Resource({
     url: request.loadedUrl ?? request.url,
-    code: lookupError(error),
+    code: findCodeForError(error),
     message: `(${error.name}: ${error.message})`,
     errors: request.errorMessages,
     headers: {},
@@ -24,7 +24,7 @@ export async function failureHandler(context: SpiderContext, error: Error) {
   await graph.push([rs, rw]);
 }
 
-function lookupError(error: Error) {
+export function findCodeForError(error: Error) {
   for (const [err, code] of Object.entries(internalErrorLookup)) {
     if (error.message.indexOf(err) > -1) return code;
   }
