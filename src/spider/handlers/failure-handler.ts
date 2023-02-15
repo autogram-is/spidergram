@@ -8,18 +8,65 @@ export async function failureHandler(context: SpiderContext, error: Error) {
 
   const rs = new Resource({
     url: request.loadedUrl ?? request.url,
-    code: -1,
+    code: lookupError(error),
     message: `(${error.name}: ${error.message})`,
     errors: request.errorMessages,
     headers: {},
   });
 
   const rw = new RespondsWith({
-    url: `unique_url/${request.uniqueKey}`,
+    url: `unique_urls/${request.uniqueKey}`,
     resource: rs,
     method: request.method,
     headers: request.headers ?? {},
   });
 
   await graph.push([rs, rw]);
+}
+
+function lookupError(error: Error) {
+  for (const [err, code] of Object.entries(internalErrorLookup)) {
+    if (error.message.indexOf(err) > -1) return code;
+  }
+  return InternalError.UNKNOWN;
+}
+
+export enum InternalError {
+  UNKNOWN = -1,
+
+  NETWORK = -1000,
+  DNS = -1010,
+  RESET = -1020,
+  TIMEOUT = -1030,
+
+  SERVER = -2000,
+  SERVERTIMEOUT = -2010,
+  EMPTY = -2020,
+  REDIRECT = -2030,
+  COOKIE = -2040,
+  COOKIEDOMAIN = -2041,
+
+  TYPE = -3000,
+
+  PLAYWRIGHT = -4000
+}
+
+const internalErrorLookup = {
+  // Network errors
+  "getaddrinfo ENOTFOUND": InternalError.DNS,
+  "read ECONNRESET": InternalError.RESET,
+  "connect ETIMEDOUT": InternalError.TIMEOUT,
+
+  // Server response errors
+  "TimeoutError": InternalError.SERVERTIMEOUT,
+  "net::ERR_EMPTY_RESPONSE": InternalError.EMPTY,
+  "MaxRedirectsError": InternalError.REDIRECT,
+  "RequestError: Cookie failed to parse": InternalError.COOKIE,
+  "RequestError: Cookie not in this host's domain": InternalError.COOKIEDOMAIN,
+
+  // Internal type errors
+  "TypeError": InternalError.TYPE,
+
+  // Playwright errors
+  "page.content": InternalError.PLAYWRIGHT
 }
