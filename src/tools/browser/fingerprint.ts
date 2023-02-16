@@ -2,8 +2,8 @@ import type {
   Technology as FingerprintTechnology,
   Category as FingerprintCategory,
   Input as FingerprintInput,
-  Resolution as FingerprintResult
- } from 'wappalyzer-core';
+  Resolution as FingerprintResult,
+} from 'wappalyzer-core';
 import pkg from 'wappalyzer-core';
 const { analyze, resolve, setCategories, setTechnologies } = pkg;
 
@@ -14,15 +14,15 @@ export type {
   Technology as FingerprintTechnology,
   Category as FingerprintCategory,
   Input as FingerprintInput,
-  Resolution as FingerprintResult
+  Resolution as FingerprintResult,
 } from 'wappalyzer-core';
 
 export type FingerprintOptions = {
-  technologies?: Record<string, FingerprintTechnology>,
-  categories?: Record<string, FingerprintCategory>,
-  forceReload?: boolean,
-  ignoreCache?: boolean,
-}
+  technologies?: Record<string, FingerprintTechnology>;
+  categories?: Record<string, FingerprintCategory>;
+  forceReload?: boolean;
+  ignoreCache?: boolean;
+};
 
 export class Fingerprint {
   protected constructor() {
@@ -31,48 +31,71 @@ export class Fingerprint {
 
   protected static loaded = false;
 
-  static analyzeHtml(html: string, technologies?: FingerprintTechnology[]): FingerprintResult[] {
+  static analyzeHtml(
+    html: string,
+    technologies?: FingerprintTechnology[],
+  ): FingerprintResult[] {
     const input = Fingerprint.extractBodyData(html);
     return Fingerprint.analyze(input, technologies);
   }
 
-  static analyzeResource(resource: Resource, technologies?: FingerprintTechnology[]): FingerprintResult[] {
+  static analyzeResource(
+    resource: Resource,
+    technologies?: FingerprintTechnology[],
+  ): FingerprintResult[] {
     const input: FingerprintInput = {
       url: resource.url,
-      ...Fingerprint.extractBodyData(resource.body ?? '')
+      ...Fingerprint.extractBodyData(resource.body ?? ''),
     };
     return Fingerprint.analyze(input, technologies);
   }
-  
-  static analyze(input: FingerprintInput, technologies?: FingerprintTechnology[]): FingerprintResult[] {
+
+  static analyze(
+    input: FingerprintInput,
+    technologies?: FingerprintTechnology[],
+  ): FingerprintResult[] {
     return resolve(analyze(input, technologies));
   }
 
-  static async loadDefinitions(options: FingerprintOptions = {}): Promise<void> {
+  static async loadDefinitions(
+    options: FingerprintOptions = {},
+  ): Promise<void> {
     const project = await Project.config();
 
     if (!Fingerprint.loaded || options.forceReload) {
       let categories: Record<string, FingerprintCategory> = {};
       let technology: Record<string, FingerprintTechnology> = {};
 
-      const catExists = (await (project.files('config').exists('wappalyzer-categories.json')));
-      const techExists = (await (project.files('config').exists('wappalyzer-technologies.json')));
-      
-      if (!catExists || options.ignoreCache) await Fingerprint.cacheCategories();
-      if (!techExists || options.ignoreCache) await Fingerprint.cacheTechnologies();
-  
-      if (await (project.files('config').exists('wappalyzer-categories.json'))) {
-        const json = (await project.files('config').read('wappalyzer-categories.json')).toString();
+      const catExists = await project
+        .files('config')
+        .exists('wappalyzer-categories.json');
+      const techExists = await project
+        .files('config')
+        .exists('wappalyzer-technologies.json');
+
+      if (!catExists || options.ignoreCache)
+        await Fingerprint.cacheCategories();
+      if (!techExists || options.ignoreCache)
+        await Fingerprint.cacheTechnologies();
+
+      if (await project.files('config').exists('wappalyzer-categories.json')) {
+        const json = (
+          await project.files('config').read('wappalyzer-categories.json')
+        ).toString();
         categories = JSON.parse(json) as Record<string, FingerprintCategory>;
       }
-  
-      if (await (project.files('config').exists('wappalyzer-technologies.json'))) {
-        const json = (await project.files('config').read('wappalyzer-technologies.json')).toString();
+
+      if (
+        await project.files('config').exists('wappalyzer-technologies.json')
+      ) {
+        const json = (
+          await project.files('config').read('wappalyzer-technologies.json')
+        ).toString();
         technology = JSON.parse(json) as Record<string, FingerprintTechnology>;
       }
-  
-      setCategories({...categories, ...options.categories});
-      setTechnologies({...technology, ...options.technologies});
+
+      setCategories({ ...categories, ...options.categories });
+      setTechnologies({ ...technology, ...options.technologies });
 
       Fingerprint.loaded = true;
     }
@@ -82,38 +105,54 @@ export class Fingerprint {
 
   protected static async cacheTechnologies() {
     const project = await Project.config();
-  
+
     const chars = Array.from({ length: 27 }, (value, index) =>
-      index ? String.fromCharCode(index + 96) : '_'
+      index ? String.fromCharCode(index + 96) : '_',
     );
-  
+
     const data = await Promise.all(
       chars.map(async char => {
-        const url = new URL(`https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/technologies/${char}.json`);
+        const url = new URL(
+          `https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/technologies/${char}.json`,
+        );
         return await fetch(url).then(response => response.json());
-      })
+      }),
     );
-  
+
     const technologies = data.reduce(
       (acc, obj) => ({
         ...acc,
-        ...obj
+        ...obj,
       }),
-      {}
-    )
-  
-    return project.files('config').write('wappalyzer-technologies.json', Buffer.from(JSON.stringify(technologies)));
-  }
-  
-  protected static async cacheCategories() {
-    const project = await Project.config();
-  
-    const url = new URL('https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/categories.json');
-    const categories = await fetch(url).then(response => response.json());
-    return project.files('config').write('wappalyzer-categories.json', Buffer.from(JSON.stringify(categories)));
+      {},
+    );
+
+    return project
+      .files('config')
+      .write(
+        'wappalyzer-technologies.json',
+        Buffer.from(JSON.stringify(technologies)),
+      );
   }
 
-  static coerceDictionary(input: Record<string, string | string[] | undefined>) {
+  protected static async cacheCategories() {
+    const project = await Project.config();
+
+    const url = new URL(
+      'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/categories.json',
+    );
+    const categories = await fetch(url).then(response => response.json());
+    return project
+      .files('config')
+      .write(
+        'wappalyzer-categories.json',
+        Buffer.from(JSON.stringify(categories)),
+      );
+  }
+
+  static coerceDictionary(
+    input: Record<string, string | string[] | undefined>,
+  ) {
     const output: Record<string, string[]> = {};
     for (const [k, v] of Object.entries(input)) {
       if (typeof v === 'string') output[k.toLocaleLowerCase()] = [v];
@@ -121,18 +160,20 @@ export class Fingerprint {
     }
     return output;
   }
-  
+
   static extractBodyData(html: string) {
     const data = HtmlTools.getPageData(html, { all: true });
     const input: FingerprintInput = { html: html };
-    
-    input.meta = data.meta ? Fingerprint.coerceDictionary(data.meta) : undefined;
+
+    input.meta = data.meta
+      ? Fingerprint.coerceDictionary(data.meta)
+      : undefined;
     input.scriptSrc = [];
     input.scripts = '';
     input.css = '';
     for (const script of Object.values(data.scripts ?? {})) {
       if ('src' in script && script.src !== undefined) {
-        input.scriptSrc.push(script.src );
+        input.scriptSrc.push(script.src);
       } else {
         input.scripts += script.content ?? '';
       }
@@ -143,7 +184,7 @@ export class Fingerprint {
         input.css += style.content;
       }
     }
-  
+
     return input;
   }
 }

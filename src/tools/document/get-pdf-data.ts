@@ -4,10 +4,14 @@ import { Result } from 'pdf-parse';
 
 export async function getPdfData(input: string | URL | Buffer | PdfOptions) {
   let data: Result | undefined = undefined;
-  if (typeof input === 'string' || input instanceof URL || Buffer.isBuffer(input)) {
+  if (
+    typeof input === 'string' ||
+    input instanceof URL ||
+    Buffer.isBuffer(input)
+  ) {
     data = await PdfParse(input);
   } else {
-    const  { render, max, version, ...initParams } = input;
+    const { render, max, version, ...initParams } = input;
     data = await PdfParse(initParams, { render, max, version });
   }
 

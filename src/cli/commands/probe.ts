@@ -6,7 +6,7 @@ import {
   Resource,
   Query,
   aql,
-  NormalizedUrl
+  NormalizedUrl,
 } from '../../index.js';
 
 export default class Probe extends SgCommand {
@@ -19,13 +19,13 @@ export default class Probe extends SgCommand {
     fetch: Flags.boolean({
       char: 'f',
       description: 'Always fetch the URL.',
-      allowNo: true
+      allowNo: true,
     }),
     refresh: Flags.boolean({
       char: 'r',
       description: 'Refresh the fingerprint definitions.',
       default: false,
-    })
+    }),
   };
 
   static args = [
@@ -44,24 +44,29 @@ export default class Probe extends SgCommand {
     const url = new NormalizedUrl(args.url);
 
     this.ux.action.start('Loading tech fingerprint patterns');
-    await BrowserTools.Fingerprint.loadDefinitions({ ignoreCache: flags.force ?? false, forceReload: true });
+    await BrowserTools.Fingerprint.loadDefinitions({
+      ignoreCache: flags.force ?? false,
+      forceReload: true,
+    });
     this.ux.action.stop();
 
     let res: Resource | undefined = undefined;
     const technologies: BrowserTools.FingerprintResult[] = [];
 
     if (flags.fetch !== true) {
-      const id = (await Query.run<string>(aql`
+      const id = (
+        await Query.run<string>(aql`
         for uu in unique_urls
         filter uu.parsed.href == ${url.href}
         for rw in responds_with FILTER rw._from == uu._id
         for r in resources FILTER r._id == rw._to
         LIMIT 1
         return r._id
-      `)).pop();
+      `)
+      ).pop();
       if (id) res = await graph.findById<Resource>(id);
     }
-    
+
     if (res instanceof Resource) {
       console.log('analyzing stored resource');
       technologies.push(...BrowserTools.Fingerprint.analyzeResource(res));
@@ -69,8 +74,8 @@ export default class Probe extends SgCommand {
       if (flags.fetch !== false) {
         console.log('analyzing fetched response');
         const response = await fetch(url);
-        const headers: Record<string, string[]> = { };
-        const cookies: Record<string, string[]> = { };
+        const headers: Record<string, string[]> = {};
+        const cookies: Record<string, string[]> = {};
 
         response.headers.forEach((value, key) => {
           if (key.toLocaleLowerCase() == 'set-cookie') {
@@ -91,7 +96,7 @@ export default class Probe extends SgCommand {
           headers,
           cookies,
           ...BrowserTools.Fingerprint.extractBodyData(await response.text()),
-        }
+        };
         technologies.push(...BrowserTools.Fingerprint.analyze(input));
       } else {
         this.ux.error('Could not find resource for url');
@@ -99,7 +104,7 @@ export default class Probe extends SgCommand {
     }
 
     for (const tech of technologies) {
-      this.ux.info(`${tech.name} ${tech.version} (${tech.website})`)
+      this.ux.info(`${tech.name} ${tech.version} (${tech.website})`);
     }
   }
 }

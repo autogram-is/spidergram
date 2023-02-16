@@ -48,25 +48,25 @@ export enum InternalError {
 
   TYPE = -3000,
 
-  PLAYWRIGHT = -4000
+  PLAYWRIGHT = -4000,
 }
 
 const internalErrorLookup = {
   // Network errors
-  "getaddrinfo ENOTFOUND": InternalError.DNS,
-  "read ECONNRESET": InternalError.RESET,
-  "connect ETIMEDOUT": InternalError.TIMEOUT,
+  'getaddrinfo ENOTFOUND': InternalError.DNS,
+  'read ECONNRESET': InternalError.RESET,
+  'connect ETIMEDOUT': InternalError.TIMEOUT,
 
   // Server response errors
-  "TimeoutError": InternalError.SERVERTIMEOUT,
-  "net::ERR_EMPTY_RESPONSE": InternalError.EMPTY,
-  "MaxRedirectsError": InternalError.REDIRECT,
-  "RequestError: Cookie failed to parse": InternalError.COOKIE,
+  TimeoutError: InternalError.SERVERTIMEOUT,
+  'net::ERR_EMPTY_RESPONSE': InternalError.EMPTY,
+  MaxRedirectsError: InternalError.REDIRECT,
+  'RequestError: Cookie failed to parse': InternalError.COOKIE,
   "RequestError: Cookie not in this host's domain": InternalError.COOKIEDOMAIN,
 
   // Internal type errors
-  "TypeError": InternalError.TYPE,
+  TypeError: InternalError.TYPE,
 
   // Playwright errors
-  "page.content": InternalError.PLAYWRIGHT
-}
+  'page.content': InternalError.PLAYWRIGHT,
+};
