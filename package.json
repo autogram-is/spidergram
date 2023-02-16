@@ -73,7 +73,7 @@
     "@sindresorhus/is": "^5.3.0",
     "@sindresorhus/slugify": "^2.1.1",
     "@vladfrangu/async_event_emitter": "^2.1.2",
-    "aql-builder": "^0.5.0-beta",
+    "aql-builder": "autogram-is/aql-builder#main",
     "arrify": "^3.0.0",
     "chalk": "^5.1.2",
     "class-transformer": "^0.5.1",
@@ -136,7 +136,7 @@
   },
   "peerDependencies": {
     "@oclif/core": "^1.19.1",
-    "arangojs": "^8.0.0",
+    "arangojs": "^8.1.0",
     "cheerio": "^1.0.0-rc.12",
     "crawlee": "^3.1.0",
     "googleapis": "^108.0.1",
