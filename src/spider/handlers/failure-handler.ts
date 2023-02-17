@@ -24,9 +24,10 @@ export async function failureHandler(context: SpiderContext, error: Error) {
   await graph.push([rs, rw]);
 }
 
-export function findFailureCode(error: Error) {
+export function findFailureCode(error: Error | string) {
+  const message = (typeof error === 'string') ? error : error.message;
   for (const [err, code] of Object.entries(internalErrorLookup)) {
-    if (error.message.indexOf(err) > -1) return code;
+    if (message.indexOf(err) > -1) return code;
   }
   return InternalError.UNKNOWN;
 }
