@@ -54,13 +54,13 @@ export enum InternalError {
 
 const internalErrorLookup = {
   // Network errors
-  'getaddrinfo ENOTFOUND': InternalError.DNS,
-  'read ECONNRESET': InternalError.RESET,
-  'connect ETIMEDOUT': InternalError.TIMEOUT,
+  ENOTFOUND: InternalError.DNS,
+  ECONNRESET: InternalError.RESET,
+  ETIMEDOUT: InternalError.TIMEOUT,
 
   // Server response errors
   TimeoutError: InternalError.SERVERTIMEOUT,
-  'net::ERR_EMPTY_RESPONSE': InternalError.EMPTY,
+  ERR_EMPTY_RESPONSE: InternalError.EMPTY,
   MaxRedirectsError: InternalError.REDIRECT,
   'RequestError: Cookie failed to parse': InternalError.COOKIE,
   "RequestError: Cookie not in this host's domain": InternalError.COOKIEDOMAIN,
