@@ -1,5 +1,5 @@
 import test from 'ava';
-import { Spreadsheet, Query, aql } from "../src/index.js";
+import { FileTools, Query, aql } from "../src/index.js";
 import * as fs from 'fs/promises';
 
 test('query results treated as sheet', async t => {
@@ -13,7 +13,7 @@ test('query results treated as sheet', async t => {
     }
   `);
 
-  const report = new Spreadsheet();
+  const report = new FileTools.Spreadsheet();
   report.addSheet(data, 'report');
   
   await t.notThrowsAsync(

@@ -7,7 +7,7 @@ import {
   isAqlFunction,
   isAqlAggregateFunction,
 } from '../../reports/index.js';
-import { Spreadsheet } from '../../index.js';
+import { FileTools } from '../../index.js';
 import { JsonMap, JsonPrimitive } from '@salesforce/ts-types';
 import _ from 'lodash';
 import { readFile } from 'fs/promises';
@@ -238,7 +238,7 @@ debug: Display the query spec and generated AQL statement without running it
         // If the user provides a *filename* that ends with .xlsx, we'll
         // generate a new Spreadsheet with the results in it, and write
         // the file as an Excel workbook to the ./storage/output directory.
-        const s = new Spreadsheet();
+        const s = new FileTools.Spreadsheet();
         s.addSheet(results, 'results');
         project.files('output').write(flags.output, Buffer.from(s.toBuffer()));
         this.ux.info(`Wrote file to ./storage/output/${flags.output}`);

@@ -1,1 +1,3 @@
-export * from './get-pdf-data.js';
+export * from './pdf.js';
+export * from './document.js';
+export * from './spreadsheet.js';

@@ -9,4 +9,3 @@ export * as FileTools from './file/index.js';
 export { Robots } from './robots.js';
 
 export * from './screenshot.js';
-export * from './spreadsheet.js';
