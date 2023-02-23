@@ -4,7 +4,7 @@ import type {
   Input as FingerprintInput,
   Resolution as FingerprintResult,
 } from 'wappalyzer-core';
-import { parse as parseCookies } from 'cookie';
+import { parse as parseCookie } from 'set-cookie-parser';
 import pkg from 'wappalyzer-core';
 const { analyze, resolve, setCategories, setTechnologies } = pkg;
 
@@ -43,6 +43,7 @@ export class Fingerprint {
     } else {
       inputStruct = input;
     }
+
     return resolve(analyze(inputStruct, technologies));
   }
 
@@ -179,7 +180,10 @@ export class Fingerprint {
       input.cookies ??= {};
 
       if (key.toLocaleLowerCase() === 'set-cookie') {
-        input.cookies = { ...input.cookies, ...wapifyDict(parseCookies(value)) };
+        const cookies = parseCookie(value);
+        for (const cookie of cookies) {
+          input.cookies[cookie.name] = [cookie.value];
+        }
       } else {
         input.headers[key.toLocaleLowerCase()] = Array.isArray(value) ? value : [value];
       }
@@ -200,8 +204,11 @@ export class Fingerprint {
     for (const [key, value] of Object.entries(res.headers)) {
       if (value !== undefined) {
         if (key.toLocaleLowerCase() === 'set-cookie' && typeof value === 'string') {
-          input.cookies = { ...input.cookies, ...wapifyDict(parseCookies(value)) };
-        } else {
+          const cookies = parseCookie(value);
+          for (const cookie of cookies) {
+            input.cookies[cookie.name] = [cookie.value];
+          }
+          } else {
           input.headers[key.toLocaleLowerCase()] = Array.isArray(value) ? value : [value];
         }
       }
