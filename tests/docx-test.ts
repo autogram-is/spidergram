@@ -6,20 +6,10 @@ test('document wrapper loads', t => {
   t.assert(doc !== undefined);
 });
 
-test('properties extracted', async t => {
-  const doc = new FileTools.Document('./tests/fixtures/filetypes/document.docx');
+test('data extracted', async t => {
+  const file = new FileTools.Document('./tests/fixtures/filetypes/document.docx');
+  const doc = await file.getAll();
 
-  const props = await doc.getProperties();
-  console.log(props);
-
-  t.assert(props !== undefined);
-});
-
-test('content extracted', async t => {
-  const doc = new FileTools.Document('./tests/fixtures/filetypes/document.docx');
-
-  const content = await doc.getContent();
-  console.log(content);
-
-  t.assert(content !== undefined);
+  t.is(doc.properties?.title, 'An example MS Word document');
+  t.is(doc.properties?.characters, 1199);
 });
