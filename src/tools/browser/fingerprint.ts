@@ -4,6 +4,7 @@ import type {
   Input as FingerprintInput,
   Resolution as FingerprintResult,
 } from 'wappalyzer-core';
+import { parse as parseCookies } from 'cookie';
 import pkg from 'wappalyzer-core';
 const { analyze, resolve, setCategories, setTechnologies } = pkg;
 
@@ -25,44 +26,32 @@ export type FingerprintOptions = {
 };
 
 export class Fingerprint {
-  protected constructor() {
-    throw new Error('wtf bro');
-  }
+  protected loaded = false;
 
-  protected static loaded = false;
-
-  static analyzeHtml(
-    html: string,
+  async analyze(
+    input: string | Response | Resource | FingerprintInput,
     technologies?: FingerprintTechnology[],
-  ): FingerprintResult[] {
-    const input = Fingerprint.extractBodyData(html);
-    return Fingerprint.analyze(input, technologies);
+  ): Promise<FingerprintResult[]> {
+    let inputStruct: FingerprintInput = {};
+
+    if (typeof input === 'string') {
+      inputStruct = this.extractBodyData(input);
+    } else if (input instanceof Resource) {
+      inputStruct = await this.extractResourceInput(input);
+    } else if (input instanceof Response) {
+      inputStruct = await this.extractResponseInput(input);
+    } else {
+      inputStruct = input;
+    }
+    return resolve(analyze(inputStruct, technologies));
   }
 
-  static analyzeResource(
-    resource: Resource,
-    technologies?: FingerprintTechnology[],
-  ): FingerprintResult[] {
-    const input: FingerprintInput = {
-      url: resource.url,
-      ...Fingerprint.extractBodyData(resource.body ?? ''),
-    };
-    return Fingerprint.analyze(input, technologies);
-  }
-
-  static analyze(
-    input: FingerprintInput,
-    technologies?: FingerprintTechnology[],
-  ): FingerprintResult[] {
-    return resolve(analyze(input, technologies));
-  }
-
-  static async loadDefinitions(
+  async loadDefinitions(
     options: FingerprintOptions = {},
-  ): Promise<void> {
+  ): Promise<this> {
     const project = await Project.config();
 
-    if (!Fingerprint.loaded || options.forceReload) {
+    if (!this.loaded || options.forceReload) {
       let categories: Record<string, FingerprintCategory> = {};
       let technology: Record<string, FingerprintTechnology> = {};
 
@@ -74,9 +63,9 @@ export class Fingerprint {
         .exists('wappalyzer-technologies.json');
 
       if (!catExists || options.ignoreCache)
-        await Fingerprint.cacheCategories();
+        await this.cacheCategories();
       if (!techExists || options.ignoreCache)
-        await Fingerprint.cacheTechnologies();
+        await this.cacheTechnologies();
 
       if (await project.files('config').exists('wappalyzer-categories.json')) {
         const json = (
@@ -97,13 +86,13 @@ export class Fingerprint {
       setCategories({ ...categories, ...options.categories });
       setTechnologies({ ...technology, ...options.technologies });
 
-      Fingerprint.loaded = true;
+      this.loaded = true;
     }
 
-    return Promise.resolve();
+    return Promise.resolve(this);
   }
 
-  protected static async cacheTechnologies() {
+  protected async cacheTechnologies() {
     const project = await Project.config();
 
     const chars = Array.from({ length: 27 }, (value, index) =>
@@ -135,7 +124,7 @@ export class Fingerprint {
       );
   }
 
-  protected static async cacheCategories() {
+  protected async cacheCategories() {
     const project = await Project.config();
 
     const url = new URL(
@@ -149,28 +138,19 @@ export class Fingerprint {
         Buffer.from(JSON.stringify(categories)),
       );
   }
-
-  static coerceDictionary(
-    input: Record<string, string | string[] | undefined>,
-  ) {
-    const output: Record<string, string[]> = {};
-    for (const [k, v] of Object.entries(input)) {
-      if (typeof v === 'string') output[k.toLocaleLowerCase()] = [v];
-      else if (Array.isArray(v)) output[k.toLocaleLowerCase()] = v;
-    }
-    return output;
-  }
-
-  static extractBodyData(html: string) {
+  
+  extractBodyData(html: string): FingerprintInput {
     const data = HtmlTools.getPageData(html, { all: true });
-    const input: FingerprintInput = { html: html };
-
-    input.meta = data.meta
-      ? Fingerprint.coerceDictionary(data.meta)
-      : undefined;
+  
+    const input: FingerprintInput = {
+      html,
+      meta: wapifyDict(data.meta ?? {}),
+    };
+  
     input.scriptSrc = [];
     input.scripts = '';
     input.css = '';
+  
     for (const script of Object.values(data.scripts ?? {})) {
       if ('src' in script && script.src !== undefined) {
         input.scriptSrc.push(script.src);
@@ -178,13 +158,66 @@ export class Fingerprint {
         input.scripts += script.content ?? '';
       }
     }
-
+  
     for (const style of Object.values(data.styles ?? {})) {
       if ('content' in style && style.content !== undefined) {
         input.css += style.content;
       }
     }
+    
+    return input;
+  }
+
+  async extractResponseInput(res: Response): Promise<FingerprintInput> {
+    const input: FingerprintInput = {
+      url: res.url,
+      ...this.extractBodyData(await res.text())
+    };
+
+    res.headers.forEach((value, key) => {
+      input.headers ??= {};
+      input.cookies ??= {};
+
+      if (key.toLocaleLowerCase() === 'set-cookie') {
+        input.cookies = { ...input.cookies, ...wapifyDict(parseCookies(value)) };
+      } else {
+        input.headers[key.toLocaleLowerCase()] = Array.isArray(value) ? value : [value];
+      }
+    });
 
     return input;
   }
+
+  async extractResourceInput(res: Resource): Promise<FingerprintInput> {
+    const input: FingerprintInput = {
+      url: res.url,
+      ...this.extractBodyData(res.body ?? '')
+    };
+
+    input.headers = {};
+    input.cookies = {};
+
+    for (const [key, value] of Object.entries(res.headers)) {
+      if (value !== undefined) {
+        if (key.toLocaleLowerCase() === 'set-cookie' && typeof value === 'string') {
+          input.cookies = { ...input.cookies, ...wapifyDict(parseCookies(value)) };
+        } else {
+          input.headers[key.toLocaleLowerCase()] = Array.isArray(value) ? value : [value];
+        }
+      }
+    }
+
+    return input;
+  }
+}
+
+
+function wapifyDict(input: Record<string, undefined | string | string[]>) {
+  const output: Record<string, string[]> = {};
+  for (const [key, value] of Object.entries(input)) {
+    if (value !== undefined) {
+      output[key.toLocaleLowerCase()] = Array.isArray(value) ? value : [value];
+    }
+  }
+  return output;
 }

@@ -42,9 +42,10 @@ export default class Probe extends SgCommand {
     const { args, flags } = await this.parse(Probe);
 
     const url = new NormalizedUrl(args.url);
+    const fp = new BrowserTools.Fingerprint();
 
     this.ux.action.start('Loading tech fingerprint patterns');
-    await BrowserTools.Fingerprint.loadDefinitions({
+    await fp.loadDefinitions({
       ignoreCache: flags.force ?? false,
       forceReload: true,
     });
@@ -69,42 +70,23 @@ export default class Probe extends SgCommand {
 
     if (res instanceof Resource) {
       console.log('analyzing stored resource');
-      technologies.push(...BrowserTools.Fingerprint.analyzeResource(res));
+      technologies.push(...await fp.analyze(res));
     } else {
       if (flags.fetch !== false) {
         console.log('analyzing fetched response');
         const response = await fetch(url);
-        const headers: Record<string, string[]> = {};
-        const cookies: Record<string, string[]> = {};
-
-        response.headers.forEach((value, key) => {
-          if (key.toLocaleLowerCase() == 'set-cookie') {
-            const entries = value.split(';');
-            for (const ent of entries) {
-              const pair = ent.split('=');
-              cookies[pair[0]] ??= [];
-              cookies[pair[0]] = cookies[pair[1]];
-            }
-          } else {
-            headers[key.toLocaleLowerCase()] ??= [];
-            headers[key.toLocaleLowerCase()].push(value);
-          }
-        });
-
-        const input: BrowserTools.FingerprintInput = {
-          url: url.href,
-          headers,
-          cookies,
-          ...BrowserTools.Fingerprint.extractBodyData(await response.text()),
-        };
-        technologies.push(...BrowserTools.Fingerprint.analyze(input));
+        technologies.push(...await fp.analyze(response));
       } else {
         this.ux.error('Could not find resource for url');
       }
     }
 
-    for (const tech of technologies) {
-      this.ux.info(`${tech.name} ${tech.version} (${tech.website})`);
+    if (technologies.length === 0) {
+      this.ux.info('No technologies detected.');
+    } else {
+      for (const tech of technologies) {
+        this.ux.info(`${tech.name} ${tech.version} (${tech.categories.map(cat => cat.name).join(', ')})`);
+      }
     }
   }
 }
