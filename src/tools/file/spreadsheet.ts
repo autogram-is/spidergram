@@ -40,6 +40,11 @@ type SpreadsheetWriteOptions = {
 
 type SpreadsheetGenerateOptions = Omit<XLSX.WritingOptions, 'type'>;
 
+
+/**
+ * Builds and exports single and multi-sheet Excel Workbooks from JSON
+ * arrays and dictionaries.
+ */
 export class Spreadsheet {
   static utils = XLSX.utils;
 
