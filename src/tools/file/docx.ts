@@ -1,13 +1,13 @@
 import mammoth from 'mammoth';
-import { fromBuffer, DocumentProperties } from 'office-document-properties';
+import { fromBuffer, DocumentProperties as DocxProperties } from 'office-document-properties';
 import { GenericFile } from './generic-file.js';
 
 /**
  * Currently only handles importing existing .docx files, and extracting their contents
  * and metadata. In the future we may use this to generate them from scratch for reports.
  */
-export class Document extends GenericFile {
-  async getAll(): Promise<{html?: string, text?: string, properties?: DocumentProperties}> {
+export class DocX extends GenericFile {
+  async getAll(): Promise<{html?: string, text?: string, properties?: DocxProperties}> {
     const buffer = await this.load();
 
     return Promise.resolve({
@@ -25,7 +25,7 @@ export class Document extends GenericFile {
     });
   }
 
-  async getData(): Promise<DocumentProperties> {
+  async getData(): Promise<DocxProperties> {
     const buffer = await this.load();
     return new Promise((resolve, reject) => fromBuffer(buffer, (error, data) => {
       if (error) reject(error);

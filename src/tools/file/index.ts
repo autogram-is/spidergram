@@ -1,3 +1,3 @@
 export * from './pdf.js';
-export * from './document.js';
+export * from './docx.js';
 export * from './spreadsheet.js';
