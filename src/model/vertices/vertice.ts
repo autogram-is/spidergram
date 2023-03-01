@@ -8,7 +8,7 @@ import {
   ClassTransformOptions,
   TargetMap,
 } from 'class-transformer';
-import { Uuid, UuidFactory } from '../helpers/uuid.js';
+import { Uuid, UuidFactory } from '../uuid.js';
 import { ensureJsonMap, JsonMap, has } from '@salesforce/ts-types';
 import _ from 'lodash';
 

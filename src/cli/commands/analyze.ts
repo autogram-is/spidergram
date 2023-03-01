@@ -42,7 +42,7 @@ export default class Analyze extends SgCommand {
       task: async resource => {
         if (is.nonEmptyString(resource.body)) {
           if (flags.metadata) {
-            const data = HtmlTools.getPageData(resource);
+            const data = HtmlTools.getPageData(resource.body);
             if (data) resource.data = data;
           }
 
