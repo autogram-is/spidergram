@@ -17,7 +17,6 @@ import {
   IsChildOf,
   IsVariantOf,
   AppearsOn,
-  DataSet,
   Fragment,
 } from '../model/index.js';
 import { Project } from './project.js';
@@ -146,7 +145,6 @@ export class ArangoStore {
       UniqueUrl,
       RespondsWith,
       Resource,
-      DataSet,
       LinksTo,
       IsChildOf,
       IsVariantOf,
