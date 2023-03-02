@@ -10,10 +10,12 @@ type Tag = Record<string, unknown> & {
 };
 
 type MetaTagOptions = {
+  hierarchyMarker?: string | RegExp;
   arrayTags?: string[];
 };
 
 const defaults: MetaTagOptions = {
+  hierarchyMarker: /[,:]/,
   arrayTags: ['keywords'],
 };
 
@@ -28,7 +30,7 @@ export function parseMetaTags(
     if (tag.content) {
       const key = tag.name ?? tag.property ?? tag.itemprop;
       if (key !== undefined) {
-        const path = key.split(':');
+        const path = key.split(options.hierarchyMarker);
         if (options.arrayMetaTags?.includes(key.toLocaleLowerCase())) {
           const existingValues = _.get(output, key) ?? [];
           const newValues = tag.content.split(',').map(v => v.trim());
