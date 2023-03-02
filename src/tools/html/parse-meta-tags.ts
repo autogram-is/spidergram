@@ -15,7 +15,7 @@ type MetaTagOptions = {
 };
 
 const defaults: MetaTagOptions = {
-  hierarchyMarker: /[,:]/,
+  hierarchyMarker: /[.:]/,
   arrayTags: ['keywords'],
 };
 
