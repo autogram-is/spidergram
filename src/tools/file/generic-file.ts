@@ -1,4 +1,5 @@
 import { readFile } from 'fs/promises';
+import { Stream } from 'stream';
 
 /**
  * A general-purpose base class for extracting data from downloaded
@@ -7,15 +8,23 @@ import { readFile } from 'fs/promises';
  * `getContent()` methods.
  */
 export abstract class GenericFile {
+  /**
+   * An array of mimetypes, or glob strings matching mimetype patterns, that
+   * the class can read and parse.
+   */
+  public static readonly mimeTypes: string[] = [];
+
   protected fileData?: Buffer;
   protected filePath?: string;
 
-  constructor(file?: string | Buffer) {
+  constructor(file?: string | Buffer | Stream) {
     if (file === undefined) {
       // Do nothing here
     } if (typeof file === 'string') {
       // Set the local filePath
       this.filePath = file;
+    } else if (file instanceof Stream) {
+      this.fileData = GenericFile.streamToBuffer(file, this.fileData)
     } else if (file instanceof Buffer) {
       // Set the local fileData
       this.fileData = file;
@@ -37,4 +46,29 @@ export abstract class GenericFile {
       }  
     });
   }
+
+  async getMetadata(): Promise<Record<string, unknown>> {
+    await this.load();
+    return Promise.resolve({});
+  }
+
+  async getContent(): Promise<Record<string, unknown>> {
+    await this.load();
+    return Promise.resolve({});
+  }
+
+  async getAll() {
+    await this.load();
+    return Promise.resolve({
+      metadata: await this.getMetadata(),
+      content: await this.getContent(),
+    });
+  }
+
+  protected static streamToBuffer(stream: Stream, target?: Buffer) {
+    const _buf = Array<Uint8Array>();
+    stream.on("data", chunk => _buf.push(chunk));
+    stream.on("end", () => target = Buffer.concat(_buf));
+    return target;
+  } 
 }

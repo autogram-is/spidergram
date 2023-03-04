@@ -7,15 +7,7 @@ import { GenericFile } from './generic-file.js';
  * and metadata. In the future we may use this to generate them from scratch for reports.
  */
 export class DocX extends GenericFile {
-  async getAll(): Promise<{html?: string, text?: string, properties?: DocxProperties}> {
-    const buffer = await this.load();
-
-    return Promise.resolve({
-      html: await mammoth.convertToHtml({ buffer }).then(results => results.value),
-      text: await mammoth.extractRawText({ buffer }).then(results => results.value),
-      properties: await this.getData()
-    });
-  }
+  public static mimeTypes = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
   async getContent(): Promise<{ html?: string, text?: string }> {
     const buffer = await this.load();
@@ -25,7 +17,7 @@ export class DocX extends GenericFile {
     });
   }
 
-  async getData(): Promise<DocxProperties> {
+  async getMetadata(): Promise<DocxProperties> {
     const buffer = await this.load();
     return new Promise((resolve, reject) => fromBuffer(buffer, (error, data) => {
       if (error) reject(error);
