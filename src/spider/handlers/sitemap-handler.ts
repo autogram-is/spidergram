@@ -1,50 +1,57 @@
+import { Duplex } from 'node:stream';
 import { SpiderContext } from '../context.js';
 import { HtmlTools } from '../../tools/index.js';
 import { fileNameFromHeaders } from '../helpers/mime.js';
-import { Readable } from 'stream';
 import { saveUrls, enqueueRequests } from '../links/index.js';
+import { Project } from '../../index.js';
+import { ensureDir } from "fs-extra";
+import path from 'node:path';
 
 // Because large feed and sitemap files can be enormous (google limits
 // them to 'no more than 50 megabytes'), we store them as file downloads
 // that are loaded as needed, rather than body data persisted to Arango.
 export async function sitemapHandler(context: SpiderContext) {
-  const { graph, files, saveResource, sendRequest } = context;
+  const { graph, files, saveResource } = context;
   const resource = await saveResource();
 
-  const buffer = await sendRequest({
-    responseType: 'buffer',
-    resolveBodyOnly: true,
-    allowGetBody: true,
-    decompress: true,
-    method: 'GET',
-    useHeaderGenerator: true,
+  const response = await fetch(resource.parsed)
+  .then(r => {
+    if (r.status !== 200) throw new Error('Could not download');
+    return r;
   });
 
-  // Save the raw XML we've retrieved — we'll retrieve it later.
-  const fileName = `sitemaps/'${resource.key}-${fileNameFromHeaders(
-    new URL(context.request.url),
-    buffer.headers,
-  )}`;
+  if (response.body) {
+    const fileName =
+      resource.key +
+      '-' +
+      fileNameFromHeaders(new URL(resource.url), resource.headers);
 
-  await files('downloads').writeStream(fileName, Readable.from(buffer));
-  resource.payload = { bucket: 'downloads', path: fileName };
-  await graph.push(resource);
+    const directory = path.join(resource.parsed.hostname.replaceAll('.', '-'), resource.mime?.replaceAll('/', '-') ?? 'unknown');
+    const proj = await Project.config();
+    await ensureDir(path.join(proj.root ?? '.', 'storage', 'downloads', directory));
+    const fullPath = path.join(directory, fileName);
+    await files('downloads').writeStream(fullPath, Duplex.from(response.body));
 
-  // Now read it back in
-  const xml = await files('downloads').read(fileName);
+    resource.payload = { bucket: 'downloads', path: fullPath };
+    await graph.push(resource);
 
-  // Now parse the sitemap and pull out URLs. Some sites (vanityfair.com is one
-  // example) do odd things like sitemap URLs with querystrings
+    // Now read it back in
+    const xml = await files('downloads').read(fileName);
 
-  const links = HtmlTools.findSitempLinks(xml.toString());
+    // Now parse the sitemap and pull out URLs. Some sites (vanityfair.com is one
+    // example) do odd things like sitemap URLs with querystrings
 
-  const subSitemaps = links.filter(l => l.label === 'sitemap');
-  const normalLinks = links.filter(l => l.label !== 'sitemap');
+    const links = HtmlTools.findSitempLinks(xml.toString());
 
-  await saveUrls(context, subSitemaps, { handler: 'sitemap' }).then(
-    savedLinks => enqueueRequests(context, savedLinks),
-  );
-  await saveUrls(context, normalLinks).then(savedLinks =>
-    enqueueRequests(context, savedLinks),
-  );
+    const subSitemaps = links.filter(l => l.label === 'sitemap');
+    const normalLinks = links.filter(l => l.label !== 'sitemap');
+
+    await saveUrls(context, subSitemaps, { handler: 'sitemap' }).then(
+      savedLinks => enqueueRequests(context, savedLinks),
+    );
+    await saveUrls(context, normalLinks).then(savedLinks =>
+      enqueueRequests(context, savedLinks),
+    );
+  }
+  return Promise.resolve();
 }

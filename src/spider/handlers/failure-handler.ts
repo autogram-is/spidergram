@@ -22,6 +22,7 @@ export async function failureHandler(context: SpiderContext, error: Error) {
   });
 
   await graph.push([rs, rw]);
+  return Promise.resolve();
 }
 
 export function findFailureCode(error: Error | string) {

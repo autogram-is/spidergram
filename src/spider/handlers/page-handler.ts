@@ -12,4 +12,5 @@ export async function pageHandler(context: SpiderContext) {
       handler: 'sitemap',
     });
   }
+  return Promise.resolve();
 }
