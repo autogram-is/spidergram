@@ -1,22 +1,27 @@
-import { GenericStore } from "./generic-storage.js";
-import { CreateCollectionOptions } from "arangojs/collection.js";
+import { GenericStore } from './generic-storage.js';
+import { CreateCollectionOptions } from 'arangojs/collection.js';
 import _ from 'lodash';
 
-
 const defaultCreateOptions: CreateCollectionOptions = {
-  keyOptions: { type: 'uuid' }
-}
+  keyOptions: { type: 'uuid' },
+};
 
 export class KeyValueStore extends GenericStore {
   protected static _prefix = 'kv_';
   protected static kvstores = new Map<string, KeyValueStore>();
 
-  static async open(name = 'default', options: CreateCollectionOptions = {}): Promise<KeyValueStore> {
-    const opt: CreateCollectionOptions = _.defaultsDeep(options, defaultCreateOptions);
+  static async open(
+    name = 'default',
+    options: CreateCollectionOptions = {},
+  ): Promise<KeyValueStore> {
+    const opt: CreateCollectionOptions = _.defaultsDeep(
+      options,
+      defaultCreateOptions,
+    );
     const cname = this.prefix(name);
     let set = KeyValueStore.kvstores.get(cname);
     if (set !== undefined) return Promise.resolve(set);
-  
+
     const db = await this.db();
     const collections = await db.listCollections();
     for (const c of collections) {
@@ -38,9 +43,12 @@ export class KeyValueStore extends GenericStore {
     return store.setValue(key, value);
   }
 
-  static async getValue<T = unknown>(key: string): Promise<T | undefined>
-  static async getValue<T = unknown>(key: string, defaultValue: T): Promise<T>
-  static async getValue<T = unknown>(key: string, defaultValue?: T): Promise<T | undefined> {
+  static async getValue<T = unknown>(key: string): Promise<T | undefined>;
+  static async getValue<T = unknown>(key: string, defaultValue: T): Promise<T>;
+  static async getValue<T = unknown>(
+    key: string,
+    defaultValue?: T,
+  ): Promise<T | undefined> {
     const store = await this.open();
     return store.getValue<T>(key, defaultValue as T);
   }
@@ -56,11 +64,14 @@ export class KeyValueStore extends GenericStore {
     return this.collection.remove({ _key: key });
   }
 
-  async getValue<T = unknown>(key: string): Promise<T | undefined>
-  async getValue<T = unknown>(key: string, defaultValue: T): Promise<T>
-  async getValue<T = unknown>(key: string, defaultValue?: T): Promise<T | undefined> {
+  async getValue<T = unknown>(key: string): Promise<T | undefined>;
+  async getValue<T = unknown>(key: string, defaultValue: T): Promise<T>;
+  async getValue<T = unknown>(
+    key: string,
+    defaultValue?: T,
+  ): Promise<T | undefined> {
     if (!this.isValidKey(key)) throw new TypeError('Invalid key');
     const record = await this.collection.document(key);
-    return record?.value as T ?? defaultValue ?? undefined;
+    return (record?.value as T) ?? defaultValue ?? undefined;
   }
 }

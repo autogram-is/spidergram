@@ -70,12 +70,12 @@ export default class Probe extends SgCommand {
 
     if (res instanceof Resource) {
       console.log('analyzing stored resource');
-      technologies.push(...await fp.analyze(res));
+      technologies.push(...(await fp.analyze(res)));
     } else {
       if (flags.fetch !== false) {
         console.log('analyzing fetched response');
         const response = await fetch(url);
-        technologies.push(...await fp.analyze(response));
+        technologies.push(...(await fp.analyze(response)));
       } else {
         this.ux.error('Could not find resource for url');
       }
@@ -85,7 +85,11 @@ export default class Probe extends SgCommand {
       this.ux.info('No technologies detected.');
     } else {
       for (const tech of technologies) {
-        this.ux.info(`${tech.name} ${tech.version} (${tech.categories.map(cat => cat.name).join(', ')})`);
+        this.ux.info(
+          `${tech.name} ${tech.version} (${tech.categories
+            .map(cat => cat.name)
+            .join(', ')})`,
+        );
       }
     }
   }

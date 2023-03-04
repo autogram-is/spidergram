@@ -30,12 +30,17 @@ export default class Compact extends SgCommand {
         const before = await collection.figures();
         await collection.compact();
         const after = await collection.figures();
-        results[c.name] = [before.figures['documentsSize'], after.figures['documentsSize']];
+        results[c.name] = [
+          before.figures['documentsSize'],
+          after.figures['documentsSize'],
+        ];
       }
     }
 
     for (const [name, sizes] of Object.entries(results)) {
-      this.ux.info(`${name}:\t${sizes[0].toLocaleString()} to ${sizes[1].toLocaleString()}`);
+      this.ux.info(
+        `${name}:\t${sizes[0].toLocaleString()} to ${sizes[1].toLocaleString()}`,
+      );
     }
   }
 }

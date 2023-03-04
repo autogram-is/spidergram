@@ -1,5 +1,5 @@
-import { Project, ArangoStore } from "../index.js";
-import { DocumentCollection, EdgeCollection } from "arangojs/collection";
+import { Project, ArangoStore } from '../index.js';
+import { DocumentCollection, EdgeCollection } from 'arangojs/collection';
 
 const INVALID_KEY_CHARS_REGEX = /[^a-zA-Z0-9_:.@()+,=;$!*'%-]/;
 const INVALID_COLLECTION_CHARS_REGEX = /[^a-zA-Z0-9_-]/;
@@ -8,7 +8,7 @@ const INVALID_COLLECTION_FIRST_CHAR_REGEX = /[^a-zA-Z]/;
 /**
  * Parent class for our generic data bucket classes. It handles ensuring there's a
  * connection to the Arango database, as well as dropping, emptying, and compacting
- * said collections. 
+ * said collections.
  */
 export abstract class GenericStore {
   protected static _ast?: ArangoStore;
@@ -30,7 +30,9 @@ export abstract class GenericStore {
     return GenericStore._ast.db;
   }
 
-  protected constructor(protected collection: DocumentCollection | EdgeCollection) {
+  protected constructor(
+    protected collection: DocumentCollection | EdgeCollection,
+  ) {
     this.collection = collection;
   }
 
@@ -72,14 +74,13 @@ export abstract class GenericStore {
   }
 
   async info() {
-    return this.collection.figures()
-      .then(data => { 
-        return {
-          name: data.name,
-          records: data.count,
-          size: data.figures['documentsSize'] as number,
-          status: data.statusString,
-        }
-      })
+    return this.collection.figures().then(data => {
+      return {
+        name: data.name,
+        records: data.count,
+        size: data.figures['documentsSize'] as number,
+        status: data.statusString,
+      };
+    });
   }
 }

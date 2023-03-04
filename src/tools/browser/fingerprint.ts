@@ -47,9 +47,7 @@ export class Fingerprint {
     return resolve(analyze(inputStruct, technologies));
   }
 
-  async loadDefinitions(
-    options: FingerprintOptions = {},
-  ): Promise<this> {
+  async loadDefinitions(options: FingerprintOptions = {}): Promise<this> {
     const project = await Project.config();
 
     if (!this.loaded || options.forceReload) {
@@ -63,10 +61,8 @@ export class Fingerprint {
         .files('config')
         .exists('wappalyzer-technologies.json');
 
-      if (!catExists || options.ignoreCache)
-        await this.cacheCategories();
-      if (!techExists || options.ignoreCache)
-        await this.cacheTechnologies();
+      if (!catExists || options.ignoreCache) await this.cacheCategories();
+      if (!techExists || options.ignoreCache) await this.cacheTechnologies();
 
       if (await project.files('config').exists('wappalyzer-categories.json')) {
         const json = (
@@ -139,19 +135,19 @@ export class Fingerprint {
         Buffer.from(JSON.stringify(categories)),
       );
   }
-  
+
   extractBodyData(html: string): FingerprintInput {
     const data = HtmlTools.getPageData(html, { all: true });
-  
+
     const input: FingerprintInput = {
       html,
       meta: wapifyDict(data.meta ?? {}),
     };
-  
+
     input.scriptSrc = [];
     input.scripts = '';
     input.css = '';
-  
+
     for (const script of Object.values(data.scripts ?? {})) {
       if ('src' in script && script.src !== undefined) {
         input.scriptSrc.push(script.src);
@@ -159,20 +155,20 @@ export class Fingerprint {
         input.scripts += script.content ?? '';
       }
     }
-  
+
     for (const style of Object.values(data.styles ?? {})) {
       if ('content' in style && style.content !== undefined) {
         input.css += style.content;
       }
     }
-    
+
     return input;
   }
 
   async extractResponseInput(res: Response): Promise<FingerprintInput> {
     const input: FingerprintInput = {
       url: res.url,
-      ...this.extractBodyData(await res.text())
+      ...this.extractBodyData(await res.text()),
     };
 
     res.headers.forEach((value, key) => {
@@ -185,7 +181,9 @@ export class Fingerprint {
           input.cookies[cookie.name] = [cookie.value];
         }
       } else {
-        input.headers[key.toLocaleLowerCase()] = Array.isArray(value) ? value : [value];
+        input.headers[key.toLocaleLowerCase()] = Array.isArray(value)
+          ? value
+          : [value];
       }
     });
 
@@ -195,7 +193,7 @@ export class Fingerprint {
   async extractResourceInput(res: Resource): Promise<FingerprintInput> {
     const input: FingerprintInput = {
       url: res.url,
-      ...this.extractBodyData(res.body ?? '')
+      ...this.extractBodyData(res.body ?? ''),
     };
 
     input.headers = {};
@@ -203,13 +201,18 @@ export class Fingerprint {
 
     for (const [key, value] of Object.entries(res.headers)) {
       if (value !== undefined) {
-        if (key.toLocaleLowerCase() === 'set-cookie' && typeof value === 'string') {
+        if (
+          key.toLocaleLowerCase() === 'set-cookie' &&
+          typeof value === 'string'
+        ) {
           const cookies = parseCookie(value);
           for (const cookie of cookies) {
             input.cookies[cookie.name] = [cookie.value];
           }
-          } else {
-          input.headers[key.toLocaleLowerCase()] = Array.isArray(value) ? value : [value];
+        } else {
+          input.headers[key.toLocaleLowerCase()] = Array.isArray(value)
+            ? value
+            : [value];
         }
       }
     }
@@ -217,7 +220,6 @@ export class Fingerprint {
     return input;
   }
 }
-
 
 function wapifyDict(input: Record<string, undefined | string | string[]>) {
   const output: Record<string, string[]> = {};

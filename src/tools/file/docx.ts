@@ -1,5 +1,8 @@
 import mammoth from 'mammoth';
-import { fromBuffer, DocumentProperties as DocxProperties } from 'office-document-properties';
+import {
+  fromBuffer,
+  DocumentProperties as DocxProperties,
+} from 'office-document-properties';
 import { GenericFile } from './generic-file.js';
 
 /**
@@ -7,21 +10,29 @@ import { GenericFile } from './generic-file.js';
  * and metadata. In the future we may use this to generate them from scratch for reports.
  */
 export class DocX extends GenericFile {
-  public static mimeTypes = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  public static mimeTypes = [
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ];
 
-  async getContent(): Promise<{ html?: string, text?: string }> {
+  async getContent(): Promise<{ html?: string; text?: string }> {
     const buffer = await this.load();
     return Promise.resolve({
-      html: await mammoth.convertToHtml({ buffer }).then(results => results.value),
-      text: await mammoth.extractRawText({ buffer }).then(results => results.value),
+      html: await mammoth
+        .convertToHtml({ buffer })
+        .then(results => results.value),
+      text: await mammoth
+        .extractRawText({ buffer })
+        .then(results => results.value),
     });
   }
 
   async getMetadata(): Promise<DocxProperties> {
     const buffer = await this.load();
-    return new Promise((resolve, reject) => fromBuffer(buffer, (error, data) => {
-      if (error) reject(error);
-      else resolve(data);
-    }));
+    return new Promise((resolve, reject) =>
+      fromBuffer(buffer, (error, data) => {
+        if (error) reject(error);
+        else resolve(data);
+      }),
+    );
   }
 }

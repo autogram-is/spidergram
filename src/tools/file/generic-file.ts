@@ -20,11 +20,12 @@ export abstract class GenericFile {
   constructor(file?: string | Buffer | Stream) {
     if (file === undefined) {
       // Do nothing here
-    } if (typeof file === 'string') {
+    }
+    if (typeof file === 'string') {
       // Set the local filePath
       this.filePath = file;
     } else if (file instanceof Stream) {
-      this.fileData = GenericFile.streamToBuffer(file, this.fileData)
+      this.fileData = GenericFile.streamToBuffer(file, this.fileData);
     } else if (file instanceof Buffer) {
       // Set the local fileData
       this.fileData = file;
@@ -36,14 +37,15 @@ export abstract class GenericFile {
       if (this.fileData) {
         resolve(this.fileData);
       } else if (this.filePath) {
-        resolve(readFile(this.filePath)
-          .then(buffer => {
+        resolve(
+          readFile(this.filePath).then(buffer => {
             this.fileData = buffer;
             return this.fileData;
-          }));
+          }),
+        );
       } else {
         reject(`No file data or path`);
-      }  
+      }
     });
   }
 
@@ -67,8 +69,8 @@ export abstract class GenericFile {
 
   protected static streamToBuffer(stream: Stream, target?: Buffer) {
     const _buf = Array<Uint8Array>();
-    stream.on("data", chunk => _buf.push(chunk));
-    stream.on("end", () => target = Buffer.concat(_buf));
+    stream.on('data', chunk => _buf.push(chunk));
+    stream.on('end', () => (target = Buffer.concat(_buf)));
     return target;
-  } 
+  }
 }

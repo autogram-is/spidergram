@@ -5,7 +5,7 @@ import { saveUrls, enqueueRequests } from '../links/index.js';
 import { Robots } from '../../tools/robots.js';
 import { FoundLink } from '../../tools/html/find-links.js';
 import { Project } from '../../index.js';
-import { ensureDir } from "fs-extra";
+import { ensureDir } from 'fs-extra';
 import path from 'node:path';
 
 // Very similar to sitemapHandler, but we also stick rulesets in the global
@@ -15,8 +15,7 @@ export async function robotsTxtHandler(context: SpiderContext) {
   const { graph, files, saveResource } = context;
   const resource = await saveResource();
 
-  const response = await fetch(resource.parsed)
-  .then(r => {
+  const response = await fetch(resource.parsed).then(r => {
     if (r.status !== 200) throw new Error('Could not download');
     return r;
   });
@@ -27,9 +26,14 @@ export async function robotsTxtHandler(context: SpiderContext) {
       '-' +
       fileNameFromHeaders(new URL(resource.url), resource.headers);
 
-    const directory = path.join(resource.parsed.hostname.replaceAll('.', '-'), resource.mime?.replaceAll('/', '-') ?? 'unknown');
+    const directory = path.join(
+      resource.parsed.hostname.replaceAll('.', '-'),
+      resource.mime?.replaceAll('/', '-') ?? 'unknown',
+    );
     const proj = await Project.config();
-    await ensureDir(path.join(proj.root ?? '.', 'storage', 'downloads', directory));
+    await ensureDir(
+      path.join(proj.root ?? '.', 'storage', 'downloads', directory),
+    );
     const fullPath = path.join(directory, fileName);
     await files('downloads').writeStream(fullPath, Duplex.from(response.body));
 

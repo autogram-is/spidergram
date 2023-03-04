@@ -4,7 +4,7 @@ import { HtmlTools } from '../../tools/index.js';
 import { fileNameFromHeaders } from '../helpers/mime.js';
 import { saveUrls, enqueueRequests } from '../links/index.js';
 import { Project } from '../../index.js';
-import { ensureDir } from "fs-extra";
+import { ensureDir } from 'fs-extra';
 import path from 'node:path';
 
 // Because large feed and sitemap files can be enormous (google limits
@@ -14,8 +14,7 @@ export async function sitemapHandler(context: SpiderContext) {
   const { graph, files, saveResource } = context;
   const resource = await saveResource();
 
-  const response = await fetch(resource.parsed)
-  .then(r => {
+  const response = await fetch(resource.parsed).then(r => {
     if (r.status !== 200) throw new Error('Could not download');
     return r;
   });
@@ -26,9 +25,14 @@ export async function sitemapHandler(context: SpiderContext) {
       '-' +
       fileNameFromHeaders(new URL(resource.url), resource.headers);
 
-    const directory = path.join(resource.parsed.hostname.replaceAll('.', '-'), resource.mime?.replaceAll('/', '-') ?? 'unknown');
+    const directory = path.join(
+      resource.parsed.hostname.replaceAll('.', '-'),
+      resource.mime?.replaceAll('/', '-') ?? 'unknown',
+    );
     const proj = await Project.config();
-    await ensureDir(path.join(proj.root ?? '.', 'storage', 'downloads', directory));
+    await ensureDir(
+      path.join(proj.root ?? '.', 'storage', 'downloads', directory),
+    );
     const fullPath = path.join(directory, fileName);
     await files('downloads').writeStream(fullPath, Duplex.from(response.body));
 
