@@ -1,6 +1,6 @@
 import test from 'ava';
 import { readFileSync } from 'fs';
-import { UniqueUrlSet } from '../src/index.js';
+import { UniqueUrlSet } from '../../src/index.js';
 
 test('handles missing procotols', t => {
   const buffer = readFileSync('./tests/fixtures/urls/mixed-urls.json')

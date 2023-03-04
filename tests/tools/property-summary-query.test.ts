@@ -1,5 +1,5 @@
 import test from 'ava';
-import { Query } from "../src/index.js";
+import { Query } from "../../src/index.js";
 
 test('grouped query runs', async t => {
   const results = await new Query('resources')

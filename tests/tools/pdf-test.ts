@@ -1,5 +1,5 @@
 import test from 'ava';
-import { FileTools } from '../src/index.js';
+import { FileTools } from '../../src/index.js';
 
 test('document wrapper loads', t => {
   const doc = new FileTools.Pdf('./tests/fixtures/filetypes/pdf-basic.pdf');

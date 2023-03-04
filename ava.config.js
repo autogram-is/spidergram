@@ -7,8 +7,8 @@ export default {
   "extensions": {
     "ts": "module"
   },
-  "concurrency": 1,
-  "failFast": true,
+  "concurrency": 2,
+  "failFast": false,
   "environmentVariables": {
     "NODE_NO_WARNINGS": "1"
   },

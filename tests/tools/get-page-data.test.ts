@@ -1,6 +1,6 @@
 import test from 'ava';
 import { readFile } from 'fs/promises';
-import { getPageData } from '../src/tools/html/index.js';
+import { getPageData } from '../../src/tools/html/index.js';
 
 test('handles malformed head', async t => {
   const markup = await readFile('./tests/fixtures/markup/truncated.html')

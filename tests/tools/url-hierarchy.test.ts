@@ -1,6 +1,6 @@
 import test from 'ava';
 import { readFileSync } from 'fs';
-import { HierarchyTools, UniqueUrl, NormalizedUrl } from '../src/index.js';
+import { HierarchyTools, UniqueUrl, NormalizedUrl } from '../../src/index.js';
 
 test('parses hierarchy', t => {
   const buffer = readFileSync('./tests/fixtures/urls/ethanmarcotte.json')

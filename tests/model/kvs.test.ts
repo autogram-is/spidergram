@@ -1,5 +1,5 @@
 import test from 'ava';
-import { KeyValueStore } from '../src/index.js';
+import { KeyValueStore } from '../../src/index.js';
 
 test('create and delete', async t => {
   const k = await KeyValueStore.open();

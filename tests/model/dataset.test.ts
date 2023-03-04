@@ -1,5 +1,5 @@
 import test from 'ava';
-import { Dataset } from '../src/index.js';
+import { Dataset } from '../../src/index.js';
 
 test('create and delete', async t => {
   const d = await Dataset.open();

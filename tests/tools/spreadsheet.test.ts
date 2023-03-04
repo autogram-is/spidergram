@@ -1,5 +1,5 @@
 import test from 'ava';
-import { FileTools, Query, aql } from "../src/index.js";
+import { FileTools, Query, aql } from "../../src/index.js";
 import * as fs from 'fs/promises';
 
 test('query results treated as sheet', async t => {
@@ -35,7 +35,7 @@ test('sheet structure respected', async t => {
     }
   `);
 
-  const report = new Spreadsheet();
+  const report = new FileTools.Spreadsheet();
   report.addSheet({
     name: 'Sheet 1',
     data,
