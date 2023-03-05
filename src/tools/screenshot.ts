@@ -1,8 +1,6 @@
 import { Page, PageScreenshotOptions } from 'playwright';
 import { Project } from '../index.js';
 import is from '@sindresorhus/is';
-import filenamify from 'filenamify';
-import humanizeUrl from 'humanize-url';
 import { Readable } from 'node:stream';
 import { DiskDriver } from 'typefs';
 import arrify from 'arrify';
@@ -241,13 +239,10 @@ export class ScreenshotTool extends AsyncEventEmitter<{
     selector?: string,
     infinite = true,
   ) {
-    const components = [humanizeUrl(url), viewport];
+    const components = [new URL(url).hostname, viewport];
     if (selector) components.push(selector);
     if (!infinite) components.push('cropped');
-    return filenamify(components.join('-'), { replacement: '-' }).replace(
-      '--',
-      '-',
-    );
+    return components.join('-').replaceAll(/<>:"\/\|?\*/g, '-').replaceAll('--','-');
   }
 
   expandViewports(
