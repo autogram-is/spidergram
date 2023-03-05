@@ -3,7 +3,6 @@ import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import arrify from 'arrify';
 import { log, PlaywrightCrawlingContext, SystemInfo } from 'crawlee';
 import { FinalStatistics } from 'crawlee';
-import { UncrawledUrlOptions, UncrawledUrlQuery } from '../reports/index.js';
 import _ from 'lodash';
 
 // We have a chance to set the log level HIGHER when configuring,
@@ -295,29 +294,7 @@ export class Spider extends PlaywrightCrawler {
   /**
    * Resume the crawl with saved-but-unvisited URLs.
    */
-  async resume(options: UniqueUrl[] | UncrawledUrlOptions) {
-    let urls: UniqueUrl[];
-    if (is.array(options)) {
-      urls = options;
-    } else {
-      if (
-        !(
-          options.domain ||
-          options.hostname ||
-          options.label ||
-          options.referer
-        )
-      ) {
-        throw new Error(
-          'At least one URL filter should be used when restarting a crawl',
-        );
-      }
-      urls = await new UncrawledUrlQuery(options).run();
-    }
-
-    // The resume method currently DOES NOT retrieve robots files
-    // that had previously been parsed and processed.
-
+  async resume(urls: UniqueUrl[]) {
     this.status.startTime = Date.now();
 
     // Crawlee has a lot of logs going on.

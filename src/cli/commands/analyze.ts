@@ -1,11 +1,5 @@
 import is from '@sindresorhus/is';
-import {
-  Resource,
-  HtmlTools,
-  GraphWorker,
-  OutputLevel,
-  aql,
-} from '../../index.js';
+import { Resource, HtmlTools, EntityWorker, OutputLevel, Query } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
 
 export default class Analyze extends SgCommand {
@@ -36,9 +30,14 @@ export default class Analyze extends SgCommand {
 
     console.log(flags);
 
-    const worker = new GraphWorker<Resource>({
+    const query = new Query('resources')
+      .filterBy('code', 200)
+      .filterBy('mime', 'text/html')
+      .return('_key');
+
+    const worker = new EntityWorker<Resource>({
       collection: 'resources',
-      filter: aql`FILTER item.code == 200 AND item.mime == 'text/html'`,
+      query,
       task: async resource => {
         if (is.nonEmptyString(resource.body)) {
           if (flags.metadata) {

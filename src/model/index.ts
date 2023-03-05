@@ -7,7 +7,5 @@ export * from './generic-storage.js';
 export * from './dataset.js';
 export * from './key-value-store.js';
 
-export interface SavedFile extends Record<string, unknown> {
-  bucket?: string;
-  path: string;
-}
+export * from 'aql-builder';
+export * from './queries/index.js';

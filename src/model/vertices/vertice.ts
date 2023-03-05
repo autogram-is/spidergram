@@ -18,6 +18,11 @@ export type Reference<T extends Vertice = Vertice> =
   | [string, Uuid]
   | string;
 
+export interface SavedFile extends Record<string, unknown> {
+  bucket?: string;
+  path: string;
+}
+  
 export interface VerticeConstructorOptions extends Record<string, unknown> {
   label?: string;
 }

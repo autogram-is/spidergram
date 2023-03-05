@@ -1,44 +1,45 @@
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
-import { AqlQuery } from 'arangojs/aql.js';
-import is from '@sindresorhus/is';
-import { JsonMap } from '@salesforce/ts-types';
+import { GeneratedAqlQuery, isGeneratedAqlQuery } from 'arangojs/aql.js';
 import {
+  AqQuery,
+  AqFilter,
   Project,
   Vertice,
-  aql,
-  ProjectConfig,
+  Query,
   ArangoStore,
   JobStatus,
+  isAqQuery,
+  isAqFilter,
+  Reference,
 } from '../index.js';
 
-export type GraphWorkerTask<T extends Vertice = Vertice> = (
+export type EntityWorkerTask<T extends Vertice = Vertice> = (
   item: T,
-) => Promise<void>;
+) => Promise<string | void>;
 
-export interface GraphWorkerOptions<T extends Vertice = Vertice> {
-  project?: Partial<ProjectConfig>;
-  items?: T[];
-  collection?: string;
-  filter?: AqlQuery;
+export interface EntityWorkerOptions<T extends Vertice = Vertice> {
+  collection: string;
+  items?: Reference<T>[];
+  query?: AqFilter | AqQuery['filters'] | AqQuery | GeneratedAqlQuery | Query;
   limit?: number;
-  batchSize?: number;
-  task: GraphWorkerTask<T>;
+  errors?: string;
+  task?: EntityWorkerTask<T>;
 }
 
-type GraphWorkerEvents = Record<PropertyKey, unknown[]> & {
-  progress: [status: JobStatus];
+type EntityWorkerEvents = Record<PropertyKey, unknown[]> & {
+  progress: [status: JobStatus, message?: string];
   end: [status: JobStatus];
 };
 
-export class GraphWorker<
+export class EntityWorker<
   T extends Vertice = Vertice,
-  Events extends GraphWorkerEvents = GraphWorkerEvents,
+  Events extends EntityWorkerEvents = EntityWorkerEvents,
 > extends AsyncEventEmitter<Events> {
   readonly status: JobStatus;
   protected project!: Project;
   protected graph!: ArangoStore;
 
-  constructor(protected options: Partial<GraphWorkerOptions<T>> = {}) {
+  constructor(protected options: EntityWorkerOptions<T>) {
     super();
     this.status = {
       startTime: 0,
@@ -49,79 +50,111 @@ export class GraphWorker<
     };
   }
 
-  async run(options: Partial<GraphWorkerOptions<T>> = {}): Promise<JobStatus> {
-    const workerOptions = {
-      ...this.options,
+  async run(options: Partial<EntityWorkerOptions<T>> = {}): Promise<JobStatus> {
+    const opt: EntityWorkerOptions<T> = {
       ...options,
+      ...this.options,
     };
 
-    if (workerOptions.task === undefined) {
+    if (opt.task === undefined) {
       throw new Error('No worker task was given');
     }
 
-    const project = await Project.config(workerOptions.project);
+    if (
+      opt.items === undefined &&
+      opt.query === undefined &&
+      opt.collection == undefined
+    ) {
+      throw new Error('No items or query given');
+    }
+
+    // return this.status;
+    const project = await Project.config();
     const graph = await project.graph();
 
     this.status.startTime = Date.now();
+    let workItems: Reference[] = [];
 
-    if (is.undefined(workerOptions.task)) {
-      throw new Error('No work task was given');
-    } else if (is.nonEmptyArray(workerOptions.items)) {
-      this.status.total = workerOptions.items.length;
-
-      for (const v of workerOptions.items) {
-        await this.performTask(v, workerOptions.task);
-      }
-
-      this.status.finishTime = Date.now();
-      return this.status;
-    } else if (is.nonEmptyStringAndNotWhitespace(workerOptions.collection)) {
-      const collection = graph.collection(workerOptions.collection);
-      const query = aql`
-        FOR item in ${collection}
-        ${workerOptions.filter}
-        return item
-      `;
-
-      return graph
-        .query<JsonMap>(query, { count: true, batchSize: 10 })
-        .then(async cursor => {
-          this.status.total = cursor.count ?? 0;
-          for await (const batch of cursor.batches) {
-            await Promise.all(
-              batch.map(value =>
-                this.performTask(
-                  Vertice.fromJSON(value) as T,
-                  workerOptions.task as GraphWorkerTask,
-                ),
-              ),
-            );
-          }
-        })
-        .then(() => {
-          this.status.finishTime = Date.now();
-          const elapsed = this.status.finishTime - this.status.startTime;
-          this.status.elapsed = elapsed;
-          this.status.average = elapsed / this.status.total;
-          this.emit('end', this.status);
-          return this.status;
-        });
+    if (Array.isArray(opt.items) && opt.items.length > 0) {
+      workItems = opt.items;
     } else {
-      throw new Error('No items or collection were given');
+      // Populate the pool of workItems
+      if (isAqFilter(opt.query)) {
+        if (opt.collection === undefined) {
+          throw new Error('No collection given');
+        }
+        const q = new Query({
+          collection: opt.collection,
+          filters: [opt.query],
+          return: ['_key'],
+          limit: opt.limit,
+        });
+        workItems = await q.run<string>();
+      }
+      if (Array.isArray(opt.query)) {
+        if (opt.collection === undefined) {
+          throw new Error('No collection given');
+        }
+        const q = new Query({
+          collection: opt.collection,
+          filters: opt.query,
+          return: ['_key'],
+          limit: opt.limit,
+        });
+        workItems = await q.run<string>();
+      } else if (isAqQuery(opt.items)) {
+        const q = new Query(opt.items);
+        if (opt.limit) q.limit(opt.limit);
+        workItems = await q.run<string>();
+      } else if (opt.items instanceof Query) {
+        if (opt.limit) opt.items.limit(opt.limit);
+        workItems = await opt.items.run<string>();
+      } else if (isGeneratedAqlQuery(opt.items)) {
+        workItems = await Query.run<string>(opt.items);
+      } else if (opt.items === undefined) {
+        const q = new Query(opt.collection).return('_key');
+        workItems = await q.run<string>();
+      }
     }
+
+    this.status.total = workItems.length;
+    for (const item of workItems) {
+      if (item instanceof Vertice) {
+        await this.performTask(item as T, opt.task);
+      } else {
+        const v = await graph.findById<T>(Vertice.idFromReference(item));
+        if (v) {
+          await this.performTask(v, opt.task);
+        } else {
+          this.status.failed++;
+        }
+      }
+      this.status.finishTime = Date.now();
+    }
+
+    return Promise.resolve(this.status);
   }
 
-  async performTask(item: T, task: GraphWorkerTask<T>): Promise<void> {
+  async performTask(item: T, task: EntityWorkerTask<T>): Promise<void> {
     return task(item)
-      .then(() => {
+      .then(message => {
         this.status.finished++;
+        increment(this.status);
+        if (typeof message === 'string')
+          this.emit('progress', this.status, message);
+        else this.emit('progress', this.status);
       })
       .catch(error => {
+        increment(this.status);
         this.status.failed++;
         this.status.lastError = error;
-      })
-      .finally(() => {
         this.emit('progress', this.status);
       });
   }
+}
+
+function increment(status: JobStatus) {
+  const elapsed = status.finishTime - status.startTime;
+  status.elapsed = elapsed;
+  status.average = elapsed / status.total;
 }
