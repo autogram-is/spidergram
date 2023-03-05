@@ -36,7 +36,7 @@ export default class Analyze extends SgCommand {
 
     worker.on('progress', status => this.updateProgress(status));
     this.startProgress('Analyzing saved pages...');
-  
+
     await worker.run(async resource => {
       if (is.nonEmptyString(resource.body)) {
         if (flags.metadata) {

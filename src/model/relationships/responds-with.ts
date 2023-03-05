@@ -41,4 +41,7 @@ export class RespondsWith<
   }
 }
 
-Entity.types.set('responds_with', { constructor: RespondsWith, isRelationship: true });
+Entity.types.set('responds_with', {
+  constructor: RespondsWith,
+  isRelationship: true,
+});

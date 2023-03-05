@@ -242,7 +242,10 @@ export class ScreenshotTool extends AsyncEventEmitter<{
     const components = [new URL(url).hostname, viewport];
     if (selector) components.push(selector);
     if (!infinite) components.push('cropped');
-    return components.join('-').replaceAll(/<>:"\/\|?\*/g, '-').replaceAll('--','-');
+    return components
+      .join('-')
+      .replaceAll(/<>:"\/\|?\*/g, '-')
+      .replaceAll('--', '-');
   }
 
   expandViewports(

@@ -63,5 +63,5 @@ export default class GraphInfo extends SgCommand {
 function getCollectionType(name: string, type: number) {
   if (name.startsWith('ds_')) return 'dataset';
   else if (name.startsWith('kv_')) return 'key-values';
-  else return (type === 2 ? 'entities' : 'relationships')
+  else return type === 2 ? 'entities' : 'relationships';
 }

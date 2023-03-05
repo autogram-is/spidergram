@@ -30,4 +30,7 @@ export class AppearsOn<
   }
 }
 
-Entity.types.set('appears_on', { constructor: AppearsOn, isRelationship: true });
+Entity.types.set('appears_on', {
+  constructor: AppearsOn,
+  isRelationship: true,
+});

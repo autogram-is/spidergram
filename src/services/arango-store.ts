@@ -25,7 +25,7 @@ import { join, AqlQuery, literal } from 'arangojs/aql.js';
 export const INVALID_KEY_CHARS_REGEX = /[^a-zA-Z0-9_:.@()+,=;$!*'%-]/g;
 export const INVALID_COLLECTION_CHARS_REGEX = /[^a-zA-Z0-9_-]/g;
 export const INVALID_COLLECTION_FIRST_CHAR_REGEX = /[^a-zA-Z]/g;
-export const NAME_SEPARATOR = '_'
+export const NAME_SEPARATOR = '_';
 
 export { aql } from 'arangojs';
 
@@ -259,7 +259,9 @@ export class ArangoStore {
     for (const relationship of input) {
       if (isRelationship(relationship)) {
         promises.push(
-          this.db.collection(relationship._collection).remove(relationship.documentId),
+          this.db
+            .collection(relationship._collection)
+            .remove(relationship.documentId),
         );
       }
     }
@@ -299,15 +301,21 @@ export class ArangoStore {
 }
 
 export function sanitizeDbName(input: string): string {
-  return input.replaceAll(INVALID_COLLECTION_CHARS_REGEX, '-').replaceAll(/-+/g, NAME_SEPARATOR);
+  return input
+    .replaceAll(INVALID_COLLECTION_CHARS_REGEX, '-')
+    .replaceAll(/-+/g, NAME_SEPARATOR);
 }
 
 export function sanitizeCollectionName(input: string): string {
-  return input.replaceAll(INVALID_COLLECTION_CHARS_REGEX, '-').replaceAll(/-+/g, NAME_SEPARATOR);
+  return input
+    .replaceAll(INVALID_COLLECTION_CHARS_REGEX, '-')
+    .replaceAll(/-+/g, NAME_SEPARATOR);
 }
 
 export function sanitizeKey(input: string): string {
-  return input.replaceAll(INVALID_KEY_CHARS_REGEX, '-').replaceAll(/-+/g, NAME_SEPARATOR);
+  return input
+    .replaceAll(INVALID_KEY_CHARS_REGEX, '-')
+    .replaceAll(/-+/g, NAME_SEPARATOR);
 }
 
 export function isValidKey(key: unknown): key is string {
@@ -330,4 +338,3 @@ export function isValidName(name: unknown): name is string {
   }
   return false;
 }
-

@@ -30,4 +30,7 @@ export class IsVariantOf<
   }
 }
 
-Entity.types.set('is_variant_of', { constructor: IsVariantOf, isRelationship: true });
+Entity.types.set('is_variant_of', {
+  constructor: IsVariantOf,
+  isRelationship: true,
+});

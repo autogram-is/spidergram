@@ -1,8 +1,8 @@
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
-import { ArangoCollection, isArangoCollection } from "arangojs/collection.js";
-import { AqStrict, AqQuery, AqBuilder } from "aql-builder";
-import { Query } from "./query.js";
-import { Entity, JobStatus, Project } from "../../index.js";
+import { ArangoCollection, isArangoCollection } from 'arangojs/collection.js';
+import { AqStrict, AqQuery, AqBuilder } from 'aql-builder';
+import { Query } from './query.js';
+import { Entity, JobStatus, Project } from '../../index.js';
 
 type WorkerEventMap = Record<PropertyKey, unknown[]> & {
   progress: [status: JobStatus, item: Entity, message?: string];
@@ -18,7 +18,7 @@ type WorkerEventListener<T extends WorkerEventType> = (
 
 export type WorkerQueryTask<T extends Entity = Entity> = (
   item: T,
-  status: JobStatus
+  status: JobStatus,
 ) => Promise<string | void>;
 
 export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
@@ -38,7 +38,7 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
       collectionName = input.name;
     } else {
       if (isArangoCollection(input.collection)) {
-        collectionName = input.collection.name
+        collectionName = input.collection.name;
       } else {
         collectionName = input.collection;
       }
@@ -69,7 +69,7 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
   ): void {
     this.events.on<T>(event, listener);
   }
-  
+
   off<T extends WorkerEventType>(
     event: T,
     listener: WorkerEventListener<T>,
@@ -80,7 +80,7 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
       this.events.removeAllListeners<WorkerEventType>(event);
     }
   }
-  
+
   // We don't allow alteration of the return value; we may want to
   // log or throw an error here.
   override return(): this {
@@ -105,7 +105,10 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
     return Promise.resolve(this.status);
   }
 
-  protected async performTask(item: T, task: WorkerQueryTask<T>): Promise<void> {
+  protected async performTask(
+    item: T,
+    task: WorkerQueryTask<T>,
+  ): Promise<void> {
     return task(item, this.status)
       .then(message => {
         this.updateStatus();

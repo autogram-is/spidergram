@@ -13,16 +13,13 @@ import { ensureJsonMap, JsonMap, has } from '@salesforce/ts-types';
 import _ from 'lodash';
 
 export { Transform, Exclude, Expose } from 'class-transformer';
-export type Reference<T extends Entity = Entity> =
-  | T
-  | [string, Uuid]
-  | string;
+export type Reference<T extends Entity = Entity> = T | [string, Uuid] | string;
 
 export interface SavedFile extends Record<string, unknown> {
   bucket?: string;
   path: string;
 }
-  
+
 export interface EntityConstructorOptions extends Record<string, unknown> {
   label?: string;
 }

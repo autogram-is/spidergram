@@ -1,8 +1,8 @@
-import { ArangoCollection, isArangoCollection } from "arangojs/collection.js";
-import { AqStrict, AqQuery, AqBuilder } from "aql-builder";
-import { Query } from "./query.js";
-import { Entity } from "../../index.js";
-import { JsonMap } from "@salesforce/ts-types";
+import { ArangoCollection, isArangoCollection } from 'arangojs/collection.js';
+import { AqStrict, AqQuery, AqBuilder } from 'aql-builder';
+import { Query } from './query.js';
+import { Entity } from '../../index.js';
+import { JsonMap } from '@salesforce/ts-types';
 
 export class EntityQuery<T extends Entity = Entity> extends AqBuilder {
   /**
@@ -18,7 +18,7 @@ export class EntityQuery<T extends Entity = Entity> extends AqBuilder {
       collectionName = input.name;
     } else {
       if (isArangoCollection(input.collection)) {
-        collectionName = input.collection.name
+        collectionName = input.collection.name;
       } else {
         collectionName = input.collection;
       }
@@ -32,7 +32,7 @@ export class EntityQuery<T extends Entity = Entity> extends AqBuilder {
     // We want the full entity data; kill the 'return' array.
     this.spec.return = [];
   }
-  
+
   // We don't allow alteration of the return value; we may want to
   // log or throw an error here.
   override return(): this {
@@ -40,9 +40,8 @@ export class EntityQuery<T extends Entity = Entity> extends AqBuilder {
   }
 
   async run(): Promise<T[]> {
-    return Query.run<JsonMap>(this.build())
-      .then(results => results.map(
-        item => Entity.fromJSON(item) as T
-      ))
+    return Query.run<JsonMap>(this.build()).then(results =>
+      results.map(item => Entity.fromJSON(item) as T),
+    );
   }
 }

@@ -1,6 +1,9 @@
 import { Resource } from '../index.js';
 import { Entity, Reference } from '../entities/entity.js';
-import { Relationship, RelationshipConstructorOptions } from './relationship.js';
+import {
+  Relationship,
+  RelationshipConstructorOptions,
+} from './relationship.js';
 
 export type IsChildOfConstructorOptions<
   F extends Entity = Resource,
@@ -26,4 +29,7 @@ export class IsChildOf<
   }
 }
 
-Entity.types.set('is_child_of', { constructor: IsChildOf, isRelationship: true });
+Entity.types.set('is_child_of', {
+  constructor: IsChildOf,
+  isRelationship: true,
+});
