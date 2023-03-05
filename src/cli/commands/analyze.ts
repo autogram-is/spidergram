@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { Resource, HtmlTools, EntityWorker, OutputLevel, Query } from '../../index.js';
+import { Resource, HtmlTools, WorkerQuery, OutputLevel } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
 
 export default class Analyze extends SgCommand {
@@ -30,39 +30,32 @@ export default class Analyze extends SgCommand {
 
     console.log(flags);
 
-    const query = new Query('resources')
+    const worker = new WorkerQuery<Resource>('resources')
       .filterBy('code', 200)
-      .filterBy('mime', 'text/html')
-      .return('_key');
-
-    const worker = new EntityWorker<Resource>({
-      collection: 'resources',
-      query,
-      task: async resource => {
-        if (is.nonEmptyString(resource.body)) {
-          if (flags.metadata) {
-            const data = HtmlTools.getPageData(resource.body);
-            if (data) resource.data = data;
-          }
-
-          if (flags.text) {
-            const content = HtmlTools.getPageContent(resource, {
-              selector: flags.body,
-              readability: flags.readability,
-            });
-
-            resource.content = content;
-          }
-
-          await graph.push(resource);
-        }
-      },
-    });
+      .filterBy('mime', 'text/html');
 
     worker.on('progress', status => this.updateProgress(status));
     this.startProgress('Analyzing saved pages...');
+  
+    await worker.run(async resource => {
+      if (is.nonEmptyString(resource.body)) {
+        if (flags.metadata) {
+          const data = HtmlTools.getPageData(resource.body);
+          if (data) resource.data = data;
+        }
 
-    await worker.run();
+        if (flags.text) {
+          const content = HtmlTools.getPageContent(resource, {
+            selector: flags.body,
+            readability: flags.readability,
+          });
+
+          resource.content = content;
+        }
+
+        await graph.push(resource);
+      }
+    });
 
     this.stopProgress();
     this.summarizeStatus(worker.status);
