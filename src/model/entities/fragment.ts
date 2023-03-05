@@ -1,6 +1,6 @@
-import { Vertice, VerticeConstructorOptions, Reference } from '../index.js';
+import { Entity, EntityConstructorOptions, Reference } from '../index.js';
 
-export interface FragmentConstructorOptions extends VerticeConstructorOptions {
+export interface FragmentConstructorOptions extends EntityConstructorOptions {
   location?: Reference;
 }
 
@@ -10,9 +10,9 @@ export interface FragmentConstructorOptions extends VerticeConstructorOptions {
  * @export
  * @class Fragment
  * @typedef {Fragment}
- * @extends {Vertice}
+ * @extends {Entity}
  */
-export class Fragment extends Vertice {
+export class Fragment extends Entity {
   readonly _collection = 'fragments';
 
   /**
@@ -20,7 +20,7 @@ export class Fragment extends Vertice {
    *
    * NOTE: If an entity ID is passed in as a string it must be a full Arango ID, i.e., 'collection_name/12346...'
    *
-   * @param {Vertice | string} input
+   * @param {Entity | string} input
    */
   location?: string;
 
@@ -35,9 +35,9 @@ export class Fragment extends Vertice {
     super(dataForSuper);
 
     if (location) {
-      this.location = Vertice.idFromReference(location);
+      this.location = Entity.idFromReference(location);
     }
   }
 }
 
-Vertice.types.set('fragments', { constructor: Fragment });
+Entity.types.set('fragments', { constructor: Fragment });

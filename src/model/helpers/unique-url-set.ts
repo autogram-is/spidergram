@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { NormalizedUrl } from '@autogram/url-tools';
-import { UniqueUrl } from '../vertices/unique-url.js';
+import { UniqueUrl } from '../entities/unique-url.js';
 import { UrlMutator } from '@autogram/url-tools/dist/source/mutators.js';
 import prependHttp from 'prepend-http';
 import { JsonMap } from '@salesforce/ts-types';

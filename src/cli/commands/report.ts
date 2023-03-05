@@ -6,7 +6,7 @@ import {
   Query,
   isAqlFunction,
   isAqlAggregateFunction,
-} from '../../reports/index.js';
+} from '../../index.js';
 import { FileTools } from '../../index.js';
 import { JsonMap, JsonPrimitive } from '@salesforce/ts-types';
 import _ from 'lodash';

@@ -13,7 +13,7 @@ import { ensureJsonMap, JsonMap, has } from '@salesforce/ts-types';
 import _ from 'lodash';
 
 export { Transform, Exclude, Expose } from 'class-transformer';
-export type Reference<T extends Vertice = Vertice> =
+export type Reference<T extends Entity = Entity> =
   | T
   | [string, Uuid]
   | string;
@@ -23,23 +23,23 @@ export interface SavedFile extends Record<string, unknown> {
   path: string;
 }
   
-export interface VerticeConstructorOptions extends Record<string, unknown> {
+export interface EntityConstructorOptions extends Record<string, unknown> {
   label?: string;
 }
 
 export interface CollectionMeta {
-  isEdge?: true;
-  constructor: ClassConstructor<Vertice>;
+  isRelationship?: true;
+  constructor: ClassConstructor<Entity>;
 }
 
-export function isVertice(value: unknown): value is Vertice {
+export function isEntity(value: unknown): value is Entity {
   return (
     is.object(value) &&
     ('_id' in value || ('_collection' in value && '_key' in value))
   );
 }
 
-export abstract class Vertice {
+export abstract class Entity {
   static readonly types = new Map<string, CollectionMeta>();
 
   static idFromReference(r: Reference): string {
@@ -48,7 +48,7 @@ export abstract class Vertice {
         return r;
       }
 
-      throw new TypeError('Vertice ID must include collection');
+      throw new TypeError('Entity ID must include collection');
     } else if (is.array(r)) {
       return r.join('/');
     } else {
@@ -66,7 +66,7 @@ export abstract class Vertice {
 
   label?: string;
 
-  constructor(data: VerticeConstructorOptions = {}) {
+  constructor(data: EntityConstructorOptions = {}) {
     // Special handling for arbitrary properties.
     for (const k in data) {
       this[k] = data[k];
@@ -94,7 +94,7 @@ export abstract class Vertice {
     return options;
   }
 
-  static fromJSON<T extends typeof Vertice = typeof this>(
+  static fromJSON<T extends typeof Entity = typeof this>(
     this: T,
     data: string | JsonMap,
   ): InstanceType<T> {
@@ -102,21 +102,21 @@ export abstract class Vertice {
       typeof data === 'string' ? ensureJsonMap(JSON.parse(data)) : data;
 
     if (has(object, ['_collection'])) {
-      const ctor = Vertice.types.get(object._collection as string)?.constructor;
+      const ctor = Entity.types.get(object._collection as string)?.constructor;
       if (ctor) {
         return plainToInstance(
           ctor,
           object,
-          Vertice.getSerializerOptions(),
+          Entity.getSerializerOptions(),
         ) as InstanceType<T>;
       }
     }
 
-    throw new TypeError('Vertice data has no _collection property');
+    throw new TypeError('Entity data has no _collection property');
   }
 
   toJSON(): JsonMap {
-    return instanceToPlain(this, Vertice.getSerializerOptions());
+    return instanceToPlain(this, Entity.getSerializerOptions());
   }
 
   serialize(): string {

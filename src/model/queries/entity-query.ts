@@ -1,15 +1,15 @@
 import { ArangoCollection, isArangoCollection } from "arangojs/collection.js";
 import { AqStrict, AqQuery, AqBuilder } from "aql-builder";
 import { Query } from "./query.js";
-import { Vertice } from "../../index.js";
+import { Entity } from "../../index.js";
 import { JsonMap } from "@salesforce/ts-types";
 
-export class EntityQuery<T extends Vertice = Vertice> extends AqBuilder {
+export class EntityQuery<T extends Entity = Entity> extends AqBuilder {
   /**
    * Returns a new {@link AqBuilder} containing a buildable {@link AqStrict}.
    */
   constructor(input: string | ArangoCollection | AqStrict | AqQuery) {
-    const validCollections = Object.keys(Vertice.types);
+    const validCollections = Object.keys(Entity.types);
     let collectionName = '';
 
     if (typeof input === 'string') {
@@ -42,7 +42,7 @@ export class EntityQuery<T extends Vertice = Vertice> extends AqBuilder {
   async run(): Promise<T[]> {
     return Query.run<JsonMap>(this.build())
       .then(results => results.map(
-        item => Vertice.fromJSON(item) as T
+        item => Entity.fromJSON(item) as T
       ))
   }
 }

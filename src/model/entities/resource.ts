@@ -1,15 +1,15 @@
 import { ParsedUrl } from '@autogram/url-tools';
 import is from '@sindresorhus/is';
 import {
-  Vertice,
-  VerticeConstructorOptions,
+  Entity,
+  EntityConstructorOptions,
   Expose,
   Transform,
-} from './vertice.js';
+} from './entity.js';
 import { parse as parseContentType } from 'content-type';
 import { SavedFile } from '../index.js';
 
-export interface ResourceConstructorOptions extends VerticeConstructorOptions {
+export interface ResourceConstructorOptions extends EntityConstructorOptions {
   url?: string | URL;
   code?: number | string;
   message?: string;
@@ -20,7 +20,7 @@ export interface ResourceConstructorOptions extends VerticeConstructorOptions {
   payload?: SavedFile;
 }
 
-export class Resource extends Vertice {
+export class Resource extends Entity {
   readonly _collection = 'resources';
 
   url!: string;
@@ -85,4 +85,4 @@ export class Resource extends Vertice {
   }
 }
 
-Vertice.types.set('resources', { constructor: Resource });
+Entity.types.set('resources', { constructor: Resource });

@@ -7,7 +7,7 @@
 		"newLine": "lf",
 		"noEmitHelpers": true,
 		"noFallthroughCasesInSwitch": true,
-		"noImplicitOverride": false,                          // This plays ugly games with Vertice subclasses, and OCLIF commands.  
+		"noImplicitOverride": false,                          // This plays ugly games with Entity subclasses, and OCLIF commands.  
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
 		"preserveConstEnums": true,

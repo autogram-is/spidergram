@@ -1,23 +1,23 @@
 import {
-  Edge,
-  EdgeConstructorOptions,
-  Vertice,
+  Relationship,
+  RelationshipConstructorOptions,
+  Entity,
   Reference,
   Resource,
 } from '../index.js';
 
 export interface AppearsOnConstructorOptions<
-  F extends Vertice = Vertice,
-  T extends Vertice = Resource,
-> extends EdgeConstructorOptions<F, T> {
+  F extends Entity = Entity,
+  T extends Entity = Resource,
+> extends RelationshipConstructorOptions<F, T> {
   item?: Reference<F>;
   location?: Reference<T>;
 }
 
 export class AppearsOn<
-  F extends Vertice = Vertice,
-  T extends Vertice = Resource,
-> extends Edge<F, T> {
+  F extends Entity = Entity,
+  T extends Entity = Resource,
+> extends Relationship<F, T> {
   readonly _collection = 'appears_on';
 
   constructor(data: AppearsOnConstructorOptions<F, T> = {}) {
@@ -30,4 +30,4 @@ export class AppearsOn<
   }
 }
 
-Vertice.types.set('appears_on', { constructor: AppearsOn, isEdge: true });
+Entity.types.set('appears_on', { constructor: AppearsOn, isRelationship: true });

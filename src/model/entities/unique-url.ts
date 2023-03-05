@@ -1,9 +1,9 @@
 import { URL } from 'node:url';
 import is from '@sindresorhus/is';
 import { NormalizedUrl, UrlMutators } from '@autogram/url-tools';
-import { Vertice, VerticeConstructorOptions, Transform } from './vertice.js';
+import { Entity, EntityConstructorOptions, Transform } from './entity.js';
 
-export interface UniqueUrlConstructorOptions extends VerticeConstructorOptions {
+export interface UniqueUrlConstructorOptions extends EntityConstructorOptions {
   /**
    * The URL to be saved. If the URL is a string, it will be parsed and normalized
    * using the specified normalizer function, or the global one if none is passed in.
@@ -73,7 +73,7 @@ export enum UrlSource {
   Path = 'path',
 }
 
-export class UniqueUrl extends Vertice {
+export class UniqueUrl extends Entity {
   readonly _collection = 'unique_urls';
   url!: string;
 
@@ -141,4 +141,4 @@ export class UniqueUrl extends Vertice {
   }
 }
 
-Vertice.types.set('unique_urls', { constructor: UniqueUrl });
+Entity.types.set('unique_urls', { constructor: UniqueUrl });

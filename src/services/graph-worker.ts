@@ -4,7 +4,7 @@ import {
   AqQuery,
   AqFilter,
   Project,
-  Vertice,
+  Entity,
   Query,
   ArangoStore,
   JobStatus,
@@ -13,11 +13,11 @@ import {
   Reference,
 } from '../index.js';
 
-export type EntityWorkerTask<T extends Vertice = Vertice> = (
+export type EntityWorkerTask<T extends Entity = Entity> = (
   item: T,
 ) => Promise<string | void>;
 
-export interface EntityWorkerOptions<T extends Vertice = Vertice> {
+export interface EntityWorkerOptions<T extends Entity = Entity> {
   collection: string;
   items?: Reference<T>[];
   query?: AqFilter | AqQuery['filters'] | AqQuery | GeneratedAqlQuery | Query;
@@ -32,7 +32,7 @@ type EntityWorkerEvents = Record<PropertyKey, unknown[]> & {
 };
 
 export class EntityWorker<
-  T extends Vertice = Vertice,
+  T extends Entity = Entity,
   Events extends EntityWorkerEvents = EntityWorkerEvents,
 > extends AsyncEventEmitter<Events> {
   readonly status: JobStatus;
@@ -119,10 +119,10 @@ export class EntityWorker<
 
     this.status.total = workItems.length;
     for (const item of workItems) {
-      if (item instanceof Vertice) {
+      if (item instanceof Entity) {
         await this.performTask(item as T, opt.task);
       } else {
-        const v = await graph.findById<T>(Vertice.idFromReference(item));
+        const v = await graph.findById<T>(Entity.idFromReference(item));
         if (v) {
           await this.performTask(v, opt.task);
         } else {

@@ -7,9 +7,9 @@ import { DocumentCollection } from 'arangojs/collection.js';
 import arrify from 'arrify';
 import slugify from '@sindresorhus/slugify';
 import {
-  Vertice,
+  Entity,
   Reference,
-  isEdge,
+  isRelationship,
   UniqueUrl,
   RespondsWith,
   Resource,
@@ -154,13 +154,13 @@ export class ArangoStore {
     assert(includedTypes.length > 0);
 
     const promises: Array<Promise<DocumentCollection>> = [];
-    for (const type of Vertice.types.keys()) {
+    for (const type of Entity.types.keys()) {
       await database
         .collection(type)
         .exists()
         .then(exists => {
           if (!exists) {
-            if (Vertice.types.get(type)?.isEdge) {
+            if (Entity.types.get(type)?.isRelationship) {
               promises.push(database.createEdgeCollection(type));
             } else {
               promises.push(database.createCollection(type));
@@ -179,22 +179,22 @@ export class ArangoStore {
    */
 
   async exists(ref: Reference): Promise<boolean> {
-    const [collection, key] = Vertice.idFromReference(ref).split('/');
+    const [collection, key] = Entity.idFromReference(ref).split('/');
     return this.db.collection(collection).documentExists(key);
   }
 
-  async findById<T extends Vertice = Vertice>(
+  async findById<T extends Entity = Entity>(
     ref: Reference,
   ): Promise<T | undefined> {
-    const [collection, key] = Vertice.idFromReference(ref).split('/');
+    const [collection, key] = Entity.idFromReference(ref).split('/');
     return this.db
       .collection<JsonMap>(collection)
       .document(key)
-      .then(json => Vertice.fromJSON(json) as T)
+      .then(json => Entity.fromJSON(json) as T)
       .catch(() => undefined);
   }
 
-  async findAll<T extends Vertice = Vertice>(
+  async findAll<T extends Entity = Entity>(
     collection: string,
     criteria: Record<string, JsonPrimitive> = {},
     limit?: number,
@@ -212,11 +212,11 @@ export class ArangoStore {
     return this.db
       .query<JsonMap>(query)
       .then(async cursor => cursor.all())
-      .then(results => results.map(value => Vertice.fromJSON(value) as T));
+      .then(results => results.map(value => Entity.fromJSON(value) as T));
   }
 
   async push(
-    input: Vertice | Vertice[],
+    input: Entity | Entity[],
     overwrite = true,
   ): Promise<PromiseSettledResult<DocumentMetadata>[]> {
     const promises: Array<Promise<DocumentMetadata>> = [];
@@ -224,23 +224,23 @@ export class ArangoStore {
     input = arrify(input);
 
     // To ensure we don't have any premature reference insertions, we
-    // save all vertices before saving edges.
-    for (const vertice of input) {
-      if (!isEdge(vertice)) {
+    // save all entities before saving relationships.
+    for (const entity of input) {
+      if (!isRelationship(entity)) {
         promises.push(
           this.db
-            .collection(vertice._collection)
-            .save(vertice.toJSON(), { overwriteMode }),
+            .collection(entity._collection)
+            .save(entity.toJSON(), { overwriteMode }),
         );
       }
     }
 
-    for (const edge of input) {
-      if (isEdge(edge)) {
+    for (const relationship of input) {
+      if (isRelationship(relationship)) {
         promises.push(
           this.db
-            .collection(edge._collection)
-            .save(edge.toJSON(), { overwriteMode }),
+            .collection(relationship._collection)
+            .save(relationship.toJSON(), { overwriteMode }),
         );
       }
     }
@@ -248,23 +248,23 @@ export class ArangoStore {
     return Promise.allSettled(promises);
   }
 
-  async delete(input: Vertice | Vertice[]) {
+  async delete(input: Entity | Entity[]) {
     const promises: Array<Promise<DocumentMetadata>> = [];
     input = arrify(input);
 
-    // When bulk deleting, remove edges first.
-    for (const edge of input) {
-      if (isEdge(edge)) {
+    // When bulk deleting, remove relationships first.
+    for (const relationship of input) {
+      if (isRelationship(relationship)) {
         promises.push(
-          this.db.collection(edge._collection).remove(edge.documentId),
+          this.db.collection(relationship._collection).remove(relationship.documentId),
         );
       }
     }
 
-    for (const vertice of input) {
-      if (!isEdge(vertice)) {
+    for (const entity of input) {
+      if (!isRelationship(entity)) {
         promises.push(
-          this.db.collection(vertice._collection).remove(vertice.documentId),
+          this.db.collection(entity._collection).remove(entity.documentId),
         );
       }
     }

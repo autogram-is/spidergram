@@ -35,7 +35,7 @@ export default class GraphInfo extends SgCommand {
             const details = await collection.figures();
             data.push({
               name: coll.name,
-              type: coll.type === 2 ? 'document' : 'edge',
+              type: getCollectionType(coll.name, coll.type),
               records: details.count.toLocaleString(),
               bytes: Number.parseInt(
                 details.figures['documentsSize'],
@@ -58,4 +58,10 @@ export default class GraphInfo extends SgCommand {
         });
     }
   }
+}
+
+function getCollectionType(name: string, type: number) {
+  if (name.startsWith('ds_')) return 'dataset';
+  else if (name.startsWith('kv_')) return 'key-values';
+  else return (type === 2 ? 'entities' : 'relationships')
 }

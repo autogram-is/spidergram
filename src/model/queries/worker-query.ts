@@ -2,10 +2,10 @@ import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import { ArangoCollection, isArangoCollection } from "arangojs/collection.js";
 import { AqStrict, AqQuery, AqBuilder } from "aql-builder";
 import { Query } from "./query.js";
-import { Vertice, JobStatus, Project } from "../../index.js";
+import { Entity, JobStatus, Project } from "../../index.js";
 
 type WorkerEventMap = Record<PropertyKey, unknown[]> & {
-  progress: [status: JobStatus, item: Vertice, message?: string];
+  progress: [status: JobStatus, item: Entity, message?: string];
   error: [status: JobStatus, message?: string];
   end: [status: JobStatus];
 };
@@ -16,12 +16,12 @@ type WorkerEventListener<T extends WorkerEventType> = (
   ...args: WorkerEventParams<T>
 ) => unknown;
 
-export type WorkerQueryTask<T extends Vertice = Vertice> = (
+export type WorkerQueryTask<T extends Entity = Entity> = (
   item: T,
   status: JobStatus
 ) => Promise<string | void>;
 
-export class WorkerQuery<T extends Vertice = Vertice> extends AqBuilder {
+export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
   status: JobStatus;
   protected events: AsyncEventEmitter<WorkerEventMap>;
 
@@ -29,7 +29,7 @@ export class WorkerQuery<T extends Vertice = Vertice> extends AqBuilder {
    * Returns a new {@link AqBuilder} containing a buildable {@link AqStrict}.
    */
   constructor(input: string | ArangoCollection | AqStrict | AqQuery) {
-    const validCollections = Object.keys(Vertice.types);
+    const validCollections = Object.keys(Entity.types);
     let collectionName = '';
 
     if (typeof input === 'string') {
@@ -94,7 +94,7 @@ export class WorkerQuery<T extends Vertice = Vertice> extends AqBuilder {
 
     this.status.total = ids.length;
     for (const id of ids) {
-      const v = await graph.findById<T>(Vertice.idFromReference(id));
+      const v = await graph.findById<T>(Entity.idFromReference(id));
       if (v === undefined) {
         this.status.failed++;
       } else {

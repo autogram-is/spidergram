@@ -1,24 +1,24 @@
 import {
-  Edge,
-  EdgeConstructorOptions,
-  Vertice,
+  Relationship,
+  RelationshipConstructorOptions,
+  Entity,
   Reference,
   UniqueUrl,
   Resource,
 } from '../index.js';
 
 export interface LinksToConstructorOptions<
-  F extends Vertice = Resource,
-  T extends Vertice = UniqueUrl,
-> extends EdgeConstructorOptions<F, T> {
+  F extends Entity = Resource,
+  T extends Entity = UniqueUrl,
+> extends RelationshipConstructorOptions<F, T> {
   from?: Reference<F>;
   to?: Reference<T>;
 }
 
 export class LinksTo<
-  F extends Vertice = Resource,
-  T extends Vertice = UniqueUrl,
-> extends Edge<F, T> {
+  F extends Entity = Resource,
+  T extends Entity = UniqueUrl,
+> extends Relationship<F, T> {
   readonly _collection = 'links_to';
 
   constructor(data: LinksToConstructorOptions<F, T> = {}) {
@@ -31,4 +31,4 @@ export class LinksTo<
   }
 }
 
-Vertice.types.set('links_to', { constructor: LinksTo, isEdge: true });
+Entity.types.set('links_to', { constructor: LinksTo, isRelationship: true });

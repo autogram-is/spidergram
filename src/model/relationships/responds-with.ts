@@ -1,16 +1,16 @@
 import {
-  Edge,
-  EdgeConstructorOptions,
-  Vertice,
+  Relationship,
+  RelationshipConstructorOptions,
+  Entity,
   Reference,
   UniqueUrl,
   Resource,
 } from '../index.js';
 
 export interface RespondsWithConstructorOptions<
-  F extends Vertice = UniqueUrl,
-  T extends Vertice = Resource,
-> extends EdgeConstructorOptions<F, T> {
+  F extends Entity = UniqueUrl,
+  T extends Entity = Resource,
+> extends RelationshipConstructorOptions<F, T> {
   url?: Reference<F>;
   resource?: Reference<T>;
   redirects?: URL[] | string[];
@@ -19,9 +19,9 @@ export interface RespondsWithConstructorOptions<
 }
 
 export class RespondsWith<
-  F extends Vertice = UniqueUrl,
-  T extends Vertice = Resource,
-> extends Edge<F, T> {
+  F extends Entity = UniqueUrl,
+  T extends Entity = Resource,
+> extends Relationship<F, T> {
   readonly _collection = 'responds_with';
   method!: string;
   headers!: Record<string, string | string[] | undefined>;
@@ -41,4 +41,4 @@ export class RespondsWith<
   }
 }
 
-Vertice.types.set('responds_with', { constructor: RespondsWith, isEdge: true });
+Entity.types.set('responds_with', { constructor: RespondsWith, isRelationship: true });
