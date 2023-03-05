@@ -1,3 +1,4 @@
+import { isValidKey,  } from '../services/arango-store.js';
 import { GenericStore } from './generic-storage.js';
 import { CreateCollectionOptions } from 'arangojs/collection.js';
 import _ from 'lodash';
@@ -54,13 +55,13 @@ export class KeyValueStore extends GenericStore {
   }
 
   async setValue<T>(key: string, value: T) {
-    if (!this.isValidKey(key)) throw new TypeError('Invalid key');
+    if (!isValidKey(key)) throw new TypeError('Invalid key');
     const data = { _key: key, value };
     return this.collection.save(data, { overwriteMode: 'replace' });
   }
 
   async unsetValue(key: string) {
-    if (!this.isValidKey(key)) throw new TypeError('Invalid key');
+    if (!isValidKey(key)) throw new TypeError('Invalid key');
     return this.collection.remove({ _key: key });
   }
 
@@ -70,7 +71,7 @@ export class KeyValueStore extends GenericStore {
     key: string,
     defaultValue?: T,
   ): Promise<T | undefined> {
-    if (!this.isValidKey(key)) throw new TypeError('Invalid key');
+    if (!isValidKey(key)) throw new TypeError('Invalid key');
     const record = await this.collection.document(key);
     return (record?.value as T) ?? defaultValue ?? undefined;
   }

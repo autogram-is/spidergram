@@ -37,7 +37,6 @@ export abstract class SgCommand extends Command {
   ux = CliUx.ux;
   format = CLI.Colors;
   chalk = CLI.chalk;
-  symbol = CLI.Prefixes;
   output = OutputLevel.interactive;
   progress = new CLI.progress.Bar({}, CLI.progress.Presets.shades_grey);
 

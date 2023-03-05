@@ -5,7 +5,6 @@ import { aql, Database } from 'arangojs';
 import { DocumentMetadata } from 'arangojs/documents.js';
 import { DocumentCollection } from 'arangojs/collection.js';
 import arrify from 'arrify';
-import slugify from '@sindresorhus/slugify';
 import {
   Entity,
   Reference,
@@ -22,6 +21,11 @@ import {
 import { Project } from './project.js';
 import { JsonMap, JsonPrimitive } from '@salesforce/ts-types';
 import { join, AqlQuery, literal } from 'arangojs/aql.js';
+
+export const INVALID_KEY_CHARS_REGEX = /[^a-zA-Z0-9_:.@()+,=;$!*'%-]/g;
+export const INVALID_COLLECTION_CHARS_REGEX = /[^a-zA-Z0-9_-]/g;
+export const INVALID_COLLECTION_FIRST_CHAR_REGEX = /[^a-zA-Z]/g;
+export const NAME_SEPARATOR = '_'
 
 export { aql } from 'arangojs';
 
@@ -97,10 +101,9 @@ export class ArangoStore {
   protected static async load(name: string): Promise<Database> {
     const { system } = ArangoStore;
 
+    name = name.replaceAll(INVALID_COLLECTION_CHARS_REGEX, '-');
     if (is.emptyStringOrWhitespace(name)) {
       throw new Error(`Invalid database '${name}'`);
-    } else {
-      name = slugify(name);
     }
 
     return ArangoStore.system
@@ -294,3 +297,37 @@ export class ArangoStore {
     return this.db.collection.bind(this.db);
   }
 }
+
+export function sanitizeDbName(input: string): string {
+  return input.replaceAll(INVALID_COLLECTION_CHARS_REGEX, '-').replaceAll(/-+/g, NAME_SEPARATOR);
+}
+
+export function sanitizeCollectionName(input: string): string {
+  return input.replaceAll(INVALID_COLLECTION_CHARS_REGEX, '-').replaceAll(/-+/g, NAME_SEPARATOR);
+}
+
+export function sanitizeKey(input: string): string {
+  return input.replaceAll(INVALID_KEY_CHARS_REGEX, '-').replaceAll(/-+/g, NAME_SEPARATOR);
+}
+
+export function isValidKey(key: unknown): key is string {
+  if (typeof key === 'string') {
+    if (key.length < 1) return false;
+    if (key.length > 254) return false;
+    if (key.match(INVALID_KEY_CHARS_REGEX)) return false;
+    return true;
+  }
+  return false;
+}
+
+export function isValidName(name: unknown): name is string {
+  if (typeof name === 'string') {
+    if (name.length < 1) return false;
+    if (name.length > 255) return false;
+    if (name[0].match(INVALID_COLLECTION_FIRST_CHAR_REGEX)) return false;
+    if (name.match(INVALID_COLLECTION_CHARS_REGEX)) return false;
+    return true;
+  }
+  return false;
+}
+
