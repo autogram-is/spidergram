@@ -35,7 +35,7 @@ export class Fingerprint {
     let inputStruct: FingerprintInput = {};
 
     if (typeof input === 'string') {
-      inputStruct = this.extractBodyData(input);
+      inputStruct = await this.extractBodyData(input);
     } else if (input instanceof Resource) {
       inputStruct = await this.extractResourceInput(input);
     } else if (input instanceof Response) {
@@ -136,8 +136,8 @@ export class Fingerprint {
       );
   }
 
-  extractBodyData(html: string): FingerprintInput {
-    const data = HtmlTools.getPageData(html, { all: true });
+  async extractBodyData(html: string): Promise<FingerprintInput> {
+    const data = await HtmlTools.getPageData(html, { all: true });
 
     const input: FingerprintInput = {
       html,

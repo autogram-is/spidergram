@@ -9,10 +9,15 @@ import {
 import { parseMetaTags, MetaValues } from './parse-meta-tags.js';
 import { findElementData, ElementData } from './find-element-data.js';
 
+export type PageDataExtractor = (
+  input: string | cheerio.Root | Resource,
+  options: PageDataOptions
+) => Promise<PageData>
+
 /**
  * Options to control extraction of structured data from HTML pages
  */
-type PageDataOptions = {
+export type PageDataOptions = {
   /**
    * Parse all available information, ignoring any other 'false' parameters set in
    * the options object.
@@ -66,7 +71,7 @@ type PageDataOptions = {
   metaArrayAttributes?: string[];
 };
 
-export const defaults = {
+export const pageDataDefaultOptions = {
   attributes: true,
   head: true,
   meta: true,
@@ -98,13 +103,13 @@ export interface PageData {
   noscript?: Record<string, string | undefined>[];
 }
 
-export function getPageData(
+export async function getPageData(
   input: string | cheerio.Root | Resource,
   customOptions: PageDataOptions = {},
-): PageData {
+): Promise<PageData> {
   const $ = getCheerio(input);
   const results: PageData = {};
-  const options = _.defaultsDeep(customOptions, defaults);
+  const options = _.defaultsDeep(customOptions, pageDataDefaultOptions);
 
   if (options.attributes || options.all) {
     const attributes = findElementData($('body'));
@@ -186,5 +191,5 @@ export function getPageData(
     }
   }
 
-  return results;
+  return Promise.resolve(results);
 }

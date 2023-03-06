@@ -40,12 +40,12 @@ export default class Analyze extends SgCommand {
     await worker.run(async resource => {
       if (is.nonEmptyString(resource.body)) {
         if (flags.metadata) {
-          const data = HtmlTools.getPageData(resource.body);
+          const data = await HtmlTools.getPageData(resource.body);
           if (data) resource.data = data;
         }
 
         if (flags.text) {
-          const content = HtmlTools.getPageContent(resource, {
+          const content = await HtmlTools.getPageContent(resource, {
             selector: flags.body,
             readability: flags.readability,
           });

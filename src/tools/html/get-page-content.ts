@@ -7,6 +7,11 @@ export interface PageContent extends Record<string, unknown> {
   readability?: TextTools.ReadabilityScore;
 }
 
+export type PageContentExtractor = (
+  input: string | cheerio.Root | Resource,
+  options: PageContentOptions
+) => Promise<PageContent>
+
 /**
  * Options to control the extraction of core content from an HTML page
  */
@@ -71,7 +76,7 @@ export interface PageContentOptions {
   readability?: boolean | TextTools.ReadabilityScoreOptions;
 }
 
-const defaults: PageContentOptions = {
+export const pageContentDefaultOptions: PageContentOptions = {
   readability: true,
   allowMultipleContentElements: false,
   defaultToFullDocument: true,
@@ -82,11 +87,11 @@ const defaults: PageContentOptions = {
  * Extract the core content of an HTML page and return its plaintext, with
  * optional configuration options.
  */
-export function getPageContent(
+export async function getPageContent(
   input: string | cheerio.Root | Resource,
   customOptions: PageContentOptions = {},
 ) {
-  const options = _.defaultsDeep(customOptions, defaults);
+  const options = _.defaultsDeep(customOptions, pageContentDefaultOptions);
   const htmltotext: HtmlToTextOptions = options.htmltotext ?? {};
   const markup = HtmlTools.getMarkup(input);
 
@@ -123,5 +128,5 @@ export function getPageContent(
     }
   }
 
-  return results;
+  return Promise.resolve(results);
 }
