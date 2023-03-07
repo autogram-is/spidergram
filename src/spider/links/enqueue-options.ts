@@ -225,4 +225,3 @@ export interface EnqueueUrlOptions {
 export type UrlMutatorWithContext<
   T extends InternalSpiderContext = InternalSpiderContext,
 > = (found: ParsedUrl, context?: T) => ParsedUrl;
-

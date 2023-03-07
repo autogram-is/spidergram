@@ -13,11 +13,7 @@ export default class ProjectInfo extends SgCommand {
     const { project } = await this.getProjectContext();
     if (project.configFile !== undefined) {
       this.log(`${chalk.bold('Project:')} ${project.configFile}`);
-      this.log(
-        `${chalk.bold('Config file:')} ${
-          project.configFile
-        }`,
-      );
+      this.log(`${chalk.bold('Config file:')} ${project.configFile}`);
       this.log(`${chalk.bold('Settings:')}`);
       CliUx.ux.styledJSON(project.config);
     } else {

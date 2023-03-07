@@ -13,8 +13,8 @@ import { findElementData, ElementData } from './find-element-data.js';
 
 export type PageDataExtractor = (
   input: string | cheerio.Root | Resource,
-  options: PageDataOptions
-) => Promise<PageData>
+  options: PageDataOptions,
+) => Promise<PageData>;
 
 /**
  * Options to control extraction of structured data from HTML pages

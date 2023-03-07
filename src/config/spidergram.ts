@@ -5,8 +5,8 @@ import typescript from '@proload/plugin-tsm';
 import { ensureDir } from 'fs-extra';
 
 import { Logger, Filter, Human } from 'caterpillar';
-import { ArangoStore } from "../services";
-import { Configuration as CrawleeConfig } from "crawlee";
+import { ArangoStore } from '../services';
+import { Configuration as CrawleeConfig } from 'crawlee';
 import { Storage as FileStore } from 'typefs';
 import { SpidergramConfig } from './spidergram-config';
 import { ParsedUrl, NormalizedUrl, UrlMutators } from '@autogram/url-tools';
@@ -15,7 +15,7 @@ import * as defaults from './defaults.js';
 import * as dotenv from 'dotenv';
 import is from '@sindresorhus/is';
 import _ from 'lodash';
-import { globalNormalizer } from './global-normalizer';
+import { globalNormalizer } from './global-normalizer.js';
 
 export class SpidergramError extends Error {}
 
@@ -31,24 +31,37 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
   }
 
   /**
-   * Initializes a copy of Spidergram 
+   * Initializes a copy of Spidergram
    */
-  static async init<T extends SpidergramConfig = SpidergramConfig>(filePath?: string, reset = false) {
+  static async init<T extends SpidergramConfig = SpidergramConfig>(
+    filePath?: string,
+    reset = false,
+  ) {
     if (this._instance && !reset) return Promise.resolve(this._instance);
 
-    const sg = this._instance ?? new Spidergram<T>()
+    const sg = this._instance ?? new Spidergram<T>();
     await sg.load(filePath);
 
     // Shared Arango connection. In the future we may instantiate custom Entities, build
     // indexes, and so on here.
-    sg._arango = await ArangoStore.open(sg.config.arango?.databaseName, sg.config.arango);
+    sg._arango = await ArangoStore.open(
+      sg.config.arango?.databaseName,
+      sg.config.arango,
+    );
 
     // Centralized logging; also pipes logs to stderr unless logLevel is FALSE.
-    sg._log = new Logger({ defaultLevel: sg.config.logLevel ? sg.config.logLevel : undefined  });
+    sg._log = new Logger({
+      defaultLevel: sg.config.logLevel ? sg.config.logLevel : undefined,
+    });
     if (sg.config.logLevel) {
       // consider logging to Arango as well
       sg._log
-        .pipe(new Filter({ filterLevel: sg._log.getLogLevel(sg.config.logLevel)?.levelNumber ?? 0 }))
+        .pipe(
+          new Filter({
+            filterLevel:
+              sg._log.getLogLevel(sg.config.logLevel)?.levelNumber ?? 0,
+          }),
+        )
         .pipe(new Human({ color: true }))
         .pipe(process.stderr);
     }
@@ -58,7 +71,11 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
       sg._crawleeConfig = sg.config.crawlee;
     } else {
       sg._crawleeConfig = new CrawleeConfig(sg.config.crawlee);
-      sg.crawlee.set('logLevel', sg._log.getLogLevel(sg.config.logLevel ? sg.config.logLevel : 0)?.levelNumber ?? 0);
+      sg.crawlee.set(
+        'logLevel',
+        sg._log.getLogLevel(sg.config.logLevel ? sg.config.logLevel : 0)
+          ?.levelNumber ?? 0,
+      );
       // TODO: Implement Arango Storage Client for Crawlee
       // sg._crawleeConfig.useStorageClient(arangoStorageClient)
     }
@@ -67,7 +84,9 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     if (is.function_(sg.config.urlNormalizer)) {
       sg.setNormalizer(sg.config.urlNormalizer);
     } else if (is.plainObject(sg.config.urlNormalizer)) {
-      sg.setNormalizer((url: ParsedUrl) => globalNormalizer(url, { ...sg.config.urlNormalizer }));
+      sg.setNormalizer((url: ParsedUrl) =>
+        globalNormalizer(url, { ...sg.config.urlNormalizer }),
+      );
     }
 
     // Give config scripts a chance to modify things
@@ -76,7 +95,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     }
 
     // Set everything up based on the config values
-    return Promise.resolve(sg)
+    return Promise.resolve(sg);
   }
 
   protected async load(filePath?: string) {
@@ -84,7 +103,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     const options: LoadOptions<T> = {
       context: this,
       mustExist: false,
-      filePath: filePath
+      filePath: filePath,
     };
 
     // Reset the active configuration to the baseline defaults, load any user-defined
@@ -99,15 +118,22 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     // Load environment variables, overriding any existing configuration defaults.
     dotenv.config({ override: true });
 
-    if (process.env.SPIDERGRAM_DEBUG) this._activeConfig.debug = !!process.env.SPIDERGRAM_DEBUG;
-    if (process.env.SPIDERGRAM_LOG_LEVEL) this._activeConfig.logLevel = process.env.SPIDERGRAM_LOG_LEVEL;
-    if (process.env.SPIDERGRAM_STORAGE_DIRECTORY) this._activeConfig.storageDirectory = process.env.SPIDERGRAM_STORAGE_DIR;
-    if (process.env.SPIDERGRAM_ARANGO_DBNAME) this._activeConfig.arango.databaseName = process.env.SPIDERGRAM_ARANGO_DBNAME;
-    if (process.env.SPIDERGRAM_ARANGO_URL) this._activeConfig.arango.url  = process.env.SPIDERGRAM_ARANGO_URL;
-    if (process.env.SPIDERGRAM_ARANGO_USERNAME) this._activeConfig.arango.auth = {
-      username: process.env.SPIDERGRAM_ARANGO_USERNAME,
-      password: process.env.SPIDERGRAM_ARANGO_PASSWORD
-    }
+    if (process.env.SPIDERGRAM_DEBUG)
+      this._activeConfig.debug = !!process.env.SPIDERGRAM_DEBUG;
+    if (process.env.SPIDERGRAM_LOG_LEVEL)
+      this._activeConfig.logLevel = process.env.SPIDERGRAM_LOG_LEVEL;
+    if (process.env.SPIDERGRAM_STORAGE_DIRECTORY)
+      this._activeConfig.storageDirectory = process.env.SPIDERGRAM_STORAGE_DIR;
+    if (process.env.SPIDERGRAM_ARANGO_DBNAME)
+      this._activeConfig.arango.databaseName =
+        process.env.SPIDERGRAM_ARANGO_DBNAME;
+    if (process.env.SPIDERGRAM_ARANGO_URL)
+      this._activeConfig.arango.url = process.env.SPIDERGRAM_ARANGO_URL;
+    if (process.env.SPIDERGRAM_ARANGO_USERNAME)
+      this._activeConfig.arango.auth = {
+        username: process.env.SPIDERGRAM_ARANGO_USERNAME,
+        password: process.env.SPIDERGRAM_ARANGO_PASSWORD,
+      };
 
     // Set up file storage defaults
     if (this._activeConfig.typefs) {
@@ -121,10 +147,10 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
             local: {
               driver: 'file',
               root: this._activeConfig.storageDirectory,
-              jail: true
-            }
-          }
-        };  
+              jail: true,
+            },
+          },
+        };
       }
     }
 
@@ -138,7 +164,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
   protected _arango: ArangoStore | undefined;
   protected _crawleeConfig: CrawleeConfig | undefined;
   protected _normalizer: UrlMutators.UrlMutator | undefined;
-  
+
   protected constructor() {
     this._activeConfig = Spidergram.defaults as T;
     Spidergram._instance = this;
@@ -169,7 +195,8 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
   }
 
   get arango() {
-    if (this._arango === undefined) throw new SpidergramError('No connection to ArangoDB');
+    if (this._arango === undefined)
+      throw new SpidergramError('No connection to ArangoDB');
     return this._arango;
   }
 
@@ -185,4 +212,3 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     return CrawleeConfig.getGlobalConfig();
   }
 }
-

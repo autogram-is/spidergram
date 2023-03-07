@@ -24,7 +24,7 @@ export async function sitemapHandler(context: SpiderContext) {
       resource.key +
       '-' +
       fileNameFromHeaders(new URL(resource.url), resource.headers);
-      
+
     const proj = await Spidergram.init();
     const directory = path.join(
       'downloads',

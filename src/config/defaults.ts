@@ -1,6 +1,6 @@
 /**
  * These exported constants contain default values for Spidergram classes and
- * functions that accept complex options or configuration. Classes relying on 
+ * functions that accept complex options or configuration. Classes relying on
  * these defaults should access them via the {@link Spidergram} singleton
  * class; it handles overriding them with any user-supplied defaults, and handles
  * the complex logic of overriding the provided defaults with environment vars
@@ -8,9 +8,13 @@
  */
 
 import path from 'path';
-import { NormalizerOptions, SpidergramConfig } from "./index.js";
+import { NormalizerOptions, SpidergramConfig } from './index.js';
 import { mimeGroups } from '../spider/helpers/mime.js';
-import { UrlMatchStrategy, EnqueueUrlOptions, SpiderOptions } from '../spider/index.js';
+import {
+  UrlMatchStrategy,
+  EnqueueUrlOptions,
+  SpiderOptions,
+} from '../spider/index.js';
 import { PageContentOptions } from '../tools/html/get-page-content.js';
 import { PageDataOptions } from '../tools/html/get-page-data.js';
 import { readPackageUpSync } from 'read-pkg-up';

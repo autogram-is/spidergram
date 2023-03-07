@@ -70,9 +70,7 @@ export class Fingerprint {
         categories = JSON.parse(json) as Record<string, FingerprintCategory>;
       }
 
-      if (
-        await project.files().exists('wappalyzer-technologies.json')
-      ) {
+      if (await project.files().exists('wappalyzer-technologies.json')) {
         const json = (
           await project.files().read('wappalyzer-technologies.json')
         ).toString();

@@ -11,8 +11,8 @@ export interface PageContent extends Record<string, unknown> {
 
 export type PageContentExtractor = (
   input: string | cheerio.Root | Resource,
-  options: PageContentOptions
-) => Promise<PageContent>
+  options: PageContentOptions,
+) => Promise<PageContent>;
 
 /**
  * Options to control the extraction of core content from an HTML page

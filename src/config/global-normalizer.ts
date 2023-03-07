@@ -1,4 +1,4 @@
-import { UrlMutators, ParsedUrl } from "@autogram/url-tools";
+import { UrlMutators, ParsedUrl } from '@autogram/url-tools';
 
 export interface NormalizerOptions {
   forceProtocol?: 'https:' | 'http:' | false;
