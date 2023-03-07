@@ -8,7 +8,7 @@ export async function enhanceSpiderContext(
   context: SpiderContext,
 ): Promise<void> {
   const crawler = context.crawler as Spider;
-  const project = await Spidergram.init();
+  const project = await Spidergram.load();
 
   // Map our 'contextualized' functions to the context object
   Object.assign(context, {

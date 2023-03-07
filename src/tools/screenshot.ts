@@ -118,7 +118,7 @@ export class ScreenshotTool extends AsyncEventEmitter<{
   };
 
   async capture(page: Page, options: Partial<ScreenshotOptions> = {}) {
-    const sg = await Spidergram.init();
+    const sg = await Spidergram.load();
     const settings: ScreenshotOptions & { storage: DiskDriver } = {
       ...this.defaults,
       storage: sg.files(),

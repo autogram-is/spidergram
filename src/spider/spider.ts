@@ -209,7 +209,7 @@ export class Spider extends PlaywrightCrawler {
     requests: RequestValue | RequestValue[] = [],
   ): Promise<SpiderStatus & FinalStatistics> {
     // If only a single value came in, turn it into an array.
-    const project = await Spidergram.init();
+    const project = await Spidergram.load();
     const graph = project.arango;
     requests = arrify(requests);
 

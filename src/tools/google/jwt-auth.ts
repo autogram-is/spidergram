@@ -22,7 +22,7 @@ const defaultScopes = [
 ];
 
 export async function authenticate(scopes?: string | string[]) {
-  const project = await Spidergram.init();
+  const project = await Spidergram.load();
   const files = project.files();
   const envAuth = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   const configAuth = 'google-service-account.json';

@@ -20,7 +20,7 @@ export async function downloadHandler(context: SpiderContext): Promise<void> {
       '-' +
       fileNameFromHeaders(new URL(resource.url), resource.headers);
 
-    const proj = await Spidergram.init();
+    const proj = await Spidergram.load();
     const directory = path.join(
       'downloads',
       resource.parsed.hostname.replaceAll('.', '-'),

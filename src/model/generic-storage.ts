@@ -20,7 +20,7 @@ export abstract class GenericStore {
 
   protected static async db() {
     if (GenericStore._ast === undefined) {
-      const conf = await Spidergram.init();
+      const conf = await Spidergram.load();
       GenericStore._ast = conf.arango;
     }
     return GenericStore._ast.db;

@@ -4,7 +4,7 @@ import { SpiderContext } from '../context.js';
 export async function failureHandler(context: SpiderContext, error: Error) {
   const { request } = context;
 
-  const graph = (await Spidergram.init()).arango;
+  const graph = (await Spidergram.load()).arango;
 
   const rs = new Resource({
     url: request.loadedUrl ?? request.url,

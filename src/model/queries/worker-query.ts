@@ -88,7 +88,7 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
   }
 
   async run(task: WorkerQueryTask<T>): Promise<JobStatus> {
-    const sg = await Spidergram.init();
+    const sg = await Spidergram.load();
     const ids = await Query.run<string>(this.build());
 
     this.status.total = ids.length;

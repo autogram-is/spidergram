@@ -182,7 +182,7 @@ export abstract class SgCommand extends Command {
 
     try {
       const { flags } = await this.parse(this.constructor as typeof SgCommand);
-      project = await Spidergram.init(flags.config);
+      project = await Spidergram.load(flags.config);
       graph = project.arango;
     } catch (error: unknown) {
       if (is.error(error)) {

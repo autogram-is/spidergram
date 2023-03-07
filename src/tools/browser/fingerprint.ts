@@ -47,7 +47,7 @@ export class Fingerprint {
   }
 
   async loadDefinitions(options: FingerprintOptions = {}): Promise<this> {
-    const project = await Spidergram.init();
+    const project = await Spidergram.load();
 
     if (!this.loaded || options.forceReload) {
       let categories: Record<string, FingerprintCategory> = {};
@@ -87,7 +87,7 @@ export class Fingerprint {
   }
 
   protected async cacheTechnologies() {
-    const project = await Spidergram.init();
+    const project = await Spidergram.load();
 
     const chars = Array.from({ length: 27 }, (value, index) =>
       index ? String.fromCharCode(index + 96) : '_',
@@ -119,7 +119,7 @@ export class Fingerprint {
   }
 
   protected async cacheCategories() {
-    const project = await Spidergram.init();
+    const project = await Spidergram.load();
 
     const url = new URL(
       'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/categories.json',
