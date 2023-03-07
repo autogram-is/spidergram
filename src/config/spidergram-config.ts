@@ -160,9 +160,9 @@ export interface SpidergramConfig extends Record<string, unknown> {
 
   /**
    * A custom setup function to be run after Spidergram has been initialized
-   * from the settings in its config file. The init hook receives a reference
+   * from the settings in its config file. The finalize hook receives a reference
    * to the global Spidergram singleton object, and can use its methods (`setLogger`
    * and so on) to alter the global configuration.
    */
-  init?: (context: Spidergram) => Promise<void>;
+  finalize?: (context: Spidergram) => Promise<void>;
 }
