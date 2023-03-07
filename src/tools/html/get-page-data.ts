@@ -1,6 +1,8 @@
 import _ from 'lodash';
+import is from '@sindresorhus/is';
 
 import { Resource } from '../../model/index.js';
+import { Spidergram } from '../../config/spidergram.js';
 import { getCheerio } from './get-cheerio.js';
 import {
   parseElementsToArray,
@@ -71,17 +73,6 @@ export type PageDataOptions = {
   metaArrayAttributes?: string[];
 };
 
-export const pageDataDefaultOptions = {
-  attributes: true,
-  head: true,
-  meta: true,
-  links: false,
-  noscript: false,
-  scripts: false,
-  styles: false,
-  templates: false,
-};
-
 /**
  * Structured data parsed from an HTML document.
  *
@@ -107,9 +98,20 @@ export async function getPageData(
   input: string | cheerio.Root | Resource,
   customOptions: PageDataOptions = {},
 ): Promise<PageData> {
+  if (is.function_(Spidergram.config.pageData)) {
+    return Spidergram.config.pageData(input, customOptions);
+  } else {
+    return _getPageData(input, customOptions);
+  }
+}
+
+async function _getPageData(
+  input: string | cheerio.Root | Resource,
+  customOptions: PageDataOptions = {},
+): Promise<PageData> {
   const $ = getCheerio(input);
   const results: PageData = {};
-  const options = _.defaultsDeep(customOptions, pageDataDefaultOptions);
+  const options = _.defaultsDeep(customOptions, Spidergram.config.pageData);
 
   if (options.attributes || options.all) {
     const attributes = findElementData($('body'));

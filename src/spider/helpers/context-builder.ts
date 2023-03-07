@@ -1,5 +1,5 @@
 import { Spider, SpiderContext } from '../index.js';
-import { Project, UniqueUrl } from '../../index.js';
+import { Spidergram, UniqueUrl } from '../../index.js';
 import { helpers } from '../index.js';
 import * as urls from '../links/index.js';
 import { HtmlTools } from '../../index.js';
@@ -8,7 +8,7 @@ export async function enhanceSpiderContext(
   context: SpiderContext,
 ): Promise<void> {
   const crawler = context.crawler as Spider;
-  const project = await Project.config(context.projectConfig);
+  const project = await Spidergram.init();
 
   // Map our 'contextualized' functions to the context object
   Object.assign(context, {
@@ -33,7 +33,7 @@ export async function enhanceSpiderContext(
       options: Partial<urls.EnqueueUrlOptions> = {},
     ) => urls.enqueueRequests(context, input, options),
 
-    graph: await project.graph(),
+    graph: project.arango,
     files: project.files,
 
     ...crawler.spiderOptions,

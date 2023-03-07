@@ -1,6 +1,8 @@
 import { HtmlTools, TextTools, Resource } from '../../index.js';
 import { getPlaintext, HtmlToTextOptions } from './get-plaintext.js';
+import { Spidergram } from '../../config/spidergram.js';
 import _ from 'lodash';
+import is from '@sindresorhus/is';
 
 export interface PageContent extends Record<string, unknown> {
   text?: string;
@@ -27,14 +29,14 @@ export interface PageContentOptions {
    *
    * @see {@link https://github.com/html-to-text/node-html-to-text/tree/master/packages/html-to-text | Html-To-Text docs} for details
    */
-  htmltotext?: HtmlToTextOptions;
+  htmlToText?: HtmlToTextOptions;
 
   /**
    * One or more CSS selectors used to find the markup's primary content.
    *
    * @remarks
    * This option is equivalent to setting {@link HtmlToTextOptions.baseElements.selectors | baseElements.selectors}
-   * on the {@link PageContentOptions.htmltotext | text} option.
+   * on the {@link PageContentOptions.htmlToText | text} option.
    */
   selector?: string | string[];
 
@@ -43,7 +45,7 @@ export interface PageContentOptions {
    *
    * @remarks
    * Setting this to `true`  is equivalent to setting {@link HtmlToTextOptions.limits.maxBaseElements | limits.maxBaseElements}
-   * on the {@link PageContentOptions.htmltotext | text} option to `1`.
+   * on the {@link PageContentOptions.htmlToText | text} option to `1`.
    *
    * @defaultValue `false`
    */
@@ -55,7 +57,7 @@ export interface PageContentOptions {
    *
    * @remarks
    * Setting this to `true`  is equivalent to setting {@link HtmlToTextOptions.baseElements.returnDomByDefault | baseElements.returnDomByDefault}
-   * on the {@link PageContentOptions.htmltotext | text} option.
+   * on the {@link PageContentOptions.htmlToText | text} option.
    *
    * @defaultValue `false`
    */
@@ -76,13 +78,6 @@ export interface PageContentOptions {
   readability?: boolean | TextTools.ReadabilityScoreOptions;
 }
 
-export const pageContentDefaultOptions: PageContentOptions = {
-  readability: true,
-  allowMultipleContentElements: false,
-  defaultToFullDocument: true,
-  trim: true,
-};
-
 /**
  * Extract the core content of an HTML page and return its plaintext, with
  * optional configuration options.
@@ -91,7 +86,19 @@ export async function getPageContent(
   input: string | cheerio.Root | Resource,
   customOptions: PageContentOptions = {},
 ) {
-  const options = _.defaultsDeep(customOptions, pageContentDefaultOptions);
+  if (is.function_(Spidergram.config.pageContent)) {
+    return Spidergram.config.pageContent(input, customOptions);
+  } else {
+    return _getPageContent(input, customOptions);
+  }
+}
+
+// Internal function that actually does the heavy lifting.
+async function _getPageContent(
+  input: string | cheerio.Root | Resource,
+  customOptions: PageContentOptions = {},
+) {
+  const options = _.defaultsDeep(customOptions, Spidergram.config.pageContent);
   const htmltotext: HtmlToTextOptions = options.htmltotext ?? {};
   const markup = HtmlTools.getMarkup(input);
 

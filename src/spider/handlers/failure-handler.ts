@@ -1,10 +1,10 @@
-import { RespondsWith, Resource, Project } from '../../index.js';
+import { RespondsWith, Resource, Spidergram } from '../../index.js';
 import { SpiderContext } from '../context.js';
 
 export async function failureHandler(context: SpiderContext, error: Error) {
   const { request } = context;
 
-  const graph = await Project.config().then(project => project.graph());
+  const graph = (await Spidergram.init()).arango;
 
   const rs = new Resource({
     url: request.loadedUrl ?? request.url,

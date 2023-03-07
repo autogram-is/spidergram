@@ -2,10 +2,10 @@ import arrify from 'arrify';
 import { Request, RequestOptions } from 'crawlee';
 import { UniqueUrl } from '../../model/index.js';
 import { SpiderContext } from '../context.js';
+import { Spidergram } from '../../config/index.js';
 import { Robots } from '../../tools/robots.js';
 import {
   EnqueueUrlOptions,
-  urlDiscoveryDefaultOptions,
   filterUrls,
 } from './index.js';
 import _ from 'lodash';
@@ -19,7 +19,7 @@ export async function enqueueRequests(
   const options: EnqueueUrlOptions = _.defaultsDeep(
     customOptions,
     context.urlOptions,
-    urlDiscoveryDefaultOptions,
+    Spidergram.config.spider?.urlOptions,
   );
   const input = arrify(urls);
   const queue =

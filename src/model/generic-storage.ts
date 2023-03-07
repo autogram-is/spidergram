@@ -1,4 +1,4 @@
-import { Project, ArangoStore } from '../index.js';
+import { Spidergram, ArangoStore } from '../index.js';
 import { DocumentCollection, EdgeCollection } from 'arangojs/collection';
 
 /**
@@ -20,8 +20,8 @@ export abstract class GenericStore {
 
   protected static async db() {
     if (GenericStore._ast === undefined) {
-      const conf = await Project.config();
-      GenericStore._ast = await conf.graph();
+      const conf = await Spidergram.init();
+      GenericStore._ast = conf.arango;
     }
     return GenericStore._ast.db;
   }

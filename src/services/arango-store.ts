@@ -18,7 +18,6 @@ import {
   AppearsOn,
   Fragment,
 } from '../model/index.js';
-import { Project } from './project.js';
 import { JsonMap, JsonPrimitive } from '@salesforce/ts-types';
 import { join, AqlQuery, literal } from 'arangojs/aql.js';
 
@@ -67,15 +66,11 @@ export class ArangoStore {
     name?: string,
     customConnection: Partial<Config> = {},
   ): Promise<ArangoStore> {
-    const project = await Project.config();
-    const { databaseName, ...connection } =
-      project.configuration.graph.connection;
-
+    const { databaseName, ...connection } = customConnection;
     const dbName = name ?? databaseName ?? 'spidergram';
-    const dbConn = customConnection ?? connection;
 
     if (is.undefined(ArangoStore._systemDb)) {
-      ArangoStore.connect(dbConn);
+      ArangoStore.connect(connection);
       await this.system.databases().catch((error: unknown) => {
         if (is.error(error)) throw error;
         throw new Error('Could not connect to Arango');

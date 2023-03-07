@@ -4,7 +4,7 @@ import { fileNameFromHeaders } from '../helpers/mime.js';
 import { saveUrls, enqueueRequests } from '../links/index.js';
 import { Robots } from '../../tools/robots.js';
 import { FoundLink } from '../../tools/html/find-links.js';
-import { Project } from '../../index.js';
+import { Spidergram } from '../../index.js';
 import { ensureDir } from 'fs-extra';
 import path from 'node:path';
 
@@ -26,22 +26,23 @@ export async function robotsTxtHandler(context: SpiderContext) {
       '-' +
       fileNameFromHeaders(new URL(resource.url), resource.headers);
 
+    const proj = await Spidergram.init();
     const directory = path.join(
+      'downloads',
       resource.parsed.hostname.replaceAll('.', '-'),
       resource.mime?.replaceAll('/', '-') ?? 'unknown',
     );
-    const proj = await Project.config();
     await ensureDir(
-      path.join(proj.root ?? '.', 'storage', 'downloads', directory),
+      path.join(proj.config.storageDirectory ?? './storage', directory),
     );
     const fullPath = path.join(directory, fileName);
-    await files('downloads').writeStream(fullPath, Duplex.from(response.body));
+    await files().writeStream(fullPath, Duplex.from(response.body));
 
     resource.payload = { bucket: 'downloads', path: fullPath };
     await graph.push(resource);
 
     // Read it back in and pass along
-    const txt = await files('downloads').read(fileName);
+    const txt = await files().read(fileName);
     const hostUrl = new URL(context.request.url);
     hostUrl.pathname = '';
     Robots.setRules(hostUrl, txt.toString());

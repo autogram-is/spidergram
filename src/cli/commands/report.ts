@@ -228,7 +228,7 @@ debug: Display the query spec and generated AQL statement without running it
         // If the user provides a *filename* that ends with .json, we'll
         // write it to the ./storage/output directory.
         project
-          .files('output')
+          .files()
           .write(
             flags.output,
             Buffer.from(JSON.stringify(results, undefined, 2)),
@@ -240,11 +240,11 @@ debug: Display the query spec and generated AQL statement without running it
         // the file as an Excel workbook to the ./storage/output directory.
         const s = new FileTools.Spreadsheet();
         s.addSheet(results, 'results');
-        project.files('output').write(flags.output, Buffer.from(s.toBuffer()));
+        project.files().write(flags.output, Buffer.from(s.toBuffer()));
         this.ux.info(`Wrote file to ./storage/output/${flags.output}`);
       } else if (flags.output?.toLocaleLowerCase().endsWith('.csv')) {
         const csvStream = csv.format({ headers: true });
-        project.files('output').writeStream(flags.output, csvStream);
+        project.files().writeStream(flags.output, csvStream);
         for (const row of results) {
           csvStream.write(row);
         }
@@ -264,7 +264,7 @@ debug: Display the query spec and generated AQL statement without running it
         // A weird fallback case in which someone specifies an arbitrary output string
         // we don't explicitly handle. Just assume it's a filename and let it rip.
         project
-          .files('output')
+          .files()
           .write(flags.output, Buffer.from(JSON.stringify(results)));
         this.ux.info(`Wrote file to ./storage/output/${flags.output}`);
       }

@@ -3,7 +3,7 @@ import { SpiderContext } from '../context.js';
 import { HtmlTools } from '../../tools/index.js';
 import { fileNameFromHeaders } from '../helpers/mime.js';
 import { saveUrls, enqueueRequests } from '../links/index.js';
-import { Project } from '../../index.js';
+import { Spidergram } from '../../index.js';
 import { ensureDir } from 'fs-extra';
 import path from 'node:path';
 
@@ -24,23 +24,24 @@ export async function sitemapHandler(context: SpiderContext) {
       resource.key +
       '-' +
       fileNameFromHeaders(new URL(resource.url), resource.headers);
-
+      
+    const proj = await Spidergram.init();
     const directory = path.join(
+      'downloads',
       resource.parsed.hostname.replaceAll('.', '-'),
       resource.mime?.replaceAll('/', '-') ?? 'unknown',
     );
-    const proj = await Project.config();
     await ensureDir(
-      path.join(proj.root ?? '.', 'storage', 'downloads', directory),
+      path.join(proj.config.storageDirectory ?? './storage', directory),
     );
     const fullPath = path.join(directory, fileName);
-    await files('downloads').writeStream(fullPath, Duplex.from(response.body));
+    await files().writeStream(fullPath, Duplex.from(response.body));
 
     resource.payload = { bucket: 'downloads', path: fullPath };
     await graph.push(resource);
 
     // Now read it back in
-    const xml = await files('downloads').read(fileName);
+    const xml = await files().read(fileName);
 
     // Now parse the sitemap and pull out URLs. Some sites (vanityfair.com is one
     // example) do odd things like sitemap URLs with querystrings

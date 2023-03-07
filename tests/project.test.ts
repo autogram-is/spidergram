@@ -1,5 +1,5 @@
 import test from 'ava';
-import { Project } from '../src/index.js';
+import { Spidergram } from '../src/index.js';
 
 test('project config loads', async t => {
 	const p = await Project.config({ _configFilePath: 'spidegram.example.json' });

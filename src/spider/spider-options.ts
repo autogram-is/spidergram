@@ -1,15 +1,7 @@
 import { Dictionary, LogLevel, PlaywrightCrawlerOptions } from 'crawlee';
-import { ProjectConfig, projectConfigDefaults } from '../index.js';
-import { mimeGroups } from './helpers/mime.js';
 import { SpiderHook } from './hooks/index.js';
-import {
-  EnqueueUrlOptions,
-  urlDiscoveryDefaultOptions,
-} from './links/index.js';
+import { EnqueueUrlOptions } from './links/index.js';
 import { SpiderRequestHandler } from './handlers/index.js';
-import { readPackageUp } from 'read-pkg-up';
-
-const pkgData = await readPackageUp();
 
 export type SpiderOptions = InternalSpiderOptions &
   Omit<
@@ -21,18 +13,6 @@ export type SpiderOptions = InternalSpiderOptions &
   >;
 
 export interface InternalSpiderOptions extends Dictionary {
-  /**
-   * An optional set of {@apilink ProjectConfig} settings to be used
-   * if a global project context doesn't yet exist. This can be useful
-   * for temporarily overriding the Arango database crawl data is saved
-   * to, for example.
-   *
-   * See {@apilink Project.context()}
-   *
-   * @type {Partial<ProjectConfig>}
-   */
-  projectConfig: Partial<ProjectConfig>;
-
   /**
    * Logging level for the spider's internal crawler.
    *
@@ -158,17 +138,3 @@ export interface InternalSpiderOptions extends Dictionary {
    */
   handlerTimeout?: number;
 }
-
-export const defaultSpiderOptions: InternalSpiderOptions = {
-  projectConfig: projectConfigDefaults,
-  logLevel: LogLevel.INFO,
-  preNavigationHooks: [],
-  postNavigationHooks: [],
-  pageHandler: undefined,
-  requestHandlers: {},
-  urlOptions: urlDiscoveryDefaultOptions,
-  parseMimeTypes: mimeGroups.page,
-  downloadMimeTypes: [],
-  userAgent: `Spidergram ${pkgData?.packageJson.version}`,
-  handlerTimeout: 180,
-};

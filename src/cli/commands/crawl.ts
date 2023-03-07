@@ -52,7 +52,7 @@ export default class Crawl extends SgCommand {
 
     if (flags.erase) {
       const confirmation = await CLI.confirm(
-        `Erase the ${project.name} database before crawling`,
+        `Erase the ${project.config.arango?.databaseName ?? 'spidergram'} database before crawling`,
       );
       if (confirmation) {
         await graph.erase({ eraseAll: true });

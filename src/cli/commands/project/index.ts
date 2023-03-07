@@ -11,15 +11,15 @@ export default class ProjectInfo extends SgCommand {
 
   async run() {
     const { project } = await this.getProjectContext();
-    if (project.configuration._configFilePath !== undefined) {
-      this.log(`${chalk.bold('Project:')} ${project.name}`);
+    if (project.configFile !== undefined) {
+      this.log(`${chalk.bold('Project:')} ${project.configFile}`);
       this.log(
         `${chalk.bold('Config file:')} ${
-          project.configuration._configFilePath
+          project.configFile
         }`,
       );
       this.log(`${chalk.bold('Settings:')}`);
-      CliUx.ux.styledJSON(project.configuration);
+      CliUx.ux.styledJSON(project.config);
     } else {
       this.log('No project configuration file could be found.');
     }

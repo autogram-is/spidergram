@@ -1,4 +1,4 @@
-import { Project } from '../../index.js';
+import { Spidergram } from '../../index.js';
 import { QueryOptions, Database } from 'arangojs/database.js';
 import { GeneratedAqlQuery, isGeneratedAqlQuery } from 'arangojs/aql.js';
 import { AnyJson } from '@salesforce/ts-types';
@@ -14,9 +14,7 @@ export class Query extends AqBuilder {
     options: QueryOptions = {},
   ) {
     if (this.db === undefined) {
-      this.db = await Project.config()
-        .then(project => project.graph())
-        .then(graph => graph.db);
+      this.db = (await Spidergram.init()).arango.db;
     }
     const aql = isGeneratedAqlQuery(query) ? query : AqBuilder.build(query);
     return this.db.query<T>(aql, options).then(cursor => cursor.all());

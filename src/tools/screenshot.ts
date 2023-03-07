@@ -1,5 +1,5 @@
 import { Page, PageScreenshotOptions } from 'playwright';
-import { Project } from '../index.js';
+import { Spidergram } from '../config/spidergram.js';
 import is from '@sindresorhus/is';
 import { Readable } from 'node:stream';
 import { DiskDriver } from 'typefs';
@@ -118,9 +118,10 @@ export class ScreenshotTool extends AsyncEventEmitter<{
   };
 
   async capture(page: Page, options: Partial<ScreenshotOptions> = {}) {
+    const sg = await Spidergram.init();
     const settings: ScreenshotOptions & { storage: DiskDriver } = {
       ...this.defaults,
-      storage: await Project.config().then(project => project.files()),
+      storage: sg.files(),
       ...options,
     };
     const {
