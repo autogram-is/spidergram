@@ -21,10 +21,21 @@ import { SpidergramConfig } from './spidergram-config.js';
 export class SpidergramError extends Error {}
 
 export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
-  protected static _instance: Spidergram;
+  protected static _instance?: Spidergram;
 
   static get config() {
-    return this._instance?.config ?? Spidergram.defaults;
+    return Spidergram._instance?.config ?? Spidergram.defaults;
+  }
+
+  static get status() {
+    return {
+      instantiated: Spidergram._instance !== undefined,
+      initializing: Spidergram._instance?._initializing,
+      initialized: !Spidergram._instance?._needsInit,
+      loaded: !Spidergram._instance?._needsLoad,
+      configFile: Spidergram._instance?.configFile,
+      arango: Spidergram._instance?._arango !== undefined,
+    }
   }
 
   static get defaults(): SpidergramConfig {
@@ -38,22 +49,33 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     filePath?: string,
     reset = false,
   ) {
-    if (this._instance === undefined || reset) {
-      this._instance = new Spidergram<T>();
-      await this._instance.init(filePath);
+    if (Spidergram._instance === undefined) {
+      return new Spidergram<T>().init(filePath);
+
+    } else if (reset) {
+      return Spidergram._instance.init(filePath);
+      
+    } else {
+      if (Spidergram._instance._initializing) {
+        while(Spidergram._instance._initializing) {
+          // Sometimes, our promises can collide and an incompletely initialized
+          // instance can be requested. This holds up the response until it's done. 
+        }
+      }
+      return Promise.resolve(Spidergram._instance);
     }
-    return Promise.resolve(this._instance);
   }
 
   protected async init(filePath?: string) {
+    this._initializing = true;
     await this.loadConfigFile(filePath);
 
     // Shared Arango connection. In the future we may instantiate custom Entities, build
     // indexes, and so on here.
-    this._arango = await ArangoStore.open(
+    await ArangoStore.open(
       this.config.arango?.databaseName,
       this.config.arango,
-    );
+    ).then(ast => this.setArangoStore(ast));
 
     // Centralized logging; also pipes logs to stderr unless logLevel is FALSE.
     this._log = new Logger({
@@ -119,7 +141,8 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
       await this._loadedConfig?.value.init(this);
     }
 
-    // Set everything up based on the config values
+    this._initializing = false;
+    this._needsInit = false;
     return Promise.resolve(this);
   }
 
@@ -167,9 +190,13 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
         password: process.env.SPIDERGRAM_ARANGO_PASSWORD,
       };
 
+    this._needsLoad = false;
     return Promise.resolve();
   }
 
+  protected _needsInit = true;
+  protected _initializing = false;
+  protected _needsLoad = true;
   protected _loadedConfig: Config<T> | undefined;
   protected _activeConfig: T;
 
@@ -179,8 +206,8 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
   protected _normalizer: UrlMutators.UrlMutator | undefined;
 
   protected constructor() {
-    this._activeConfig = Spidergram.defaults as T;
     Spidergram._instance = this;
+    this._activeConfig = Spidergram.defaults as T;
   }
 
   get config(): T {

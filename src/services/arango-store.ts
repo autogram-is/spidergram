@@ -49,7 +49,6 @@ export class ArangoStore {
    * Should be followed by `ArangoStore.load()` in most situations.
    */
   protected static connect(connection: Partial<Config> = {}): Database {
-    connection.url ??= 'http://127.0.0.1:8529';
     ArangoStore._systemDb = new Database(connection);
     return ArangoStore.system;
   }
@@ -83,7 +82,7 @@ export class ArangoStore {
       );
     }
 
-    return ArangoStore.instances[dbName];
+    return Promise.resolve(ArangoStore.instances[dbName]);
   }
 
   /**

@@ -19,11 +19,7 @@ export abstract class GenericStore {
   }
 
   protected static async db() {
-    if (GenericStore._ast === undefined) {
-      const conf = await Spidergram.load();
-      GenericStore._ast = conf.arango;
-    }
-    return GenericStore._ast.db;
+    return Spidergram.load().then(sg => sg.arango.db);
   }
 
   protected constructor(
@@ -32,8 +28,8 @@ export abstract class GenericStore {
     this.collection = collection;
   }
 
-  protected db() {
-    return GenericStore.db();
+  protected async db() {
+    return Spidergram.load().then(sg => sg.arango.db);
   }
 
   async drop() {
