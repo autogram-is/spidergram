@@ -1,4 +1,5 @@
-import { Project, ArangoStore, CLI, JobStatus } from '../index.js';
+import { ArangoStore, CLI, JobStatus } from '../index.js';
+import { Spidergram } from '../config/spidergram.js';
 import { CliUx, Command } from '@oclif/core';
 import { Duration } from 'luxon';
 import is from '@sindresorhus/is';
@@ -173,23 +174,16 @@ export abstract class SgCommand extends Command {
    * This makes it easier to create functions that use the Project and
    * graph context *if they exist* but continue without them if they
    * can't be loaded.
-   *
-   * @async
-   * @param {boolean} [returnErrors=false]
-   * @returns {unknown}
    */
   async getProjectContext(returnErrors = false) {
     const errors: Error[] = [];
-    let project = {} as unknown as Project;
+    let project = {} as Spidergram;
     let graph = {} as unknown as ArangoStore;
 
     try {
       const { flags } = await this.parse(this.constructor as typeof SgCommand);
-      const options = is.string(flags.config)
-        ? { _configFilePath: flags.config }
-        : undefined;
-      project = await Project.config(options);
-      graph = await project.graph();
+      project = await Spidergram.load(flags.config);
+      graph = project.arango;
     } catch (error: unknown) {
       if (is.error(error)) {
         errors.push(error);

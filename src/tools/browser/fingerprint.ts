@@ -8,8 +8,7 @@ import { parse as parseCookie } from 'set-cookie-parser';
 import pkg from 'wappalyzer-core';
 const { analyze, resolve, setCategories, setTechnologies } = pkg;
 
-import { Project, Resource } from '../../index.js';
-import { HtmlTools } from '../../index.js';
+import { Spidergram, Resource, HtmlTools } from '../../index.js';
 
 export type {
   Technology as FingerprintTechnology,
@@ -35,7 +34,7 @@ export class Fingerprint {
     let inputStruct: FingerprintInput = {};
 
     if (typeof input === 'string') {
-      inputStruct = this.extractBodyData(input);
+      inputStruct = await this.extractBodyData(input);
     } else if (input instanceof Resource) {
       inputStruct = await this.extractResourceInput(input);
     } else if (input instanceof Response) {
@@ -48,34 +47,32 @@ export class Fingerprint {
   }
 
   async loadDefinitions(options: FingerprintOptions = {}): Promise<this> {
-    const project = await Project.config();
+    const project = await Spidergram.load();
 
     if (!this.loaded || options.forceReload) {
       let categories: Record<string, FingerprintCategory> = {};
       let technology: Record<string, FingerprintTechnology> = {};
 
       const catExists = await project
-        .files('config')
+        .files()
         .exists('wappalyzer-categories.json');
       const techExists = await project
-        .files('config')
+        .files()
         .exists('wappalyzer-technologies.json');
 
       if (!catExists || options.ignoreCache) await this.cacheCategories();
       if (!techExists || options.ignoreCache) await this.cacheTechnologies();
 
-      if (await project.files('config').exists('wappalyzer-categories.json')) {
+      if (await project.files().exists('wappalyzer-categories.json')) {
         const json = (
-          await project.files('config').read('wappalyzer-categories.json')
+          await project.files().read('wappalyzer-categories.json')
         ).toString();
         categories = JSON.parse(json) as Record<string, FingerprintCategory>;
       }
 
-      if (
-        await project.files('config').exists('wappalyzer-technologies.json')
-      ) {
+      if (await project.files().exists('wappalyzer-technologies.json')) {
         const json = (
-          await project.files('config').read('wappalyzer-technologies.json')
+          await project.files().read('wappalyzer-technologies.json')
         ).toString();
         technology = JSON.parse(json) as Record<string, FingerprintTechnology>;
       }
@@ -90,7 +87,7 @@ export class Fingerprint {
   }
 
   protected async cacheTechnologies() {
-    const project = await Project.config();
+    const project = await Spidergram.load();
 
     const chars = Array.from({ length: 27 }, (value, index) =>
       index ? String.fromCharCode(index + 96) : '_',
@@ -114,7 +111,7 @@ export class Fingerprint {
     );
 
     return project
-      .files('config')
+      .files()
       .write(
         'wappalyzer-technologies.json',
         Buffer.from(JSON.stringify(technologies)),
@@ -122,22 +119,22 @@ export class Fingerprint {
   }
 
   protected async cacheCategories() {
-    const project = await Project.config();
+    const project = await Spidergram.load();
 
     const url = new URL(
       'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/categories.json',
     );
     const categories = await fetch(url).then(response => response.json());
     return project
-      .files('config')
+      .files()
       .write(
         'wappalyzer-categories.json',
         Buffer.from(JSON.stringify(categories)),
       );
   }
 
-  extractBodyData(html: string): FingerprintInput {
-    const data = HtmlTools.getPageData(html, { all: true });
+  async extractBodyData(html: string): Promise<FingerprintInput> {
+    const data = await HtmlTools.getPageData(html, { all: true });
 
     const input: FingerprintInput = {
       html,

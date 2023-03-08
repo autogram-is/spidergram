@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import arrify from 'arrify';
 import { google } from 'googleapis';
-import { Project } from '../../index.js';
+import { Spidergram } from '../../index.js';
 
 export interface GoogleKeyJson {
   type: string;
@@ -22,8 +22,8 @@ const defaultScopes = [
 ];
 
 export async function authenticate(scopes?: string | string[]) {
-  const project = await Project.config();
-  const files = project.files('config');
+  const project = await Spidergram.load();
+  const files = project.files();
   const envAuth = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   const configAuth = 'google-service-account.json';
   const workingScopes = scopes ? arrify(scopes) : defaultScopes;

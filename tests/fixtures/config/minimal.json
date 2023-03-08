@@ -1,0 +1,5 @@
+{
+  "testing": true,
+  "debug": false,
+  "logLevel": "info"
+}

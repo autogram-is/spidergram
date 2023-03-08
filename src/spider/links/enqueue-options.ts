@@ -225,20 +225,3 @@ export interface EnqueueUrlOptions {
 export type UrlMutatorWithContext<
   T extends InternalSpiderContext = InternalSpiderContext,
 > = (found: ParsedUrl, context?: T) => ParsedUrl;
-
-export const urlDiscoveryDefaultOptions: EnqueueUrlOptions = {
-  limit: Number.POSITIVE_INFINITY,
-  selector: 'body a',
-  save: UrlMatchStrategy.All,
-  enqueue: UrlMatchStrategy.SameDomain,
-  prioritize: false,
-  checkRobots: false,
-  respectRobots: false,
-  checkSitemaps: false,
-  prioritizeSitemaps: false,
-  discardEmptyLinks: true,
-  discardAnchorOnlyLinks: true,
-  discardNonWebLinks: false,
-  discardUnparsableLinks: false,
-  discardExistingLinks: true,
-};

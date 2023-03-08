@@ -19,14 +19,13 @@ import {
   RequestOptions,
 } from 'crawlee';
 import { NormalizedUrl, ParsedUrl } from '@autogram/url-tools';
-import { Project } from '../services/project.js';
+import { Spidergram } from '../index.js';
 import { UniqueUrl, UniqueUrlSet } from '../model/index.js';
 import { SpiderRequestHandler } from './handlers/index.js';
 import {
   InternalSpiderOptions,
   SpiderOptions,
   SpiderContext,
-  defaultSpiderOptions,
   handlers,
   helpers,
   contextualizeHandler,
@@ -210,8 +209,8 @@ export class Spider extends PlaywrightCrawler {
     requests: RequestValue | RequestValue[] = [],
   ): Promise<SpiderStatus & FinalStatistics> {
     // If only a single value came in, turn it into an array.
-    const project = await Project.config(this.spiderOptions.projectConfig);
-    const graph = await project.graph();
+    const project = await Spidergram.load();
+    const graph = project.arango;
     requests = arrify(requests);
 
     // Crawlee has a lot of logs going on.
@@ -320,7 +319,6 @@ async function playwrightPostNavigate(context: SpiderContext) {
 /* eslint-disable @typescript-eslint/no-unused-vars */
 function splitOptions(options: Partial<SpiderOptions> = {}) {
   const {
-    projectConfig,
     logLevel,
     pageHandler,
     requestHandlers,
@@ -338,7 +336,7 @@ function splitOptions(options: Partial<SpiderOptions> = {}) {
   return {
     internal: _.defaultsDeep(
       options,
-      defaultSpiderOptions,
+      Spidergram.config.spider,
     ) as InternalSpiderOptions,
     crawler: crawlerOptions as PlaywrightCrawlerOptions,
   };

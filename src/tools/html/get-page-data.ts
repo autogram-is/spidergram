@@ -1,6 +1,8 @@
 import _ from 'lodash';
+import is from '@sindresorhus/is';
 
 import { Resource } from '../../model/index.js';
+import { Spidergram } from '../../config/spidergram.js';
 import { getCheerio } from './get-cheerio.js';
 import {
   parseElementsToArray,
@@ -9,10 +11,15 @@ import {
 import { parseMetaTags, MetaValues } from './parse-meta-tags.js';
 import { findElementData, ElementData } from './find-element-data.js';
 
+export type PageDataExtractor = (
+  input: string | cheerio.Root | Resource,
+  options: PageDataOptions,
+) => Promise<PageData>;
+
 /**
  * Options to control extraction of structured data from HTML pages
  */
-type PageDataOptions = {
+export type PageDataOptions = {
   /**
    * Parse all available information, ignoring any other 'false' parameters set in
    * the options object.
@@ -66,17 +73,6 @@ type PageDataOptions = {
   metaArrayAttributes?: string[];
 };
 
-export const defaults = {
-  attributes: true,
-  head: true,
-  meta: true,
-  links: false,
-  noscript: false,
-  scripts: false,
-  styles: false,
-  templates: false,
-};
-
 /**
  * Structured data parsed from an HTML document.
  *
@@ -98,13 +94,24 @@ export interface PageData {
   noscript?: Record<string, string | undefined>[];
 }
 
-export function getPageData(
+export async function getPageData(
   input: string | cheerio.Root | Resource,
   customOptions: PageDataOptions = {},
-): PageData {
+): Promise<PageData> {
+  if (is.function_(Spidergram.config.pageData)) {
+    return Spidergram.config.pageData(input, customOptions);
+  } else {
+    return _getPageData(input, customOptions);
+  }
+}
+
+async function _getPageData(
+  input: string | cheerio.Root | Resource,
+  customOptions: PageDataOptions = {},
+): Promise<PageData> {
   const $ = getCheerio(input);
   const results: PageData = {};
-  const options = _.defaultsDeep(customOptions, defaults);
+  const options = _.defaultsDeep(customOptions, Spidergram.config.pageData);
 
   if (options.attributes || options.all) {
     const attributes = findElementData($('body'));
@@ -186,5 +193,5 @@ export function getPageData(
     }
   }
 
-  return results;
+  return Promise.resolve(results);
 }

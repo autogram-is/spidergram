@@ -2,7 +2,7 @@ import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import { ArangoCollection, isArangoCollection } from 'arangojs/collection.js';
 import { AqStrict, AqQuery, AqBuilder } from 'aql-builder';
 import { Query } from './query.js';
-import { Entity, JobStatus, Project } from '../../index.js';
+import { Entity, JobStatus, Spidergram } from '../../index.js';
 
 type WorkerEventMap = Record<PropertyKey, unknown[]> & {
   progress: [status: JobStatus, item: Entity, message?: string];
@@ -88,13 +88,12 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
   }
 
   async run(task: WorkerQueryTask<T>): Promise<JobStatus> {
-    const prj = await Project.config();
-    const graph = await prj.graph();
+    const sg = await Spidergram.load();
     const ids = await Query.run<string>(this.build());
 
     this.status.total = ids.length;
     for (const id of ids) {
-      const v = await graph.findById<T>(Entity.idFromReference(id));
+      const v = await sg.arango.findById<T>(Entity.idFromReference(id));
       if (v === undefined) {
         this.status.failed++;
       } else {
