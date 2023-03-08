@@ -1,6 +1,7 @@
 import { SgCommand, CLI } from '../../index.js';
 import { CliUx } from '@oclif/core';
 import chalk from 'chalk';
+import { Spidergram } from '../../../config/spidergram.js';
 
 export default class ProjectInfo extends SgCommand {
   static description = 'Settings and stats for the current project';
@@ -11,13 +12,12 @@ export default class ProjectInfo extends SgCommand {
 
   async run() {
     const { project } = await this.getProjectContext();
-    if (project.configFile !== undefined) {
-      this.log(`${chalk.bold('Project:')} ${project.configFile}`);
-      this.log(`${chalk.bold('Config file:')} ${project.configFile}`);
-      this.log(`${chalk.bold('Settings:')}`);
-      CliUx.ux.styledJSON(project.config);
-    } else {
-      this.log('No project configuration file could be found.');
+
+    this.log(`${chalk.bold('Config file:')} ${ Spidergram.status.configFile ?? '<none>' }`);
+    this.log(`${chalk.bold('Arango DB:')} ${ Spidergram.status.arango ? project.arango.db.name : '<none>' }`);
+    if (Spidergram.status.configFile) {
+      this.log(`${chalk.bold('Custom settings:')}`); 
+      CliUx.ux.styledJSON(project.rawConfig);
     }
   }
 }
