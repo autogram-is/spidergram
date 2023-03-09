@@ -1,4 +1,4 @@
-import { JobStatus } from '../services';
+import { JobStatus } from '../services/index.js';
 
 export interface SpiderStatus extends JobStatus {
   /**

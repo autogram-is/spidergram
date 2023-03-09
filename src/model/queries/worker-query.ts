@@ -92,6 +92,8 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
     const ids = await Query.run<string>(this.build());
 
     this.status.total = ids.length;
+    this.status.startTime = Date.now();
+
     for (const id of ids) {
       const v = await sg.arango.findById<T>(Entity.idFromReference(id));
       if (v === undefined) {
@@ -101,6 +103,7 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
       }
     }
 
+    this.status.finishTime = Date.now();
     this.events.emit('end', this.status);
     return Promise.resolve(this.status);
   }
@@ -130,7 +133,7 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
     } else {
       this.status.failed++;
     }
-    const elapsed = this.status.finishTime - this.status.startTime;
+    const elapsed = (this.status.finishTime ?? Date.now()) - this.status.startTime;
     this.status.elapsed = elapsed;
     this.status.average = elapsed / this.status.total;
   }
