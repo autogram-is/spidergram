@@ -13,6 +13,7 @@ export abstract class GenericFile {
    * the class can read and parse.
    */
   public static readonly mimeTypes: string[] = [];
+  public static readonly extensions: string[] = [];
 
   protected fileData?: Buffer;
   protected filePath?: string;
@@ -47,6 +48,10 @@ export abstract class GenericFile {
         reject(`No file data or path`);
       }
     });
+  }
+
+  async getBuffer(): Promise<Buffer> {
+    return this.load();
   }
 
   async getMetadata(): Promise<Record<string, unknown>> {

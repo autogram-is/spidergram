@@ -13,6 +13,9 @@ export class DocX extends GenericFile {
   public static mimeTypes = [
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   ];
+  public static extensions = [
+    'docx',
+  ];
 
   async getContent(): Promise<{ html?: string; text?: string }> {
     const buffer = await this.load();
