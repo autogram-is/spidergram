@@ -1,11 +1,17 @@
 # Spidergram Changelog
 
-## v0.9.0 (23-03-08)
+## v0.9.1 - 23-03-09
+
+- `Entity.get('property.path')` fallback value types should be `unknown`, not `undefined`.
+- `WorkerQuery` wasn't updating the start/finish times in its status property.
+
+## v0.9.0 - 23-03-08
 
 This release is dedicated to teen crime-fighter Gwen Stacy of Earth-65. She juggles high school, her band, and wisecracking web-slinging until her boyfriend Peter Parker becomes infatuated with Spider-Woman. Unable to reveal her secret identity, Spider-Woman is blamed for Peter's tragic lizard-themed death on prom night… and Gwen goes on the run.
 
 - Major Changes
   - **`Vertice` and `Edge` have been renamed** to `Entity` and `Relationship` to avoid confusion with ArangoDB graph traversal and storage concepts. With the arrival of the `Dataset` and `KeyValueStore` classes (see below), we also needed the clarity when dealing with full-fledged Entities vs random datatypes.
+  - **HtmlTools.getPageContent() and .getPageData()** are both async, allowing them to use some of the aync parsing and extraction tools in our toolbox. If your extracted data and content suddenly appear empty, make sure you're **awaiting** the results of these two calls in your handlers and scripts.
   - **Improved report/query helpers**. The `GraphWorker` and `VerticeQuery` — both of which relied on raw snippets of AQL for filtering — have been replaced by a new query-builder system. A unified `Query` class can take a query definition in JSON format, or construct one piecemeal using fluent methods like `filterBy()` and `sort()`. A related `EntityQuery` class returns pre-instantiated Entity instances to eliminate boilerplate code, and a `WorkerQuery` class executes a worker function against each query result while emitting progress events for easy monitoring.
   - **`Project` class replaced by `Spidergram` class**, as part of the configuration management overhaul mentioned below. In most code, changing `const project = await Project.config();` to `const spidergram = await Spidergram.load();` and `const db = await project.graph();` to `const db = spidergram.arango;` should be sufficient.
 - New Additions
