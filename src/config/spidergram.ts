@@ -74,19 +74,8 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     await this.loadConfigFile(filePath);
 
     // Shared Arango connection. In the future we may instantiate custom Entities, build
-    // indexes, and so on here. We swallow the error when we're not in debug mode, as
-    // there are actually a number of instances where doing some setup before Arango exists
-    // can be useful.
-    try {
-      await ArangoStore.open(
-        this.config.arango?.databaseName,
-        this.config.arango,
-      ).then(ast => this.setArangoStore(ast));
-    } catch(err: unknown) {
-      if (this.config.debug && err instanceof Error) {
-        throw err;
-      }
-    }
+    // indexes, and so on here.
+    await this.attemptArangoConnection(true);
 
     // Centralized logging; also pipes logs to stderr unless logLevel is FALSE.
     this.setLogger(
@@ -237,6 +226,27 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
 
   setArangoStore(input: ArangoStore) {
     this._arango = input;
+  }
+
+  async attemptArangoConnection(silent = false): Promise<Error | ArangoStore>{
+    if (this._arango === undefined)  {
+      try {
+        await ArangoStore.open(
+          this.config.arango?.databaseName,
+          this.config.arango,
+        ).then(ast => this.setArangoStore(ast));
+      } catch(err: unknown) {
+        if (err instanceof Error) {
+          if (!silent || this.config.debug) throw err;
+          return Promise.resolve(err);
+        }
+      }
+    }
+    return Promise.resolve(this.arango);
+  }
+
+  get hasArangoConnection() {
+    return this._arango !== undefined;
   }
 
   get arango() {
