@@ -28,7 +28,6 @@ export default class GetSitemap extends SgCommand {
   static strict = false;
 
   async run() {
-    await this.getProjectContext();
     const { argv: urls, flags } = await this.parse(GetSitemap);
 
     if (flags.verbose) {

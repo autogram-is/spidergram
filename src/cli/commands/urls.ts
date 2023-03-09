@@ -1,6 +1,7 @@
 import { Flags } from '@oclif/core';
 import { NormalizedUrlSet } from '@autogram/url-tools';
 import {
+  Spidergram,
   CLI,
   Query,
   SgCommand,
@@ -127,7 +128,7 @@ export default class Urls extends SgCommand {
 
   async run() {
     const { args, flags } = await this.parse(Urls);
-    const { project, graph } = await this.getProjectContext();
+    const sg = await Spidergram.load();
 
     let rawUrls: string[] = [];
     let filteredUrls: string[] = [];
@@ -148,7 +149,7 @@ export default class Urls extends SgCommand {
         .catch(() => this.error(`File ${args.input} couldn't be opened`));
       rawUrls = urlFile.match(URL_WITH_COMMAS_REGEX) || [];
     } else {
-      const collection = graph.collection(args.input);
+      const collection = sg.arango.collection(args.input);
       if ((await collection.exists()) === false) {
         this.error(`Collection ${args.input} doesn't exist`);
       }
@@ -269,8 +270,8 @@ export default class Urls extends SgCommand {
         }
         output.push(summaryLines.join('\n'));
       } else {
-        this.log(project.cli.header('URL Summary'));
-        this.log(project.cli.infoList(summary));
+        this.log(sg.cli.header('URL Summary'));
+        this.log(sg.cli.infoList(summary));
       }
     }
 

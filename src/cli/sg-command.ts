@@ -1,5 +1,4 @@
-import { ArangoStore, CLI, JobStatus } from '../index.js';
-import { Spidergram } from '../config/spidergram.js';
+import { CLI, JobStatus } from '../index.js';
 import { CliUx, Command } from '@oclif/core';
 import is from '@sindresorhus/is';
 
@@ -84,48 +83,5 @@ export abstract class SgCommand extends Command {
       );
       this.progress.start(total, 0);
     }
-  }
-
-
-  /**
-   * Loads instances of the {Project} and {ArangoStore} classes for
-   * the current project; if the current command exposes a `context`
-   * flag to override the default settings, this function will respect
-   * the custom context.
-   *
-   * By default, this function throws an error if the Arango server
-   * can't be reached, or tthe Project configuration data is malformed.
-   * If the `returnErrors` parameter is true, it will instead return
-   * an array of errors that can be checked and optionally displayed
-   * to the user when graceful recovery is possible.
-   *
-   * This makes it easier to create functions that use the Project and
-   * graph context *if they exist* but continue without them if they
-   * can't be loaded.
-   */
-  async getProjectContext(returnErrors = false) {
-    const errors: Error[] = [];
-    let project = {} as Spidergram;
-    let graph = {} as unknown as ArangoStore;
-
-    try {
-      const { flags } = await this.parse(this.constructor as typeof SgCommand);
-      project = await Spidergram.load(flags.config);
-      graph = project.arango;
-    } catch (error: unknown) {
-      if (is.error(error)) {
-        errors.push(error);
-
-        if (errors.length > 0 && !returnErrors) {
-          for (const error of errors) this.ux.error(error);
-        }
-      }
-    }
-
-    return {
-      project,
-      graph,
-      errors,
-    };
   }
 }

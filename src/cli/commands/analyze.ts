@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { Resource, HtmlTools, WorkerQuery, OutputLevel } from '../../index.js';
+import { Spidergram, Resource, HtmlTools, WorkerQuery, OutputLevel } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
 
 export default class Analyze extends SgCommand {
@@ -16,13 +16,7 @@ export default class Analyze extends SgCommand {
 
   async run() {
     const { flags } = await this.parse(Analyze);
-    const { project, graph, errors } = await this.getProjectContext();
-
-    if (errors.length > 0) {
-      for (const error of errors) {
-        if (is.error(error)) this.ux.error(error);
-      }
-    }
+    const sg = await Spidergram.load();
 
     if (flags.verbose) {
       this.output = OutputLevel.verbose;
@@ -53,11 +47,11 @@ export default class Analyze extends SgCommand {
           resource.content = content;
         }
 
-        await graph.push(resource);
+        await sg.arango.push(resource);
       }
     });
 
     this.stopProgress();
-    project.cli.summarizeStatus(worker.status);
+    sg.cli.summarizeStatus(worker.status);
   }
 }

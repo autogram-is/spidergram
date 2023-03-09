@@ -1,4 +1,4 @@
-import { CLI, SgCommand } from '../../../index.js';
+import { Spidergram, CLI, SgCommand } from '../../../index.js';
 export default class Compact extends SgCommand {
   static description = 'Compact existing data';
 
@@ -20,13 +20,13 @@ export default class Compact extends SgCommand {
 
   async run() {
     const { argv } = await this.parse(Compact);
-    const { graph } = await this.getProjectContext();
+    const sg = await Spidergram.load();
 
     const compactAll = argv.length === 0;
     const results: Record<string, [number, number]> = {};
-    for (const c of await graph.db.listCollections()) {
+    for (const c of await sg.arango.db.listCollections()) {
       if (compactAll || argv.includes(c.name.toLocaleLowerCase())) {
-        const collection = graph.db.collection(c.name);
+        const collection = sg.arango.db.collection(c.name);
         const before = await collection.figures();
         await collection.compact();
         const after = await collection.figures();

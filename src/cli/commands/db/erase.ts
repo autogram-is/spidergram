@@ -1,5 +1,5 @@
 import { Flags } from '@oclif/core';
-import { CLI, TextTools, SgCommand } from '../../../index.js';
+import { Spidergram, CLI, TextTools, SgCommand } from '../../../index.js';
 export default class Erase extends SgCommand {
   static description = 'Discard stored crawling data';
 
@@ -31,9 +31,9 @@ export default class Erase extends SgCommand {
 
   async run() {
     const { argv, flags } = await this.parse(Erase);
-    const { graph } = await this.getProjectContext();
+    const sg = await Spidergram.load();
 
-    const dbName = graph.db.name;
+    const dbName = sg.arango.db.name;
     let message = `Empty the collection${
       argv.length > 1 ? 's' : ''
     } ${TextTools.joinOxford(argv)} from ${dbName}?`;
@@ -44,7 +44,7 @@ export default class Erase extends SgCommand {
     const confirmation = flags.force ? true : await CLI.confirm(message);
 
     if (confirmation) {
-      await graph.erase({ eraseAll: true });
+      await sg.arango.erase({ eraseAll: true });
       this.log(`Data erased from ${dbName}.`);
     }
   }

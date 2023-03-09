@@ -1,7 +1,6 @@
 import { Flags } from '@oclif/core';
-import is from '@sindresorhus/is';
 import { LogLevel } from 'crawlee';
-import { Spider, SpiderStatus, EnqueueUrlOptions } from '../../index.js';
+import { Spidergram, Spider, SpiderStatus, EnqueueUrlOptions } from '../../index.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
 
 export default class Crawl extends SgCommand {
@@ -37,14 +36,8 @@ export default class Crawl extends SgCommand {
   static strict = false;
 
   async run() {
-    const { project, graph, errors } = await this.getProjectContext();
+    const sg = await Spidergram.load();
     const { argv: urls, flags } = await this.parse(Crawl);
-
-    if (errors.length > 0) {
-      for (const error of errors) {
-        if (is.error(error)) this.ux.error(error);
-      }
-    }
 
     if (flags.verbose) {
       this.output = OutputLevel.verbose;
@@ -53,11 +46,11 @@ export default class Crawl extends SgCommand {
     if (flags.erase) {
       const confirmation = await CLI.confirm(
         `Erase the ${
-          project.config.arango?.databaseName ?? 'spidergram'
+          sg.config.arango?.databaseName ?? 'spidergram'
         } database before crawling`,
       );
       if (confirmation) {
-        await graph.erase({ eraseAll: true });
+        await sg.arango.erase({ eraseAll: true });
       }
     }
 

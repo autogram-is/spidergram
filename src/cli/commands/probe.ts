@@ -1,5 +1,6 @@
 import { Flags } from '@oclif/core';
 import {
+  Spidergram,
   CLI,
   SgCommand,
   BrowserTools,
@@ -38,7 +39,7 @@ export default class Probe extends SgCommand {
   static strict = false;
 
   async run() {
-    const { graph } = await this.getProjectContext();
+    const sg = await Spidergram.load();
     const { args, flags } = await this.parse(Probe);
 
     const url = new NormalizedUrl(args.url);
@@ -65,7 +66,7 @@ export default class Probe extends SgCommand {
         return r._id
       `)
       ).pop();
-      if (id) res = await graph.findById<Resource>(id);
+      if (id) res = await sg.arango.findById<Resource>(id);
     }
 
     if (res instanceof Resource) {

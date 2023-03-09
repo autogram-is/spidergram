@@ -1,4 +1,4 @@
-import { SgCommand, CLI } from '../../index.js';
+import { Spidergram, SgCommand, CLI } from '../../../index.js';
 import arrify from 'arrify';
 import terminalLink from 'terminal-link';
 
@@ -10,27 +10,27 @@ export default class GraphInfo extends SgCommand {
   };
 
   async run() {
-    const { project, graph } = await this.getProjectContext();
+    const sg = await Spidergram.load();
     const dbUrl = new URL(
-      arrify(project.config.arango?.url)[0] ?? 'http://127.0.0.1:8529',
+      arrify(sg.config.arango?.url)[0] ?? 'http://127.0.0.1:8529',
     );
-    dbUrl.pathname = `_db/${graph.db.name}`;
+    dbUrl.pathname = `_db/${sg.arango.db.name}`;
 
     // This is actually very much not true.
-    const dbStatus = graph.db.isArangoDatabase;
+    const dbStatus = sg.arango.db.isArangoDatabase;
 
     this.ux.styledHeader(
-      `Database: ${terminalLink(graph.db.name, dbUrl.toString())}`,
+      `Database: ${terminalLink(sg.arango.db.name, dbUrl.toString())}`,
     );
     this.ux.styledHeader(`Status: ${dbStatus ? 'online' : 'offline'}`);
 
     if (dbStatus) {
-      await graph.db
+      await sg.arango.db
         .listCollections()
         .then(async metadata => {
           const data: Record<string, unknown>[] = [];
           for (const coll of metadata) {
-            const collection = graph.db.collection(coll.name);
+            const collection = sg.arango.db.collection(coll.name);
             const details = await collection.figures();
             data.push({
               name: coll.name,
