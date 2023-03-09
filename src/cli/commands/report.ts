@@ -7,7 +7,7 @@ import {
   Query,
   isAqlFunction,
   isAqlAggregateFunction,
-  FileTools
+  FileTools,
 } from '../../index.js';
 import { JsonMap, JsonPrimitive } from '@salesforce/ts-types';
 import _ from 'lodash';
@@ -228,13 +228,13 @@ debug: Display the query spec and generated AQL statement without running it
       } else if (flags.output?.toLocaleLowerCase().endsWith('.json')) {
         // If the user provides a *filename* that ends with .json, we'll
         // write it to the global storage directory.
-        sg
-          .files()
-          .write(
-            flags.output,
-            Buffer.from(JSON.stringify(results, undefined, 2)),
-          );
-        this.ux.info(`Wrote file to ${sg.config.storageDirectory}/${flags.output}`);
+        sg.files().write(
+          flags.output,
+          Buffer.from(JSON.stringify(results, undefined, 2)),
+        );
+        this.ux.info(
+          `Wrote file to ${sg.config.storageDirectory}/${flags.output}`,
+        );
       } else if (flags.output?.toLocaleLowerCase().endsWith('.xlsx')) {
         // If the user provides a *filename* that ends with .xlsx, we'll
         // generate a new Spreadsheet with the results in it, and write
@@ -242,7 +242,9 @@ debug: Display the query spec and generated AQL statement without running it
         const s = new FileTools.Spreadsheet();
         s.addSheet(results, 'results');
         sg.files().write(flags.output, Buffer.from(s.toBuffer()));
-        this.ux.info(`Wrote file to ${sg.config.storageDirectory}/${flags.output}`);
+        this.ux.info(
+          `Wrote file to ${sg.config.storageDirectory}/${flags.output}`,
+        );
       } else if (flags.output?.toLocaleLowerCase().endsWith('.csv')) {
         const csvStream = csv.format({ headers: true });
         sg.files().writeStream(flags.output, csvStream);
@@ -250,7 +252,9 @@ debug: Display the query spec and generated AQL statement without running it
           csvStream.write(row);
         }
         csvStream.end();
-        this.ux.info(`Wrote file to ${sg.config.storageDirectory}/${flags.output}`);
+        this.ux.info(
+          `Wrote file to ${sg.config.storageDirectory}/${flags.output}`,
+        );
       } else if (flags.output === undefined) {
         // If there's no output flag specified, it's time to party.
         // 1. If it's an array of primitives (strings, numbers, etc), print the list.
@@ -264,10 +268,10 @@ debug: Display the query spec and generated AQL statement without running it
       } else {
         // A weird fallback case in which someone specifies an arbitrary output string
         // we don't explicitly handle. Just assume it's a filename and let it rip.
-        sg
-          .files()
-          .write(flags.output, Buffer.from(JSON.stringify(results)));
-        this.ux.info(`Wrote file to ${sg.config.storageDirectory}/${flags.output}`);
+        sg.files().write(flags.output, Buffer.from(JSON.stringify(results)));
+        this.ux.info(
+          `Wrote file to ${sg.config.storageDirectory}/${flags.output}`,
+        );
       }
     }
   }

@@ -1,6 +1,11 @@
 import { Flags } from '@oclif/core';
 import { LogLevel } from 'crawlee';
-import { Spidergram, Spider, SpiderStatus, EnqueueUrlOptions } from '../../index.js';
+import {
+  Spidergram,
+  Spider,
+  SpiderStatus,
+  EnqueueUrlOptions,
+} from '../../index.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
 
 export default class Crawl extends SgCommand {

@@ -1,4 +1,4 @@
-import { chalk, joinOxford } from "./format.js";
+import { chalk, joinOxford } from './format.js';
 
 type InfoListOptions = {
   title?: string;
@@ -34,4 +34,3 @@ export function infoList(
 
   return lines.join('\n');
 }
-

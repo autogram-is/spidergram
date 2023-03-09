@@ -162,11 +162,11 @@ export interface SpidergramConfig extends Record<string, unknown> {
   /**
    * A class implementing the ConsoleTheme interface; this provides assorted
    * formatting and interaction helpers that Spidergram uses when displaying
-   * information or controlling flow on the CLI. Making it pluggable here is 
+   * information or controlling flow on the CLI. Making it pluggable here is
    * a bit of overkill, but lets us swap interesting stuff in and out without
    * rewriting all of our scripts.
    */
-  cli?: SpiderCli
+  cli?: SpiderCli;
 
   /**
    * A custom setup function to be run after Spidergram has been initialized

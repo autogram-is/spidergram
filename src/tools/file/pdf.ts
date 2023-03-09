@@ -14,9 +14,7 @@ export class Pdf extends GenericFile {
   // Application/pdf is the "correct" one but some legacy applications
   // that predate RFC 3778 still use x-pdf. Viva la internet.
   public static mimeTypes = ['application/pdf', 'application/x-pdf'];
-  public static extensions = [
-    'pdf',
-  ];
+  public static extensions = ['pdf'];
 
   async getAll(): Promise<PdfResults> {
     const buffer = await this.load();

@@ -1,11 +1,14 @@
-import { JobStatus } from "../../services/index.js";
-import { Duration } from "luxon";
+import { JobStatus } from '../../services/index.js';
+import { Duration } from 'luxon';
 
 /**
  * Given a {JobStatus} object, print a summary of what work was perfomed,
  * how long the operation took, and whether any errors were encountered.
  */
-export function summarizeStatus(status: JobStatus, listFailures = true): string {
+export function summarizeStatus(
+  status: JobStatus,
+  listFailures = true,
+): string {
   const lines: string[] = [];
   const { finished, failed, total, startTime, finishTime } = status;
   const elapsed = Duration.fromMillis(finishTime - startTime)
@@ -17,9 +20,7 @@ export function summarizeStatus(status: JobStatus, listFailures = true): string 
       `${finished.toLocaleString()} of ${total.toLocaleString()} items processed in ${elapsed}`,
     );
   } else {
-    lines.push(
-      `${finished.toLocaleString()} items processed in ${elapsed}`,
-    );
+    lines.push(`${finished.toLocaleString()} items processed in ${elapsed}`);
   }
 
   if (listFailures && failed > 0) {

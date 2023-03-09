@@ -1,5 +1,11 @@
 import is from '@sindresorhus/is';
-import { Spidergram, Resource, HtmlTools, WorkerQuery, OutputLevel } from '../../index.js';
+import {
+  Spidergram,
+  Resource,
+  HtmlTools,
+  WorkerQuery,
+  OutputLevel,
+} from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
 
 export default class Analyze extends SgCommand {

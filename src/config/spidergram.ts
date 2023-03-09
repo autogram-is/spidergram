@@ -37,7 +37,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
       loaded: !Spidergram._instance?._needsLoad,
       configFile: Spidergram._instance?.configFile,
       arango: Spidergram._instance?._arango !== undefined,
-    }
+    };
   }
 
   static get defaults(): SpidergramConfig {
@@ -53,13 +53,11 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
   ) {
     if (Spidergram._instance === undefined) {
       return new Spidergram<T>().init(filePath);
-
     } else if (reset) {
       return Spidergram._instance.init(filePath);
-      
     } else {
       if (Spidergram._instance._initializing) {
-        while(Spidergram._instance._initializing) {
+        while (Spidergram._instance._initializing) {
           // Sometimes, our promises can collide and an incompletely initialized
           // instance can be requested. This pauses for a relatively teeny 50ms.,
           // which is generally plenty of time for the initialization process to
@@ -83,9 +81,11 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     ).then(ast => this.setArangoStore(ast));
 
     // Centralized logging; also pipes logs to stderr unless logLevel is FALSE.
-    this.setLogger(new Logger({
-      defaultLevel: this.config.logLevel ? this.config.logLevel : undefined,
-    }));
+    this.setLogger(
+      new Logger({
+        defaultLevel: this.config.logLevel ? this.config.logLevel : undefined,
+      }),
+    );
 
     // Set up file storage defaults
     if (this.config.typefs) {

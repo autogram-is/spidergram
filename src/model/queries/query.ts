@@ -14,8 +14,7 @@ export class Query extends AqBuilder {
     const aql = isGeneratedAqlQuery(query) ? query : AqBuilder.build(query);
     return Spidergram.load()
       .then(sg => sg.arango.db)
-      .then(db => db.query<T>(aql, options)
-      .then(cursor => cursor.all()))
+      .then(db => db.query<T>(aql, options).then(cursor => cursor.all()));
   }
 
   async run<T = AnyJson>(options: QueryOptions = {}) {

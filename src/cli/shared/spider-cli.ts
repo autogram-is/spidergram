@@ -1,14 +1,14 @@
-import { JobStatus } from "../../index.js";
-import { progress  } from "./progress.js";
-import * as prompts from "./prompts.js"
-import terminalLink from "terminal-link";
-import { CliUx } from "@oclif/core";
+import { JobStatus } from '../../index.js';
+import { progress } from './progress.js';
+import * as prompts from './prompts.js';
+import terminalLink from 'terminal-link';
+import { CliUx } from '@oclif/core';
 import { chalk, joinOxford } from './format.js';
-import { infoList } from "./info-list.js";
-import { summarizeStatus } from "./summarize-status.js";
+import { infoList } from './info-list.js';
+import { summarizeStatus } from './summarize-status.js';
 
 /**
- * This class is a rat's nest of helper utilities at the moment; 
+ * This class is a rat's nest of helper utilities at the moment;
  * half of its utilities are wrappers around CliUx, others are overrides,
  * others are custom stuff we're using.
  */
@@ -18,7 +18,7 @@ export class SpiderCli {
   header(input: string) {
     return '\n' + chalk.bold(input.toLocaleUpperCase());
   }
-  
+
   url(input: string | URL, label?: string) {
     return terminalLink(label ?? input.toString(), input.toString());
   }
@@ -29,7 +29,7 @@ export class SpiderCli {
 
   joinOxford = joinOxford;
   infoList = infoList;
-  summarizeStatus = summarizeStatus
+  summarizeStatus = summarizeStatus;
 
   /**
    * Render an 'activity' indicator of some kind (a spinner, etc) followed by
@@ -52,7 +52,7 @@ export class SpiderCli {
       clearOnComplete: false,
       format: `\u001b[90m{bar}\u001b[0m {percentage}% | ETA: {eta}s | {value}/{total}`,
       barCompleteChar: '\u2588',
-      barIncompleteChar: '\u2591'
+      barIncompleteChar: '\u2591',
     });
   }
 
@@ -92,7 +92,7 @@ export class SpiderCli {
 
   /**
    * Pause execution and display a confirmation prompt before proceeding.
-   * 
+   *
    * If the `timeout` parameter is set, the prompt will automatically dismiss
    * itself after the specified number of miliseconds, using the `initial` parameter
    * as its final answer.

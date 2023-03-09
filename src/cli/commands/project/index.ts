@@ -13,10 +13,18 @@ export default class ProjectInfo extends SgCommand {
   async run() {
     const sg = await Spidergram.load();
 
-    this.log(`${chalk.bold('Config file:')} ${ Spidergram.status.configFile ?? '<none>' }`);
-    this.log(`${chalk.bold('Arango DB:')} ${ Spidergram.status.arango ? sg.arango.db.name : '<none>' }`);
+    this.log(
+      `${chalk.bold('Config file:')} ${
+        Spidergram.status.configFile ?? '<none>'
+      }`,
+    );
+    this.log(
+      `${chalk.bold('Arango DB:')} ${
+        Spidergram.status.arango ? sg.arango.db.name : '<none>'
+      }`,
+    );
     if (Spidergram.status.configFile) {
-      this.log(`${chalk.bold('Custom settings:')}`); 
+      this.log(`${chalk.bold('Custom settings:')}`);
       CliUx.ux.styledJSON(sg.rawConfig);
     }
   }

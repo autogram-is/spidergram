@@ -40,7 +40,7 @@ export async function timedPrompt<T extends Answers>(
 
 /**
  * Simplified prompt for single-question confirmation.
- * 
+ *
  * If the `timeout` parameter is set, the prompt will automatically dismiss
  * itself after the specified number of miliseconds, using the `initial` parameter
  * as its final answer.
@@ -48,15 +48,16 @@ export async function timedPrompt<T extends Answers>(
 export async function confirm(
   message: string,
   initial = true,
-  timeout?: number | undefined
+  timeout?: number | undefined,
 ): Promise<boolean> {
   if (timeout === undefined) {
-    return prompt<{ confirmed: boolean }>(
-      [{ name: 'confirmed', message, default: initial, type: 'confirm' }],
-    ).then(result => result.confirmed);
+    return prompt<{ confirmed: boolean }>([
+      { name: 'confirmed', message, default: initial, type: 'confirm' },
+    ]).then(result => result.confirmed);
   } else {
     return timedPrompt<{ confirmed: boolean }>(
-      [{ name: 'confirmed', message, type: 'confirm' }], timeout,
+      [{ name: 'confirmed', message, type: 'confirm' }],
+      timeout,
     ).then(result => result.confirmed);
   }
 }
