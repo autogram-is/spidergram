@@ -10,6 +10,8 @@ import {
   PageDataOptions,
 } from '../tools/html/index.js';
 
+import { PageTechnologyExtractor, PageTechnologyOptions } from '../tools/browser/index.js';
+
 import { Configuration as FileConfiguration } from 'typefs';
 import { Config as ArangoConfig } from 'arangojs/connection';
 import { LoggerOptions } from 'caterpillar';
@@ -122,22 +124,38 @@ export interface SpidergramConfig extends Record<string, unknown> {
   htmlToText?: HtmlToTextOptions;
 
   /**
-   * Extraction options for core content on crawled pages.
-   *
-   * An options object, or a custom async {@link PageContentExtractor|Extractor} function,
-   * can be provided here. Note that the options object contains an `htmlToText` property,
-   * which can be used to conditionally override global `htmlToText` defaults.
+   * Extraction options for structured metadata on crawled pages.
    */
-  pageContent?: PageContentOptions | PageContentExtractor;
+  pageContent?: PageContentOptions;
+
+  /**
+   * An async {@link PageContentExtractor|Extractor} function to be used as an override
+   * for the default content extractor.
+   */
+  getPageContent?: PageContentExtractor
 
   /**
    * Extraction options for structured metadata on crawled pages.
-   *
-   * An options object, or a custom async {@link PageDataExtractor|Extractor} function,
-   * can be provided here.
    */
-  pageData?: PageDataOptions | PageDataExtractor;
+  pageData?: PageDataOptions;
 
+  /**
+  * An async {@link PageDataExtractor|Extractor} function to be used as an override
+  * for the default page extractor.
+  */
+  getPageData?: PageDataExtractor
+
+  /**
+   * Extraction options for structured metadata on crawled pages.
+   */
+  pageTechnologies?: PageTechnologyOptions;
+
+  /**
+    * An async {@link PageTechnologyExtractor|Extractor} function to be used as an override
+    * for the default technology fingerprinting function.
+    */
+  getPageTechnologies?: PageTechnologyExtractor
+  
   /**
    * A key/value collection of pre-written queries that can be used
    * elsewhere in Spidergram. Values can be {@link AqQuery|AqQuery} JSON objects,

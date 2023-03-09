@@ -16,7 +16,6 @@ export { Transform, Exclude, Expose } from 'class-transformer';
 export type Reference<T extends Entity = Entity> = T | [string, Uuid] | string;
 
 export interface SavedFile extends Record<string, unknown> {
-  bucket?: string;
   path: string;
 }
 

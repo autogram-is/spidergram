@@ -15,9 +15,10 @@ import {
   EnqueueUrlOptions,
   SpiderOptions,
 } from '../spider/index.js';
-import { PageContentOptions } from '../tools/html/get-page-content.js';
-import { PageDataOptions } from '../tools/html/get-page-data.js';
+import { PageDataOptions, PageContentOptions } from '../tools/html/index.js';
+import { PageTechnologyOptions } from '../tools/browser/index.js';
 import { readPackageUpSync } from 'read-pkg-up';
+import { AqQuery } from 'aql-builder';
 
 export const urlNormalizerDefaults: NormalizerOptions = {
   forceProtocol: 'https:',
@@ -32,7 +33,7 @@ export const urlNormalizerDefaults: NormalizerOptions = {
 };
 
 export const urlDiscoveryDefaults: EnqueueUrlOptions = {
-  limit: Number.POSITIVE_INFINITY,
+  limit: 1_000_000,
   selector: 'body a',
   save: UrlMatchStrategy.All,
   enqueue: UrlMatchStrategy.SameDomain,
@@ -71,12 +72,30 @@ export const pageDataDefaults: PageDataOptions = {
   templates: false,
 };
 
+export const pageTechnologyDefaults: PageTechnologyOptions = {
+  forceReload: false,
+  ignoreCache: false,
+  technologiesUrl: 'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/technologies',
+  categoriesUrl: 'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/categories.json',
+  technologies: {},
+  categories: {}
+};
+
 export const pageContentDefaults: PageContentOptions = {
   readability: true,
   allowMultipleContentElements: false,
   defaultToFullDocument: true,
   trim: true,
 };
+
+export const defaultQueries: Record<string, AqQuery> = {
+  errorPages: { 
+    collection: 'resources',
+    filters: [{ name: 'code', eq: 200, negate: true }],
+    aggregates: [['site', 'parsed.hostname'], 'mime', 'code'],
+    count: 'pages'
+  }
+}
 
 export const spidergramDefaults: SpidergramConfig = {
   debug: false,
@@ -86,9 +105,10 @@ export const spidergramDefaults: SpidergramConfig = {
   crawlee: {},
   spider: spiderDefaults,
   htmlToText: {},
-  queries: {},
+  queries: defaultQueries,
   reports: {},
   pageData: pageDataDefaults,
   pageContent: pageContentDefaults,
+  pageTechnologies: pageTechnologyDefaults,
   urlNormalizer: urlNormalizerDefaults,
 };
