@@ -16,7 +16,7 @@ export default class Analyze extends SgCommand {
 
   async run() {
     const { flags } = await this.parse(Analyze);
-    const { graph, errors } = await this.getProjectContext();
+    const { project, graph, errors } = await this.getProjectContext();
 
     if (errors.length > 0) {
       for (const error of errors) {
@@ -58,6 +58,6 @@ export default class Analyze extends SgCommand {
     });
 
     this.stopProgress();
-    this.summarizeStatus(worker.status);
+    project.cli.summarizeStatus(worker.status);
   }
 }

@@ -18,6 +18,7 @@ import { ArangoStore } from '../index.js';
 import { globalNormalizer } from './global-normalizer.js';
 import { SpidergramConfig } from './spidergram-config.js';
 import { setTimeout } from 'timers/promises';
+import { SpiderCli } from '../cli/shared/index.js';
 
 export class SpidergramError extends Error {}
 
@@ -128,6 +129,9 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
       );
     }
 
+    // CLI Utilities
+    this._cli = this._loadedConfig?.value.cli ?? new SpiderCli();
+
     // Give config scripts a chance to modify things
     if (this._loadedConfig?.value.finalize) {
       await this._loadedConfig?.value.finalize(this);
@@ -189,13 +193,14 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
   protected _needsInit = true;
   protected _initializing = false;
   protected _needsLoad = true;
-  protected _loadedConfig: Config<T> | undefined;
+  protected _loadedConfig?: Config<T>;
   protected _activeConfig: T;
 
-  protected _logger: Logger | undefined;
-  protected _arango: ArangoStore | undefined;
-  protected _crawleeConfig: CrawleeConfig | undefined;
-  protected _normalizer: UrlMutators.UrlMutator | undefined;
+  protected _logger?: Logger;
+  protected _arango?: ArangoStore;
+  protected _crawleeConfig?: CrawleeConfig;
+  protected _normalizer?: UrlMutators.UrlMutator;
+  protected _cli?: SpiderCli;
 
   protected constructor() {
     Spidergram._instance = this;
@@ -236,6 +241,11 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
 
   get files() {
     return FileStore.disk.bind(FileStore);
+  }
+
+  get cli() {
+    this._cli ??= new SpiderCli();
+    return this._cli;
   }
 
   setLogger(input: Logger) {

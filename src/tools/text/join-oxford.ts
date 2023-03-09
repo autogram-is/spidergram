@@ -1,4 +1,4 @@
-export function joinOxford(input: string[], conjunction = 'and'): string {
+export function joinOxford(input: unknown[], conjunction = 'and'): string {
   if (input.length === 2) {
     return input.join(` ${conjunction} `);
   } else if (input.length > 2) {
