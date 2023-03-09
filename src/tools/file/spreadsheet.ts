@@ -23,11 +23,11 @@ export type StructuredSheet = {
   skipHeader?: boolean;
 };
 
-function isSimpleSheet(input: unknown): input is SimpleSheet {
+export function isSimpleSheet(input: unknown): input is SimpleSheet {
   return isJsonArray(toAnyJson(input));
 }
 
-function isStructuredSheet(input: unknown): input is StructuredSheet {
+export function isStructuredSheet(input: unknown): input is StructuredSheet {
   if (!isAnyJson(input)) return false;
   if (!isJsonMap(input)) return false;
   return isSimpleSheet(input.data);
