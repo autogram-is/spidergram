@@ -2,7 +2,7 @@
 
 ## v0.9.0 (23-03-08)
 
-This release is dedicated to Gwen Stacy of Earth-6160, aka Spider-Gwen.
+This release is dedicated to teen crime-fighter Gwen Stacy of Earth-65. She juggles high school, her band, and wisecracking web-slinging until her boyfriend Peter Parker becomes infatuated with Spider-Woman. Unable to reveal her secret identity, Spider-Woman is blamed for Peter's tragic lizard-themed death on prom night… and Gwen goes on the run.
 
 - Major Changes
   - **`Vertice` and `Edge` have been renamed** to `Entity` and `Relationship` to avoid confusion with ArangoDB graph traversal and storage concepts. With the arrival of the `Dataset` and `KeyValueStore` classes (see below), we also needed the clarity when dealing with full-fledged Entities vs random datatypes.
