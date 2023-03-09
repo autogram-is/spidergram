@@ -94,7 +94,7 @@ export default class Crawl extends SgCommand {
     });
   }
 
-  override summarizeStatus(stats: SpiderStatus) {
+  summarizeStatus(stats: SpiderStatus) {
     this.log();
     this.ux.styledJSON(stats);
     this.ux.styledHeader('Crawl complete.');

@@ -127,7 +127,7 @@ export default class Urls extends SgCommand {
 
   async run() {
     const { args, flags } = await this.parse(Urls);
-    const { graph } = await this.getProjectContext();
+    const { project, graph } = await this.getProjectContext();
 
     let rawUrls: string[] = [];
     let filteredUrls: string[] = [];
@@ -269,8 +269,8 @@ export default class Urls extends SgCommand {
         }
         output.push(summaryLines.join('\n'));
       } else {
-        this.ux.styledHeader('URL Summary');
-        this.infoList(summary);
+        this.log(project.cli.header('URL Summary'));
+        this.log(project.cli.infoList(summary));
       }
     }
 

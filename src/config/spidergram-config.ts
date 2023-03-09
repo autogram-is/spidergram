@@ -19,6 +19,7 @@ import {
   Configuration as CrawleeConfig,
   ConfigurationOptions as CrawleeConfigOptions,
 } from 'crawlee';
+import { SpiderCli } from '../cli/shared/index.js';
 
 /**
  * Global configuration settings for Spidergram and its key components. Many of these
@@ -157,6 +158,15 @@ export interface SpidergramConfig extends Record<string, unknown> {
     string,
     Record<string, string | AqQuery | GeneratedAqlQuery | Query>
   >;
+
+  /**
+   * A class implementing the ConsoleTheme interface; this provides assorted
+   * formatting and interaction helpers that Spidergram uses when displaying
+   * information or controlling flow on the CLI. Making it pluggable here is 
+   * a bit of overkill, but lets us swap interesting stuff in and out without
+   * rewriting all of our scripts.
+   */
+  cli?: SpiderCli
 
   /**
    * A custom setup function to be run after Spidergram has been initialized

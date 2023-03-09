@@ -1,5 +1,4 @@
 import { default as inquirer, Answers, QuestionCollection } from 'inquirer';
-import { CliUx } from '@oclif/core';
 export * from 'inquirer';
 
 /**
@@ -29,7 +28,6 @@ export async function timedPrompt<T extends Answers>(
       // @ts-expect-error
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       thePrompt.ui['activePrompt'].done();
-      CliUx.ux.log();
       reject(new Error(`Timed out after ${ms} ms.`));
     }, ms).unref();
   });
@@ -41,16 +39,24 @@ export async function timedPrompt<T extends Answers>(
 }
 
 /**
- * Simplified prompt for single-question confirmation. Times out and throws after 10s
- *
- * @param message text to display.  Do not include a question mark.
- * @param ms milliseconds to wait for user input.  Defaults to 10s.
- * @return true if the user confirms, false if they do not.
+ * Simplified prompt for single-question confirmation.
+ * 
+ * If the `timeout` parameter is set, the prompt will automatically dismiss
+ * itself after the specified number of miliseconds, using the `initial` parameter
+ * as its final answer.
  */
-export async function confirm(message: string, ms = 20_000): Promise<boolean> {
-  const { confirmed } = await timedPrompt<{ confirmed: boolean }>(
-    [{ name: 'confirmed', message, type: 'confirm' }],
-    ms,
-  );
-  return confirmed;
+export async function confirm(
+  message: string,
+  initial = true,
+  timeout?: number | undefined
+): Promise<boolean> {
+  if (timeout === undefined) {
+    return prompt<{ confirmed: boolean }>(
+      [{ name: 'confirmed', message, default: initial, type: 'confirm' }],
+    ).then(result => result.confirmed);
+  } else {
+    return timedPrompt<{ confirmed: boolean }>(
+      [{ name: 'confirmed', message, type: 'confirm' }], timeout,
+    ).then(result => result.confirmed);
+  }
 }

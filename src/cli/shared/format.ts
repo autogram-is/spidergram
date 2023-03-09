@@ -1,7 +1,6 @@
 import { Chalk } from 'chalk';
 
 export const chalk = new Chalk();
-
 export const Colors = {
   error: chalk.bold.red,
   warning: chalk.bold.yellow,
@@ -9,3 +8,5 @@ export const Colors = {
   success: chalk.bold.green,
   highlight: chalk.bold.bgYellow,
 };
+
+export { joinOxford } from '../../tools/text/join-oxford.js';
