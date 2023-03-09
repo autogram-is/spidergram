@@ -141,7 +141,7 @@
     "@oclif/core": "^1.19.1",
     "arangojs": "^8.1.0",
     "cheerio": "^1.0.0-rc.12",
-    "crawlee": "^3.1.0",
+    "crawlee": "^3.2.0",
     "googleapis": "^108.0.1",
     "html-to-text": "^9.0.0",
     "playwright": "^1.27.1",
