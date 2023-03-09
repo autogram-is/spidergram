@@ -1,6 +1,6 @@
 # Spidergram Changelog
 
-## v0.9.0-dev (in progress)
+## v0.9.0 (23-03-08)
 
 This release is dedicated to Gwen Stacy of Earth-6160, aka Spider-Gwen.
 
@@ -14,6 +14,7 @@ This release is dedicated to Gwen Stacy of Earth-6160, aka Spider-Gwen.
   - **PDF and DocX parsing** via `FileTools.Pdf` and `FileTools.Document`, based on the [pdf-parse](https://gitlab.com/autokent/pdf-parse) and [mammoth](https://github.com/mwilliamson/mammoth.js) projects. Those two formats are a first trial run for more generic parsing/handling of arbitrary formats; both can return filetype-specific metadata, and plaintext versions of file contents. For consistency, the Spreadsheet class has also been moved to `FileTools.Spreadsheet`.
   - **Site technology detection** via `BrowserTools.Fingerprint`. Fingerprinting is currently based on the [Wappalyzer](https://www.wappalyzer.com) project and uses markup, script, and header patterns to identify the technologies and platforms used to build/host a page.
   - **CLI improvements**. The new `spidergram report` command can pull up filtered, aggregated, and formatted versions of Spidergram crawl data. It can output to tabular overviews on the command line, raw JSON files for use with data visualization tools, or ready-to-read Excel worksheets. The `spidergram probe` command allows the new Fingerprint tool to be run from the command line, as well.
+  - **Groundwork for cleaner CLI code**. While it's not as obvious to end users, we're moving more and more code away from the Oclif-dependent `SgCommand` class and putting it into the shared `SpiderCli` helper class where it can be used in more contexts. In the next version, we'll be leveraging these improvements to make Spidergram's built-in CLI tools take better advantage of the new global configuration settings.
 - Fixes and minor improvements
   - Internal errors (aka, pre-request DNS problems or errors thrown during response processing) saave a wider range of error codes rather than mapping everything to `-1`. Any thrown errors are also saved in `Resource.errors` for later reference.
   - A subtle but long-standing issue with the `downloadHandler` (and by extension `sitemapHandler` and `robotsTxtHandler` choked on most downloads but "properly" persisted status records rather than erroring out. The improved error handling caught it, and downloads now work consistently.
