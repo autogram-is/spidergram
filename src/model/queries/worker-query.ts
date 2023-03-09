@@ -29,7 +29,7 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
    * Returns a new {@link AqBuilder} containing a buildable {@link AqStrict}.
    */
   constructor(input: string | ArangoCollection | AqStrict | AqQuery) {
-    const validCollections = Object.keys(Entity.types);
+    const validCollections = [...Entity.types.keys()];
     let collectionName = '';
 
     if (typeof input === 'string') {
@@ -101,6 +101,7 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
       }
     }
 
+    this.events.emit('end', this.status);
     return Promise.resolve(this.status);
   }
 
