@@ -156,7 +156,7 @@ export abstract class Entity {
    * arbitarily deep property values by path, useful for making
    * deep property references in reporting scripts.
    */
-  get(path: string, fallback: undefined) {
+  get(path: string, fallback?: unknown) {
     return _.get(this, path, fallback);
   }
 
