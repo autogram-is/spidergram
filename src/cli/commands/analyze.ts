@@ -5,6 +5,7 @@ import {
   HtmlTools,
   WorkerQuery,
   OutputLevel,
+  BrowserTools,
 } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
 
@@ -37,27 +38,28 @@ export default class Analyze extends SgCommand {
     worker.on('progress', status => this.updateProgress(status));
     this.startProgress('Analyzing saved pages...');
 
+    sg.config.pageContent ??= {}
+    if (flags.body) {
+      sg.config.pageContent ??= {}
+      sg.config.pageContent.selector = flags.body;
+      sg.config.pageContent.readability = flags.readability
+    }
+
     await worker.run(async resource => {
       if (is.nonEmptyString(resource.body)) {
-        if (flags.metadata) {
-          const data = await HtmlTools.getPageData(resource.body);
-          if (data) resource.data = data;
-        }
-
-        if (flags.text) {
-          const content = await HtmlTools.getPageContent(resource, {
-            selector: flags.body,
-            readability: flags.readability,
-          });
-
-          resource.content = content;
-        }
-
-        await sg.arango.push(resource);
+        resource.data = await HtmlTools.getPageData(resource);
       }
+      if (flags.content) {
+        resource.content = await HtmlTools.getPageContent(resource);
+      }
+      if (flags.tech) {
+        resource.tech = await BrowserTools.getPageTechnologies(resource)
+          .then(techs => techs.map(tech => tech.name));
+      }
+      await sg.arango.push(resource);
     });
 
     this.stopProgress();
-    sg.cli.summarizeStatus(worker.status);
+    this.log(sg.cli.summarizeStatus(worker.status));
   }
 }

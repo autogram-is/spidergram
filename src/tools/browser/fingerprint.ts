@@ -46,7 +46,7 @@ export class Fingerprint {
       inputStruct = input;
     }
 
-    return resolve(analyze(inputStruct, technologies));
+    return Promise.resolve(resolve(analyze(inputStruct, technologies)));
   }
 
   async loadDefinitions(customOptions: FingerprintOptions = {}): Promise<this> {

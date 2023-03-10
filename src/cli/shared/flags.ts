@@ -122,14 +122,13 @@ export const crawlFlags = {
   }),
   download: Flags.string({
     aliases: ['dl'],
+    multiple: true,
     summary: 'MIME type to download if encountered',
   }),
   concurrency: Flags.integer({
-    default: 1,
     summary: 'Max simultaneous requests',
   }),
   rate: Flags.integer({
-    default: 300,
     summary: 'Max requests to process per minute',
   }),
 };
@@ -141,22 +140,28 @@ export const analysisFlags = {
     default: ['body'],
     summary: 'CSS selector for page content',
   }),
-  text: Flags.boolean({
-    char: 't',
+  content: Flags.boolean({
+    char: 'c',
     default: true,
     allowNo: true,
-    summary: 'Generate plaintext version of page',
+    summary: 'Extract key page content',
   }),
   readability: Flags.boolean({
     char: 'r',
     default: true,
     allowNo: true,
-    summary: 'Calculate page readability',
+    summary: 'Calculate content readability',
   }),
   metadata: Flags.boolean({
     char: 'm',
     default: true,
     allowNo: true,
     summary: 'Extract page metadata',
+  }),
+  tech: Flags.boolean({
+    char: 't',
+    default: true,
+    allowNo: true,
+    summary: 'Detect page technologies',
   }),
 };

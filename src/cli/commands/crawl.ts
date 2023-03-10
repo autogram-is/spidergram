@@ -4,7 +4,6 @@ import {
   Spidergram,
   Spider,
   SpiderStatus,
-  EnqueueUrlOptions,
 } from '../../index.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
 
@@ -24,9 +23,6 @@ export default class Crawl extends SgCommand {
       description: 'Erase database before crawling',
     }),
     ...CLI.crawlFlags,
-    selector: Flags.string({
-      summary: 'CSS selector for links',
-    }),
     verbose: CLI.outputFlags.verbose,
   };
 
@@ -63,24 +59,11 @@ export default class Crawl extends SgCommand {
       logLevel: flags.verbose ? LogLevel.DEBUG : LogLevel.OFF,
       maxConcurrency: flags.concurrency,
       maxRequestsPerMinute: flags.rate,
-      downloadMimeTypes: [flags.download ?? ''],
-      async pageHandler(context) {
-        const { $, saveResource, enqueueUrls } = context;
-
-        await saveResource({ body: $?.html() });
-
-        const urlOptions: Partial<EnqueueUrlOptions> = {};
-        if (flags.discover !== 'none') {
-          urlOptions.save = flags.discover;
-          urlOptions.enqueue =
-            flags.enqueue === 'none' ? () => false : flags.enqueue;
-
-          if (flags.selector) {
-            urlOptions.selector = flags.selector;
-          }
-          await enqueueUrls(urlOptions);
-        }
-      },
+      downloadMimeTypes: flags.download,
+      urlOptions: {
+        save: (flags.discover === 'none') ? () => false : flags.discover,
+        enqueue: (flags.enqueue === 'none') ? () => false : flags.enqueue,
+      }
     });
 
     spider.on('requestComplete', status => this.updateProgress(status));

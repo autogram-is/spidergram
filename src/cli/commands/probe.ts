@@ -9,6 +9,8 @@ import {
   aql,
   NormalizedUrl,
 } from '../../index.js';
+import { FingerprintResult } from '../../tools/browser/fingerprint.js';
+import { SpiderCli } from '../shared/spider-cli.js';
 
 export default class Probe extends SgCommand {
   static summary = 'Probe a web site to determine its technology stack';
@@ -71,12 +73,12 @@ export default class Probe extends SgCommand {
 
     if (res instanceof Resource) {
       console.log('analyzing stored resource');
-      technologies.push(...(await fp.analyze(res)));
+      technologies.push(...(await BrowserTools.getPageTechnologies(res)));
     } else {
       if (flags.fetch !== false) {
         console.log('analyzing fetched response');
         const response = await fetch(url);
-        technologies.push(...(await fp.analyze(response)));
+        technologies.push(...(await BrowserTools.getPageTechnologies(response)));
       } else {
         this.ux.error('Could not find resource for url');
       }
@@ -85,13 +87,19 @@ export default class Probe extends SgCommand {
     if (technologies.length === 0) {
       this.ux.info('No technologies detected.');
     } else {
-      for (const tech of technologies) {
-        this.ux.info(
-          `${tech.name} ${tech.version} (${tech.categories
-            .map(cat => cat.name)
-            .join(', ')})`,
-        );
-      }
+      this.ux.info(sg.cli.infoList(categorize(technologies)));
     }
   }
+}
+
+function categorize(input: FingerprintResult[]): Record<string, string[]> {
+  const scl = new SpiderCli();
+  const output: Record<string, string[]> = {};
+  for (const t of input) {
+    for (const c of t.categories) {
+      output[c.name] ??= [];
+      output[c.name].push(scl.url(t.website, t.name));
+    }
+  }
+  return output;
 }
