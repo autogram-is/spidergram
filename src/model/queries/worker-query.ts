@@ -120,7 +120,6 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
         else this.events.emit('progress', this.status, item);
       })
       .catch(error => {
-        console.log(error);
         this.updateStatus(false);
         this.status.lastError = error;
         this.events.emit('progress', this.status, item, error.message);
