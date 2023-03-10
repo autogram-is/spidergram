@@ -130,8 +130,8 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     this._cli = this._loadedConfig?.value.cli ?? new SpiderCli();
 
     // Give config scripts a chance to modify things
-    if (this._loadedConfig?.value.finalize) {
-      await this._loadedConfig?.value.finalize(this);
+    if (this._loadedConfig?.value.finalizer) {
+      await this._loadedConfig?.value.finalizer(this);
     }
 
     this._initializing = false;

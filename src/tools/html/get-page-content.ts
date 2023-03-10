@@ -86,8 +86,8 @@ export async function getPageContent(
   input: string | cheerio.Root | Resource,
   customOptions: PageContentOptions = {},
 ) {
-  if (is.function_(Spidergram.config.getPageContent)) {
-    return Spidergram.config.getPageContent(input, customOptions);
+  if (is.function_(Spidergram.config.getPageContentFn)) {
+    return Spidergram.config.getPageContentFn(input, customOptions);
   } else {
     return _getPageContent(input, customOptions);
   }

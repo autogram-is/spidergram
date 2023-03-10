@@ -26,8 +26,8 @@ export async function getPageTechnologies(
     customOptions,
     Spidergram.config.pageTech,
   );
-  if (is.function_(Spidergram.config.getPageTechnologies)) {
-    return Spidergram.config.getPageTechnologies(input, options);
+  if (is.function_(Spidergram.config.getPageTechnologiesFn)) {
+    return Spidergram.config.getPageTechnologiesFn(input, options);
   } else {
     return _getPageTechnologies(input, options);
   }

@@ -19,6 +19,7 @@ import { PageDataOptions, PageContentOptions } from '../tools/html/index.js';
 import { PageTechnologyOptions } from '../tools/browser/index.js';
 import { readPackageUpSync } from 'read-pkg-up';
 import { AqQuery } from 'aql-builder';
+import { PageAnalysisOptions } from '../tools/analyze-page.js';
 
 export const urlNormalizerDefaults: NormalizerOptions = {
   forceProtocol: 'https:',
@@ -99,16 +100,34 @@ export const defaultQueries: Record<string, AqQuery> = {
   },
 };
 
+export const arangoDefaults = {
+  databaseName: 'spidergram',
+  url: 'http://127.0.0.1:8529',
+  auth: {
+    username: 'root',
+    password: '',
+  }
+}
+
+export const analyzePageDefaults: PageAnalysisOptions = {
+  data: pageDataDefaults,
+  content: {},
+  tech: {},
+  regions: {},
+  propertyMap: {}
+}
+
 export const spidergramDefaults: SpidergramConfig = {
   debug: false,
   logLevel: 'error',
   storageDirectory: path.join(process.cwd(), 'storage'),
-  arango: { databaseName: 'spidergram' },
+  arango: arangoDefaults,
   crawlee: {},
   spider: spiderDefaults,
   htmlToText: {},
   queries: defaultQueries,
   reports: {},
+  pageAnalysis: analyzePageDefaults,
   pageData: pageDataDefaults,
   pageContent: pageContentDefaults,
   pageTechnologies: pageTechnologyDefaults,
