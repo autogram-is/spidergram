@@ -1,4 +1,4 @@
-import { Spidergram, Resource, HtmlTools, BrowserTools, EnqueueUrlOptions } from '../index.js';
+import { Spidergram, Resource, HtmlTools, BrowserTools, UrlDiscoveryOptions } from '../index.js';
 import { PageDataOptions, PageContentOptions } from './html/index.js';
 import { PageTechnologyOptions } from './browser/index.js';
 import { PropertySource, findPropertyValue } from './find-property-value.js';
