@@ -1,5 +1,14 @@
 # Spidergram Changelog
 
+## v0.9.2 - 23-03-10
+
+- The `crawl`, `analyze`, and `probe` CLI functions now use global defaults.
+- Added a convenience wrapper (`getPageTechnologies`) around the Fingerprint library.
+- Config files can supply `pageTechnologies`, `pageData` and `pageContent` config options.
+- Config scripts can supply `getPageTechnologies`, `getPageData` and `getPageContent` functions to globally override their operation.
+- Fixed an issue that prevented `Spidergram.init()` from loading without a database.
+- Added a handful of example queries in the default configuration.
+
 ## v0.9.1 - 23-03-09
 
 - `Entity.get('property.path')` fallback value types should be `unknown`, not `undefined`.
