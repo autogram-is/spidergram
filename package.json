@@ -16,6 +16,7 @@
     "lint": "eslint . --ext .ts",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "lint-and-fix": "eslint . --ext .ts --fix",
+    "spidergram": "./bin/run.js",
     "clean": "rm -rf ./dist; rm ./*.tsbuildinfo",
     "nuke": "npm run clean; rm -rf ./node_modules; rm package-lock.json; npm install",
     "publish": "npm publish",
