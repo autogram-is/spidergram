@@ -148,18 +148,21 @@ export class Spider extends PlaywrightCrawler {
   on<T extends SpiderEventType>(
     event: T,
     listener: SpiderEventListener<T>,
-  ): void {
+  ): this {
     this._events.on<T>(event, listener);
+    return this;
   }
 
   off<T extends SpiderEventType>(
     event: T,
     listener: SpiderEventListener<T>,
-  ): void {
+  ): this {
     if (listener) {
       this._events.removeListener<T>(event, listener);
+      return this;
     } else {
       this._events.removeAllListeners<T>(event);
+      return this;
     }
   }
 

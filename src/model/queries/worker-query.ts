@@ -66,18 +66,21 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
   on<T extends WorkerEventType>(
     event: T,
     listener: WorkerEventListener<T>,
-  ): void {
+  ): this {
     this.events.on<T>(event, listener);
+    return this;
   }
 
   off<T extends WorkerEventType>(
     event: T,
     listener: WorkerEventListener<T>,
-  ): void {
+  ): this {
     if (listener) {
       this.events.removeListener<WorkerEventType>(event, listener);
+      return this;
     } else {
       this.events.removeAllListeners<WorkerEventType>(event);
+      return this;
     }
   }
 
