@@ -6,8 +6,8 @@ import { Entity, JobStatus, Spidergram } from '../../index.js';
 
 type WorkerEventMap = Record<PropertyKey, unknown[]> & {
   progress: [status: JobStatus, item: Entity, message?: string];
-  error: [status: JobStatus, message?: string];
-  end: [status: JobStatus];
+  fail: [status: JobStatus, error?: Error, message?: string];
+  complete: [status: JobStatus];
 };
 
 type WorkerEventType = keyof WorkerEventMap;
@@ -120,10 +120,11 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
         else this.events.emit('progress', this.status, item);
       })
       .catch(error => {
+        console.log(error);
         this.updateStatus(false);
         this.status.lastError = error;
         this.events.emit('progress', this.status, item, error.message);
-        this.events.emit('error', this.status, error.message);
+        this.events.emit('fail', this.status, error, error.message);
       });
   }
 
@@ -133,7 +134,8 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
     } else {
       this.status.failed++;
     }
-    const elapsed = (this.status.finishTime ?? Date.now()) - this.status.startTime;
+    const elapsed =
+      (this.status.finishTime ?? Date.now()) - this.status.startTime;
     this.status.elapsed = elapsed;
     this.status.average = elapsed / this.status.total;
   }

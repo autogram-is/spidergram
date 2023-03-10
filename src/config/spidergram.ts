@@ -228,14 +228,14 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     this._arango = input;
   }
 
-  async attemptArangoConnection(silent = false): Promise<Error | ArangoStore>{
-    if (this._arango === undefined)  {
+  async attemptArangoConnection(silent = false): Promise<Error | ArangoStore> {
+    if (this._arango === undefined) {
       try {
         await ArangoStore.open(
           this.config.arango?.databaseName,
           this.config.arango,
         ).then(ast => this.setArangoStore(ast));
-      } catch(err: unknown) {
+      } catch (err: unknown) {
         if (err instanceof Error) {
           if (!silent || this.config.debug) throw err;
           return Promise.resolve(err);

@@ -1,10 +1,6 @@
 import { Flags } from '@oclif/core';
 import { LogLevel } from 'crawlee';
-import {
-  Spidergram,
-  Spider,
-  SpiderStatus,
-} from '../../index.js';
+import { Spidergram, Spider, SpiderStatus } from '../../index.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
 
 export default class Crawl extends SgCommand {
@@ -61,9 +57,9 @@ export default class Crawl extends SgCommand {
       maxRequestsPerMinute: flags.rate,
       downloadMimeTypes: flags.download,
       urlOptions: {
-        save: (flags.discover === 'none') ? () => false : flags.discover,
-        enqueue: (flags.enqueue === 'none') ? () => false : flags.enqueue,
-      }
+        save: flags.discover === 'none' ? () => false : flags.discover,
+        enqueue: flags.enqueue === 'none' ? () => false : flags.enqueue,
+      },
     });
 
     spider.on('requestComplete', status => this.updateProgress(status));

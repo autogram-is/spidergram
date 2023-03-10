@@ -78,7 +78,9 @@ export default class Probe extends SgCommand {
       if (flags.fetch !== false) {
         console.log('analyzing fetched response');
         const response = await fetch(url);
-        technologies.push(...(await BrowserTools.getPageTechnologies(response)));
+        technologies.push(
+          ...(await BrowserTools.getPageTechnologies(response)),
+        );
       } else {
         this.ux.error('Could not find resource for url');
       }

@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import {
   Spidergram,
   Resource,
@@ -29,8 +28,6 @@ export default class Analyze extends SgCommand {
       this.output = OutputLevel.verbose;
     }
 
-    console.log(flags);
-
     const worker = new WorkerQuery<Resource>('resources')
       .filterBy('code', 200)
       .filterBy('mime', 'text/html');
@@ -38,26 +35,26 @@ export default class Analyze extends SgCommand {
     worker.on('progress', status => this.updateProgress(status));
     this.startProgress('Analyzing saved pages...');
 
-    sg.config.pageContent ??= {}
+    sg.config.pageContent ??= {};
     if (flags.body) {
-      sg.config.pageContent ??= {}
+      sg.config.pageContent ??= {};
       sg.config.pageContent.selector = flags.body;
-      sg.config.pageContent.readability = flags.readability
+      sg.config.pageContent.readability = flags.readability;
     }
 
-    await worker.run(async resource => {
-      if (is.nonEmptyString(resource.body)) {
+    await worker
+      .run(async resource => {
         resource.data = await HtmlTools.getPageData(resource);
-      }
-      if (flags.content) {
-        resource.content = await HtmlTools.getPageContent(resource);
-      }
-      if (flags.tech) {
-        resource.tech = await BrowserTools.getPageTechnologies(resource)
-          .then(techs => techs.map(tech => tech.name));
-      }
-      await sg.arango.push(resource);
-    });
+        if (flags.content) {
+          resource.content = await HtmlTools.getPageContent(resource);
+        }
+        if (flags.tech) {
+          resource.tech = await BrowserTools.getPageTechnologies(resource).then(
+            techs => techs.map(tech => tech.name),
+          );
+        }
+        await sg.arango.push(resource);
+      });
 
     this.stopProgress();
     this.log(sg.cli.summarizeStatus(worker.status));

@@ -75,10 +75,12 @@ export const pageDataDefaults: PageDataOptions = {
 export const pageTechnologyDefaults: PageTechnologyOptions = {
   forceReload: false,
   ignoreCache: false,
-  technologiesUrl: 'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/technologies',
-  categoriesUrl: 'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/categories.json',
+  technologiesUrl:
+    'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/technologies',
+  categoriesUrl:
+    'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/categories.json',
   technologies: {},
-  categories: {}
+  categories: {},
 };
 
 export const pageContentDefaults: PageContentOptions = {
@@ -89,13 +91,13 @@ export const pageContentDefaults: PageContentOptions = {
 };
 
 export const defaultQueries: Record<string, AqQuery> = {
-  errorPages: { 
+  errorPages: {
     collection: 'resources',
     filters: [{ name: 'code', eq: 200, negate: true }],
     aggregates: [['site', 'parsed.hostname'], 'mime', 'code'],
-    count: 'pages'
-  }
-}
+    count: 'pages',
+  },
+};
 
 export const spidergramDefaults: SpidergramConfig = {
   debug: false,

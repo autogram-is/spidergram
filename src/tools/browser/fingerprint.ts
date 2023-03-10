@@ -19,8 +19,8 @@ export type {
 } from 'wappalyzer-core';
 
 export type FingerprintOptions = {
-  technologiesUrl?: string,
-  categoriesUrl?: string,
+  technologiesUrl?: string;
+  categoriesUrl?: string;
   technologies?: Record<string, FingerprintTechnology>;
   categories?: Record<string, FingerprintCategory>;
   forceReload?: boolean;
@@ -51,26 +51,31 @@ export class Fingerprint {
 
   async loadDefinitions(customOptions: FingerprintOptions = {}): Promise<this> {
     const sg = await Spidergram.load();
-    const options: FingerprintOptions = _.defaultsDeep(customOptions, Spidergram.config.pageTechnologies);
+    const options: FingerprintOptions = _.defaultsDeep(
+      customOptions,
+      Spidergram.config.pageTechnologies,
+    );
 
     if (!this.loaded || options.forceReload) {
       let categories: Record<string, FingerprintCategory> = {};
       let technology: Record<string, FingerprintTechnology> = {};
 
-      const catExists = await sg
-        .files()
-        .exists('wappalyzer-categories.json');
+      const catExists = await sg.files().exists('wappalyzer-categories.json');
 
       const techExists = await sg
         .files()
         .exists('wappalyzer-technologies.json');
 
-      if (!catExists || options.ignoreCache) await this.cacheCategories(
-        options.categoriesUrl ?? 'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/categories.json'
-      );
-      if (!techExists || options.ignoreCache) await this.cacheTechnologies(
-        options.technologiesUrl ?? 'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/technologies'
-      );
+      if (!catExists || options.ignoreCache)
+        await this.cacheCategories(
+          options.categoriesUrl ??
+            'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/categories.json',
+        );
+      if (!techExists || options.ignoreCache)
+        await this.cacheTechnologies(
+          options.technologiesUrl ??
+            'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/technologies',
+        );
 
       if (await sg.files().exists('wappalyzer-categories.json')) {
         const json = (
