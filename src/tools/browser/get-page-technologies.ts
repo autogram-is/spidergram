@@ -22,8 +22,8 @@ export async function getPageTechnologies(
   customOptions: PageTechnologyOptions = {},
 ) {
   const options: PageTechnologyOptions = _.defaultsDeep(customOptions, Spidergram.config.pageTech)
-  if (is.function_(Spidergram.config.getPageTech)) {
-    return Spidergram.config.getPageTech(input, options);
+  if (is.function_(Spidergram.config.getPageTechnologies)) {
+    return Spidergram.config.getPageTechnologies(input, options);
   } else {
     return _getPageTechnologies(input, options);
   }
