@@ -1,4 +1,4 @@
-import { Spidergram, Resource, HtmlTools, BrowserTools } from '../index.js';
+import { Spidergram, Resource, HtmlTools, BrowserTools, EnqueueUrlOptions } from '../index.js';
 import { PageDataOptions, PageContentOptions } from './html/index.js';
 import { PageTechnologyOptions } from './browser/index.js';
 import { PropertySource, findPropertyValue } from './find-property-value.js';
@@ -17,6 +17,9 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
   /**
    * Options for structured data parsing, including HTML Meta tags and other
    * metadata standards. Setting this to `false` skips all metadata extraction.
+   * 
+   * Note: By default, running data extraction will overwrite any information in a
+   * Resource object's existing `data` property.
    */
   data?: PageDataOptions | false,
 
@@ -24,6 +27,10 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
    * Options for content analysis, including the transformation of core page content
    * to plaintext, readability analysis, etc. Setting this to `false` skips all content
    * analysis.
+   *  
+   * Note: By default, running content analysis will overwrite any information in a
+   * Resource object's existing `content` property.
+
    */
   content?: PageContentOptions | false,
 
@@ -31,14 +38,6 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
    * Options for technology fingerprinting. Setting this to `false` skips all fingerprinting.
    */
   tech?: PageTechnologyOptions | false,
-
-  /**
-   * Named CSS selectors describing particular sections of the page. If present, these are
-   * are used to group the page's links. If a 'content' region selector is present, it is
-   * used as a fallback when for identifying a page's core content during text extraction
-   * as well.
-   */
-  regions?: Record<string, string>,
 
   /**
    * A dictionary describing simple data mapping operations that should be performed after

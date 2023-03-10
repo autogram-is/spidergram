@@ -1,10 +1,10 @@
 import {
   Spidergram,
   Resource,
-  HtmlTools,
   WorkerQuery,
   OutputLevel,
-  BrowserTools,
+  analyzePage,
+  PageAnalysisOptions,
 } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
 
@@ -28,35 +28,31 @@ export default class Analyze extends SgCommand {
       this.output = OutputLevel.verbose;
     }
 
-    const worker = new WorkerQuery<Resource>('resources')
-      .filterBy('code', 200)
-      .filterBy('mime', 'text/html');
-
-    worker.on('progress', status => this.updateProgress(status));
-    this.startProgress('Analyzing saved pages...');
-
-    sg.config.pageContent ??= {};
-    if (flags.body) {
-      sg.config.pageContent ??= {};
-      sg.config.pageContent.selector = flags.body;
-      sg.config.pageContent.readability = flags.readability;
+    const options: PageAnalysisOptions = {}
+    if (flags.metadata === false) {
+      options.data = false;
+    }
+    if (flags.content === false) {
+      options.content = false;
+    }
+    if (flags.tech === false) {
+      options.tech = false;
     }
 
-    await worker
-      .run(async resource => {
-        resource.data = await HtmlTools.getPageData(resource);
-        if (flags.content) {
-          resource.content = await HtmlTools.getPageContent(resource);
-        }
-        if (flags.tech) {
-          resource.tech = await BrowserTools.getPageTechnologies(resource).then(
-            techs => techs.map(tech => tech.name),
-          );
-        }
-        await sg.arango.push(resource);
-      });
+    this.startProgress('Analyzing saved pages...');
 
-    this.stopProgress();
-    this.log(sg.cli.summarizeStatus(worker.status));
+    await new WorkerQuery<Resource>('resources')
+      .filterBy('code', 200)
+      .filterBy('mime', 'text/html')
+      .on('progress', status => this.updateProgress(status))
+      .on('complete', status => {
+        this.stopProgress();
+        this.log(sg.cli.summarizeStatus(status))
+      })
+      .run(async resource => {
+        return analyzePage(resource, options)
+          .then(() => sg.arango.push(resource))
+          .then(() => resource.url)
+      });
   }
 }
