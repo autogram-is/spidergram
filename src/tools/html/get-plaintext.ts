@@ -1,12 +1,8 @@
 import { htmlToText, HtmlToTextOptions } from 'html-to-text';
 import _ from 'lodash';
+import { Spidergram } from '../../index.js';
 
 export { HtmlToTextOptions } from 'html-to-text';
-
-const defaults: HtmlToTextOptions = {
-  wordwrap: false,
-  selectors: [{ selector: 'a', options: { ignoreHref: true } }],
-};
 
 /**
  * Convert HTML markup into plain text
@@ -21,5 +17,5 @@ export function getPlaintext(
   html: string,
   options?: HtmlToTextOptions,
 ): string {
-  return htmlToText(html, _.defaultsDeep(options, defaults));
+  return htmlToText(html, _.defaultsDeep(options, Spidergram.config.htmlToText));
 }

@@ -5,7 +5,7 @@ import {
   UniqueUrl,
   LinksTo,
   EnqueueUrlOptions,
-  filterUrls,
+  filterUrl,
   HtmlTools,
   NormalizedUrl,
   aql,
@@ -40,18 +40,18 @@ export async function saveUrls(
     });
 
     // Run each URL through a few gauntlets
-    if (options.discardUnparsableLinks && is.undefined(uu.parsed)) {
+    if (options.discardUnparsable && is.undefined(uu.parsed)) {
       continue;
     }
 
     if (
-      options.discardNonWebLinks &&
+      options.discardNonWeb &&
       !['http:', 'https:'].includes(uu.parsed?.protocol.toLowerCase() ?? '')
     ) {
       continue;
     }
 
-    if (!filterUrls(context, uu, options.save)) {
+    if (!filterUrl(context, uu, options.save)) {
       continue;
     }
 
@@ -70,7 +70,7 @@ export async function saveUrls(
           handler: 'robotstxt',
           forefrontRequest: true,
         });
-        if (!options.discardExistingLinks || !(await graph.exists(ruu))) {
+        if (!options.discardExisting || !(await graph.exists(ruu))) {
           results.uniques.push(ruu);
         }
       } else if (options.checkSitemaps) {
@@ -81,7 +81,7 @@ export async function saveUrls(
           handler: 'sitemap',
           forefrontRequest: true,
         });
-        if (!options.discardExistingLinks || !(await graph.exists(suu))) {
+        if (!options.discardExisting || !(await graph.exists(suu))) {
           results.uniques.push(suu);
         }
       }
@@ -101,7 +101,7 @@ export async function saveUrls(
     // This will be simple once we implement an Arango-based StorageProvider
     // for Crawlee, and ensure that its Request de-duplication stays in sync
     // with Spidergram's UniqueUrl de-duplication.
-    if (!options.discardExistingLinks || !(await graph.exists(uu))) {
+    if (!options.discardExisting || !(await graph.exists(uu))) {
       results.uniques.push(uu);
     }
 
@@ -109,7 +109,6 @@ export async function saveUrls(
       const lt = new LinksTo({
         from: resource,
         to: uu,
-        label: options.linkLabel,
         ...link,
       });
       results.links.push(lt);
@@ -122,7 +121,7 @@ export async function saveUrls(
   if (
     resource !== undefined &&
     results.links.length > 0 &&
-    options.discardExistingLinks
+    options.discardExisting
   ) {
     const deleteLinkTos = aql`
       FOR lt IN links_to

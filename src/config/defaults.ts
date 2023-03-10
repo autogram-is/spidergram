@@ -15,7 +15,7 @@ import {
   EnqueueUrlOptions,
   SpiderOptions,
 } from '../spider/index.js';
-import { PageDataOptions, PageContentOptions } from '../tools/html/index.js';
+import { PageDataOptions, PageContentOptions, HtmlToTextOptions } from '../tools/html/index.js';
 import { PageTechnologyOptions } from '../tools/browser/index.js';
 import { readPackageUpSync } from 'read-pkg-up';
 import { AqQuery } from 'aql-builder';
@@ -35,7 +35,7 @@ export const urlNormalizerDefaults: NormalizerOptions = {
 
 export const urlDiscoveryDefaults: EnqueueUrlOptions = {
   limit: 1_000_000,
-  selector: 'body a',
+  selectors: 'body a',
   save: UrlMatchStrategy.All,
   enqueue: UrlMatchStrategy.SameDomain,
   prioritize: false,
@@ -43,12 +43,17 @@ export const urlDiscoveryDefaults: EnqueueUrlOptions = {
   respectRobots: false,
   checkSitemaps: false,
   prioritizeSitemaps: false,
-  discardEmptyLinks: true,
-  discardAnchorOnlyLinks: true,
-  discardNonWebLinks: false,
-  discardUnparsableLinks: false,
-  discardExistingLinks: true,
+  discardEmpty: true,
+  discardlocalAnchors: true,
+  discardNonWeb: false,
+  discardUnparsable: false,
+  discardExisting: true,
 };
+
+export const htmlToTextDefaults: HtmlToTextOptions = {
+  wordwrap: false,
+  selectors: [{ selector: 'a', options: { ignoreHref: true } }],
+}
 
 export const spiderDefaults: Partial<SpiderOptions> = {
   preNavigationHooks: [],
@@ -124,7 +129,7 @@ export const spidergramDefaults: SpidergramConfig = {
   arango: arangoDefaults,
   crawlee: {},
   spider: spiderDefaults,
-  htmlToText: {},
+  htmlToText: htmlToTextDefaults,
   queries: defaultQueries,
   reports: {},
   pageAnalysis: analyzePageDefaults,
