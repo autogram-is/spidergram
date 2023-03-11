@@ -10,6 +10,8 @@ export async function relinkResource(
   customOptions: Partial<EnqueueUrlOptions> = {}
 ) {
   const sg = await Spidergram.load();
+  const options: Partial<EnqueueUrlOptions> = _.defaultsDeep(customOptions, Spidergram.config.spider?.urlOptions);
+  options.discardExisting = true;
 
   const uus = await new EntityQuery<UniqueUrl>({
     document: 'uu',
@@ -26,13 +28,11 @@ export async function relinkResource(
   }).run();
 
   const uu = uus.pop();
-    
-  const options: Partial<EnqueueUrlOptions> = _.defaultsDeep(customOptions, Spidergram.config.spider?.urlOptions);
   
   // TODO: Boy howdy is this horrible. Let's change findLinks to use raw HTML instead.
   // While we're at it, we can change saveUrls to accept individual items instead of
   // a context object.
-  
+
   const fakeContext = {
     resource,
     graph: sg.arango,
@@ -40,5 +40,5 @@ export async function relinkResource(
   } as SpiderContext;
 
   const links = findUrls(fakeContext, options);
-  return saveUrls(fakeContext, links);
+  return saveUrls(fakeContext, links, options);
 }
