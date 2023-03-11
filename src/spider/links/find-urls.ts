@@ -20,8 +20,8 @@ export function findUrls(
 
   // We're doing this song and dance temporarily, to avoid altering the underlying
   // DOM before it's saved.
-  const { $: ch } = context;
-  const html = ch?.html() ?? '';
+  const { resource } = context;
+  const html = resource?.body ?? '';
   const $ = getCheerio(html);
 
   const results: HtmlTools.FoundLink[] = [];
