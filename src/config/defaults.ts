@@ -15,7 +15,11 @@ import {
   EnqueueUrlOptions,
   SpiderOptions,
 } from '../spider/index.js';
-import { PageDataOptions, PageContentOptions, HtmlToTextOptions } from '../tools/html/index.js';
+import {
+  PageDataOptions,
+  PageContentOptions,
+  HtmlToTextOptions,
+} from '../tools/html/index.js';
 import { PageTechnologyOptions } from '../tools/browser/index.js';
 import { readPackageUpSync } from 'read-pkg-up';
 import { AqQuery } from 'aql-builder';
@@ -53,7 +57,7 @@ export const urlDiscoveryDefaults: EnqueueUrlOptions = {
 export const htmlToTextDefaults: HtmlToTextOptions = {
   wordwrap: false,
   selectors: [{ selector: 'a', options: { ignoreHref: true } }],
-}
+};
 
 export const spiderDefaults: Partial<SpiderOptions> = {
   preNavigationHooks: [],
@@ -111,16 +115,16 @@ export const arangoDefaults = {
   auth: {
     username: 'root',
     password: '',
-  }
-}
+  },
+};
 
 export const analyzePageDefaults: PageAnalysisOptions = {
   data: pageDataDefaults,
   content: {},
   tech: {},
   regions: {},
-  propertyMap: {}
-}
+  propertyMap: {},
+};
 
 export const spidergramDefaults: SpidergramConfig = {
   debug: false,

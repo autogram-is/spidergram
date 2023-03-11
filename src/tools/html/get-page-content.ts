@@ -98,7 +98,10 @@ async function _getPageContent(
   input: string | cheerio.Root | Resource,
   customOptions: PageContentOptions = {},
 ) {
-  const options: PageContentOptions = _.defaultsDeep(customOptions, Spidergram.config.pageContent);
+  const options: PageContentOptions = _.defaultsDeep(
+    customOptions,
+    Spidergram.config.pageContent,
+  );
   const htmltotext: HtmlToTextOptions = options.htmlToText ?? {};
   const markup = HtmlTools.getMarkup(input);
 

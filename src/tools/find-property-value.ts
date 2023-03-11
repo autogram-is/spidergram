@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import _ from 'lodash';
 import { getCheerio } from './html/index.js';
 
 /**
@@ -19,14 +19,14 @@ export interface PropertySource extends Record<string, unknown> {
 
   /**
    * If the source property is found, use this function to filter it or convert it to
-   * another format. 
+   * another format.
    */
   fn?: (value: unknown) => unknown | undefined;
 
   /**
    * If the property is not found, or the selector and fn properties are used but return
    * empty results, return this value as a fallback.
-   * 
+   *
    * Note: If a PropertySource with a default value is placed in the middle of an array of
    * PropertySources, its default value will be returned and all subsequent PropertySources
    * will be ignored.
@@ -37,11 +37,15 @@ export interface PropertySource extends Record<string, unknown> {
 /**
  * Find a single value on an object using a {@link PropertySource} description. For simple
  * properties, a string can also be used instead of a full {@link PropertySource} object.
- * 
+ *
  * Multiple property descriptions will be checked in order; the first one to have a defined
  * value will be returned.
  */
-export function findPropertyValue<T = unknown>(object: T, locations: (string | PropertySource) | (string | PropertySource)[], fallback?: unknown): unknown | undefined {
+export function findPropertyValue<T = unknown>(
+  object: T,
+  locations: (string | PropertySource) | (string | PropertySource)[],
+  fallback?: unknown,
+): unknown | undefined {
   const sources = Array.isArray(locations) ? locations : [locations];
   for (const source of sources) {
     if (typeof source === 'string') {

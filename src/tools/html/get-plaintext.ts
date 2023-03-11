@@ -17,5 +17,8 @@ export function getPlaintext(
   html: string,
   options?: HtmlToTextOptions,
 ): string {
-  return htmlToText(html, _.defaultsDeep(options, Spidergram.config.htmlToText));
+  return htmlToText(
+    html,
+    _.defaultsDeep(options, Spidergram.config.htmlToText),
+  );
 }

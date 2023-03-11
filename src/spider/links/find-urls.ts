@@ -15,8 +15,7 @@ export function findUrls(
     customOptions,
     context.urlOptions,
   );
-  const { selectors, discardlocalAnchors, discardEmpty } =
-    options;
+  const { selectors, discardlocalAnchors, discardEmpty } = options;
 
   // We're doing this song and dance temporarily, to avoid altering the underlying
   // DOM before it's saved.
@@ -63,7 +62,11 @@ export function findUrls(
   return results;
 }
 
-function discardLink(link: FoundLink, discardLocalAnchors: boolean, discardEmpty: boolean): boolean {
+function discardLink(
+  link: FoundLink,
+  discardLocalAnchors: boolean,
+  discardEmpty: boolean,
+): boolean {
   if (discardEmpty && is.undefined(link.url)) return true;
   if (discardEmpty && is.emptyStringOrWhitespace(link.url)) return true;
   if (discardLocalAnchors && link.url?.startsWith('#')) return true;

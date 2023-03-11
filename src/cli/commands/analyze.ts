@@ -28,7 +28,7 @@ export default class Analyze extends SgCommand {
       this.output = OutputLevel.verbose;
     }
 
-    const options: PageAnalysisOptions = {}
+    const options: PageAnalysisOptions = {};
     if (flags.metadata === false) {
       options.data = false;
     }
@@ -47,12 +47,12 @@ export default class Analyze extends SgCommand {
       .on('progress', status => this.updateProgress(status))
       .on('end', status => {
         this.stopProgress('Complete!');
-        this.log(sg.cli.summarizeStatus(status))
+        this.log(sg.cli.summarizeStatus(status));
       })
       .run(async resource => {
         return analyzePage(resource, options)
           .then(() => sg.arango.push(resource))
-          .then(() => resource.url)
+          .then(() => resource.url);
       });
   }
 }

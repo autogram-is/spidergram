@@ -1,4 +1,9 @@
-import { Spidergram, Resource, BrowserTools as bt, BrowserTools } from '../../index.js';
+import {
+  Spidergram,
+  Resource,
+  BrowserTools as bt,
+  BrowserTools,
+} from '../../index.js';
 import is from '@sindresorhus/is';
 import _ from 'lodash';
 import { Fingerprint } from './fingerprint.js';

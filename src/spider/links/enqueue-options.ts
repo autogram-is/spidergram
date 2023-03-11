@@ -3,11 +3,15 @@ import { ParsedUrl } from '@autogram/url-tools';
 import { InternalSpiderContext } from '../../index.js';
 import { FilterInput } from './index.js';
 
-export type RegionSelectors<T extends Record<string, unknown> = Record<string, unknown>> =
-  string |
-  Record<string, string | undefined> |
-  Record<string, ({ selector: string } & T) | undefined>
-type RegionLinkSelectorData = Record<string, string | undefined> & { linkSelector: string }
+export type RegionSelectors<
+  T extends Record<string, unknown> = Record<string, unknown>,
+> =
+  | string
+  | Record<string, string | undefined>
+  | Record<string, ({ selector: string } & T) | undefined>;
+type RegionLinkSelectorData = Record<string, string | undefined> & {
+  linkSelector: string;
+};
 
 export enum UrlMatchStrategy {
   /**
@@ -46,10 +50,10 @@ export interface EnqueueUrlOptions {
 
   /**
    * One or more CSS selectors used to locate links on the page.
-   * 
+   *
    * @example A single simple selector
    * `selectors: 'head link, body a'`
-   * 
+   *
    * @example Multiple named selectors
    * ```
    * selectors: {
@@ -67,10 +71,10 @@ export interface EnqueueUrlOptions {
    *   footer: { selector: 'footer', linkSelector: 'a' },
    * }
    * ```
-   * 
+   *
    * @default 'body a'
    */
-  selectors: RegionSelectors<RegionLinkSelectorData>
+  selectors: RegionSelectors<RegionLinkSelectorData>;
 
   /**
    * A filter condition to determine which links will be saved as

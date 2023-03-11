@@ -17,11 +17,11 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
   /**
    * Options for structured data parsing, including HTML Meta tags and other
    * metadata standards. Setting this to `false` skips all metadata extraction.
-   * 
+   *
    * Note: By default, running data extraction will overwrite any information in a
    * Resource object's existing `data` property.
    */
-  data?: PageDataOptions | false,
+  data?: PageDataOptions | false;
 
   /**
    * Options for content analysis, including the transformation of core page content
@@ -32,26 +32,32 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
    * Resource object's existing `content` property.
 
    */
-  content?: PageContentOptions | false,
+  content?: PageContentOptions | false;
 
   /**
    * Options for technology fingerprinting. Setting this to `false` skips all fingerprinting.
    */
-  tech?: PageTechnologyOptions | false,
+  tech?: PageTechnologyOptions | false;
 
   /**
    * A dictionary describing simple data mapping operations that should be performed after
    * a page is processed. Each key is the name of a target property on the page object,
    * and each value is a string or {@link PropertySource} object describing where the target
    * property's value should be found.
-   * 
+   *
    * If an array of sources is supplied, they will be checked in order and the first match
    * will be
    */
-  propertyMap?: Record<string, (string | PropertySource) | (string | PropertySource)[]>
+  propertyMap?: Record<
+    string,
+    (string | PropertySource) | (string | PropertySource)[]
+  >;
 }
 
-export async function analyzePage(resource: Resource, customOptions: PageAnalysisOptions = {}): Promise<void> {
+export async function analyzePage(
+  resource: Resource,
+  customOptions: PageAnalysisOptions = {},
+): Promise<void> {
   if (is.function_(Spidergram.config.analyzePageFn)) {
     return Spidergram.config.analyzePageFn(resource, customOptions);
   } else {
@@ -59,23 +65,35 @@ export async function analyzePage(resource: Resource, customOptions: PageAnalysi
   }
 }
 
-async function _analyzePage(resource: Resource, customOptions: PageAnalysisOptions = {}): Promise<void> {
-  const options: PageAnalysisOptions = _.defaultsDeep(customOptions, Spidergram.config.pageAnalysis);
+async function _analyzePage(
+  resource: Resource,
+  customOptions: PageAnalysisOptions = {},
+): Promise<void> {
+  const options: PageAnalysisOptions = _.defaultsDeep(
+    customOptions,
+    Spidergram.config.pageAnalysis,
+  );
 
   if (options.data) {
     resource.data = await HtmlTools.getPageData(resource, options.data);
   }
 
   if (options.content) {
-    resource.content = await HtmlTools.getPageContent(resource, options.content);
+    resource.content = await HtmlTools.getPageContent(
+      resource,
+      options.content,
+    );
   }
 
   if (options.tech) {
-    resource.tech = await BrowserTools.getPageTechnologies(resource, options.tech);
+    resource.tech = await BrowserTools.getPageTechnologies(
+      resource,
+      options.tech,
+    );
   }
 
   if (options.propertyMap) {
-    for(const [prop, source] of Object.entries(options.propertyMap)) {
+    for (const [prop, source] of Object.entries(options.propertyMap)) {
       resource[prop] = findPropertyValue(resource, source);
     }
   }

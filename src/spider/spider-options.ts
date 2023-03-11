@@ -49,7 +49,7 @@ export interface InternalSpiderOptions extends Dictionary {
    * delay time consuming operations (like named entity extraction) until a post-
    * crawl analysis step.
    */
-  pageOptions?: PageAnalysisOptions
+  pageOptions?: PageAnalysisOptions;
 
   /**
    * A dictionary of request handlers, keyed by the request label they're

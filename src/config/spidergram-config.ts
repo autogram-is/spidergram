@@ -1,5 +1,10 @@
 import { Spidergram } from './spidergram.js';
-import { SpiderOptions, Query, PageAnalysisOptions, PageAnalyzer } from '../index.js';
+import {
+  SpiderOptions,
+  Query,
+  PageAnalysisOptions,
+  PageAnalyzer,
+} from '../index.js';
 import { UrlMutators } from '@autogram/url-tools';
 import { NormalizerOptions } from './global-normalizer.js';
 import {
