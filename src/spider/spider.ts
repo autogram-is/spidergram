@@ -36,8 +36,8 @@ import {
 
 type SpiderEventMap = Record<PropertyKey, unknown[]> & {
   systemInfo: [status: SystemInfo & SpiderStatus];
-  requestComplete: [status: SpiderStatus, url: string];
-  crawlComplete: [status: SpiderStatus & FinalStatistics];
+  progress: [status: SpiderStatus, url: string];
+  end: [status: SpiderStatus & FinalStatistics];
   aborting: [reason: string];
   exiting: [reason: string];
 };
@@ -142,8 +142,8 @@ export class Spider extends PlaywrightCrawler {
    * Respond to an internal Spider event.
    *
    * - `systemInfo`: Fired at regular intervals, summarizing memory and server load
-   * - `requestComplete`: Fired when a specific reqest has been processed
-   * - `crawlComplete`: Fired when last request in the queue has been processed
+   * - `progress`: Fired when a specific reqest has been processed
+   * - `end`: Fired when last request in the queue has been processed
    */
   on<T extends SpiderEventType>(
     event: T,
@@ -200,7 +200,7 @@ export class Spider extends PlaywrightCrawler {
 
     // Even in the case of an error, we'll fire the event so that progress
     // indicators can be updated, etc.
-    this._events.emit('requestComplete', this.status, context.request.url);
+    this._events.emit('progress', this.status, context.request.url);
 
     super._cleanupContext(context as PlaywrightCrawlingContext);
   }
@@ -288,7 +288,7 @@ export class Spider extends PlaywrightCrawler {
 
     return super.run().then(stats => {
       this.status.finishTime = Date.now();
-      this._events.emit('crawlComplete', { ...this.status, ...stats });
+      this._events.emit('end', { ...this.status, ...stats });
       return { ...this.status, ...stats };
     });
   }

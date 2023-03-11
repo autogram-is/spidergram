@@ -18,12 +18,7 @@ export default class Relink extends SgCommand {
       .filterBy('code', 200)
       .filterBy('mime', 'text/html')
       .on('progress', status => this.updateProgress(status))
-      .on('complete', status => {
-        this.stopProgress();
-        this.log(sg.cli.summarizeStatus(status))
-      })
-      .on('progress', status => this.updateProgress(status))
-      .on('complete', status => {
+      .on('end', status => {
         this.stopProgress('Complete!');
         this.ux.info(sg.cli.summarizeStatus(status));
       })
