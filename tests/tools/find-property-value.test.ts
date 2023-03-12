@@ -36,4 +36,19 @@ test('predicate', t => {
   }), 'third');
 });
 
+test('filters', t => {
+  // gotta investigate the 'contains' operator
+  
+  t.is(findPropertyValue(obj, { source: 'null', eq: null, nullIsValue: true }), null);
+  t.is(findPropertyValue(obj, { source: 'null', eq: null }), undefined);
+  t.is(findPropertyValue(obj, { source: 'null', eq: null, negate: true }), undefined);
 
+  t.is(findPropertyValue(obj, { source: 'num', eq: 1 }), 1);
+  t.is(findPropertyValue(obj, { source: 'num', gt: 0 }), 1);
+  t.is(findPropertyValue(obj, { source: 'num', lt: 0 }), undefined);
+
+  t.is(findPropertyValue(obj, { source: 'num', in: [1, 2, 3] }), 1);
+  t.is(findPropertyValue(obj, { source: 'nested.deeply.leaf', in: ['value', 'another value'] }), 'value');
+
+  t.deepEqual(findPropertyValue(obj, { source: 'nested', eq: { deeply: { leaf: 'value' }} }), { deeply: { leaf: 'value' }});
+});
