@@ -1,4 +1,9 @@
-import { Spidergram, Resource, BrowserTools as bt, BrowserTools } from '../../index.js';
+import {
+  Spidergram,
+  Resource,
+  BrowserTools as bt,
+  BrowserTools,
+} from '../../index.js';
 import is from '@sindresorhus/is';
 import _ from 'lodash';
 import { Fingerprint } from './fingerprint.js';
@@ -26,8 +31,8 @@ export async function getPageTechnologies(
     customOptions,
     Spidergram.config.pageTech,
   );
-  if (is.function_(Spidergram.config.getPageTechnologies)) {
-    return Spidergram.config.getPageTechnologies(input, options);
+  if (is.function_(Spidergram.config.getPageTechnologiesFn)) {
+    return Spidergram.config.getPageTechnologiesFn(input, options);
   } else {
     return _getPageTechnologies(input, options);
   }

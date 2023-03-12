@@ -137,7 +137,6 @@ export const analysisFlags = {
   body: Flags.string({
     char: 'b',
     multiple: true,
-    default: ['body'],
     summary: 'CSS selector for page content',
   }),
   content: Flags.boolean({

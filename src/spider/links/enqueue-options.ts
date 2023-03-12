@@ -3,6 +3,16 @@ import { ParsedUrl } from '@autogram/url-tools';
 import { InternalSpiderContext } from '../../index.js';
 import { FilterInput } from './index.js';
 
+export type RegionSelectors<
+  T extends Record<string, unknown> = Record<string, unknown>,
+> =
+  | string
+  | Record<string, string | undefined>
+  | Record<string, ({ selector: string } & T) | undefined>;
+type RegionLinkSelectorData = Record<string, string | undefined> & {
+  linkSelector: string;
+};
+
 export enum UrlMatchStrategy {
   /**
    * Matches any URLs found
@@ -39,13 +49,32 @@ export interface EnqueueUrlOptions {
   limit: number;
 
   /**
-   * The CSS selector used to find links on the page; {@apilink enqueueUrls}
-   * can be run multiple times with different options on a given page to find
-   * and capture different sets of links, e.g. navigation vs footer vs body.
+   * One or more CSS selectors used to locate links on the page.
    *
-   * @default 'body a, head link'
+   * @example A single simple selector
+   * `selectors: 'head link, body a'`
+   *
+   * @example Multiple named selectors
+   * ```
+   * selectors: {
+   *   head: 'head link',
+   *   main: '#main a',
+   *   footer: '#footer a'
+   * }
+   * ```
+   * @example Multiple named selectors with distinct region and link selectors, and extra link data
+   * ```
+   * selectors: {
+   *   sitemap: { selector: 'head', linkSelector: 'link [ref="sitemap"]', handler: 'sitemap' },
+   *   head: { selector: 'head', linkSelector: 'link' },
+   *   main: { selector: '#main', linkSelector: 'a' },
+   *   footer: { selector: 'footer', linkSelector: 'a' },
+   * }
+   * ```
+   *
+   * @default 'body a'
    */
-  selector: string;
+  selectors: RegionSelectors<RegionLinkSelectorData>;
 
   /**
    * A filter condition to determine which links will be saved as
@@ -105,7 +134,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default false
    */
-  discardUnparsableLinks: boolean;
+  discardUnparsable: boolean;
 
   /**
    * Ignore HTML tags that are found by the selector, but have no `href`
@@ -117,7 +146,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default true
    */
-  discardEmptyLinks: boolean;
+  discardEmpty: boolean;
 
   /**
    * Ignore links that only contain an anchor, e.g. `<a href="#top">Scroll to top</a>`
@@ -125,7 +154,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default true
    */
-  discardAnchorOnlyLinks: boolean;
+  discardlocalAnchors: boolean;
 
   /**
    * Ignore HTML tags with protocols other than `http` and `https`.
@@ -136,7 +165,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default true
    */
-  discardNonWebLinks: boolean;
+  discardNonWeb: boolean;
 
   /**
    * A function to modify the {@apilink Request} object before a link is
@@ -180,18 +209,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default true
    */
-  discardExistingLinks?: boolean;
-
-  /**
-   * A label applied to any {@apilink LinksTo} objects created when the
-   * URLs are saved to the project graph. This can be used in conjunction
-   * with a restrictive selector to record which links appeared in body
-   * text, which links appeared in navigation menus, and so on.
-   *
-   * @default {undefined}
-   * @type {string}
-   */
-  linkLabel?: string;
+  discardExisting?: boolean;
 
   /**
    * A label applied to any {@apilink Request} objects created when the

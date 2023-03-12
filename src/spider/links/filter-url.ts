@@ -5,7 +5,7 @@ import arrify from 'arrify';
 import { UniqueUrl } from '../../model/index.js';
 import { SpiderContext, UrlMatchStrategy } from '../index.js';
 
-export function filterUrls(
+export function filterUrl(
   context: SpiderContext,
   input: UniqueUrl | ParsedUrl,
   filters: FilterInput,

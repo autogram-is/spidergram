@@ -6,11 +6,5 @@ export async function pageHandler(context: SpiderContext) {
 
   await enqueueUrls();
 
-  if (context.urlOptions.checkSitemaps) {
-    await enqueueUrls({
-      selector: 'head link [ref="sitemap"]',
-      handler: 'sitemap',
-    });
-  }
   return Promise.resolve();
 }

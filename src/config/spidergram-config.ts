@@ -1,5 +1,10 @@
 import { Spidergram } from './spidergram.js';
-import { SpiderOptions, Query } from '../index.js';
+import {
+  SpiderOptions,
+  Query,
+  PageAnalysisOptions,
+  PageAnalyzer,
+} from '../index.js';
 import { UrlMutators } from '@autogram/url-tools';
 import { NormalizerOptions } from './global-normalizer.js';
 import {
@@ -129,13 +134,24 @@ export interface SpidergramConfig extends Record<string, unknown> {
   /**
    * Extraction options for structured metadata on crawled pages.
    */
+  pageAnalysis?: PageAnalysisOptions;
+
+  /**
+   * An async {@link PageAnalyzer|Processor} function to be used as an override
+   * for the default page processor.
+   */
+  analyzePageFn?: PageAnalyzer;
+
+  /**
+   * Extraction options for structured metadata on crawled pages.
+   */
   pageContent?: PageContentOptions;
 
   /**
    * An async {@link PageContentExtractor|Extractor} function to be used as an override
    * for the default content extractor.
    */
-  getPageContent?: PageContentExtractor;
+  getPageContentFn?: PageContentExtractor;
 
   /**
    * Extraction options for structured metadata on crawled pages.
@@ -146,7 +162,7 @@ export interface SpidergramConfig extends Record<string, unknown> {
    * An async {@link PageDataExtractor|Extractor} function to be used as an override
    * for the default page extractor.
    */
-  getPageData?: PageDataExtractor;
+  getPageDataFn?: PageDataExtractor;
 
   /**
    * Extraction options for structured metadata on crawled pages.
@@ -157,7 +173,7 @@ export interface SpidergramConfig extends Record<string, unknown> {
    * An async {@link PageTechnologyExtractor|Extractor} function to be used as an override
    * for the default technology fingerprinting function.
    */
-  getPageTechnologies?: PageTechnologyExtractor;
+  getPageTechnologiesFn?: PageTechnologyExtractor;
 
   /**
    * A key/value collection of pre-written queries that can be used
@@ -191,9 +207,9 @@ export interface SpidergramConfig extends Record<string, unknown> {
 
   /**
    * A custom setup function to be run after Spidergram has been initialized
-   * from the settings in its config file. The finalize hook receives a reference
+   * from the settings in its config file. The finalizer hook receives a reference
    * to the global Spidergram singleton object, and can use its methods (`setLogger`
    * and so on) to alter the global configuration.
    */
-  finalize?: (context: Spidergram) => Promise<void>;
+  finalizer?: (context: Spidergram) => Promise<void>;
 }

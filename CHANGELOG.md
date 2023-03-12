@@ -1,5 +1,12 @@
 # Spidergram Changelog
 
+## v0.9.3 - 23-03-13
+
+- `EntityQuery` execution now works when passed a string collection name.
+- `Spider` and `WorkerQuery` events names are now standardized on 'progress' and 'end'. The first parameter for both is a JobStatus object, making it easy to route the event to a shared progress bar or status display function.
+- Events subscription methods return references to instances; this makes it easy to chain `spider.on(...)` and `worker.on(...)` calls during setup.
+- `UrlEnqueueOptions.selector` is now `UrlEnqueueOptions.selectors`, and can accept a single CSS selector or a dictionary of named CSS selectors to categorize found links. (For example, header vs footer vs. body links). A `remapLinks` helper function, and the `relink` CLI command, can be used to rebuild existing LinkTo relationships.
+
 ## v0.9.2 - 23-03-10
 
 - The `crawl`, `analyze`, and `probe` CLI functions now use global defaults.

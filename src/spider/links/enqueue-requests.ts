@@ -4,7 +4,7 @@ import { UniqueUrl } from '../../model/index.js';
 import { SpiderContext } from '../context.js';
 import { Spidergram } from '../../config/index.js';
 import { Robots } from '../../tools/robots.js';
-import { EnqueueUrlOptions, filterUrls } from './index.js';
+import { EnqueueUrlOptions, filterUrl } from './index.js';
 import _ from 'lodash';
 
 export async function enqueueRequests(
@@ -35,7 +35,7 @@ export async function enqueueRequests(
       continue;
     }
 
-    if (!filterUrls(context, uu, options.enqueue)) {
+    if (!filterUrl(context, uu, options.enqueue)) {
       continue;
     }
 

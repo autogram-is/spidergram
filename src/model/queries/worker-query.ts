@@ -6,8 +6,8 @@ import { Entity, JobStatus, Spidergram } from '../../index.js';
 
 type WorkerEventMap = Record<PropertyKey, unknown[]> & {
   progress: [status: JobStatus, item: Entity, message?: string];
-  fail: [status: JobStatus, error?: Error, message?: string];
-  complete: [status: JobStatus];
+  failure: [status: JobStatus, error?: Error, message?: string];
+  end: [status: JobStatus];
 };
 
 type WorkerEventType = keyof WorkerEventMap;
@@ -66,18 +66,21 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
   on<T extends WorkerEventType>(
     event: T,
     listener: WorkerEventListener<T>,
-  ): void {
+  ): this {
     this.events.on<T>(event, listener);
+    return this;
   }
 
   off<T extends WorkerEventType>(
     event: T,
     listener: WorkerEventListener<T>,
-  ): void {
+  ): this {
     if (listener) {
       this.events.removeListener<WorkerEventType>(event, listener);
+      return this;
     } else {
       this.events.removeAllListeners<WorkerEventType>(event);
+      return this;
     }
   }
 
@@ -123,7 +126,7 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
         this.updateStatus(false);
         this.status.lastError = error;
         this.events.emit('progress', this.status, item, error.message);
-        this.events.emit('fail', this.status, error, error.message);
+        this.events.emit('failure', this.status, error, error.message);
       });
   }
 

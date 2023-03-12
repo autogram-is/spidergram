@@ -86,8 +86,8 @@ export async function getPageContent(
   input: string | cheerio.Root | Resource,
   customOptions: PageContentOptions = {},
 ) {
-  if (is.function_(Spidergram.config.getPageContent)) {
-    return Spidergram.config.getPageContent(input, customOptions);
+  if (is.function_(Spidergram.config.getPageContentFn)) {
+    return Spidergram.config.getPageContentFn(input, customOptions);
   } else {
     return _getPageContent(input, customOptions);
   }
@@ -98,8 +98,11 @@ async function _getPageContent(
   input: string | cheerio.Root | Resource,
   customOptions: PageContentOptions = {},
 ) {
-  const options = _.defaultsDeep(customOptions, Spidergram.config.pageContent);
-  const htmltotext: HtmlToTextOptions = options.htmltotext ?? {};
+  const options: PageContentOptions = _.defaultsDeep(
+    customOptions,
+    Spidergram.config.pageContent,
+  );
+  const htmltotext: HtmlToTextOptions = options.htmlToText ?? {};
   const markup = HtmlTools.getMarkup(input);
 
   let results: PageContent | undefined;
