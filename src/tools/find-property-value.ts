@@ -52,7 +52,8 @@ export interface PropertySource extends Record<string, unknown> {
   gt?: string | number;
 
   /**
-   * Only return the value if it is contained in this.
+   * Only return the value if it is contained in this. If the value is an array,
+   * only return array values that are contained in this.
    */
   in?: unknown[] | string;
 
@@ -139,11 +140,18 @@ function checkPropertyValue(
     }
   } else if (conditions.in !== undefined && conditions.in.length > 0) {
     let foundMatch = false;
-    for (const condition of conditions.in) {
-      if (_.isEqual(condition, value)) {
-        foundMatch = true;
-        if (conditions.negate) continue;
-        return value;
+    if (Array.isArray(value)) {
+      const returnValue = _.intersection(conditions.in, value);
+      if (returnValue.length === 0) return undefined;
+      if (returnValue.length === 1) return returnValue[0]
+      return returnValue;
+    } else {
+      for (const condition of conditions.in) {
+        if (_.isEqual(condition, value)) {
+          foundMatch = true;
+          if (conditions.negate) continue;
+          return value;
+        }
       }
     }
     if (conditions.negate && foundMatch) return undefined;

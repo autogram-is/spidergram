@@ -4,6 +4,7 @@ import { findPropertyValue } from '../../src/index.js';
 const obj = {
   num: 1,
   arr: ['first', 'second', 'third'],
+  numArr: [1, 2, 3],
   str: 'string',
   null: null,
   nested: {
@@ -32,8 +33,8 @@ test('css selectors', t => {
 test('predicate', t => {
   t.is(findPropertyValue(obj, {
     source: 'arr',
-    fn: val => Array.isArray(val) ? val.pop() : undefined
-  }), 'third');
+    fn: val => Array.isArray(val) ? val[1] : undefined
+  }), 'second');
 });
 
 test('filters', t => {
@@ -51,4 +52,7 @@ test('filters', t => {
   t.is(findPropertyValue(obj, { source: 'nested.deeply.leaf', in: ['value', 'another value'] }), 'value');
 
   t.deepEqual(findPropertyValue(obj, { source: 'nested', eq: { deeply: { leaf: 'value' }} }), { deeply: { leaf: 'value' }});
+
+  t.is(findPropertyValue(obj, { source: 'arr', in: ['fourth', 'third'] }), 'third');
+  t.is(findPropertyValue(obj, { source: 'arr', in: ['fourth'] }), undefined);
 });
