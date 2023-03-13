@@ -2,9 +2,9 @@ import { Page, PageScreenshotOptions } from 'playwright';
 import { Spidergram } from '../config/spidergram.js';
 import is from '@sindresorhus/is';
 import { Readable } from 'node:stream';
-import { DiskDriver } from 'typefs';
 import arrify from 'arrify';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
+import { JobStatus } from '../services/job-status.js';
 
 export interface Viewport {
   width: number;
@@ -19,14 +19,11 @@ export enum Orientation {
 
 export interface ScreenshotOptions {
   /**
-   * A TypeFS disk driver instance; can be obtained by calling `await Project.files()`
-   * in code that already has a Spidergram Project context.
+   * The name of a storage bucket to save screenshots into.
    *
    * If no storage bucket is passed in, the project's default bucket is used.
-   *
-   * @type {?DiskDriver}
    */
-  storage?: DiskDriver;
+  storage?: string;
 
   /**
    * An optional subdirectory inside the storage bucket to use when saving the screenshots.
@@ -95,9 +92,20 @@ export interface ScreenshotOptions {
   limit: number;
 }
 
-export class ScreenshotTool extends AsyncEventEmitter<{
-  capture: [filename: string];
-}> {
+type ScreenshotEventMap = Record<PropertyKey, unknown[]> & {
+  progress: [status: JobStatus, message?: string],
+  end: [status: JobStatus],
+};
+
+type ScreenshotEventType = keyof ScreenshotEventMap;
+type ScreenshotEventParams<T extends ScreenshotEventType> = ScreenshotEventMap[T];
+type ScreenshotEventListener<T extends ScreenshotEventType> = (
+  ...args: ScreenshotEventParams<T>
+) => unknown;
+
+
+
+export class ScreenshotTool {
   // Since this exists as a global const, new presets can
   // be added and removed at will. Knock yourself out.
   static ViewportPresets: Record<string, Viewport> = {
@@ -107,6 +115,37 @@ export class ScreenshotTool extends AsyncEventEmitter<{
     fhd: { width: 1920, height: 1080 },
   };
 
+  protected events = new AsyncEventEmitter<ScreenshotEventMap>();
+
+  status: JobStatus = {
+    startTime: 0,
+    finishTime: 0,
+    finished: 0,
+    failed: 0,
+    total: 0,
+  };
+
+  on<T extends ScreenshotEventType>(
+    event: T,
+    listener: ScreenshotEventListener<T>,
+  ): this {
+    this.events.on<T>(event, listener);
+    return this;
+  }
+
+  off<T extends ScreenshotEventType>(
+    event: T,
+    listener: ScreenshotEventListener<T>,
+  ): this {
+    if (listener) {
+      this.events.removeListener<ScreenshotEventType>(event, listener);
+      return this;
+    } else {
+      this.events.removeAllListeners<ScreenshotEventType>(event);
+      return this;
+    }
+  }
+
   protected defaults: ScreenshotOptions = {
     directory: 'screenshots',
     viewports: ['hd'],
@@ -114,18 +153,19 @@ export class ScreenshotTool extends AsyncEventEmitter<{
     selectors: [],
     type: 'png',
     fullPage: false,
-    limit: Infinity,
+    limit: 1_000,
   };
 
-  async capture(page: Page, options: Partial<ScreenshotOptions> = {}) {
+  constructor(public options: Partial<ScreenshotOptions> = {}) { }
+
+  async capture(page: Page) {
     const sg = await Spidergram.load();
-    const settings: ScreenshotOptions & { storage: DiskDriver } = {
+    const settings: ScreenshotOptions = {
       ...this.defaults,
-      storage: sg.files(),
-      ...options,
+      ...this.options,
     };
+
     const {
-      storage,
       directory,
       viewports,
       orientation,
@@ -135,9 +175,13 @@ export class ScreenshotTool extends AsyncEventEmitter<{
       limit,
     } = settings;
 
-    const results: string[] = [];
+    const storage = sg.files(settings.storage);
 
     const materializedViewports = this.expandViewports(viewports, orientation);
+
+    this.status.startTime = Date.now();
+    this.status.total = Object.keys(materializedViewports).length;
+
     for (const v in materializedViewports) {
       await page.setViewportSize(materializedViewports[v]);
       const pwOptions: PageScreenshotOptions = { type, fullPage, scale: 'css' };
@@ -155,8 +199,9 @@ export class ScreenshotTool extends AsyncEventEmitter<{
 
         const buffer = await page.screenshot(pwOptions);
         await storage.writeStream(filename, Readable.from(buffer));
-        this.emit('capture', filename);
-        results.push(filename);
+
+        this.status.finished++;
+        this.events.emit('progress', this.status, filename);
       } else {
         for (const selector of selectors) {
           let filename = `${directory}/${this.getFilename(
@@ -167,7 +212,14 @@ export class ScreenshotTool extends AsyncEventEmitter<{
           )}.${type}`;
           const max = Math.min(limit, await page.locator(selector).count());
 
-          if (max === 0) continue;
+          if (max === 0) {
+            this.status.total++;
+            this.status.finished++;
+            this.events.emit('progress', this.status, 'No selectors matched');  
+            continue;
+          } else {
+            this.status.total += max;
+          }
 
           for (let l = 0; l < max; l++) {
             const locator = page.locator(selector).nth(l);
@@ -182,17 +234,20 @@ export class ScreenshotTool extends AsyncEventEmitter<{
             }
             const buffer = await locator.screenshot(pwOptions);
             await storage.writeStream(filename, Readable.from(buffer));
-            this.emit('capture', filename);
-            results.push(filename);
+
+            this.status.finished++;
+            this.events.emit('progress', this.status, filename);
           }
         }
       }
     }
 
-    return Promise.resolve(results);
+    this.status.finishTime = Date.now();
+    this.events.emit('end', this.status);
+    return Promise.resolve(this.status);
   }
 
-  presetsToViewports(input: string | string[]): Record<string, Viewport> {
+  protected presetsToViewports(input: string | string[]): Record<string, Viewport> {
     let results: Record<string, Viewport> = {};
     for (const k of arrify(input)) {
       if (k === 'all') {
@@ -217,24 +272,24 @@ export class ScreenshotTool extends AsyncEventEmitter<{
     return results;
   }
 
-  isPortrait(input: Viewport): boolean {
+  protected isPortrait(input: Viewport): boolean {
     return input.height > input.width;
   }
 
-  rotateViewport(input: Viewport): Viewport {
+  protected rotateViewport(input: Viewport): Viewport {
     return { width: input.height, height: input.width };
   }
 
-  forcePortrait(input: Viewport): Viewport {
+  protected forcePortrait(input: Viewport): Viewport {
     return this.isPortrait(input) ? input : this.rotateViewport(input);
   }
 
-  forceLandscape(input: Viewport): Viewport {
+  protected forceLandscape(input: Viewport): Viewport {
     return this.isPortrait(input) ? this.rotateViewport(input) : input;
   }
 
   // In theory, we could use this for subdirectories in addition to long filenames.
-  getFilename(
+  protected getFilename(
     url: string,
     viewport: string,
     selector?: string,
@@ -249,7 +304,7 @@ export class ScreenshotTool extends AsyncEventEmitter<{
       .replaceAll('--', '-');
   }
 
-  expandViewports(
+  protected expandViewports(
     names?: string | string[],
     orientation?: string,
   ): Record<string, Viewport> {

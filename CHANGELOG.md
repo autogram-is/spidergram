@@ -3,11 +3,12 @@
 ## v0.9.4 - 23-03-15
 
 - `EntityQuery` execution now works when passed a string collection name.
-- `Spider` and `WorkerQuery` events names are now standardized on 'progress' and 'end'. The first parameter for both is a JobStatus object, making it easy to route the event to a shared progress bar or status display function.
+- `Spider`, `WorkerQuery`, and `ScreenshotTool` events are now standardized on 'progress' and 'end'. The first parameter for both is a JobStatus object, making it easy to route the event to a shared progress bar or status display function.
 - Events subscription methods return references to instances; this makes it easy to chain `spider.on(...)` and `worker.on(...)` calls during setup.
 - `UrlEnqueueOptions.selector` is now `UrlEnqueueOptions.selectors`, and can accept a single CSS selector or a dictionary of named CSS selectors to categorize found links. (For example, header vs footer vs. body links). A `remapLinks` helper function, and the `relink` CLI command, can be used to rebuild existing LinkTo relationships.
 - The `analyzePage` helper function runs data extracton, content analysis, and technology fingerprinting on a `Resource` using the current project configuration. Custom configuration can be passed in at runtime as well.
 - `analyzePage` also supports simple property normalization via `propertyMap` on its options object. New properties on the Resource can be created from existing properties found during data extraction and content analysis, with fallbacks if specific properties weren't found.
+- The `screenshot` CLI command now attempts to give a progress update.
 
 ## v0.9.3 - 23-03-12
 

@@ -2,8 +2,8 @@ import {
   CLI,
   SgCommand,
   ScreenshotTool,
-  ScreenshotOptions,
   Orientation,
+  Spidergram,
 } from '../../index.js';
 import { Flags } from '@oclif/core';
 import { PlaywrightCrawler } from 'crawlee';
@@ -67,12 +67,10 @@ export default class Screenshot extends SgCommand {
   };
 
   async run() {
+    const sg = await Spidergram.load();
     const { argv: urls, flags } = await this.parse(Screenshot);
 
-    const captureTool = new ScreenshotTool();
-    captureTool.on('capture', filename => this.ux.info(`Saved ${filename}...`));
-
-    const options: Partial<ScreenshotOptions> = {
+    const captureTool = new ScreenshotTool({
       directory: flags.directory,
       viewports: [flags.viewport],
       orientation: flags.orientation,
@@ -80,11 +78,18 @@ export default class Screenshot extends SgCommand {
       type: flags.format,
       fullPage: flags.fullpage,
       limit: flags.limit ?? Infinity,
-    };
+    })
+    .on('progress', (status, message) => this.ux.action.status = message ?? '')
+    .on('end', status => {
+      this.ux.action.stop();
+      this.ux.info(sg.cli.summarizeStatus(status))
+    });
+
 
     const crawler = new PlaywrightCrawler({
       requestHandler: async ({ page }) => {
-        await captureTool.capture(page, options);
+        this.ux.action.start(`Capturing ${page.url()}`);
+        await captureTool.capture(page);
       },
     });
 
