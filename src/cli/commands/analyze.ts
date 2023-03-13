@@ -46,7 +46,7 @@ export default class Analyze extends SgCommand {
       .filterBy('mime', 'text/html')
       .on('progress', status => this.updateProgress(status))
       .on('end', status => {
-        this.stopProgress('Complete!');
+        this.stopProgress();
         this.log(sg.cli.summarizeStatus(status));
       })
       .run(async resource => {

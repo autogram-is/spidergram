@@ -105,7 +105,11 @@ export function findPropertyValue<T = unknown>(
           typeof source.selector === 'string'
         ) {
           const t = getCheerio(v)(source.selector).first().text().trim();
-          if (t.length > 0) return t;
+          if (t.length > 0) {
+            v = t;
+          } else {
+            v = undefined;
+          }
         } else {
           v = checkPropertyValue(v, source);
         }

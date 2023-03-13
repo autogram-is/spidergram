@@ -1,6 +1,11 @@
 # Spidergram Changelog
 
-## v0.9.5 - 23-03-15
+## v0.9.6 - 23-03-13
+
+- Unmatched selectors in `propertyMap` no longer return the full HTML document.
+- Mapping to deep property paths now sets `object.prop.subprop` rather than `object['prop.subprop']`
+
+## v0.9.5 - 23-03-13
 
 - `EntityQuery` execution now works when passed a string collection name.
 - `Spider`, `WorkerQuery`, and `ScreenshotTool` events are now standardized on 'progress' and 'end'. The first parameter for both is a JobStatus object, making it easy to route the event to a shared progress bar or status display function.

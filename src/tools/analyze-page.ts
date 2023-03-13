@@ -58,8 +58,9 @@ export async function analyzePage(
   resource: Resource,
   customOptions: PageAnalysisOptions = {},
 ): Promise<void> {
-  if (is.function_(Spidergram.config.analyzePageFn)) {
-    return Spidergram.config.analyzePageFn(resource, customOptions);
+  const sg = await Spidergram.load();
+  if (is.function_(sg.config.analyzePageFn)) {
+    return sg.config.analyzePageFn(resource, customOptions);
   } else {
     return _analyzePage(resource, customOptions);
   }
@@ -73,7 +74,7 @@ async function _analyzePage(
     customOptions,
     Spidergram.config.pageAnalysis,
   );
-
+  
   if (options.data) {
     resource.data = await HtmlTools.getPageData(resource, options.data);
   }
@@ -94,7 +95,7 @@ async function _analyzePage(
 
   if (options.propertyMap) {
     for (const [prop, source] of Object.entries(options.propertyMap)) {
-      resource[prop] = findPropertyValue(resource, source);
+      resource.set(prop, findPropertyValue(resource, source));
     }
   }
 

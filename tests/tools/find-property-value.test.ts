@@ -28,6 +28,7 @@ test('simple paths', t => {
 test('css selectors', t => {
   t.is(findPropertyValue(obj, { source: 'html', selector: 'h1' }), 'headline');
   t.is(findPropertyValue(obj, { source: 'html', selector: 'p' }), 'first paragraph');
+  t.is(findPropertyValue(obj, { source: 'html', selector: 'iframe' }), undefined);
 });
 
 test('predicate', t => {
