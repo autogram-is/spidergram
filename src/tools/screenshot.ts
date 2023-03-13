@@ -93,17 +93,16 @@ export interface ScreenshotOptions {
 }
 
 type ScreenshotEventMap = Record<PropertyKey, unknown[]> & {
-  progress: [status: JobStatus, message?: string],
-  end: [status: JobStatus],
+  progress: [status: JobStatus, message?: string];
+  end: [status: JobStatus];
 };
 
 type ScreenshotEventType = keyof ScreenshotEventMap;
-type ScreenshotEventParams<T extends ScreenshotEventType> = ScreenshotEventMap[T];
+type ScreenshotEventParams<T extends ScreenshotEventType> =
+  ScreenshotEventMap[T];
 type ScreenshotEventListener<T extends ScreenshotEventType> = (
   ...args: ScreenshotEventParams<T>
 ) => unknown;
-
-
 
 export class ScreenshotTool {
   // Since this exists as a global const, new presets can
@@ -156,7 +155,7 @@ export class ScreenshotTool {
     limit: 1_000,
   };
 
-  constructor(public options: Partial<ScreenshotOptions> = {}) { }
+  constructor(public options: Partial<ScreenshotOptions> = {}) {}
 
   async capture(page: Page) {
     const sg = await Spidergram.load();
@@ -215,7 +214,7 @@ export class ScreenshotTool {
           if (max === 0) {
             this.status.total++;
             this.status.finished++;
-            this.events.emit('progress', this.status, 'No selectors matched');  
+            this.events.emit('progress', this.status, 'No selectors matched');
             continue;
           } else {
             this.status.total += max;
@@ -247,7 +246,9 @@ export class ScreenshotTool {
     return Promise.resolve(this.status);
   }
 
-  protected presetsToViewports(input: string | string[]): Record<string, Viewport> {
+  protected presetsToViewports(
+    input: string | string[],
+  ): Record<string, Viewport> {
     let results: Record<string, Viewport> = {};
     for (const k of arrify(input)) {
       if (k === 'all') {

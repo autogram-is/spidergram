@@ -79,12 +79,14 @@ export default class Screenshot extends SgCommand {
       fullPage: flags.fullpage,
       limit: flags.limit ?? Infinity,
     })
-    .on('progress', (status, message) => this.ux.action.status = message ?? '')
-    .on('end', status => {
-      this.ux.action.stop();
-      this.ux.info(sg.cli.summarizeStatus(status))
-    });
-
+      .on(
+        'progress',
+        (status, message) => (this.ux.action.status = message ?? ''),
+      )
+      .on('end', status => {
+        this.ux.action.stop();
+        this.ux.info(sg.cli.summarizeStatus(status));
+      });
 
     const crawler = new PlaywrightCrawler({
       requestHandler: async ({ page }) => {

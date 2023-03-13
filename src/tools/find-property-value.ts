@@ -20,7 +20,7 @@ export interface PropertySource extends Record<string, unknown> {
   /**
    * If the source property is found, use this function to filter it or convert it to
    * another format.
-   * 
+   *
    * If this property is set, conditional properties (eq, lt, gt, in, contains, megate,
    * and match) **WILL NOT** be evaluated.
    */
@@ -60,7 +60,7 @@ export interface PropertySource extends Record<string, unknown> {
    * Only return the value if it is a string that matches this.
    */
   match?: string;
-  
+
   /**
    * Only return the value if it contains this.
    */
@@ -97,10 +97,12 @@ export function findPropertyValue<T = unknown>(
     } else {
       let v = _.get(object, source.source);
       if (!undef(v, source.nullIsValue)) {
-
         if (source.fn) {
           v = source.fn(v, source);
-        } else if (typeof v === 'string' && typeof source.selector === 'string') {
+        } else if (
+          typeof v === 'string' &&
+          typeof source.selector === 'string'
+        ) {
           const t = getCheerio(v)(source.selector).first().text().trim();
           if (t.length > 0) return t;
         } else {
@@ -115,11 +117,14 @@ export function findPropertyValue<T = unknown>(
 }
 
 /**
- * This internal function applies the filtering logic for potential property values; 
+ * This internal function applies the filtering logic for potential property values;
  * if `conditions.selector` was populated, these checks are run after the selector.
  * if `conditions.fn` is populated, thse checks **WILL NOT** be run.
  */
-function checkPropertyValue(value: unknown, conditions: PropertySource): unknown {
+function checkPropertyValue(
+  value: unknown,
+  conditions: PropertySource,
+): unknown {
   if (conditions.eq !== undefined) {
     if (_.isEqual(conditions.eq, value)) {
       return conditions.negate ? undefined : value;
@@ -141,7 +146,7 @@ function checkPropertyValue(value: unknown, conditions: PropertySource): unknown
         return value;
       }
     }
-    if (conditions.negate && foundMatch) return undefined; 
+    if (conditions.negate && foundMatch) return undefined;
   } else if (conditions.contains !== undefined) {
     if (Array.isArray(value) && value.includes(conditions.contains)) {
       return conditions.negate ? undefined : value;
@@ -152,6 +157,6 @@ function checkPropertyValue(value: unknown, conditions: PropertySource): unknown
 }
 
 function undef(value: unknown, nullIsValue = false): value is undefined {
-  if ((value === undefined) || ( value === null && !nullIsValue)) return true;
+  if (value === undefined || (value === null && !nullIsValue)) return true;
   return false;
 }
