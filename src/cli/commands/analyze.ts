@@ -41,18 +41,20 @@ export default class Analyze extends SgCommand {
 
     this.startProgress('Analyzing saved pages...');
 
-    await new WorkerQuery<Resource>('resources')
+    const worker = new WorkerQuery<Resource>('resources')
       .filterBy('code', 200)
-      .filterBy('mime', 'text/html')
-      .on('progress', status => this.updateProgress(status))
-      .on('end', status => {
-        this.stopProgress();
-        this.log(sg.cli.summarizeStatus(status));
-      })
-      .run(async resource => {
-        return analyzePage(resource, options)
-          .then(() => sg.arango.push(resource))
-          .then(() => resource.url);
-      });
+      .filterBy('mime', 'text/html');
+
+    worker.on('progress', status => this.updateProgress(status));
+    worker.on('end', status => {
+      this.stopProgress();
+      this.log(sg.cli.summarizeStatus(status));
+    });
+    
+    await worker.run(async resource => {
+      return analyzePage(resource, options)
+        .then(() => sg.arango.push(resource))
+        .then(() => resource.url);
+    });
   }
 }
