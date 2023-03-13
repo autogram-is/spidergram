@@ -4,6 +4,8 @@
 
 - Unmatched selectors in `propertyMap` no longer return the full HTML document.
 - Mapping to deep property paths now sets `object.prop.subprop` rather than `object['prop.subprop']`
+- Nicer handling of single-column result sets in `report` CLI
+- Spidergram-specific env variables now shown in `project` CLI output
 
 ## v0.9.5 - 23-03-13
 
