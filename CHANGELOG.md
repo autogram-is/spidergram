@@ -1,5 +1,11 @@
 # Spidergram Changelog
 
+## v0.9.8 - 23-03-15
+
+- The `getPageContent` function now now uses Cheerio to narrow down the page to its content region before passing HTML into `htmlToText`. Although HtmlToText can accept body selectors in its own config, its selector engine lacks support for some common CSS combinators, making common queries fail silently.
+- Several deprecated options have been culled from the `EnqueueUrlOptions` interface. Flags that controlled robots.txt and sitemap.xml auto-discovery previously lived here, but complicated the URL search code uncessarily. As we've accumualted better lifecycle control options for the Spider itself, they're no longer needed.
+- An additional option — `regions` — has been added to `EnqueueUrlOptions`. It can contain a dictionary of named selectors that will be used to chop the page up into named regions before searching for links. Links that are found will be labeled with the name of the region they're found in, and those labels will be preserved in the `LinksTo.label` property in the final crawl database. That property can then be used to filter graph traversal queries that map paths through a site. Super fun stuff.
+
 ## v0.9.7 - 23-03-14
 
 - Config can now live in a YAML file — it's clunky for large structured configuration blocks, but just right for a handful of properties like DB connection strings or a few normalizer settings.
