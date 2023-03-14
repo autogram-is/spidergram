@@ -31,7 +31,9 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
 
   static get status() {
     const env = Object.fromEntries(
-      Object.entries(process.env).filter(entry => entry[0].startsWith('SPIDERGRAM_'))
+      Object.entries(process.env).filter(entry =>
+        entry[0].startsWith('SPIDERGRAM_'),
+      ),
     );
 
     return {
@@ -41,7 +43,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
       loaded: !Spidergram._instance?._needsLoad,
       configFile: Spidergram._instance?.configFile,
       arango: Spidergram._instance?._arango !== undefined,
-      env
+      env,
     };
   }
 

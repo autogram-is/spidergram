@@ -50,7 +50,7 @@ export default class Analyze extends SgCommand {
       this.stopProgress();
       this.log(sg.cli.summarizeStatus(status));
     });
-    
+
     await worker.run(async resource => {
       return analyzePage(resource, options)
         .then(() => sg.arango.push(resource))

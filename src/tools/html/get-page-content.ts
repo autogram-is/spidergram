@@ -105,11 +105,14 @@ async function _getPageContent(
     customOptions,
     Spidergram.config.pageContent,
   );
-  const htmlOptions: HtmlToTextOptions = options.htmlToText ?? Spidergram.config.htmlToText ?? {};
+  const htmlOptions: HtmlToTextOptions =
+    options.htmlToText ?? Spidergram.config.htmlToText ?? {};
   let markup = '';
 
   if (options.selector) {
-    const selectors = Array.isArray(options.selector) ? options.selector : [options.selector];
+    const selectors = Array.isArray(options.selector)
+      ? options.selector
+      : [options.selector];
     const $ = getCheerio(input);
     for (const s of selectors) {
       markup = $(s).html() ?? '';
@@ -118,7 +121,6 @@ async function _getPageContent(
   } else {
     markup = getMarkup(input);
   }
-
 
   let results: PageContent | undefined;
 

@@ -30,7 +30,7 @@ export default class ProjectInfo extends SgCommand {
     }
     if (!is.emptyObject(Spidergram.status.env)) {
       this.log(`${chalk.bold('Environment variables:')}`);
-      CliUx.ux.styledJSON(Spidergram.status.env);  
+      CliUx.ux.styledJSON(Spidergram.status.env);
     }
   }
 }

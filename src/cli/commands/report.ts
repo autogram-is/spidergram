@@ -263,18 +263,27 @@ debug: Display the query spec and generated AQL statement without running it
 
         if (results.length === 0) {
           this.ux.info('No matching results.');
-
-        } else if (['string', 'number', 'boolean', 'null'].includes(typeof results[0])) {
+        } else if (
+          ['string', 'number', 'boolean', 'null'].includes(typeof results[0])
+        ) {
           // 1. If it's an array of primitives (strings, numbers, etc), print the list.
-          this.ux.table(results.map(item => { return { value: item } } ), { value: { header: 'Results' } });
-
+          this.ux.table(
+            results.map(item => {
+              return { value: item };
+            }),
+            { value: { header: 'Results' } },
+          );
         } else if ('_rev' in results[0]) {
           // 2. If it looks like an array of raw documents, just print their IDs
           this.ux.table(
-            results.map(item => { return { collection: (item._id as string).split('/')[0], id: (item._id as string).split('/')[1] } } ),
-            { collection: { header: 'Collection' }, id: { header: 'ID' } }
+            results.map(item => {
+              return {
+                collection: (item._id as string).split('/')[0],
+                id: (item._id as string).split('/')[1],
+              };
+            }),
+            { collection: { header: 'Collection' }, id: { header: 'ID' } },
           );
-
         } else {
           // 3. If it's an array of objects, extract their keys to use as column headers and output a CLI table.
           const columns: Record<string, Record<string, string>> = {};

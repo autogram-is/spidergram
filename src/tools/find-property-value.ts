@@ -147,7 +147,7 @@ function checkPropertyValue(
     if (Array.isArray(value)) {
       const returnValue = _.intersection(conditions.in, value);
       if (returnValue.length === 0) return undefined;
-      if (returnValue.length === 1) return returnValue[0]
+      if (returnValue.length === 1) return returnValue[0];
       return returnValue;
     } else {
       for (const condition of conditions.in) {

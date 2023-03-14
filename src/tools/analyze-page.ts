@@ -74,7 +74,7 @@ async function _analyzePage(
     customOptions,
     Spidergram.config.pageAnalysis,
   );
-  
+
   if (options.data) {
     resource.data = await HtmlTools.getPageData(resource, options.data);
   }
