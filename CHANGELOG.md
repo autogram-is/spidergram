@@ -1,5 +1,10 @@
 # Spidergram Changelog
 
+## v0.9.6 - 23-03-15
+
+- Config can now live in a YAML file — it's clunky for large structured configuration blocks, but just right for a handful of properties like DB connection strings or a few normalizer settings.
+- The `getPageData` function now parses JSON and JSON+LD chunks by default. Normal scripts are still unparsed by default, but JSON+LD in particular often holds a wealth of useful Schema.org properties and configuration data. In Drupal, for example, the `drupal-settings-json` block often exposes internal category and tag information for each piece of content.
+
 ## v0.9.6 - 23-03-13
 
 - Unmatched selectors in `propertyMap` no longer return the full HTML document.
