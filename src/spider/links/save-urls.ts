@@ -15,7 +15,7 @@ import _ from 'lodash';
 export async function saveUrls(
   context: SpiderContext,
   links: HtmlTools.FoundLink | HtmlTools.FoundLink[],
-  customOptions: Partial<EnqueueUrlOptions> = {},
+  customOptions: EnqueueUrlOptions = {},
 ) {
   const options: EnqueueUrlOptions = _.defaultsDeep(
     customOptions,
@@ -53,38 +53,6 @@ export async function saveUrls(
 
     if (!filterUrl(context, uu, options.save)) {
       continue;
-    }
-
-    // This approach is pretty inefficient, but it'll do for new.
-    // If the 'always check' flag is set, and we're processing a top-level URL,
-    // also save a version of the URL with sitemap.xml appended. We might
-    // want to handle this in a parallel track to ensure that any newly
-    // spotted domain gets both sitemap and robots.txt analysis if enabled, even
-    // if the link to it isn't the top level index.
-    if (is.emptyArray(uu.parsed?.path)) {
-      if (options.checkRobots) {
-        const ru = new NormalizedUrl(uu.url);
-        ru.pathname = 'robots.txt';
-        const ruu = new UniqueUrl({
-          url: ru,
-          handler: 'robotstxt',
-          forefrontRequest: true,
-        });
-        if (!options.discardExisting || !(await graph.exists(ruu))) {
-          results.uniques.push(ruu);
-        }
-      } else if (options.checkSitemaps) {
-        const nu = new NormalizedUrl(uu.url);
-        nu.pathname = 'sitemap.xml';
-        const suu = new UniqueUrl({
-          url: nu,
-          handler: 'sitemap',
-          forefrontRequest: true,
-        });
-        if (!options.discardExisting || !(await graph.exists(suu))) {
-          results.uniques.push(suu);
-        }
-      }
     }
 
     // If 'discardExistingLinks' is set, we don't bother including URLs

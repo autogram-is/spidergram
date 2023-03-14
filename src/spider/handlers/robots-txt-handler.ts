@@ -47,15 +47,14 @@ export async function robotsTxtHandler(context: SpiderContext) {
     hostUrl.pathname = '';
     Robots.setRules(hostUrl, txt.toString());
 
-    if (context.urlOptions.checkSitemaps) {
-      const sitemaps = Robots.getSitemaps(hostUrl);
-      const links: FoundLink[] = sitemaps.map(s => {
-        return { url: s };
-      });
-      await saveUrls(context, links, { handler: 'sitemap' }).then(savedLinks =>
-        enqueueRequests(context, savedLinks),
-      );
-    }
+    const sitemaps = Robots.getSitemaps(hostUrl);
+    const links: FoundLink[] = sitemaps.map(s => {
+      return { url: s };
+    });
+    await saveUrls(context, links, { handler: 'sitemap' }).then(savedLinks =>
+      enqueueRequests(context, savedLinks),
+    );
+
   }
   return Promise.resolve();
 }

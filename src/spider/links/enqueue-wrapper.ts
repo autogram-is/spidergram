@@ -8,7 +8,7 @@ import {
 
 export async function enqueueUrls(
   context: SpiderContext,
-  customOptions: Partial<EnqueueUrlOptions> = {},
+  customOptions: EnqueueUrlOptions = {},
 ) {
   const links = findUrls(context, customOptions);
   return saveUrls(context, links, customOptions).then(async urls =>

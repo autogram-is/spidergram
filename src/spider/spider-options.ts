@@ -83,7 +83,7 @@ export interface InternalSpiderOptions extends Dictionary {
    *
    * @type {EnqueueUrlOptions}
    */
-  urlOptions: Partial<EnqueueUrlOptions>;
+  urlOptions: EnqueueUrlOptions;
 
   /**
    * An array of MIME type strings used to recognize HTTP requests as

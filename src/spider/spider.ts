@@ -245,43 +245,6 @@ export class Spider extends PlaywrightCrawler {
     }
     await graph.push([...uniques], false);
 
-    // If we're set up to check robot rules, also enqueue them.
-    if (this.spiderOptions.urlOptions.checkRobots) {
-      const rOptions = {
-        keepUnparsable: false,
-        guessProtocol: true,
-        normalizer: (url: ParsedUrl) => {
-          url.pathname = '/robots.txt';
-          return url;
-        },
-        userData: { handler: 'robotstxt' },
-      };
-      const domains = new UniqueUrlSet([...uniques], rOptions);
-      await graph.push([...domains], false);
-      await queue.addRequests(
-        [...domains].map(uu => uniqueUrlToRequest(uu)),
-        { forefront: true },
-      );
-    }
-
-    if (this.spiderOptions.urlOptions.checkSitemaps) {
-      const sOptions = {
-        keepUnparsable: false,
-        guessProtocol: true,
-        normalizer: (url: ParsedUrl) => {
-          url.pathname = '/sitemap.xml';
-          return url;
-        },
-        userData: { handler: 'sitemap' },
-      };
-      const domains = new UniqueUrlSet([...uniques], sOptions);
-      await graph.push([...domains], false);
-      await queue.addRequests(
-        [...domains].map(uu => uniqueUrlToRequest(uu)),
-        { forefront: true },
-      );
-    }
-
     this.status.startTime = Date.now();
 
     await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)));

@@ -15,10 +15,10 @@ import _ from 'lodash';
  */
 export async function relinkResource(
   resource: Resource,
-  customOptions: Partial<EnqueueUrlOptions> = {},
+  customOptions: EnqueueUrlOptions = {},
 ) {
   const sg = await Spidergram.load();
-  const options: Partial<EnqueueUrlOptions> = _.defaultsDeep(
+  const options: EnqueueUrlOptions = _.defaultsDeep(
     customOptions,
     Spidergram.config.spider?.urlOptions,
   );

@@ -99,7 +99,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    *
    * @type {Function}
    */
-  enqueueUrls: (options?: Partial<EnqueueUrlOptions>) => Promise<unknown>;
+  enqueueUrls: (options?: EnqueueUrlOptions) => Promise<unknown>;
 
   /**
    * Finds URLs on the current page matching the criteria specified
@@ -107,7 +107,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * @type {Function}
    */
   findUrls: (
-    options?: Partial<EnqueueUrlOptions>,
+    options?: EnqueueUrlOptions,
   ) => Promise<HtmlTools.FoundLink[]>;
 
   /**
@@ -118,7 +118,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    */
   saveUrls: (
     links: HtmlTools.FoundLink[],
-    options?: Partial<EnqueueUrlOptions>,
+    options?: EnqueueUrlOptions,
   ) => Promise<UniqueUrl[]>;
 
   /**
@@ -129,7 +129,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    */
   saveRequests: (
     urls: UniqueUrl[],
-    options?: Partial<EnqueueUrlOptions>,
+    options?: EnqueueUrlOptions,
   ) => Promise<Request[]>;
 
   /**

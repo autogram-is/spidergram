@@ -10,7 +10,7 @@ import _ from 'lodash';
 export async function enqueueRequests(
   context: SpiderContext,
   urls: UniqueUrl | UniqueUrl[],
-  customOptions: Partial<EnqueueUrlOptions> = {},
+  customOptions: EnqueueUrlOptions = {},
   requestOptions: Partial<RequestOptions> = {},
 ) {
   const options: EnqueueUrlOptions = _.defaultsDeep(
@@ -60,7 +60,7 @@ export async function enqueueRequests(
 export function uniqueUrlToRequest(
   uu: UniqueUrl,
   options: Partial<RequestOptions> = {},
-  contextOptions: Partial<EnqueueUrlOptions> = {},
+  contextOptions: EnqueueUrlOptions = {},
 ): Request {
   const r = new Request<
     Partial<UniqueUrl & { fromUniqueUrl?: boolean; handler?: string }>

@@ -1,4 +1,4 @@
-import { RequestQueue, RequestTransform } from 'crawlee';
+import { RequestQueue } from 'crawlee';
 import { ParsedUrl } from '@autogram/url-tools';
 
 import { FilterInput } from './index.js';
@@ -73,15 +73,14 @@ export interface EnqueueUrlOptions {
    *
    * @defaultValue Infinity
    */
-  limit: number;
+  limit?: number;
 
   /**
    * One or more CSS selectors used to locate links on the page.
    * 
    * @defaultValue 'body a'
    */
-  selectors: string | string[];
-
+  selectors?: string | string[];
 
   /**
    * A list of page regions in which different link-discovery rules should be applied.
@@ -113,7 +112,7 @@ export interface EnqueueUrlOptions {
    * },
    * ```
    */
-  regions: string[] | Record<string, string | PageLinkRegion>
+  regions?: string[] | Record<string, string | PageLinkRegion>
 
   /**
    * A filter condition to determine which links will be saved as
@@ -122,39 +121,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean | string | RegExp | UrlMatchStrategy | UrlFilterWithContext}
    * @default UrlMatchStrategy.All
    */
-  save: FilterInput;
-
-  /**
-   * When enqueing a new hostname, enqueue a high-priority robots.txt as well.
-   *
-   * @type {boolean}
-   * @default true
-   */
-  checkRobots: boolean;
-
-  /**
-   * Do not enqueue URLs if they're disallowed in a hostname's Robots.txt.
-   *
-   * @type {boolean}
-   * @default true
-   */
-  respectRobots: boolean;
-
-  /**
-   * When enqueing a new hostname, infer a sitemap URL and enqueue it as well.
-   *
-   * @type {boolean}
-   * @default true
-   */
-  checkSitemaps: boolean;
-
-  /**
-   * When enqueuing, bump sitemap.xml links to the top of the request queue.
-   *
-   * @type {boolean}
-   * @default true
-   */
-  prioritizeSitemaps: boolean;
+  save?: FilterInput;
 
   /**
    * A filter condition to determine which links will be enqueued for crawling.
@@ -162,7 +129,20 @@ export interface EnqueueUrlOptions {
    * @type {boolean | string | RegExp | UrlMatchStrategy | UrlFilterWithContext}
    * @default UrlMatchStrategy.SameDomain
    */
-  enqueue: FilterInput;
+  enqueue?: FilterInput;
+
+  /**
+   * Don't save or enqueue the link if it already exists in the graph.
+   *
+   * *NOTE:* Only affects the saving and enqueuing of {@apilink UniqueUrl}
+   * objects themselves; LinksTo records connection crawled Resources to
+   * the UniqueUrl may still be created.
+   *
+   * @type {boolean}
+   * @default true
+   */
+  discardExisting?: boolean;
+
 
   /**
    * Ignore links that can't be parsed by the {@apilink URL} constructor.
@@ -173,7 +153,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default false
    */
-  discardUnparsable: boolean;
+  discardUnparsable?: boolean;
 
   /**
    * Ignore HTML tags that are found by the selector, but have no `href`
@@ -185,7 +165,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default true
    */
-  discardEmpty: boolean;
+  discardEmpty?: boolean;
 
   /**
    * Ignore links that only contain an anchor, e.g. `<a href="#top">Scroll to top</a>`
@@ -193,7 +173,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default true
    */
-  discardlocalAnchors: boolean;
+  discardlocalAnchors?: boolean;
 
   /**
    * Ignore HTML tags with protocols other than `http` and `https`.
@@ -204,19 +184,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default true
    */
-  discardNonWeb: boolean;
-
-  /**
-   * A function to modify the {@apilink Request} object before a link is
-   * enqueued for crawling.
-   *
-   * Custom headers, request labels, etc. can be added here if needed, and
-   * used by the request router and handlers to control processing later in
-   * the crawl process.
-   *
-   * @type {string}
-   */
-  transformRequestFunction?: RequestTransform;
+  discardNonWeb?: boolean;
 
   /**
    * The base URL that should be used when parsing relative URLs. If none
@@ -237,18 +205,6 @@ export interface EnqueueUrlOptions {
    * @type {string}
    */
   requestQueue?: RequestQueue;
-
-  /**
-   * Don't save or enqueue the link if it already exists in the graph.
-   *
-   * *NOTE:* Only affects the saving and enqueuing of {@apilink UniqueUrl}
-   * objects themselves; LinksTo records connection crawled Resources to
-   * the UniqueUrl may still be created.
-   *
-   * @type {boolean}
-   * @default true
-   */
-  discardExisting?: boolean;
 
   /**
    * A label applied to any {@apilink Request} objects created when the

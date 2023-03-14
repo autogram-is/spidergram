@@ -8,7 +8,7 @@ import { SpiderContext, UrlMatchStrategy } from '../index.js';
 export function filterUrl(
   context: SpiderContext,
   input: UniqueUrl | ParsedUrl,
-  filters: FilterInput,
+  filters: FilterInput = UrlMatchStrategy.SameDomain
 ): boolean {
   const incomingUrl = input instanceof UniqueUrl ? input.parsed : input;
   if (is.undefined(incomingUrl)) {

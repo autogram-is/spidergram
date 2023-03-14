@@ -10,7 +10,7 @@ import { getHtmlRegions } from '../../tools/html/get-html-regions.js';
 
 export function findUrls(
   context: SpiderContext,
-  customOptions?: Partial<EnqueueUrlOptions>,
+  customOptions?: EnqueueUrlOptions,
 ) {
   const options: EnqueueUrlOptions = _.defaultsDeep(
     customOptions,
@@ -64,8 +64,8 @@ export function findUrls(
 
 function discardLink(
   link: FoundLink,
-  discardLocalAnchors: boolean,
-  discardEmpty: boolean,
+  discardLocalAnchors = true,
+  discardEmpty = true,
 ): boolean {
   if (discardEmpty && is.undefined(link.url)) return true;
   if (discardEmpty && is.emptyStringOrWhitespace(link.url)) return true;
