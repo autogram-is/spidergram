@@ -2,14 +2,14 @@ import { JobStatus } from '../../index.js';
 import { progress } from './progress.js';
 import * as prompts from './prompts.js';
 import terminalLink from 'terminal-link';
-import { CliUx } from '@oclif/core';
+import { ux } from '@oclif/core';
 import { chalk, joinOxford } from './format.js';
 import { infoList } from './info-list.js';
 import { summarizeStatus } from './summarize-status.js';
 
 /**
  * This class is a rat's nest of helper utilities at the moment;
- * half of its utilities are wrappers around CliUx, others are overrides,
+ * half of its utilities are wrappers around ux, others are overrides,
  * others are custom stuff we're using.
  */
 export class SpiderCli {
@@ -23,9 +23,9 @@ export class SpiderCli {
     return terminalLink(label ?? input.toString(), input.toString());
   }
 
-  table = CliUx.ux.table;
-  json = CliUx.ux.styledJSON;
-  object = CliUx.ux.styledObject;
+  table = ux.table;
+  json = ux.styledJSON;
+  object = ux.styledObject;
 
   joinOxford = joinOxford;
   infoList = infoList;
@@ -37,13 +37,13 @@ export class SpiderCli {
    * remain busy until the `done` or `progress` methods are called.
    */
   busy(input: string) {
-    if (!CliUx.ux.action.running) {
+    if (!ux.action.running) {
       this.done();
-      CliUx.ux.action.start(input);
+      ux.action.start(input);
     } else {
-      CliUx.ux.action.status = input;
+      ux.action.status = input;
     }
-    return `${CliUx.ux.action.task}: ${CliUx.ux.action.status}`;
+    return `${ux.action.task}: ${ux.action.status}`;
   }
 
   newProgressBar() {
@@ -86,7 +86,7 @@ export class SpiderCli {
       this._progress.stop();
       this._progress = undefined;
     }
-    if (CliUx.ux.action.running) CliUx.ux.action.stop(input);
+    if (ux.action.running) ux.action.stop(input);
     return input;
   }
 
@@ -99,5 +99,5 @@ export class SpiderCli {
    */
   confirm = prompts.confirm;
 
-  anyKey = CliUx.ux.anykey;
+  anyKey = ux.anykey;
 }

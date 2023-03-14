@@ -1,4 +1,4 @@
-import { Flags, CliUx } from '@oclif/core';
+import { Flags, ux } from '@oclif/core';
 import { UrlMatchStrategy } from '../../spider/index.js';
 
 /**
@@ -16,7 +16,7 @@ import { UrlMatchStrategy } from '../../spider/index.js';
  * ```
  */
 
-export const tableFlags = CliUx.ux.table.flags;
+export const tableFlags = ux.table.flags;
 
 export enum OutputFormats {
   JSON = 'json',
@@ -71,7 +71,7 @@ export const queryFlags = {
 };
 
 export const outputFlags = {
-  output: Flags.enum<OutputFormats>({
+  output: Flags.string({
     default: OutputFormats.INTERACTIVE,
     options: [
       OutputFormats.INTERACTIVE,
@@ -100,7 +100,7 @@ export const outputFlags = {
 };
 
 export const crawlFlags = {
-  discover: Flags.enum<UrlMatchStrategy | 'none'>({
+  discover: Flags.string({
     default: UrlMatchStrategy.All,
     options: [
       UrlMatchStrategy.All,
@@ -110,7 +110,7 @@ export const crawlFlags = {
     ],
     summary: 'Link discovery strategy',
   }),
-  enqueue: Flags.enum<UrlMatchStrategy | 'none'>({
+  enqueue: Flags.string({
     default: UrlMatchStrategy.SameDomain,
     options: [
       UrlMatchStrategy.All,

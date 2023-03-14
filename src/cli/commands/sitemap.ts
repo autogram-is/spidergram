@@ -6,7 +6,9 @@ import {
   UrlMatchStrategy,
   UniqueUrlSet,
 } from '../../index.js';
+import { Args } from '@oclif/core';
 import { ParsedUrl } from '@autogram/url-tools';
+import is from '@sindresorhus/is';
 
 export default class GetSitemap extends SgCommand {
   static summary = 'Retrieve and analyze sitemap data';
@@ -17,18 +19,22 @@ export default class GetSitemap extends SgCommand {
     ...CLI.globalFlags,
   };
 
-  static args = [
-    {
-      name: 'urls',
-      description: 'One or more domains to examine',
-      multiple: true,
-    },
-  ];
-
   static strict = false;
+
+  static args = {
+    urls: Args.url({
+      description: 'One or more domains to examine',
+      required: true
+    }),
+  }
 
   async run() {
     const { argv: urls, flags } = await this.parse(GetSitemap);
+
+    if (!is.array<string>(urls)) {
+      this.error('URLs must be strings.');
+    }
+
 
     if (flags.verbose) {
       this.output = OutputLevel.verbose;

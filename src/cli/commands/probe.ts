@@ -1,4 +1,4 @@
-import { Flags } from '@oclif/core';
+import { Flags, Args } from '@oclif/core';
 import {
   Spidergram,
   CLI,
@@ -31,12 +31,12 @@ export default class Probe extends SgCommand {
     }),
   };
 
-  static args = [
-    {
-      name: 'url',
+  static args = {
+    url: Args.url({
       description: 'A valid URL to analyze',
-    },
-  ];
+      required: true,
+    }),
+  }
 
   static strict = false;
 
@@ -44,7 +44,7 @@ export default class Probe extends SgCommand {
     const sg = await Spidergram.load();
     const { args, flags } = await this.parse(Probe);
 
-    const url = new NormalizedUrl(args.url);
+    const url = new NormalizedUrl(args.url.toString());
     const fp = new BrowserTools.Fingerprint();
 
     this.ux.action.start('Loading tech fingerprint patterns');

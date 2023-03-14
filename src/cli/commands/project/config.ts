@@ -1,5 +1,5 @@
 import { SgCommand } from '../../index.js';
-import { CliUx } from '@oclif/core';
+import { ux } from '@oclif/core';
 import chalk from 'chalk';
 import { Spidergram } from '../../../index.js';
 import is from '@sindresorhus/is';
@@ -12,7 +12,7 @@ export default class Config extends SgCommand {
 
     if (!is.emptyObject(Spidergram.status.env)) {
       this.log(`${chalk.bold('Environment variables:')}`);
-      CliUx.ux.styledJSON(Spidergram.status.env);
+      ux.styledJSON(Spidergram.status.env);
     }
 
     this.log(
@@ -23,17 +23,17 @@ export default class Config extends SgCommand {
 
     if (Spidergram.status.configFile) {
       this.log(`${chalk.bold('Custom settings:')}`);
-      CliUx.ux.styledJSON(sg.rawConfig);
+      ux.styledJSON(sg.rawConfig);
     }
 
     if (Spidergram.status.initialized) {
       this.log(`${chalk.bold('Current settings:')}`);
-      CliUx.ux.styledJSON(sg.config);
+      ux.styledJSON(sg.config);
     }
 
     if (Spidergram.status.initialized) {
       this.log(`${chalk.bold('Global defaults:')}`);
-      CliUx.ux.styledJSON(Spidergram.defaults);
+      ux.styledJSON(Spidergram.defaults);
     }
   }
 }

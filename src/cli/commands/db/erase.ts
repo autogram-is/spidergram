@@ -1,4 +1,4 @@
-import { Flags } from '@oclif/core';
+import { Flags, Args } from '@oclif/core';
 import { Spidergram, CLI, TextTools, SgCommand } from '../../../index.js';
 export default class Erase extends SgCommand {
   static description = 'Discard stored crawling data';
@@ -12,13 +12,12 @@ export default class Erase extends SgCommand {
     }),
   };
 
-  static args = [
-    {
-      name: 'collections',
-      summary: 'One or more graph collections',
+  static args = {
+    collections: Args.string({
+      description: 'One or more graph collections',
       required: false,
-    },
-  ];
+    }),
+  }
 
   static usage =
     '<%= config.bin %> <%= command.id %> --force --all <collections...>';

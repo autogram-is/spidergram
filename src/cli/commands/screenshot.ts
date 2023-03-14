@@ -2,11 +2,11 @@ import {
   CLI,
   SgCommand,
   ScreenshotTool,
-  Orientation,
   Spidergram,
 } from '../../index.js';
-import { Flags } from '@oclif/core';
+import { Flags, Args } from '@oclif/core';
 import { PlaywrightCrawler } from 'crawlee';
+import is from '@sindresorhus/is';
 
 export default class Screenshot extends SgCommand {
   static summary = 'Save screenshots of pages and page elements';
@@ -20,13 +20,12 @@ export default class Screenshot extends SgCommand {
 
   static strict = false;
 
-  static args = [
-    {
-      name: 'urls',
+  static args = {
+    urls: Args.url({
       description: 'One or more URLs to capture',
-      required: true,
-    },
-  ];
+      required: true
+    }),
+  }
 
   static flags = {
     config: CLI.globalFlags.config,
@@ -42,11 +41,11 @@ export default class Screenshot extends SgCommand {
         "Viewport can be a resolution in 'width,height' format; a preset name (iphone, ipad, hd, or fhd); or the preset 'all', which generates one screenshot for each defined preset.'",
       default: 'hd',
     }),
-    orientation: Flags.enum<Orientation>({
+    orientation: Flags.string({
       summary: 'Force viewport orientation',
       description:
         "If no orientation is selected, the default for the viewport preset will be used. If 'both' is selected, two screenshots will be created for each viewport preset.",
-      options: [Orientation.landscape, Orientation.portrait, Orientation.both],
+      options: ['landscape', 'portrait', 'both'],
       required: false,
     }),
     fullpage: Flags.boolean({
@@ -59,7 +58,7 @@ export default class Screenshot extends SgCommand {
       summary: 'Directory to store screenshots',
       default: 'screenshots',
     }),
-    format: Flags.enum<'jpeg' | 'png'>({
+    format: Flags.string({
       summary: 'Screenshot file format',
       options: ['jpeg', 'png'],
       default: 'jpeg',
@@ -70,12 +69,16 @@ export default class Screenshot extends SgCommand {
     const sg = await Spidergram.load();
     const { argv: urls, flags } = await this.parse(Screenshot);
 
+    if (!is.array<string>(urls)) {
+      this.error('URLs must be strings.');
+    }
+
     const captureTool = new ScreenshotTool({
       directory: flags.directory,
       viewports: [flags.viewport],
-      orientation: flags.orientation,
+      orientation: (flags.orientation === 'both') ? 'both' : (flags.orientation === 'landscape') ? 'landscape' : 'portrait',
       selectors: flags.selector ? [flags.selector] : undefined,
-      type: flags.format,
+      type: (flags.format === 'jpeg') ? 'jpeg' : 'png',
       fullPage: flags.fullpage,
       limit: flags.limit ?? Infinity,
     })

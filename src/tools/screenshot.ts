@@ -11,12 +11,6 @@ export interface Viewport {
   height: number;
 }
 
-export enum Orientation {
-  portrait = 'portrait',
-  landscape = 'landscape',
-  both = 'both',
-}
-
 export interface ScreenshotOptions {
   /**
    * The name of a storage bucket to save screenshots into.
@@ -47,12 +41,10 @@ export interface ScreenshotOptions {
 
   /**
    * An orientation to use when capturing the screen. If no value is passed in, the viewport's
-   * inherent orientation is used. If `Orientation.both` is used, a screenshot is captured for
+   * inherent orientation is used. If `both` is used, a screenshot is captured for
    * each orientation
-   *
-   * @type {?Orientation}
    */
-  orientation?: Orientation;
+  orientation?: 'portrait' | 'landscape' | 'both';
 
   /**
    * CSS selectors used crop the captured image.

@@ -1,7 +1,8 @@
-import { Flags } from '@oclif/core';
+import { Flags, Args } from '@oclif/core';
 import { LogLevel } from 'crawlee';
 import { Spidergram, Spider, SpiderStatus } from '../../index.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
+import is from '@sindresorhus/is';
 
 export default class Crawl extends SgCommand {
   static summary = 'Crawl and store a site';
@@ -22,19 +23,22 @@ export default class Crawl extends SgCommand {
     verbose: CLI.outputFlags.verbose,
   };
 
-  static args = [
-    {
-      name: 'urls',
+  static args = {
+    urls: Args.url({
       description: 'One or more URLs to crawl',
       required: true,
-    },
-  ];
+    }),
+  }
 
   static strict = false;
 
   async run() {
     const sg = await Spidergram.load();
     const { argv: urls, flags } = await this.parse(Crawl);
+    
+    if (!is.array<string>(urls)) {
+      this.error('URLs must be strings.');
+    }
 
     if (flags.verbose) {
       this.output = OutputLevel.verbose;

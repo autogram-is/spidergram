@@ -1,5 +1,5 @@
 import { CLI, JobStatus } from '../index.js';
-import { CliUx, Command } from '@oclif/core';
+import { ux, Command } from '@oclif/core';
 import is from '@sindresorhus/is';
 
 export enum OutputLevel {
@@ -25,7 +25,7 @@ export enum OutputLevel {
 export abstract class SgCommand extends Command {
   static enableJsonFlag = true;
 
-  ux = CliUx.ux;
+  ux = ux;
   format = CLI.Colors;
   chalk = CLI.chalk;
   output = OutputLevel.interactive;

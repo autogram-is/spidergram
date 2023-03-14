@@ -1,4 +1,4 @@
-import { Flags } from '@oclif/core';
+import { Flags, Args } from '@oclif/core';
 import { NormalizedUrlSet } from '@autogram/url-tools';
 import {
   Spidergram,
@@ -81,7 +81,7 @@ export default class Urls extends SgCommand {
       dependsOn: ['tree'],
       helpGroup: 'FORMAT',
     }),
-    preset: Flags.enum({
+    preset: Flags.string({
       summary: 'A URL display preset',
       default: 'default',
       options: ['default', 'expand', 'collapse', 'markdown'],
@@ -100,7 +100,7 @@ export default class Urls extends SgCommand {
       dependsOn: ['tree'],
       helpGroup: 'FORMAT',
     }),
-    gaps: Flags.enum({
+    gaps: Flags.string({
       summary: 'Gap resolution strategy',
       description:
         "How to deal with URL gaps, where a URL is implied by another URL's path but does not itself exist in the list of URLs. 'ignore' will discard URLs with gaps; 'adopt' will treat them as direct children of their closest ancestor, and 'bridge' will create intermediary URLs to accuratly represent the full path.",
@@ -118,13 +118,12 @@ export default class Urls extends SgCommand {
     }),
   };
 
-  static args = [
-    {
-      name: 'input',
+  static args = {
+    input: Args.string({
       description: 'A database collection, local filename, or remote URL',
       default: 'resources',
-    },
-  ];
+    }),
+  }
 
   async run() {
     const { args, flags } = await this.parse(Urls);
