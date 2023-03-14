@@ -36,7 +36,7 @@ export default class Probe extends SgCommand {
       description: 'A valid URL to analyze',
       required: true,
     }),
-  }
+  };
 
   static strict = false;
 

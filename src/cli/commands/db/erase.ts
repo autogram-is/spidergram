@@ -17,7 +17,7 @@ export default class Erase extends SgCommand {
       description: 'One or more graph collections',
       required: false,
     }),
-  }
+  };
 
   static usage =
     '<%= config.bin %> <%= command.id %> --force --all <collections...>';

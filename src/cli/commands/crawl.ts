@@ -28,14 +28,14 @@ export default class Crawl extends SgCommand {
       description: 'One or more URLs to crawl',
       required: true,
     }),
-  }
+  };
 
   static strict = false;
 
   async run() {
     const sg = await Spidergram.load();
     const { argv: urls, flags } = await this.parse(Crawl);
-    
+
     if (!is.array<string>(urls)) {
       this.error('URLs must be strings.');
     }

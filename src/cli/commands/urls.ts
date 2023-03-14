@@ -123,7 +123,7 @@ export default class Urls extends SgCommand {
       description: 'A database collection, local filename, or remote URL',
       default: 'resources',
     }),
-  }
+  };
 
   async run() {
     const { args, flags } = await this.parse(Urls);

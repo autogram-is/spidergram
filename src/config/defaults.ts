@@ -80,7 +80,7 @@ export const pageDataDefaults: PageDataOptions = {
   scripts: false,
   json: true,
   styles: false,
-  templates: false
+  templates: false,
 };
 
 export const pageTechnologyDefaults: PageTechnologyOptions = {

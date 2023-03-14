@@ -1,9 +1,4 @@
-import {
-  CLI,
-  SgCommand,
-  ScreenshotTool,
-  Spidergram,
-} from '../../index.js';
+import { CLI, SgCommand, ScreenshotTool, Spidergram } from '../../index.js';
 import { Flags, Args } from '@oclif/core';
 import { PlaywrightCrawler } from 'crawlee';
 import is from '@sindresorhus/is';
@@ -23,9 +18,9 @@ export default class Screenshot extends SgCommand {
   static args = {
     urls: Args.string({
       description: 'One or more URLs to capture',
-      required: true
+      required: true,
     }),
-  }
+  };
 
   static flags = {
     config: CLI.globalFlags.config,
@@ -76,9 +71,14 @@ export default class Screenshot extends SgCommand {
     const captureTool = new ScreenshotTool({
       directory: flags.directory,
       viewports: [flags.viewport],
-      orientation: (flags.orientation === 'both') ? 'both' : (flags.orientation === 'landscape') ? 'landscape' : 'portrait',
+      orientation:
+        flags.orientation === 'both'
+          ? 'both'
+          : flags.orientation === 'landscape'
+          ? 'landscape'
+          : 'portrait',
       selectors: flags.selector ? [flags.selector] : undefined,
-      type: (flags.format === 'jpeg') ? 'jpeg' : 'png',
+      type: flags.format === 'jpeg' ? 'jpeg' : 'png',
       fullPage: flags.fullpage,
       limit: flags.limit ?? Infinity,
     })

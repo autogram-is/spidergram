@@ -12,7 +12,7 @@ export default class Compact extends SgCommand {
       description: 'One or more graph collections',
       required: false,
     }),
-  }
+  };
 
   static usage = '<%= config.bin %> <%= command.id %> [collections...]';
 

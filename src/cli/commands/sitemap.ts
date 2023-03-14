@@ -24,9 +24,9 @@ export default class GetSitemap extends SgCommand {
   static args = {
     urls: Args.string({
       description: 'One or more domains to examine',
-      required: true
+      required: true,
     }),
-  }
+  };
 
   async run() {
     const { argv: urls, flags } = await this.parse(GetSitemap);
