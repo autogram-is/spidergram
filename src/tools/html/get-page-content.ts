@@ -1,8 +1,10 @@
-import { HtmlTools, TextTools, Resource } from '../../index.js';
+import { TextTools, Resource } from '../../index.js';
 import { getPlaintext, HtmlToTextOptions } from './get-plaintext.js';
 import { Spidergram } from '../../config/spidergram.js';
 import _ from 'lodash';
 import is from '@sindresorhus/is';
+import { getCheerio } from './get-cheerio.js';
+import { getMarkup } from './get-markup.js';
 
 export interface PageContent extends Record<string, unknown> {
   text?: string;
@@ -35,8 +37,9 @@ export interface PageContentOptions {
    * One or more CSS selectors used to find the markup's primary content.
    *
    * @remarks
-   * This option is equivalent to setting {@link HtmlToTextOptions.baseElements.selectors | baseElements.selectors}
-   * on the {@link PageContentOptions.htmlToText | text} option.
+   * This option is prefered over {@link HtmlToTextOptions.baseElements.selectors | baseElements.selectors}
+   * on the {@link PageContentOptions.htmlToText | text} option. HtmlToText is good, but its support for
+   * some selectors is limited and can generate surprising results. Whenever possible, use this option instead.
    */
   selector?: string | string[];
 
@@ -103,16 +106,22 @@ async function _getPageContent(
     Spidergram.config.pageContent,
   );
   const htmlOptions: HtmlToTextOptions = options.htmlToText ?? Spidergram.config.htmlToText ?? {};
-  const markup = HtmlTools.getMarkup(input);
+  let markup = '';
+
+  if (options.selector) {
+    const selectors = Array.isArray(options.selector) ? options.selector : [options.selector];
+    const $ = getCheerio(input);
+    for (const s of selectors) {
+      markup = $(s).html() ?? '';
+      if (markup.length > 0) continue;
+    }
+  } else {
+    markup = getMarkup(input);
+  }
+
 
   let results: PageContent | undefined;
 
-  if (options.selector) {
-    const selectors = Array.isArray(options.selector)
-      ? options.selector
-      : [options.selector];
-    _.set(htmlOptions, 'baseElements.selectors', selectors);
-  }
   if (options.allowMultipleContentElements === false) {
     _.set(htmlOptions, 'limits.maxBaseElements', 1);
   }
