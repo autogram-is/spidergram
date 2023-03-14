@@ -52,9 +52,16 @@ export type PageDataOptions = {
   noscript?: boolean;
   /**
    * Parse and list any `<script>` tags in the document; JSON data will be parsed
-   * and stored in a separate 'json' property of the results
+   * and stored in a separate 'json' property of the results.
    */
   scripts?: boolean;
+
+  /**
+   * Parse and list any JSON or JSON+LD tags in the document, even if normal scripts
+   * are ignored.
+   */
+  json?: boolean;
+
   /**
    * Parse and list any CSS `<style>` tags present in the document.
    */
@@ -70,6 +77,11 @@ export type PageDataOptions = {
    * meta tags, RDFa gunk, and so on. It's a plague. Nightmarish stuff, really.
    */
   strict?: boolean;
+
+  /**
+   * A list of HTML Meta tags whose attributes should be treated as comma-delimited
+   * lists rather than strings.
+   */
   metaArrayAttributes?: string[];
 };
 
@@ -175,7 +187,7 @@ async function _getPageData(
     }
   }
 
-  if (options.scripts || options.all) {
+  if (options.scripts || options.json || options.all) {
     const json: Record<string, string | unknown>[] = [];
     const scripts: Record<string, string | undefined>[] = [];
 
@@ -183,7 +195,9 @@ async function _getPageData(
       if (script.type?.includes('json') && typeof script.content === 'string') {
         script.content = JSON.parse(script.content);
         json.push(script);
-      } else scripts.push(script);
+      } else if (options.scripts) {
+        scripts.push(script);
+      }
     });
     if (scripts.length) {
       results.scripts = scripts;
