@@ -1,3 +1,4 @@
+import { RegionSelectors } from '../../spider/index.js';
 import { getCheerio } from './get-cheerio.js';
 
 /**
@@ -14,19 +15,23 @@ import { getCheerio } from './get-cheerio.js';
  */
 export function chopBySelector(
   input: string,
-  selectors: Record<string, string | { selector: string } | undefined>,
+  selectors: RegionSelectors,
   remainder: string | false = 'no_region_matched',
 ): Record<string, string> {
   const results: Record<string, string> = {};
   const $ = getCheerio(input);
 
+  if (typeof selectors === 'string') {
+    selectors = { main: selectors };
+  }
+  
   for (const [key, value] of Object.entries(selectors)) {
-    const selector = typeof value === 'string' ? value : value?.selector ?? '';
+    const selector = (typeof value === 'string' ? value : value?.selector as string) ?? '';
     const subset = $(selector);
     if (subset.length) {
       results[key] = subset
         .toArray()
-        .map(e => $(e).html())
+        .map(e => $.html(e))
         .join();
       subset.remove();
     }
