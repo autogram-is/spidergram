@@ -61,12 +61,12 @@ export default class Crawl extends SgCommand {
         enqueue: flags.enqueue === 'none' ? () => false : flags.enqueue,
       },
     });
+    spider.on('progress', status => this.updateProgress(status));
+    spider.on('end', () => this.stopProgress());
 
-    spider.on('end', status => this.updateProgress(status));
     this.startProgress('Crawling...');
 
     await spider.run(urls).then(status => {
-      this.stopProgress();
       this.summarizeStatus(status);
     });
   }

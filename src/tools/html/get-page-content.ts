@@ -102,7 +102,7 @@ async function _getPageContent(
     customOptions,
     Spidergram.config.pageContent,
   );
-  const htmltotext: HtmlToTextOptions = options.htmlToText ?? {};
+  const htmlOptions: HtmlToTextOptions = options.htmlToText ?? Spidergram.config.htmlToText ?? {};
   const markup = HtmlTools.getMarkup(input);
 
   let results: PageContent | undefined;
@@ -111,17 +111,17 @@ async function _getPageContent(
     const selectors = Array.isArray(options.selector)
       ? options.selector
       : [options.selector];
-    _.set(htmltotext, 'baseElements.selectors', selectors);
+    _.set(htmlOptions, 'baseElements.selectors', selectors);
   }
   if (options.allowMultipleContentElements === false) {
-    _.set(htmltotext, 'limits.maxBaseElements', 1);
+    _.set(htmlOptions, 'limits.maxBaseElements', 1);
   }
 
   if (options.defaultToFullDocument === false) {
-    _.set(htmltotext, 'baseElements.returnDomByDefault', false);
+    _.set(htmlOptions, 'baseElements.returnDomByDefault', false);
   }
 
-  let plainText = getPlaintext(markup, htmltotext);
+  let plainText = getPlaintext(markup, htmlOptions);
   if (options.trim) plainText = plainText.trim();
 
   if (plainText.length > 0) {
