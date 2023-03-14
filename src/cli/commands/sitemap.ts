@@ -22,7 +22,7 @@ export default class GetSitemap extends SgCommand {
   static strict = false;
 
   static args = {
-    urls: Args.url({
+    urls: Args.string({
       description: 'One or more domains to examine',
       required: true
     }),
@@ -34,7 +34,6 @@ export default class GetSitemap extends SgCommand {
     if (!is.array<string>(urls)) {
       this.error('URLs must be strings.');
     }
-
 
     if (flags.verbose) {
       this.output = OutputLevel.verbose;

@@ -24,7 +24,7 @@ export default class Crawl extends SgCommand {
   };
 
   static args = {
-    urls: Args.url({
+    urls: Args.string({
       description: 'One or more URLs to crawl',
       required: true,
     }),

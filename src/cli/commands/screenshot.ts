@@ -21,7 +21,7 @@ export default class Screenshot extends SgCommand {
   static strict = false;
 
   static args = {
-    urls: Args.url({
+    urls: Args.string({
       description: 'One or more URLs to capture',
       required: true
     }),

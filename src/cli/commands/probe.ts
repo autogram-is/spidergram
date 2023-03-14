@@ -32,7 +32,7 @@ export default class Probe extends SgCommand {
   };
 
   static args = {
-    url: Args.url({
+    url: Args.string({
       description: 'A valid URL to analyze',
       required: true,
     }),
