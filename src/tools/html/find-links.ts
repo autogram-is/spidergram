@@ -23,7 +23,7 @@ export const LinkSelector: Record<string, string> = {
 
 export function findLinks(
   input: string | cheerio.Root,
-  selectors: string | string[] = LinkSelector.anchor = 'a',
+  selectors: string | string[] = (LinkSelector.anchor = 'a'),
 ) {
   const $ = typeof input === 'string' ? getCheerio(input) : input;
   const results: FoundLink[] = [];

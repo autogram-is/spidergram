@@ -7,7 +7,6 @@ import { getCheerio } from '../../tools/html/get-cheerio.js';
 import { FoundLink } from '../../tools/html/find-links.js';
 import { getHtmlRegions } from '../../tools/html/get-html-regions.js';
 
-
 export function findUrls(
   context: SpiderContext,
   customOptions?: EnqueueUrlOptions,
@@ -35,24 +34,35 @@ export function findUrls(
   } else {
     const regions = getHtmlRegions(html, options.regions);
     for (const [region, regionHtml] of Object.entries(regions)) {
-
       // Grab or simulate the definition for this particular region;
       // does it have additional link options?
       let linkOptions: PageLinkRegion | undefined = undefined;
-      if (typeof options.regions !== 'string' && !Array.isArray(options.regions)) {
+      if (
+        typeof options.regions !== 'string' &&
+        !Array.isArray(options.regions)
+      ) {
         if (Object.keys(options.regions).includes(region)) {
-          const definition = options.regions[region]
+          const definition = options.regions[region];
           if (typeof definition !== 'string') linkOptions = definition;
         }
-      }      
-      
+      }
+
       // Find the links!
-      for (const link of HtmlTools.findLinks(regionHtml, linkOptions?.linkSelectors ?? options.selectors)) {
+      for (const link of HtmlTools.findLinks(
+        regionHtml,
+        linkOptions?.linkSelectors ?? options.selectors,
+      )) {
         if (!discardLink(link, discardlocalAnchors, discardEmpty)) {
           link.label = linkOptions?.label ?? region;
           link.handler = linkOptions?.handler ?? options.handler;
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { selector, save, enqueue, linkSelectors, ...linkOptionsToSave } = linkOptions ?? {};          
+          const {
+            selector,
+            save,
+            enqueue,
+            linkSelectors,
+            ...linkOptionsToSave
+          } = linkOptions ?? {};
           results.push({ ...link, ...linkOptionsToSave });
         }
       }

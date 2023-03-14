@@ -2,8 +2,8 @@ import _ from 'lodash';
 import { getCheerio } from './get-cheerio.js';
 
 export type PageRegion = Record<string, unknown> & {
-  selector: string
-}
+  selector: string;
+};
 
 /**
  * Default options for the
@@ -15,14 +15,14 @@ export interface RegionOptions extends Record<string, unknown> {
 
 const defaults: RegionOptions = {
   removeFoundElements: true,
-  fallbackRegion: 'other'
-}
+  fallbackRegion: 'other',
+};
 
 /**
  * Chop an HTML fragment into smaller chunks based on named selectors, optionally
  * preserving the remaining portions of the document.
  *
- * Selectors are processed in the order they appear in the dictionary, and by default 
+ * Selectors are processed in the order they appear in the dictionary, and by default
  * the DOM elements they match are removed from the HTML so overlapping selectors won't
  * produce duplicate markup. The downside is that it can produce discontiguous markup,
  * but that's not a problem for things like link and component identification.
@@ -30,7 +30,7 @@ const defaults: RegionOptions = {
 export function getHtmlRegions(
   input: string,
   regions: string | string[] | Record<string, string | PageRegion>,
-  options: RegionOptions = {}
+  options: RegionOptions = {},
 ): Record<string, string> {
   const opt: RegionOptions = _.defaultsDeep(options, defaults);
   const regionDefinitions: Record<string, PageRegion> = {};
@@ -55,7 +55,7 @@ export function getHtmlRegions(
       }
     }
   }
-  
+
   // Fairly straightforward loop that grabs matching chunks from the full HTML,
   // concatenates their HTML, and slams it into the region bucket. Optionally,
   // it then deletes all the found elements from the document and moves on to

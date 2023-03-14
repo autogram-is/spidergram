@@ -8,37 +8,37 @@ import { PageRegion } from '../../tools/html/index.js';
 export type PageLinkRegion = PageRegion & {
   /**
    * One or more CSS selectors used to find links in a given region.
-   * 
+   *
    * These selectors should find elements with either a `src` or `href` tag; they're used after
    * a "bucket" of HMTL has been identified and specific URL-bearing elements must be found
    * inside of it.
    */
-  linkSelectors?: string | string[],
+  linkSelectors?: string | string[];
 
   /**
    * Region-specific override for the filter that determines whether a URL should be saved
    * to the crawl database.
    */
-  save?: FilterInput,
+  save?: FilterInput;
 
   /**
    * Region-specific override for the filter that determines whether a URL should be enqueued
    * for crawling.
    */
-  enqueue?: FilterInput,
+  enqueue?: FilterInput;
 
   /**
    * Region-specific override for the label for each saved URL and Link. If none is specified,
    * this defaults to the name of the region being processed.
    */
-  label?: string,
+  label?: string;
 
   /**
    * Region-specific override for the default Request handler that should be used when processing
    * the URL during a crawl.
    */
-  handler?: string
-}
+  handler?: string;
+};
 
 export enum UrlMatchStrategy {
   /**
@@ -77,7 +77,7 @@ export interface EnqueueUrlOptions {
 
   /**
    * One or more CSS selectors used to locate links on the page.
-   * 
+   *
    * @defaultValue 'body a'
    */
   selectors?: string | string[];
@@ -86,7 +86,7 @@ export interface EnqueueUrlOptions {
    * A list of page regions in which different link-discovery rules should be applied.
    * By default, the region's name is saved as the {@link LinksTo.label} property on the
    * connection between a {@link Resource} and a {@link UniqueUrl}.
-   * 
+   *
    * @example Find and label links inside the following tags
    * `regions: ['heading', 'main', 'footer'],`
    *
@@ -98,7 +98,7 @@ export interface EnqueueUrlOptions {
    *   footer: 'div#global__footer-v2.DONTDELETE',
    * },
    * ```
-   * 
+   *
    * @example Find links in regions, using custom settings for one region
    * ```
    * regions: {
@@ -112,7 +112,7 @@ export interface EnqueueUrlOptions {
    * },
    * ```
    */
-  regions?: string[] | Record<string, string | PageLinkRegion>
+  regions?: string[] | Record<string, string | PageLinkRegion>;
 
   /**
    * A filter condition to determine which links will be saved as
@@ -142,7 +142,6 @@ export interface EnqueueUrlOptions {
    * @default true
    */
   discardExisting?: boolean;
-
 
   /**
    * Ignore links that can't be parsed by the {@apilink URL} constructor.

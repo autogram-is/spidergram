@@ -106,9 +106,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * in the options; but does not save or enqueue them.
    * @type {Function}
    */
-  findUrls: (
-    options?: EnqueueUrlOptions,
-  ) => Promise<HtmlTools.FoundLink[]>;
+  findUrls: (options?: EnqueueUrlOptions) => Promise<HtmlTools.FoundLink[]>;
 
   /**
    * Saves a list of found links as {@apilink UniqueUrl} objects, applying
