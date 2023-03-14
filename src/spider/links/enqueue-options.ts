@@ -1,17 +1,44 @@
 import { RequestQueue, RequestTransform } from 'crawlee';
 import { ParsedUrl } from '@autogram/url-tools';
-import { InternalSpiderContext } from '../../index.js';
-import { FilterInput } from './index.js';
 
-export type RegionSelectors<
-  T extends Record<string, unknown> = Record<string, unknown>,
-> =
-  | string
-  | Record<string, string | undefined>
-  | Record<string, ({ selector: string } & T) | undefined>;
-type RegionLinkSelectorData = Record<string, string | undefined> & {
-  linkSelector: string;
-};
+import { FilterInput } from './index.js';
+import { InternalSpiderContext } from '../../index.js';
+import { PageRegion } from '../../tools/html/index.js';
+
+export type PageLinkRegion = PageRegion & {
+  /**
+   * One or more CSS selectors used to find links in a given region.
+   * 
+   * These selectors should find elements with either a `src` or `href` tag; they're used after
+   * a "bucket" of HMTL has been identified and specific URL-bearing elements must be found
+   * inside of it.
+   */
+  linkSelectors?: string | string[],
+
+  /**
+   * Region-specific override for the filter that determines whether a URL should be saved
+   * to the crawl database.
+   */
+  save?: FilterInput,
+
+  /**
+   * Region-specific override for the filter that determines whether a URL should be enqueued
+   * for crawling.
+   */
+  enqueue?: FilterInput,
+
+  /**
+   * Region-specific override for the label for each saved URL and Link. If none is specified,
+   * this defaults to the name of the region being processed.
+   */
+  label?: string,
+
+  /**
+   * Region-specific override for the default Request handler that should be used when processing
+   * the URL during a crawl.
+   */
+  handler?: string
+}
 
 export enum UrlMatchStrategy {
   /**
@@ -50,31 +77,43 @@ export interface EnqueueUrlOptions {
 
   /**
    * One or more CSS selectors used to locate links on the page.
-   *
-   * @example A single simple selector
-   * `selectors: 'head link, body a'`
-   *
-   * @example Multiple named selectors
-   * ```
-   * selectors: {
-   *   head: 'head link',
-   *   main: '#main a',
-   *   footer: '#footer a'
-   * }
-   * ```
-   * @example Multiple named selectors with distinct region and link selectors, and extra link data
-   * ```
-   * selectors: {
-   *   sitemap: { selector: 'head', linkSelector: 'link [ref="sitemap"]', handler: 'sitemap' },
-   *   head: { selector: 'head', linkSelector: 'link' },
-   *   main: { selector: '#main', linkSelector: 'a' },
-   *   footer: { selector: 'footer', linkSelector: 'a' },
-   * }
-   * ```
-   *
-   * @default 'body a'
+   * 
+   * @defaultValue 'body a'
    */
-  selectors: RegionSelectors<RegionLinkSelectorData>;
+  selectors: string | string[];
+
+
+  /**
+   * A list of page regions in which different link-discovery rules should be applied.
+   * By default, the region's name is saved as the {@link LinksTo.label} property on the
+   * connection between a {@link Resource} and a {@link UniqueUrl}.
+   * 
+   * @example Find and label links inside the following tags
+   * `regions: ['heading', 'main', 'footer'],`
+   *
+   * @example Find and label links with specific selectors
+   * ```
+   * regions: {
+   *   heading: 'heading.site-hero',
+   *   main: 'main > div.content',
+   *   footer: 'div#global__footer-v2.DONTDELETE',
+   * },
+   * ```
+   * 
+   * @example Find links in regions, using custom settings for one region
+   * ```
+   * regions: {
+   *   heading: 'heading.site-hero',
+   *   main: 'main > div.content',
+   *   footer: {
+   *     selector: 'div#global__footer-v2.DONTDELETE',
+   *     linkSelector: 'a:not(.endlessRedirect)',
+   *     enqueue: UrlMatchStrategy.SameHostname
+   *   },
+   * },
+   * ```
+   */
+  regions: string[] | Record<string, string | PageLinkRegion>
 
   /**
    * A filter condition to determine which links will be saved as

@@ -40,6 +40,7 @@ export const urlNormalizerDefaults: NormalizerOptions = {
 export const urlDiscoveryDefaults: EnqueueUrlOptions = {
   limit: 1_000_000,
   selectors: 'body a',
+  regions: {},
   save: UrlMatchStrategy.All,
   enqueue: UrlMatchStrategy.SameDomain,
   prioritize: false,
