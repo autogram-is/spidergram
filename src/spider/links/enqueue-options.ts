@@ -78,7 +78,7 @@ export interface EnqueueUrlOptions {
   /**
    * One or more CSS selectors used to locate links on the page.
    *
-   * @defaultValue 'body a'
+   * @defaultValue 'a'
    */
   selectors?: string | string[];
 
