@@ -1,5 +1,11 @@
 # Spidergram Changelog
 
+## v0.9.9 - 23-03-16
+
+- Graph queries can be saved as named reporting presets in the 'queries' section of Spidergram's configuration. The `spidergram report` CLI now offers a `--query` flag that can use these presets by name. An 'errorPages' query is built into the default settings: `spidergram report -q errorPages`. A `spidergram report --list` flag is now available to list stored queries, as well.
+- The spider now saves any cookies set during the page load on `Resource.cookies`. This improves the accuracy of technology fingerprinting, and can be useful in reconstructing certain on-page behavior. It can be turned off using the `spider.saveCookies` setting.
+- Page analysis PropertyMaps now support a 'limit' option to be used in conjunction with the 'selector' option. It enforces a hard limit on the number of options that will be returned to populate the new property; using '1' as the limit will ensure a single value, never an array of values.
+
 ## v0.9.8 - 23-03-15
 
 - The `getPageContent` function now now uses Cheerio to narrow down the page to its content region before passing HTML into `htmlToText`. Although HtmlToText can accept body selectors in its own config, its selector engine lacks support for some common CSS combinators, making common queries fail silently.
