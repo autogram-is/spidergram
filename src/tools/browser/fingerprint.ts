@@ -206,20 +206,26 @@ export class Fingerprint {
     input.headers = {};
     input.cookies = {};
 
-    for (const [key, value] of Object.entries(res.headers)) {
-      if (value !== undefined) {
-        if (
-          key.toLocaleLowerCase() === 'set-cookie' &&
-          typeof value === 'string'
-        ) {
-          const cookies = parseCookie(value);
-          for (const cookie of cookies) {
-            input.cookies[cookie.name] = [cookie.value];
+    if (res.cookies) {
+      for (const cookie of res.cookies) {
+        input.cookies[cookie.name.toString()] = [cookie.value.toString()];
+      }
+    } else {
+      for (const [key, value] of Object.entries(res.headers)) {
+        if (value !== undefined) {
+          if (
+            key.toLocaleLowerCase() === 'set-cookie' &&
+            typeof value === 'string'
+          ) {
+            const cookies = parseCookie(value);
+            for (const cookie of cookies) {
+              input.cookies[cookie.name] = [cookie.value];
+            }
+          } else {
+            input.headers[key.toLocaleLowerCase()] = Array.isArray(value)
+              ? value
+              : [value];
           }
-        } else {
-          input.headers[key.toLocaleLowerCase()] = Array.isArray(value)
-            ? value
-            : [value];
         }
       }
     }

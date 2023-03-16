@@ -60,6 +60,7 @@ export const spiderDefaults: Partial<SpiderOptions> = {
   postNavigationHooks: [],
   pageHandler: undefined,
   requestHandlers: {},
+  saveCookies: true,
   urlOptions: urlDiscoveryDefaults,
   parseMimeTypes: mimeGroups.page,
   downloadMimeTypes: [],

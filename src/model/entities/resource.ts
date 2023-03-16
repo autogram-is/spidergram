@@ -17,6 +17,7 @@ export interface ResourceConstructorOptions extends EntityConstructorOptions {
   mime?: string;
   size?: number;
   body?: string;
+  cookies?: Record<string, string | number | boolean>[];
   payload?: SavedFile;
 }
 
@@ -30,10 +31,11 @@ export class Resource extends Entity {
   mime?: string;
   size?: number;
   body?: string;
+  cookies?: Record<string, string | number | boolean>[];
   payload?: SavedFile;
 
   constructor(data: ResourceConstructorOptions = {}) {
-    const { url, code, message, headers, body, payload, ...dataForSuper } =
+    const { url, code, cookies, message, headers, body, payload, ...dataForSuper } =
       data;
     super(dataForSuper);
 
@@ -60,6 +62,7 @@ export class Resource extends Entity {
 
     this.message = message ?? '';
     this.headers = headers ?? {};
+    this.cookies = cookies;
     this.body = body;
     this.payload = payload;
 

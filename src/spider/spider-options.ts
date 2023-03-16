@@ -139,6 +139,11 @@ export interface InternalSpiderOptions extends Dictionary {
   userAgent?: string;
 
   /**
+   * Save any browser cookies set during page rendering.
+   */
+  saveCookies?: boolean;
+
+  /**
    * Number of seconds to wait for a handler before cancelling the request and
    * treating it as an eror. np
    *
