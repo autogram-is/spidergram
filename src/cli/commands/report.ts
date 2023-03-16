@@ -1,5 +1,5 @@
 import { SgCommand } from '../index.js';
-import { Flags } from '@oclif/core';
+import { Flags, Args } from '@oclif/core';
 import {
   OutputLevel,
   Spidergram,
@@ -8,11 +8,12 @@ import {
   isAqlFunction,
   isAqlAggregateFunction,
   FileTools,
+  isAqQuery,
 } from '../../index.js';
 import { JsonMap, JsonPrimitive } from '@salesforce/ts-types';
 import _ from 'lodash';
 import { readFile } from 'fs/promises';
-import { aql, literal, GeneratedAqlQuery } from 'arangojs/aql.js';
+import { aql, literal, GeneratedAqlQuery, isGeneratedAqlQuery } from 'arangojs/aql.js';
 import * as csv from 'fast-csv';
 import arrify from 'arrify';
 
@@ -22,14 +23,20 @@ export default class Report extends SgCommand {
   static summary = 'Query the Spidergram crawl data';
 
   static usage =
-    '<%= command.id %> [--input <value> | --aql <value> | --collection=<value>] ...';
+    '<%= command.id %> [query name>] [--input <value> | --aql <value> | --collection=<value>] ...';
+
+  static args = {
+    preset: Args.string({
+      description: "A named query from the project configuration."
+    })
+  }
 
   static flags = {
     // Basic query information
     input: Flags.string({
       char: 'i',
       summary: 'A JSON file containing a query description',
-      exclusive: ['aql'],
+      exclusive: ['aql', 'query'],
     }),
     output: Flags.string({
       char: 'o',
@@ -40,9 +47,16 @@ debug: Display the query spec and generated AQL statement without running it
 *.json: Save the results as a JSON file in the storage directory.
 *.xlsx: Save the results as an Excel workbook in the storage directory`,
     }),
+
     aql: Flags.string({
       char: 'a',
       summary: 'A file containing a raw AQL query',
+      exclusive: ['input', 'query'],
+    }),
+    query: Flags.string({
+      char: 'q',
+      summary: 'The name of a query saved in project configuration.',
+      exclusive: ['input', 'aql'],
     }),
 
     collection: Flags.string({
@@ -170,7 +184,19 @@ debug: Display the query spec and generated AQL statement without running it
     let q: GeneratedAqlQuery | undefined;
     let results: JsonMap[] = [];
 
-    if (flags.aql) {
+    if (flags.query) {
+      // We got the name of a preset. Party time!
+      const preset = sg.config.queries?.[flags.query];
+      if (isAqQuery(preset)) {
+        qb = await this.buildQueryFromFlags(new Query(preset));
+        q = qb.build();
+      } else if (preset instanceof Query) {
+        qb = await this.buildQueryFromFlags(preset);
+        q = qb.build();
+      } else if (isGeneratedAqlQuery(preset)) {
+        q = preset;
+      }
+    } else if (flags.aql) {
       // If we received a raw AQL file, we'll skip the majority of our builder code and
       // go straight to display.
       const aqlString = await readFile(flags.aql).then(buffer =>
