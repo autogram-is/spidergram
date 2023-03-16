@@ -27,7 +27,9 @@ test('simple paths', t => {
 
 test('css selectors', t => {
   t.is(findPropertyValue(obj, { source: 'html', selector: 'h1' }), 'headline');
-  t.is(findPropertyValue(obj, { source: 'html', selector: 'p' }), 'first paragraph');
+  t.is(findPropertyValue(obj, { source: 'html', selector: 'p' }), 'first paragraphsecond paragraph');
+  t.is(findPropertyValue(obj, { source: 'html', selector: 'p', limit: 1 }), 'first paragraph');
+  t.deepEqual(findPropertyValue(obj, { source: 'html', selector: 'p', limit: 2 }), ['first paragraph', 'second paragraph']);
   t.is(findPropertyValue(obj, { source: 'html', selector: 'iframe' }), undefined);
 });
 

@@ -13,9 +13,20 @@ export interface PropertySource extends Record<string, unknown> {
 
   /**
    * If the source property is found, and its value is a string, parse it as an HTML
-   * fragment and return the first instance of this selector inside of it.
+   * fragment and return the inner text.
    */
   selector?: string;
+
+  /**
+   * Limit the number of items returned in an array property.
+   *
+   *    0: Return all items concatenated into a single value.
+   *    1: Return the first item as a single value.
+   *  2-n: Return the first n items as an array.
+   * 
+   * @defaultValue: 0
+   */
+  limit?: number;
 
   /**
    * If the source property is found, use this function to filter it or convert it to
@@ -104,9 +115,21 @@ export function findPropertyValue<T = unknown>(
           typeof v === 'string' &&
           typeof source.selector === 'string'
         ) {
-          const t = getCheerio(v)(source.selector).first().text().trim();
-          if (t.length > 0) {
-            v = t;
+          const $ = getCheerio(v);
+          const matches = $(source.selector);
+          if (matches.length > 0) {
+            const limit = source.limit ?? 0;
+            if (limit === 1) {
+              // Return a single value
+              v = matches.first().text().trim();
+            } else if (limit > 1) {
+              // Slice the array to length and text-ify each element
+              v = matches.toArray().slice(0, limit).map(e => $(e).text().trim());
+            } else {
+              // Concatenate all values
+              v = matches.text().trim();
+            }
+            if (v?.length === 0) v = undefined;
           } else {
             v = undefined;
           }
