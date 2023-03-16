@@ -68,6 +68,7 @@
   },
   "dependencies": {
     "@autogram/url-tools": "^2.5.4",
+    "@axe-core/playwright": "^4.6.0",
     "@oclif/plugin-help": "^5",
     "@oclif/plugin-plugins": "^2.4.1",
     "@proload/core": "^0.3.3",
@@ -80,6 +81,7 @@
     "@vladfrangu/async_event_emitter": "^2.1.2",
     "aql-builder": "^0.5.1",
     "arrify": "^3.0.0",
+    "axe-core-npm": "github:akornmeier/axe-core-npm",
     "caterpillar": "^6.8.0",
     "chalk": "^5.1.2",
     "class-transformer": "^0.5.1",
@@ -97,6 +99,7 @@
     "object-hash": "^3.0.0",
     "office-document-properties": "^1.1.0",
     "pdf-parse": "autogram-is/pdf-parse",
+    "playwright-lighthouse": "github:asambstack/playwright-lighthouse",
     "prepend-http": "^4.0.0",
     "read-pkg-up": "^9.1.0",
     "readability-scores": "^1.0.8",
