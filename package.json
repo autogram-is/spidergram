@@ -7,7 +7,7 @@
   "types": "./dist/index.d.ts",
   "type": "module",
   "engines": {
-    "node": "^18.1.0"
+    "node": ">18.1.0"
   },
   "bin": {
     "spidergram": "./bin/run.js"
