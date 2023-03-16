@@ -35,8 +35,16 @@ export class Resource extends Entity {
   payload?: SavedFile;
 
   constructor(data: ResourceConstructorOptions = {}) {
-    const { url, code, cookies, message, headers, body, payload, ...dataForSuper } =
-      data;
+    const {
+      url,
+      code,
+      cookies,
+      message,
+      headers,
+      body,
+      payload,
+      ...dataForSuper
+    } = data;
     super(dataForSuper);
 
     // Flatten the URL to a string

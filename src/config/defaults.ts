@@ -100,6 +100,7 @@ export const pageContentDefaults: PageContentOptions = {
 
 export const defaultQueries: Record<string, AqQuery> = {
   errorPages: {
+    description: 'Summarize HTTP errors by domain',
     collection: 'resources',
     filters: [{ name: 'code', eq: 200, negate: true }],
     aggregates: [['site', 'parsed.hostname'], 'mime', 'code'],

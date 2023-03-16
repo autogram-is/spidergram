@@ -13,7 +13,12 @@ import {
 import { JsonMap, JsonPrimitive } from '@salesforce/ts-types';
 import _ from 'lodash';
 import { readFile } from 'fs/promises';
-import { aql, literal, GeneratedAqlQuery, isGeneratedAqlQuery } from 'arangojs/aql.js';
+import {
+  aql,
+  literal,
+  GeneratedAqlQuery,
+  isGeneratedAqlQuery,
+} from 'arangojs/aql.js';
 import * as csv from 'fast-csv';
 import arrify from 'arrify';
 
@@ -27,11 +32,14 @@ export default class Report extends SgCommand {
 
   static args = {
     preset: Args.string({
-      description: "A named query from the project configuration."
-    })
-  }
+      description: 'A named query from the project configuration.',
+    }),
+  };
 
   static flags = {
+    list: Flags.boolean({
+      summary: 'List the available stored queries',
+    }),
     // Basic query information
     input: Flags.string({
       char: 'i',
@@ -172,6 +180,44 @@ debug: Display the query spec and generated AQL statement without running it
   async run() {
     const { flags } = await this.parse(Report);
     const sg = await Spidergram.load();
+
+    if (flags.list) {
+      const storedQueries = sg.config.queries;
+      if (
+        storedQueries === undefined ||
+        Object.keys(storedQueries).length === 0
+      ) {
+        this.ux.info(
+          `No queries are currently stored in the Spidergram configuration.`,
+        );
+        this.exit();
+      } else {
+        const data: Record<string, unknown>[] = Object.entries(
+          storedQueries,
+        ).map(([name, query]) => {
+          if (isGeneratedAqlQuery(query)) return { query: name, type: 'AQL' };
+          if (isAqQuery(query))
+            return {
+              query: name,
+              description: query.description,
+              type: 'JSON',
+            };
+          if (query instanceof Query)
+            return {
+              query: name,
+              description: query.spec.description,
+              type: 'Class',
+            };
+          else return {};
+        });
+        this.ux.table(data, {
+          query: { header: 'Query' },
+          description: { header: 'Description' },
+          type: { header: 'Type' },
+        });
+        this.exit();
+      }
+    }
 
     if (flags.output === 'json') {
       this.output = OutputLevel.silent;
@@ -353,12 +399,12 @@ debug: Display the query spec and generated AQL statement without running it
     }
 
     // Aggregates
-    const aggregateFuncs = ['distinct', 'sum', 'avg', 'min', 'max'] as const;
+    const aggregateFuncs = ['distinct', 'sum', 'avg', 'min', 'max'];
     for (const fnc of aggregateFuncs) {
       for (const a of flags[fnc] ?? []) {
         const [name, path] = a.split('=');
         if (isAqlAggregateFunction(fnc)) {
-          qb.aggregate({ name, function: fnc }, fnc, path);
+          qb.aggregate({ name, path, function: fnc });
         }
       }
     }

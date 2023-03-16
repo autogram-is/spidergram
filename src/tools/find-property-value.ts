@@ -23,7 +23,7 @@ export interface PropertySource extends Record<string, unknown> {
    *    0: Return all items concatenated into a single value.
    *    1: Return the first item as a single value.
    *  2-n: Return the first n items as an array.
-   * 
+   *
    * @defaultValue: 0
    */
   limit?: number;
@@ -124,7 +124,10 @@ export function findPropertyValue<T = unknown>(
               v = matches.first().text().trim();
             } else if (limit > 1) {
               // Slice the array to length and text-ify each element
-              v = matches.toArray().slice(0, limit).map(e => $(e).text().trim());
+              v = matches
+                .toArray()
+                .slice(0, limit)
+                .map(e => $(e).text().trim());
             } else {
               // Concatenate all values
               v = matches.text().trim();
