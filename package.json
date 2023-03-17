@@ -1,6 +1,6 @@
 {
   "name": "spidergram",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "description": "Structural analysis tools for complex web sites",
   "main": "./dist/index.js",
   "exports": "./dist/index.js",
@@ -98,6 +98,7 @@
     "office-document-properties": "^1.1.0",
     "pdf-parse": "autogram-is/pdf-parse",
     "prepend-http": "^4.0.0",
+    "proload-plugin-json5": "github:autogram-is/proload-plugin-json5",
     "read-pkg-up": "^9.1.0",
     "readability-scores": "^1.0.8",
     "reflect-metadata": "^0.1.13",

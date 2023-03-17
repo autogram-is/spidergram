@@ -2,6 +2,7 @@ import load, { Config, LoadOptions } from '@proload/core';
 import json from '@proload/plugin-json';
 import yaml from '@proload/plugin-yaml';
 import typescript from '@proload/plugin-typescript';
+import json5 from 'proload-plugin-json5';
 
 import { ensureDir, exists } from 'fs-extra';
 
@@ -152,7 +153,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
       throw new SpidergramError(`Config file ${filePath} doesn't exist`);
     }
 
-    load.use([typescript, json, yaml]);
+    load.use([typescript, json5, json, yaml]);
     const options: LoadOptions<T> = {
       context: this,
       mustExist: false,
