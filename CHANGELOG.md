@@ -1,5 +1,10 @@
 # Spidergram Changelog
 
+## v0.9.10 - 23-03-17
+
+- Config files in [JSON5](https://test.com) format are now supported, for folks who don't buy 50gal drums of double-quotes at Costco.
+- The `BrowserTools.getAxeReport` method, given a Playwright page handle, runs a full accessibility audit on the live page.
+
 ## v0.9.9 - 23-03-16
 
 - Graph queries can be saved as named reporting presets in the 'queries' section of Spidergram's configuration. The `spidergram report` CLI now offers a `--query` flag that can use these presets by name. An 'errorPages' query is built into the default settings: `spidergram report -q errorPages`. A `spidergram report --list` flag is now available to list stored queries, as well.
