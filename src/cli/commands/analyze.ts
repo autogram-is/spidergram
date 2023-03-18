@@ -29,15 +29,10 @@ export default class Analyze extends SgCommand {
     }
 
     const options: PageAnalysisOptions = {};
-    if (flags.metadata === false) {
-      options.data = false;
-    }
-    if (flags.content === false) {
-      options.content = false;
-    }
-    if (flags.tech === false) {
-      options.tech = false;
-    }
+    options.data = flags.metadata;
+    options.content = flags.content;
+    options.tech = flags.tech;
+    options.links = flags.links;
 
     this.startProgress('Analyzing saved pages...');
 

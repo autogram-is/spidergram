@@ -1,9 +1,10 @@
-import { Spidergram, Resource, HtmlTools, BrowserTools } from '../index.js';
+import { Spidergram, Resource, HtmlTools, BrowserTools, relinkResource } from '../index.js';
 import { PageDataOptions, PageContentOptions } from './html/index.js';
 import { PageTechnologyOptions } from './browser/index.js';
 import { PropertySource, findPropertyValue } from './find-property-value.js';
 import is from '@sindresorhus/is';
 import _ from 'lodash';
+import { EnqueueLinksOptions } from 'crawlee';
 
 export type PageAnalyzer = (
   input: Resource,
@@ -21,7 +22,7 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
    * Note: By default, running data extraction will overwrite any information in a
    * Resource object's existing `data` property.
    */
-  data?: PageDataOptions | false;
+  data?: PageDataOptions | boolean;
 
   /**
    * Options for content analysis, including the transformation of core page content
@@ -32,12 +33,19 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
    * Resource object's existing `content` property.
 
    */
-  content?: PageContentOptions | false;
+  content?: PageContentOptions | boolean;
 
   /**
    * Options for technology fingerprinting. Setting this to `false` skips all fingerprinting.
    */
-  tech?: PageTechnologyOptions | false;
+  tech?: PageTechnologyOptions | boolean;
+
+  /**
+   * Options for rebuilding the metadata for a page's outgoing links.
+   * 
+   * @defaultValue: false
+   */
+  links?: EnqueueLinksOptions | boolean;
 
   /**
    * A dictionary describing simple data mapping operations that should be performed after
@@ -76,20 +84,30 @@ async function _analyzePage(
   );
 
   if (options.data) {
-    resource.data = await HtmlTools.getPageData(resource, options.data);
+    resource.data = await HtmlTools.getPageData(
+      resource,
+      options.data === true ? undefined : options.data
+    );
   }
 
   if (options.content) {
     resource.content = await HtmlTools.getPageContent(
       resource,
-      options.content,
+      options.content === true ? undefined : options.content
     );
   }
 
   if (options.tech) {
     resource.tech = await BrowserTools.getPageTechnologies(
       resource,
-      options.tech,
+      options.tech === true ? undefined : options.tech
+    );
+  }
+
+  if (options.links) {
+    await relinkResource(
+      resource,
+      options.links === true ? undefined : options.links
     );
   }
 
