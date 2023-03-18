@@ -145,12 +145,6 @@ export const analysisFlags = {
     allowNo: true,
     summary: 'Extract key page content',
   }),
-  readability: Flags.boolean({
-    char: 'r',
-    default: true,
-    allowNo: true,
-    summary: 'Calculate content readability',
-  }),
   metadata: Flags.boolean({
     char: 'm',
     default: true,
@@ -162,5 +156,11 @@ export const analysisFlags = {
     default: true,
     allowNo: true,
     summary: 'Detect page technologies',
+  }),
+  links: Flags.boolean({
+    char: 'l',
+    default: false,
+    allowNo: true,
+    summary: 'Rebuild outgoing link metadata',
   }),
 };

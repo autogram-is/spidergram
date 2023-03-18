@@ -98,15 +98,7 @@ export const pageContentDefaults: PageContentOptions = {
   trim: true,
 };
 
-export const defaultQueries: Record<string, AqQuery> = {
-  errorPages: {
-    description: 'Summarize HTTP errors by domain',
-    collection: 'resources',
-    filters: [{ name: 'code', eq: 200, negate: true }],
-    aggregates: [['site', 'parsed.hostname'], 'mime', 'code'],
-    count: 'pages',
-  },
-};
+export const defaultQueries: Record<string, AqQuery> = { };
 
 export const arangoDefaults = {
   databaseName: 'spidergram',
@@ -119,9 +111,10 @@ export const arangoDefaults = {
 
 export const analyzePageDefaults: PageAnalysisOptions = {
   data: pageDataDefaults,
-  content: {},
-  tech: {},
-  regions: {},
+  content: true,
+  tech: true,
+  regions: true,
+  rebuildLinks: false,
   propertyMap: {},
 };
 

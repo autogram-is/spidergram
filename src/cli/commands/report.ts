@@ -195,23 +195,27 @@ debug: Display the query spec and generated AQL statement without running it
         const data: Record<string, unknown>[] = Object.entries(
           storedQueries,
         ).map(([name, query]) => {
+          if (typeof query === 'string') return { query: name, type: 'Raw' };
           if (isGeneratedAqlQuery(query)) return { query: name, type: 'AQL' };
           if (isAqQuery(query))
             return {
               query: name,
-              description: query.description,
-              type: 'JSON',
+              category: query.metadata?.category,
+              description: query.metadata?.description ?? query.comment,
+              type: 'Spec',
             };
           if (query instanceof Query)
             return {
               query: name,
-              description: query.spec.description,
+              category: query.spec.metadata?.category,
+              description: query.spec.metadata?.description ?? query.spec.comment,
               type: 'Class',
             };
           else return {};
         });
         this.ux.table(data, {
           query: { header: 'Query' },
+          category: { header: 'Group' },
           description: { header: 'Description' },
           type: { header: 'Type' },
         });
@@ -233,7 +237,9 @@ debug: Display the query spec and generated AQL statement without running it
     if (flags.query) {
       // We got the name of a preset. Party time!
       const preset = sg.config.queries?.[flags.query];
-      if (isAqQuery(preset)) {
+      if (typeof preset === 'string') {
+        q = aql`${literal(preset)}`;
+      } else if (isAqQuery(preset)) {
         qb = await this.buildQueryFromFlags(new Query(preset));
         q = qb.build();
       } else if (preset instanceof Query) {
