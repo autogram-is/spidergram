@@ -53,7 +53,8 @@ export function findUrls(
         linkOptions?.linkSelectors ?? options.selectors,
       )) {
         if (!discardLink(link, discardlocalAnchors, discardEmpty)) {
-          link.label = linkOptions?.label ?? region;
+          link.region = region;
+          link.label = linkOptions?.label;
           link.handler = linkOptions?.handler ?? options.handler;
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const {
