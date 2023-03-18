@@ -2,8 +2,10 @@
 
 ## v0.9.10 - 23-03-17
 
-- Config files in [JSON5](https://test.com) format are now supported, for folks who don't buy 50gal drums of double-quotes at Costco.
+- The shared `analyzePage()` method can now rebuild a page's `LinksTo` metadata; this is useful when region selectors have changed and you want to make sure your link reporting stays up to date. The `analyze` CLI command now has a `--links` flag, though it defaults to false. The `relink` CLI command has been removed.
 - The `BrowserTools.getAxeReport` method, given a Playwright page handle, runs a full accessibility audit on the live page.
+- Config files in [JSON5](https://test.com) format are now supported, for folks who don't buy 50gal drums of double-quotes at Costco.
+- Raw AQL queries can be embedded as strings in the config's `queries` collection.
 
 ## v0.9.9 - 23-03-16
 

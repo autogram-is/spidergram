@@ -7,6 +7,7 @@ export * as FileTools from './file/index.js';
 export * from './find-property-value.js';
 export * from './analyze-page.js';
 export * from './relink-resource.js';
+export * from './inspect-variable.js';
 
 export { Robots } from './robots.js';
 

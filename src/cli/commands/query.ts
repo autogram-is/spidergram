@@ -21,18 +21,20 @@ import {
 } from 'arangojs/aql.js';
 import * as csv from 'fast-csv';
 import arrify from 'arrify';
+import { inspectValue } from '../../index.js';
 
-export default class Report extends SgCommand {
+export default class RunQuery extends SgCommand {
   static strict = false;
 
-  static summary = 'Query the Spidergram crawl data';
+  static summary = 'Run a query against the crawl data';
 
   static usage =
     '<%= command.id %> [query name>] [--input <value> | --aql <value> | --collection=<value>] ...';
 
   static args = {
-    preset: Args.string({
+    query: Args.string({
       description: 'A named query from the project configuration.',
+      required: false
     }),
   };
 
@@ -44,7 +46,7 @@ export default class Report extends SgCommand {
     input: Flags.string({
       char: 'i',
       summary: 'A JSON file containing a query description',
-      exclusive: ['aql', 'query'],
+      exclusive: ['aql'],
     }),
     output: Flags.string({
       char: 'o',
@@ -59,32 +61,26 @@ debug: Display the query spec and generated AQL statement without running it
     aql: Flags.string({
       char: 'a',
       summary: 'A file containing a raw AQL query',
-      exclusive: ['input', 'query'],
-    }),
-    query: Flags.string({
-      char: 'q',
-      summary: 'The name of a query saved in project configuration.',
-      exclusive: ['input', 'aql'],
+      exclusive: ['input'],
     }),
 
     collection: Flags.string({
       char: 'c',
       exclusive: ['aql'],
       summary: 'The Arango collection to be queried',
-      default: 'resources',
       helpGroup: 'Query',
     }),
     filter: Flags.string({
       char: 'f',
       exclusive: ['aql'],
       summary: 'Filter records by a property',
-      description: `[path] returns records where the property IS NOT null
-[path = value] returns records where property equals value
-[path != value] returns records where property DOES NOT equal value
-[path > value] returns records where property is greater than value
-[path < value] returns records where property is less than value
-[path { value,value] returns records where values contain property
-[path } value] returns records where value is contained in property`,
+      description: `"path" returns records where the property IS NOT null
+"path = value} returns records where property equals value
+"path != value" returns records where property DOES NOT equal value
+"path > value" returns records where property is greater than value
+"path < value" returns records where property is less than value
+"path { value,value" returns records where values contain property
+"path } value" returns records where value is contained in property`,
       multiple: true,
       helpGroup: 'Query',
     }),
@@ -112,8 +108,8 @@ debug: Display the query spec and generated AQL statement without running it
     limit: Flags.integer({
       char: 'l',
       exclusive: ['aql'],
-      summary: 'The Arango collection to be queried',
-      default: 20,
+      summary: 'The maximum number of results to display',
+      default: 40,
       helpGroup: 'Query',
     }),
 
@@ -178,7 +174,7 @@ debug: Display the query spec and generated AQL statement without running it
   };
 
   async run() {
-    const { flags } = await this.parse(Report);
+    const { flags, args } = await this.parse(RunQuery);
     const sg = await Spidergram.load();
 
     if (flags.list) {
@@ -234,9 +230,9 @@ debug: Display the query spec and generated AQL statement without running it
     let q: GeneratedAqlQuery | undefined;
     let results: JsonMap[] = [];
 
-    if (flags.query) {
+    if (args.query) {
       // We got the name of a preset. Party time!
-      const preset = sg.config.queries?.[flags.query];
+      const preset = sg.config.queries?.[args.query];
       if (typeof preset === 'string') {
         q = aql`${literal(preset)}`;
       } else if (isAqQuery(preset)) {
@@ -287,7 +283,14 @@ debug: Display the query spec and generated AQL statement without running it
         this.ux.action.stop();
       }
 
-      if (flags.output?.toLocaleLowerCase() === 'json') {
+      if (flags.output?.toLocaleLowerCase() === 'inspect') {
+        // In 'inspect' mode we output a pretty-printed version of the first item.
+        this.log(inspectValue(results[0]));
+      } else if (flags.output?.toLocaleLowerCase() === 'raw') {
+        // In 'raw' mode we output pretty-printed results to the console; it's
+        // useful for inspecting large resultset with limit=1.
+        this.ux.styledJSON(results);
+      } else if (flags.output?.toLocaleLowerCase() === 'json') {
         // In JSON mode we don't do anything else, just spit JSON to the screen.
         // People can pipe it to whatever JSON tool they like.
         this.log(JSON.stringify(results));
@@ -299,10 +302,6 @@ debug: Display the query spec and generated AQL statement without running it
           csvStream.write(row);
         }
         csvStream.end();
-      } else if (flags.output?.toLocaleLowerCase() === 'raw') {
-        // In 'raw' mode we output pretty-printed results to the console; it's
-        // useful for inspecting large resultset with limit=1.
-        this.ux.styledJSON(results);
       } else if (flags.output?.toLocaleLowerCase().endsWith('.json')) {
         // If the user provides a *filename* that ends with .json, we'll
         // write it to the global storage directory.
@@ -386,9 +385,9 @@ debug: Display the query spec and generated AQL statement without running it
    * fluent methods to build out a full query spec.
    */
   async buildQueryFromFlags(qb?: Query) {
-    const { flags } = await this.parse(Report);
+    const { flags } = await this.parse(RunQuery);
 
-    if (qb === undefined) qb = new Query(flags.collection);
+    if (qb === undefined) qb = new Query(flags.collection ?? 'resources');
 
     // Filters
     for (const f of flags.filter ?? []) {
