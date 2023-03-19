@@ -168,7 +168,7 @@ export class Report implements ReportOptions {
         this.status.finished++;
       });
     } else {
-      const fileName = `${this.name ?? 'report'}.xslx`;
+      const fileName = `${this.name ?? 'report'}.xlsx`;
       const rpt = new FileTools.Spreadsheet();
       for (const [name, data] of Object.entries(this.data)) {
         rpt.addSheet(data, name);
@@ -189,7 +189,7 @@ export class Report implements ReportOptions {
     // Calculate rough progress
     this.status.total = 2 + Object.keys(this.queries).length;
 
-    return this.generate()
+    return this.build()
       .then(() => this.process())
       .then(() => this.generate())
       .then(() => {
