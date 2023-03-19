@@ -10,6 +10,14 @@ import { FileTools } from "../index.js";
  */
 export interface ReportOptions {
   /**
+   * A unique name for the report. This will be used to generate the file
+   * or directory in which the report's output is stored.
+   * 
+   * @defaultValue `report`
+   */
+  name?: string;
+
+  /**
    * A human-friendly description of the Report and its purpose. This will
    * be displayed on the command line and in other locations where Spidergram
    * users can choose from available reporting options.
@@ -66,7 +74,8 @@ type ReportEventListener<T extends ReportEventType> = (
 export class Report implements ReportOptions {
   queries: Record<string, string | GeneratedAqlQuery | AqQuery | Query>;
   data: Record<string, AnyJson[]> = {};
-  description?: string
+  description?: string;
+  name?: string;
 
   protected _buildFn?: (report: this) => Promise<void>;
   protected _processFn?: (report: this) => Promise<void>;
@@ -82,6 +91,7 @@ export class Report implements ReportOptions {
     this.events = new AsyncEventEmitter<ReportEventMap>();
 
     // Set internal options
+    this.name = options.name;
     this.description = options.description;
     this._buildFn = options.build;
     this._generateFn = options.generate;
@@ -153,7 +163,7 @@ export class Report implements ReportOptions {
       return this._generateFn(this)
         .then(() => { this.status.finished++; });
     } else {
-      const fileName = 'report.xslx';
+      const fileName = `${this.name ?? 'report'}.xslx`;
       const rpt = new FileTools.Spreadsheet();
       for (const [name, data] of Object.entries(this.data)) {
         rpt.addSheet(data, name);
