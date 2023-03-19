@@ -56,6 +56,7 @@ export const htmlToTextDefaults: HtmlToTextOptions = {
 };
 
 export const spiderDefaults: Partial<SpiderOptions> = {
+  logLevel: 0,
   preNavigationHooks: [],
   postNavigationHooks: [],
   pageHandler: undefined,
