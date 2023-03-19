@@ -1,9 +1,9 @@
-import { GeneratedAqlQuery } from "arangojs/aql";
-import { AqQuery } from "aql-builder";
-import { Query, JobStatus, Spidergram } from "../index.js";
+import { GeneratedAqlQuery } from 'arangojs/aql';
+import { AqQuery } from 'aql-builder';
+import { Query, JobStatus, Spidergram } from '../index.js';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
-import { AnyJson } from "@salesforce/ts-types";
-import { FileTools } from "../index.js";
+import { AnyJson } from '@salesforce/ts-types';
+import { FileTools } from '../index.js';
 
 /**
  * Configuration options for a {@link Report}
@@ -12,7 +12,7 @@ export interface ReportOptions {
   /**
    * A unique name for the report. This will be used to generate the file
    * or directory in which the report's output is stored.
-   * 
+   *
    * @defaultValue `report`
    */
   name?: string;
@@ -23,7 +23,7 @@ export interface ReportOptions {
    * users can choose from available reporting options.
    */
   description?: string;
-  
+
   /**
    * An optional grouping or category for the report, when displayed in user-facing
    * lists and status displays.
@@ -38,26 +38,26 @@ export interface ReportOptions {
   /**
    * An optional pre-processing function responsible for executing the queries and
    * gathering any additional data for the report.
-   * 
+   *
    * By default, a report's queries are run in the sequence they appear in its 'queries'
    * collection, and results are placed in its 'data' collection.
    */
-  build?: (report: this) => Promise<void>
+  build?: (report: this) => Promise<void>;
 
   /**
    * An optional post-processing function to be executed after the report's queries
    * are run. It may add additional data sets, modify the data from the report's own
    * queries, and so on.
-   * 
+   *
    * By default, no operations are performend in this phase.
    */
-  process?: (report: this) => Promise<void>
+  process?: (report: this) => Promise<void>;
 
   /**
    * An optional processing function responsible for outputting the final representation
    * of the report.
    */
-  generate?: (report: this) => Promise<void>
+  generate?: (report: this) => Promise<void>;
 }
 
 interface ReportStatus extends JobStatus {
@@ -101,7 +101,7 @@ export class Report implements ReportOptions {
     this._generateFn = options.generate;
     this._processFn = options.process;
     this.queries = options.queries ?? {};
-    
+
     // Set up status
     this.status = {
       total: 0,
@@ -111,7 +111,7 @@ export class Report implements ReportOptions {
       finishTime: 0,
       files: [],
       records: {},
-    }
+    };
   }
 
   on<T extends ReportEventType>(
@@ -137,16 +137,15 @@ export class Report implements ReportOptions {
 
   async build(): Promise<void> {
     if (this._buildFn) {
-      return this._buildFn(this)
-        .then(() => {
-          this.events.emit('progress', this.status, 'Data retrieved');
-        });
+      return this._buildFn(this).then(() => {
+        this.events.emit('progress', this.status, 'Data retrieved');
+      });
     } else {
       for (const [name, query] of Object.entries(this.queries)) {
         this.events.emit('progress', this.status, `Running '${name}' query`);
-        this.data[name] = await Query.run(query)
+        this.data[name] = await Query.run(query);
         this.status.records[name] = this.data[name].length;
-        this.status.finished++;        
+        this.status.finished++;
       }
       this.events.emit('progress', this.status, 'Data retrieved');
     }
@@ -154,8 +153,9 @@ export class Report implements ReportOptions {
 
   async process(): Promise<void> {
     if (this._processFn) {
-      return this._processFn(this)
-        .then(() => { this.status.finished++; });
+      return this._processFn(this).then(() => {
+        this.status.finished++;
+      });
     } else return Promise.resolve();
   }
 
@@ -164,15 +164,18 @@ export class Report implements ReportOptions {
     this.events.emit('progress', this.status, 'Generating files');
 
     if (this._generateFn) {
-      return this._generateFn(this)
-        .then(() => { this.status.finished++; });
+      return this._generateFn(this).then(() => {
+        this.status.finished++;
+      });
     } else {
       const fileName = `${this.name ?? 'report'}.xslx`;
       const rpt = new FileTools.Spreadsheet();
       for (const [name, data] of Object.entries(this.data)) {
         rpt.addSheet(data, name);
       }
-      return sg.files().write(fileName, rpt.toBuffer())
+      return sg
+        .files()
+        .write(fileName, rpt.toBuffer())
         .then(() => {
           this.status.finished++;
           this.status.files.push(fileName);
@@ -185,7 +188,7 @@ export class Report implements ReportOptions {
 
     // Calculate rough progress
     this.status.total = 2 + Object.keys(this.queries).length;
-    
+
     return this.generate()
       .then(() => this.process())
       .then(() => this.generate())
@@ -193,6 +196,6 @@ export class Report implements ReportOptions {
         this.status.finishTime = Date.now();
         this.events.emit('end', this.status);
         return this.status;
-      })
+      });
   }
 }

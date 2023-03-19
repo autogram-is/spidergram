@@ -34,7 +34,7 @@ export default class RunQuery extends SgCommand {
   static args = {
     query: Args.string({
       description: 'A named query from the project configuration.',
-      required: false
+      required: false,
     }),
   };
 
@@ -204,7 +204,8 @@ debug: Display the query spec and generated AQL statement without running it
             return {
               query: name,
               category: query.spec.metadata?.category,
-              description: query.spec.metadata?.description ?? query.spec.comment,
+              description:
+                query.spec.metadata?.description ?? query.spec.comment,
               type: 'Class',
             };
           else return {};

@@ -1,6 +1,11 @@
 import { Spidergram } from '../../index.js';
 import { QueryOptions } from 'arangojs/database.js';
-import { GeneratedAqlQuery, aql, isGeneratedAqlQuery, literal } from 'arangojs/aql.js';
+import {
+  GeneratedAqlQuery,
+  aql,
+  isGeneratedAqlQuery,
+  literal,
+} from 'arangojs/aql.js';
 import { AnyJson } from '@salesforce/ts-types';
 import { AqBuilder, AqQuery, isAqQuery } from 'aql-builder';
 

@@ -98,7 +98,7 @@ export const pageContentDefaults: PageContentOptions = {
   trim: true,
 };
 
-export const defaultQueries: Record<string, AqQuery> = { };
+export const defaultQueries: Record<string, AqQuery> = {};
 
 export const arangoDefaults = {
   databaseName: 'spidergram',

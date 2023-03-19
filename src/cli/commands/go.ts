@@ -1,5 +1,12 @@
 import { Flags, Args } from '@oclif/core';
-import { Spidergram, Spider, WorkerQuery, analyzePage, Resource, Report } from '../../index.js';
+import {
+  Spidergram,
+  Spider,
+  WorkerQuery,
+  analyzePage,
+  Resource,
+  Report,
+} from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
 import is from '@sindresorhus/is';
 
@@ -27,11 +34,11 @@ export default class Go extends SgCommand {
   async run() {
     const sg = await Spidergram.load();
     const { argv: urls, flags } = await this.parse(Go);
-    
+
     if (!is.array<string>(urls)) {
       this.error('URLs must be strings.');
     }
-  
+
     if (flags.erase) {
       const confirmation = await CLI.confirm(
         `Erase the ${
@@ -47,9 +54,10 @@ export default class Go extends SgCommand {
     const spider = new Spider()
       .on('progress', status => this.updateProgress(status))
       .on('end', () => this.stopProgress());
-    
+
     this.startProgress('Crawling URLs');
-    await spider.run()
+    await spider
+      .run()
       .then(status => this.ux.info(sg.cli.summarizeStatus(status)));
 
     // Analyze
@@ -58,16 +66,19 @@ export default class Go extends SgCommand {
       .on('end', () => this.stopProgress());
 
     this.startProgress('Analyzing crawled resources');
-    await analyzer.run(resource => analyzePage(resource))
+    await analyzer
+      .run(resource => analyzePage(resource))
       .then(status => this.ux.info(sg.cli.summarizeStatus(status)));
-  
+
     // Report
     for (const [name, report] of Object.entries(sg.config.reports ?? {})) {
       const r = new Report({ name, ...report })
-        .on('progress', message => { if (message) this.ux.action.status; })
+        .on('progress', message => {
+          if (message) this.ux.action.status;
+        })
         .on('end', () => this.ux.action.stop());
 
-      this.ux.action.start('Crawl reports')
+      this.ux.action.start('Crawl reports');
       await r.run();
     }
 

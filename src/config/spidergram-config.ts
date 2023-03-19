@@ -182,7 +182,7 @@ export interface SpidergramConfig extends Record<string, unknown> {
    * elsewhere in Spidergram. Values can be {@link AqQuery|AqQuery} JSON objects,
    * {@link GeneratedAqlQuery|Generated AQL Queries} output by the @{link aql | aql}
    * function, or fully-instantiated Spidergram {@link Query|Query} objects.
-   * 
+   *
    * String values are assumed to be raw AQL and will be transformed into a
    * {@link GeneratedAqlQuery|Generated AQL Query}.
    */

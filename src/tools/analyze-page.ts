@@ -1,4 +1,10 @@
-import { Spidergram, Resource, HtmlTools, BrowserTools, relinkResource } from '../index.js';
+import {
+  Spidergram,
+  Resource,
+  HtmlTools,
+  BrowserTools,
+  relinkResource,
+} from '../index.js';
 import { PageDataOptions, PageContentOptions } from './html/index.js';
 import { PageTechnologyOptions } from './browser/index.js';
 import { PropertySource, findPropertyValue } from './find-property-value.js';
@@ -42,7 +48,7 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
 
   /**
    * Options for rebuilding the metadata for a page's outgoing links.
-   * 
+   *
    * @defaultValue: false
    */
   links?: EnqueueLinksOptions | boolean;
@@ -86,28 +92,28 @@ async function _analyzePage(
   if (options.data) {
     resource.data = await HtmlTools.getPageData(
       resource,
-      options.data === true ? undefined : options.data
+      options.data === true ? undefined : options.data,
     );
   }
 
   if (options.content) {
     resource.content = await HtmlTools.getPageContent(
       resource,
-      options.content === true ? undefined : options.content
+      options.content === true ? undefined : options.content,
     );
   }
 
   if (options.tech) {
     resource.tech = await BrowserTools.getPageTechnologies(
       resource,
-      options.tech === true ? undefined : options.tech
+      options.tech === true ? undefined : options.tech,
     );
   }
 
   if (options.links) {
     await relinkResource(
       resource,
-      options.links === true ? undefined : options.links
+      options.links === true ? undefined : options.links,
     );
   }
 
