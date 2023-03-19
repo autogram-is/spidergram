@@ -184,7 +184,7 @@ debug: Display the query spec and generated AQL statement without running it
         Object.keys(storedQueries).length === 0
       ) {
         this.ux.info(
-          `No queries are currently stored in the Spidergram configuration.`,
+          `No queries are currently defined in the Spidergram configuration.`,
         );
         this.exit();
       } else {
