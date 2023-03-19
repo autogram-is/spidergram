@@ -4,6 +4,8 @@ import {
   Query,
   PageAnalysisOptions,
   PageAnalyzer,
+  Report,
+  ReportOptions,
 } from '../index.js';
 import { UrlMutators } from '@autogram/url-tools';
 import { NormalizerOptions } from './global-normalizer.js';
@@ -187,17 +189,10 @@ export interface SpidergramConfig extends Record<string, unknown> {
   queries?: Record<string, string | AqQuery | GeneratedAqlQuery | Query>;
 
   /**
-   * An object containing named collections of queries; each collection forms a single
-   * "report" appropriate for exporting in JSON or XLSX format.
-   *
-   * Individual queries can be {@link AqQuery} JSON structures, {@link GeneratedAqlQuery}
-   * instances, {@link Query} instances, or strings that act as lookup keys for the
-   * {@link SpidergramConfig.queries} collection.
+   * An object containing named report definitions in the form of {@link ReportOptions}
+   * definition objects, or an already-instantiated Report instance.
    */
-  reports?: Record<
-    string,
-    Record<string, string | AqQuery | GeneratedAqlQuery | Query>
-  >;
+  reports?: Record<string, ReportOptions | Report>;
 
   /**
    * A class implementing the ConsoleTheme interface; this provides assorted

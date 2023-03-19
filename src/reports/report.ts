@@ -25,6 +25,12 @@ export interface ReportOptions {
   description?: string;
   
   /**
+   * An optional grouping or category for the report, when displayed in user-facing
+   * lists and status displays.
+   */
+  category?: string;
+
+  /**
    * A named collection of queries that should be run to build the report's data
    */
   queries?: Record<string, string | GeneratedAqlQuery | AqQuery | Query>;
@@ -75,6 +81,7 @@ export class Report implements ReportOptions {
   queries: Record<string, string | GeneratedAqlQuery | AqQuery | Query>;
   data: Record<string, AnyJson[]> = {};
   description?: string;
+  category?: string;
   name?: string;
 
   protected _buildFn?: (report: this) => Promise<void>;
@@ -84,10 +91,7 @@ export class Report implements ReportOptions {
   status: ReportStatus;
   protected events: AsyncEventEmitter<ReportEventMap>;
 
-  /**
-   * Returns a new {@link AqBuilder} containing a buildable {@link AqStrict}.
-   */
-  constructor(protected options: ReportOptions) {
+  constructor(protected options: ReportOptions = {}) {
     this.events = new AsyncEventEmitter<ReportEventMap>();
 
     // Set internal options
