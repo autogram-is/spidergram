@@ -2,8 +2,8 @@
 
 ## v0.9.10 - 23-03-20
 
-- Multi-query reports can be defined using the `Report` class, either by defining a `ReportOptions` object, or by building a custom Report subclass that handles its own data collection and output.
-- Named Reports (or ReportOption objects) can be defined in the `reports` property of the Spidergram config for reuse. The `spidergram report` CLI command can be used to trigger and run any defined reports.
+- Multi-query reports can be defined using the `Report` class, either by defining a `ReportConfig` object, or by building a custom Report subclass that handles its own data collection and output.
+- Named Reports (or ReportConfig objects) can be defined in the `reports` property of the Spidergram config for reuse. The `spidergram report` CLI command can be used to trigger and run any defined reports.
 - A new `spidergram go` CLI command accepts one or more URLs, and kicks off a crawl, page analysis, and report generation based on the currently loaded config, in a single command.
 - The previous `spidergram report` command has been renamed `spidergram query`, as it's meant for running single ad-hoc queries.
 - Raw AQL queries can be embedded as strings in the config's `queries` collection.
