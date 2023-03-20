@@ -24,6 +24,9 @@ import { PageTechnologyOptions } from '../tools/browser/index.js';
 import { readPackageUpSync } from 'read-pkg-up';
 import { AqQuery } from 'aql-builder';
 import { PageAnalysisOptions } from '../tools/analyze-page.js';
+import { GeneratedAqlQuery } from 'arangojs/aql.js';
+import { Report, ReportConfig } from '../reports/report.js';
+import { Query } from '../model/index.js';
 
 export const urlNormalizerDefaults: NormalizerOptions = {
   forceProtocol: 'https:',
@@ -99,7 +102,9 @@ export const pageContentDefaults: PageContentOptions = {
   trim: true,
 };
 
-export const defaultQueries: Record<string, AqQuery> = {};
+export const defaultQueries: Record<string, string | AqQuery | GeneratedAqlQuery | Query> = {};
+
+export const defaultReports: Record<string, ReportConfig | Report> = {};
 
 export const arangoDefaults = {
   databaseName: 'spidergram',
@@ -129,7 +134,7 @@ export const spidergramDefaults: SpidergramConfig = {
   spider: spiderDefaults,
   htmlToText: htmlToTextDefaults,
   queries: defaultQueries,
-  reports: {},
+  reports: defaultReports,
   pageAnalysis: analyzePageDefaults,
   pageData: pageDataDefaults,
   pageContent: pageContentDefaults,

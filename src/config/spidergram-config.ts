@@ -5,7 +5,7 @@ import {
   PageAnalysisOptions,
   PageAnalyzer,
   Report,
-  ReportOptions,
+  ReportConfig,
 } from '../index.js';
 import { UrlMutators } from '@autogram/url-tools';
 import { NormalizerOptions } from './global-normalizer.js';
@@ -198,10 +198,10 @@ export interface SpidergramConfig extends Record<string, unknown> {
   queries?: Record<string, string | AqQuery | GeneratedAqlQuery | Query>;
 
   /**
-   * An object containing named report definitions in the form of {@link ReportOptions}
+   * An object containing named report definitions in the form of {@link ReportConfig}
    * definition objects, or an already-instantiated Report instance.
    */
-  reports?: Record<string, ReportOptions | Report>;
+  reports?: Record<string, ReportConfig | Report>;
 
   /**
    * A class implementing the ConsoleTheme interface; this provides assorted

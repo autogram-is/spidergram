@@ -2,16 +2,23 @@ import { GeneratedAqlQuery } from 'arangojs/aql';
 import { AqQuery } from 'aql-builder';
 import { Query, JobStatus, Spidergram } from '../index.js';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
-import { AnyJson } from '@salesforce/ts-types';
+import { AnyJson, JsonCollection, isJsonArray, isJsonMap } from '@salesforce/ts-types';
 import { FileTools } from '../index.js';
+import { write as writeCsv } from '@fast-csv/format';
+import _ from 'lodash';
+import path from 'node:path';
 
 /**
  * Configuration options for a {@link Report}
  */
-export interface ReportOptions {
+export interface ReportConfig {
   /**
-   * A unique name for the report. This will be used to generate the file
-   * or directory in which the report's output is stored.
+   * A unique name for the report.
+   * 
+   * For reports that generate a single file, this name will be used as the
+   * filename, though the file extension will be determined by the report itself.
+   * 
+   * Reports that generate multiple files will use this value as a directory name.
    *
    * @defaultValue `report`
    */
@@ -29,6 +36,11 @@ export interface ReportOptions {
    * lists and status displays.
    */
   category?: string;
+
+  /**
+   * A dictionary of report-specific options.
+   */
+  options?: Record<string, unknown>
 
   /**
    * A named collection of queries that should be run to build the report's data
@@ -77,12 +89,14 @@ type ReportEventListener<T extends ReportEventType> = (
   ...args: ReportEventParams<T>
 ) => unknown;
 
-export class Report implements ReportOptions {
+export class Report implements ReportConfig {
   queries: Record<string, string | GeneratedAqlQuery | AqQuery | Query>;
   data: Record<string, AnyJson[]> = {};
+  
+  name?: string;
   description?: string;
   category?: string;
-  name?: string;
+  options?: Record<string, unknown>;
 
   protected _buildFn?: (report: this) => Promise<void>;
   protected _processFn?: (report: this) => Promise<void>;
@@ -91,16 +105,20 @@ export class Report implements ReportOptions {
   status: ReportStatus;
   protected events: AsyncEventEmitter<ReportEventMap>;
 
-  constructor(protected options: ReportOptions = {}) {
+  constructor(protected config: ReportConfig = {}) {
     this.events = new AsyncEventEmitter<ReportEventMap>();
 
     // Set internal options
-    this.name = options.name;
-    this.description = options.description;
-    this._buildFn = options.build;
-    this._generateFn = options.generate;
-    this._processFn = options.process;
-    this.queries = options.queries ?? {};
+    this.name = config.name;
+    this.description = config.description;
+    this.category = config.category;
+    this.options = config.options ?? { format: 'xslx'}
+
+    this.queries = config.queries ?? {};
+
+    this._buildFn = config.build;
+    this._generateFn = config.generate;
+    this._processFn = config.process;
 
     // Set up status
     this.status = {
@@ -168,19 +186,51 @@ export class Report implements ReportOptions {
         this.status.finished++;
       });
     } else {
-      const fileName = `${this.name ?? 'report'}.xlsx`;
+      const opt = _.get(this.options, 'format');
+      const format = (typeof opt === 'string') ? opt : 'xlsx';
       const rpt = new FileTools.Spreadsheet();
-      for (const [name, data] of Object.entries(this.data)) {
-        rpt.addSheet(data, name);
-      }
-      return sg
-        .files()
-        .write(fileName, rpt.toBuffer())
-        .then(() => {
+      const loc = this.name ?? 'report';
+
+      if (format === 'json') {
+        if (!(await sg.files('output').exists(loc))) {
+          await sg.files('output').createDirectory(loc);
+        }
+        for (const [name, data] of Object.entries(this.data)) {
+          const curFilePath = path.join(loc, `${name}.${format}`);
+          await sg.files('output').write(curFilePath, Buffer.from(JSON.stringify(data)));
+
           this.status.finished++;
-          this.status.files.push(fileName);
-        });
-    }
+          this.status.files.push(curFilePath);
+        }
+      } else if (format === 'csv' || format === 'tsv') {
+          if (!(await sg.files('output').exists(loc))) {
+            await sg.files('output').createDirectory(loc);
+          }
+          for (const [name, data] of Object.entries(this.data)) {
+            if (isJsonArray(data[0]) || isJsonMap(data[0])) {
+              const rows = data as JsonCollection[];
+              const curFilePath = path.join(loc, `${name}.${format}`);
+              const stream = writeCsv(rows, { delimiter: format === 'tsv' ? '\t' :  undefined});
+              await sg.files('output').writeStream(curFilePath, stream);
+
+              this.status.finished++;
+              this.status.files.push(curFilePath);
+            }
+          }
+      } else {
+        for (const [name, data] of Object.entries(this.data)) {
+          rpt.addSheet(data, name);
+        }
+        const curFilePath = `${loc}.xlsx`;
+        return sg
+          .files('output')
+          .write(curFilePath, rpt.toBuffer())
+          .then(() => {
+            this.status.finished++;
+            this.status.files.push(curFilePath);
+          });
+        }    
+      }
   }
 
   async run(): Promise<ReportStatus> {
