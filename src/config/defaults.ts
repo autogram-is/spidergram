@@ -123,6 +123,7 @@ export const spidergramDefaults: SpidergramConfig = {
   debug: false,
   logLevel: 'error',
   storageDirectory: path.join(process.cwd(), 'storage'),
+  outputDirectory: process.cwd(),
   arango: arangoDefaults,
   crawlee: {},
   spider: spiderDefaults,
