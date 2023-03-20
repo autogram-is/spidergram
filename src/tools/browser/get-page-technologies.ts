@@ -7,6 +7,7 @@ import {
 import is from '@sindresorhus/is';
 import _ from 'lodash';
 import { Fingerprint } from './fingerprint.js';
+import { AnyJson } from '@salesforce/ts-types';
 
 export { FingerprintResult as PageTech } from './fingerprint.js';
 
@@ -29,13 +30,12 @@ export async function getPageTechnologies(
 ) {
   const options: PageTechnologyOptions = _.defaultsDeep(
     customOptions,
-    Spidergram.config.pageTech,
+    Spidergram.config.pageTechnologies,
   );
   if (is.function_(Spidergram.config.getPageTechnologiesFn)) {
     return Spidergram.config.getPageTechnologiesFn(input, options);
   } else {
-    return _getPageTechnologies(input, options);
-  }
+    return _getPageTechnologies(input, options);  }
 }
 
 let fp: BrowserTools.Fingerprint | undefined;
@@ -76,4 +76,14 @@ async function _getPageTechnologies(
       .extractResponseInput(input)
       .then(signals => fp.analyze({ ...signals, ...customSignals }));
   }
+}
+
+export function formatPageTechnologies(input: bt.FingerprintResult[]): AnyJson[] {
+  return input.map(tech => {
+    return {
+      name: tech.name,
+      version: tech.version.length ? tech.version : undefined,
+      categories: tech.categories.map(cat => cat.name)
+    }
+  });
 }

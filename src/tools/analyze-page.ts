@@ -6,7 +6,7 @@ import {
   relinkResource,
 } from '../index.js';
 import { PageDataOptions, PageContentOptions } from './html/index.js';
-import { PageTechnologyOptions } from './browser/index.js';
+import { PageTechnologyOptions, formatPageTechnologies } from './browser/index.js';
 import { PropertySource, findPropertyValue } from './find-property-value.js';
 import is from '@sindresorhus/is';
 import _ from 'lodash';
@@ -107,7 +107,7 @@ async function _analyzePage(
     resource.tech = await BrowserTools.getPageTechnologies(
       resource,
       options.tech === true ? undefined : options.tech,
-    );
+    ).then(results => formatPageTechnologies(results));
   }
 
   if (options.links) {
