@@ -266,8 +266,11 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     }
   }
 
-  get files() {
-    return FileStore.disk.bind(FileStore);
+  files(bucket?: string) {
+    if (bucket && Object.keys(FileStore.config.disks).includes(bucket)) {
+      return FileStore.disk(bucket);
+    }
+    return FileStore.disk(bucket);
   }
 
   get cli() {
