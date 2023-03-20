@@ -100,7 +100,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
       if (this.config.storageDirectory && this.config.outputDirectory) {
         await ensureDir(this.config.storageDirectory);
         await ensureDir(this.config.outputDirectory);
-        
+
         FileStore.config = {
           default: 'storage',
           disks: {
@@ -276,8 +276,10 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
   }
 
   files(bucket?: string) {
-    if (bucket && Object.keys(FileStore.config.disks).includes(bucket)) {
+    try {
       return FileStore.disk(bucket);
+    } catch (err: unknown) {
+      return FileStore.disk();
     }
     return FileStore.disk(bucket);
   }
