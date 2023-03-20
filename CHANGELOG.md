@@ -1,11 +1,16 @@
 # Spidergram Changelog
 
-## v0.9.10 - 23-03-17
+## v0.9.10 - 23-03-20
 
+- Multi-query reports can be defined using the `Report` class, either by defining a `ReportOptions` object and passing into a new Report, or by building a custom Report subclass that handles its own data collection and output.
+- Named Reports (or ReportOption objects) can be defined in the `reports` property of the Spidergram config for reuse. The `spidergram report` CLI command can be used to trigger and run any defined reports.
+- A new `spidergram go` CLI command accepts one or more URLs, and kicks off a crawl, page analysis, and report generation based on the currently loaded config, in a single command.
+- The previous `spidergram report` command has been renamed `spidergram query`, as it's meant for running single ad-hoc queries.
+- Raw AQL queries can be embedded as strings in the config's `queries` collection.
+- Config files in [JSON5](https://test.com) format are now supported, for folks who don't buy 50gal drums of double-quotes at Costco.
 - The shared `analyzePage()` method can now rebuild a page's `LinksTo` metadata; this is useful when region selectors have changed and you want to make sure your link reporting stays up to date. The `analyze` CLI command now has a `--links` flag, though it defaults to false. The `relink` CLI command has been removed.
 - The `BrowserTools.getAxeReport` method, given a Playwright page handle, runs a full accessibility audit on the live page.
-- Config files in [JSON5](https://test.com) format are now supported, for folks who don't buy 50gal drums of double-quotes at Costco.
-- Raw AQL queries can be embedded as strings in the config's `queries` collection.
+- To help keep final artifacts separate from internal data, a separate `outputDirectory` property has been added to Spidergram's configuration. A new 'output' file bucket is also part of the default configuration, and can be written to/read from by passing its name into the Spidergram config object's `files()` method. Passing in the name of a non-existent bucket will fall back to the default storage directory.
 
 ## v0.9.9 - 23-03-16
 
