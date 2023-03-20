@@ -1,5 +1,9 @@
 # Spidergram Changelog
 
+## v0.9.11 - 23-03-21
+
+- Axe accessibility testing can be enabled for all pages in a crawl using the `spider.auditAccessibility` configuration flag. Setting it to TRUE returns full raw results for every page, while setting it to 'summary' yields a more manageable summary of a11y violations by severity.
+
 ## v0.9.10 - 23-03-20
 
 - Multi-query reports can be defined using the `Report` class, either by defining a `ReportConfig` object, or by building a custom Report subclass that handles its own data collection and output.
