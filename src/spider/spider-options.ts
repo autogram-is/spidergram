@@ -144,6 +144,16 @@ export interface InternalSpiderOptions extends Dictionary {
   saveCookies?: boolean;
 
   /**
+   * Run an accessibility audit on the page; this may increase crawl time on large pages.
+   * 
+   * Can be toggled on and off with a boolean value, or set to summarize violations by
+   * level of impact with a 'summary' value.
+   * 
+   * @defaultValue false
+   */
+  auditAccessibility?: 'summary' | boolean;
+
+  /**
    * Number of seconds to wait for a handler before cancelling the request and
    * treating it as an eror. np
    *
