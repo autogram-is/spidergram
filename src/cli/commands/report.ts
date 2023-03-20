@@ -2,7 +2,7 @@ import { Flags, Args } from '@oclif/core';
 import { Spidergram, Report } from '../../index.js';
 import { SgCommand } from '../index.js';
 import _ from 'lodash';
-import { joinOxford } from '../../tools/text/join-oxford.js';
+import { joinOxford } from '../shared/index.js';
 
 export default class DoReport extends SgCommand {
   static summary = 'Build and save a crawl report';

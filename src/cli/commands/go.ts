@@ -9,6 +9,7 @@ import {
 } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
 import is from '@sindresorhus/is';
+import { joinOxford } from '../shared/format.js';
 
 export default class Go extends SgCommand {
   static summary = 'Crawl and analyze a site, then generate a report.';
@@ -57,7 +58,7 @@ export default class Go extends SgCommand {
 
     this.startProgress('Crawling URLs');
     await spider
-      .run()
+      .run(urls)
       .then(status => this.ux.info(sg.cli.summarizeStatus(status)));
 
     // Analyze
@@ -80,6 +81,7 @@ export default class Go extends SgCommand {
 
       this.ux.action.start('Crawl reports');
       await r.run();
+      console.log(`Saved ${joinOxford(r.status.files)}.`);
     }
 
     // We should perform some kin of wrapup step here.
