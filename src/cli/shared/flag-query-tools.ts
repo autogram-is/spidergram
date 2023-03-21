@@ -1,6 +1,7 @@
 import { JsonPrimitive } from "@salesforce/ts-types";
 import { AqFilter, isAqlAggregateFunction, isAqlFunction } from "aql-builder";
 import arrify from "arrify";
+import is from '@sindresorhus/is';
 
 export function buildFilter(input: string): AqFilter {
   let filterSpec: AqFilter;
@@ -63,10 +64,13 @@ export function splitMultiValues(value: string) {
 }
 
 export function coerceValue(value: string) {
-  const numValue = Number.parseInt(value);
-  if (!Number.isNaN(numValue)) return numValue;
-  else if (value.toLocaleLowerCase() === 'null') return null;
-  else return value;
+  if (is.string(value) && !is.emptyStringOrWhitespace(value) && !Number.isNaN(Number(value))) {
+    return Number(value);
+  } else if (value.toLocaleLowerCase() === 'null') {
+    return null
+  } else {
+    return value;
+  }
 }
 
 export function unwrapPathFunction(input: string, aggregate = true) {
