@@ -8,7 +8,7 @@ import { parse as parseCookie } from 'set-cookie-parser';
 import pkg from 'wappalyzer-core';
 const { analyze, resolve, setCategories, setTechnologies } = pkg;
 
-import { Spidergram, Resource, HtmlTools } from '../../index.js';
+import { Spidergram, Resource, HtmlTools, inspectValue } from '../../index.js';
 import _ from 'lodash';
 
 export type {
@@ -175,7 +175,7 @@ export class Fingerprint {
   async extractResponseInput(res: Response): Promise<FingerprintInput> {
     const input: FingerprintInput = {
       url: res.url,
-      ...this.extractBodyData(await res.text()),
+      ...await this.extractBodyData(await res.text()),
     };
 
     res.headers.forEach((value, key) => {
@@ -200,15 +200,20 @@ export class Fingerprint {
   async extractResourceInput(res: Resource): Promise<FingerprintInput> {
     const input: FingerprintInput = {
       url: res.url,
-      ...this.extractBodyData(res.body ?? ''),
+      ...await this.extractBodyData(res.body ?? ''),
     };
 
     input.headers = {};
     input.cookies = {};
 
+    for (const [name, value] of Object.entries(res.headers ?? {})) {
+      if (value === undefined) continue;
+      input.headers[name.toLocaleLowerCase()] = Array.isArray(value) ? value : [value];
+    }
+
     if (res.cookies) {
       for (const cookie of res.cookies) {
-        input.cookies[cookie.name.toString()] = [cookie.value.toString()];
+        input.cookies[cookie.name.toString().toLocaleLowerCase()] = [cookie.value.toString()];
       }
     } else {
       for (const [key, value] of Object.entries(res.headers)) {
