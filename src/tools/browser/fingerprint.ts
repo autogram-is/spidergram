@@ -175,7 +175,7 @@ export class Fingerprint {
   async extractResponseInput(res: Response): Promise<FingerprintInput> {
     const input: FingerprintInput = {
       url: res.url,
-      ...await this.extractBodyData(await res.text()),
+      ...(await this.extractBodyData(await res.text())),
     };
 
     res.headers.forEach((value, key) => {
@@ -200,7 +200,7 @@ export class Fingerprint {
   async extractResourceInput(res: Resource): Promise<FingerprintInput> {
     const input: FingerprintInput = {
       url: res.url,
-      ...await this.extractBodyData(res.body ?? ''),
+      ...(await this.extractBodyData(res.body ?? '')),
     };
 
     input.headers = {};
@@ -208,12 +208,16 @@ export class Fingerprint {
 
     for (const [name, value] of Object.entries(res.headers ?? {})) {
       if (value === undefined) continue;
-      input.headers[name.toLocaleLowerCase()] = Array.isArray(value) ? value : [value];
+      input.headers[name.toLocaleLowerCase()] = Array.isArray(value)
+        ? value
+        : [value];
     }
 
     if (res.cookies) {
       for (const cookie of res.cookies) {
-        input.cookies[cookie.name.toString().toLocaleLowerCase()] = [cookie.value.toString()];
+        input.cookies[cookie.name.toString().toLocaleLowerCase()] = [
+          cookie.value.toString(),
+        ];
       }
     } else {
       for (const [key, value] of Object.entries(res.headers)) {

@@ -102,7 +102,10 @@ export const pageContentDefaults: PageContentOptions = {
   trim: true,
 };
 
-export const defaultQueries: Record<string, string | AqQuery | GeneratedAqlQuery | Query> = {};
+export const defaultQueries: Record<
+  string,
+  string | AqQuery | GeneratedAqlQuery | Query
+> = {};
 
 export const defaultReports: Record<string, ReportConfig | Report> = {};
 

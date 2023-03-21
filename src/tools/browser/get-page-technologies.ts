@@ -35,7 +35,8 @@ export async function getPageTechnologies(
   if (is.function_(Spidergram.config.getPageTechnologiesFn)) {
     return Spidergram.config.getPageTechnologiesFn(input, options);
   } else {
-    return _getPageTechnologies(input, options);  }
+    return _getPageTechnologies(input, options);
+  }
 }
 
 let fp: BrowserTools.Fingerprint | undefined;
@@ -78,12 +79,14 @@ async function _getPageTechnologies(
   }
 }
 
-export function formatPageTechnologies(input: bt.FingerprintResult[]): AnyJson[] {
+export function formatPageTechnologies(
+  input: bt.FingerprintResult[],
+): AnyJson[] {
   return input.map(tech => {
     return {
       name: tech.name,
       version: tech.version.length ? tech.version : undefined,
-      categories: tech.categories.map(cat => cat.name)
-    }
+      categories: tech.categories.map(cat => cat.name),
+    };
   });
 }

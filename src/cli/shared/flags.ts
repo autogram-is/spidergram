@@ -96,36 +96,36 @@ export const analysisFlags = {
     char: 'b',
     multiple: true,
     summary: 'CSS selector for page content',
-    required: false
+    required: false,
   }),
   content: Flags.boolean({
     char: 'c',
     allowNo: true,
     summary: 'Extract key page content',
-    required: false
+    required: false,
   }),
   metadata: Flags.boolean({
     char: 'm',
     allowNo: true,
     summary: 'Extract page metadata',
-    required: false
+    required: false,
   }),
   tech: Flags.boolean({
     char: 't',
     allowNo: true,
     summary: 'Detect page technologies',
-    required: false
+    required: false,
   }),
   links: Flags.boolean({
     char: 'l',
     allowNo: true,
     summary: 'Rebuild outgoing link metadata',
-    required: false
+    required: false,
   }),
   properties: Flags.boolean({
     char: 'p',
     allowNo: true,
     summary: 'Extract page properties using rules from config',
-    required: false
-  })
+    required: false,
+  }),
 };

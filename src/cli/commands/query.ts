@@ -466,4 +466,3 @@ debug: Display the query spec and generated AQL statement without running it
     return Promise.resolve();
   }
 }
-

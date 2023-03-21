@@ -53,7 +53,6 @@ export default class Analyze extends SgCommand {
       options.propertyMap = false;
     }
 
-
     const worker = new WorkerQuery<Resource>('resources');
     for (const f of flags.filter ?? []) {
       worker.filterBy(buildFilter(f));
@@ -68,11 +67,10 @@ export default class Analyze extends SgCommand {
       this.log(sg.cli.summarizeStatus(status));
     });
 
-    await worker
-    .run(async resource => {
+    await worker.run(async resource => {
       return analyzePage(resource)
         .then(resource => sg.arango.push(resource))
-        .then(() => resource.url)
+        .then(() => resource.url);
     });
   }
 }

@@ -186,10 +186,11 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
       this._activeConfig.debug = !!process.env.SPIDERGRAM_DEBUG;
     if (process.env.SPIDERGRAM_LOG_LEVEL)
       this._activeConfig.logLevel = process.env.SPIDERGRAM_LOG_LEVEL;
-      if (process.env.SPIDERGRAM_STORAGE_DIRECTORY)
+    if (process.env.SPIDERGRAM_STORAGE_DIRECTORY)
       this._activeConfig.storageDirectory = process.env.SPIDERGRAM_STORAGE_DIR;
     if (process.env.SPIDERGRAM_OUTPUT_DIRECTORY)
-      this._activeConfig.outputDirectory = process.env.SPIDERGRAM_OUTPUT_DIRECTORY;
+      this._activeConfig.outputDirectory =
+        process.env.SPIDERGRAM_OUTPUT_DIRECTORY;
     if (process.env.SPIDERGRAM_ARANGO_DBNAME)
       this._activeConfig.arango.databaseName =
         process.env.SPIDERGRAM_ARANGO_DBNAME;

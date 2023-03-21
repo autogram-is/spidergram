@@ -6,7 +6,10 @@ import {
   relinkResource,
 } from '../index.js';
 import { PageDataOptions, PageContentOptions } from './html/index.js';
-import { PageTechnologyOptions, formatPageTechnologies } from './browser/index.js';
+import {
+  PageTechnologyOptions,
+  formatPageTechnologies,
+} from './browser/index.js';
 import { PropertySource, findPropertyValue } from './find-property-value.js';
 import is from '@sindresorhus/is';
 import _ from 'lodash';
@@ -62,10 +65,9 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
    * If an array of sources is supplied, they will be checked in order and the first match
    * will be
    */
-  propertyMap?: Record<
-    string,
-    (string | PropertySource) | (string | PropertySource)[]
-  > | boolean;
+  propertyMap?:
+    | Record<string, (string | PropertySource) | (string | PropertySource)[]>
+    | boolean;
 }
 
 export async function analyzePage(

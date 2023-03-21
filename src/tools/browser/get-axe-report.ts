@@ -20,14 +20,14 @@ type results = Record<string, unknown> & {
 };
 
 type violation = {
-  id: string,
-  impact: string,
-  tags: string[],
-  description: string,
-  help: string,
-  helpUrl: string,
-  nodes: unknown[]
-}
+  id: string;
+  impact: string;
+  tags: string[];
+  description: string;
+  help: string;
+  helpUrl: string;
+  nodes: unknown[];
+};
 
 const defaults: AxeReportOptions = {
   raw: false,
@@ -53,14 +53,13 @@ export async function getAxeReport(page: Page, options: AxeReportOptions = {}) {
   return results;
 }
 
-
 type formattedResult = Record<string, number | undefined>;
 
 export function formatAxeReport(input: results): formattedResult {
   const output: formattedResult = {};
 
-  output.needsReview = input.incomplete?.length ?? 0,
-  output.totalViolations = 0;
+  (output.needsReview = input.incomplete?.length ?? 0),
+    (output.totalViolations = 0);
 
   for (const v of input.violations ?? []) {
     output[v.impact] = (output[v.impact] ?? 0) + 1;

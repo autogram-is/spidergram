@@ -2,7 +2,12 @@ import { GeneratedAqlQuery } from 'arangojs/aql';
 import { AqQuery } from 'aql-builder';
 import { Query, JobStatus, Spidergram } from '../index.js';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
-import { AnyJson, JsonCollection, isJsonArray, isJsonMap } from '@salesforce/ts-types';
+import {
+  AnyJson,
+  JsonCollection,
+  isJsonArray,
+  isJsonMap,
+} from '@salesforce/ts-types';
 import { FileTools } from '../index.js';
 import { write as writeCsv } from '@fast-csv/format';
 import _ from 'lodash';
@@ -14,10 +19,10 @@ import path from 'node:path';
 export interface ReportConfig {
   /**
    * A unique name for the report.
-   * 
+   *
    * For reports that generate a single file, this name will be used as the
    * filename, though the file extension will be determined by the report itself.
-   * 
+   *
    * Reports that generate multiple files will use this value as a directory name.
    *
    * @defaultValue `report`
@@ -40,7 +45,7 @@ export interface ReportConfig {
   /**
    * A dictionary of report-specific options.
    */
-  options?: Record<string, unknown>
+  options?: Record<string, unknown>;
 
   /**
    * A named collection of queries that should be run to build the report's data
@@ -92,7 +97,7 @@ type ReportEventListener<T extends ReportEventType> = (
 export class Report implements ReportConfig {
   queries: Record<string, string | GeneratedAqlQuery | AqQuery | Query>;
   data: Record<string, AnyJson[]> = {};
-  
+
   name?: string;
   description?: string;
   category?: string;
@@ -112,7 +117,7 @@ export class Report implements ReportConfig {
     this.name = config.name;
     this.description = config.description;
     this.category = config.category;
-    this.options = config.options ?? { format: 'xslx'}
+    this.options = config.options ?? { format: 'xslx' };
 
     this.queries = config.queries ?? {};
 
@@ -187,7 +192,7 @@ export class Report implements ReportConfig {
       });
     } else {
       const opt = _.get(this.options, 'format');
-      const format = (typeof opt === 'string') ? opt : 'xlsx';
+      const format = typeof opt === 'string' ? opt : 'xlsx';
       const rpt = new FileTools.Spreadsheet();
       const loc = this.name ?? 'report';
 
@@ -197,26 +202,30 @@ export class Report implements ReportConfig {
         }
         for (const [name, data] of Object.entries(this.data)) {
           const curFilePath = path.join(loc, `${name}.${format}`);
-          await sg.files('output').write(curFilePath, Buffer.from(JSON.stringify(data)));
+          await sg
+            .files('output')
+            .write(curFilePath, Buffer.from(JSON.stringify(data)));
 
           this.status.finished++;
           this.status.files.push(curFilePath);
         }
       } else if (format === 'csv' || format === 'tsv') {
-          if (!(await sg.files('output').exists(loc))) {
-            await sg.files('output').createDirectory(loc);
-          }
-          for (const [name, data] of Object.entries(this.data)) {
-            if (isJsonArray(data[0]) || isJsonMap(data[0])) {
-              const rows = data as JsonCollection[];
-              const curFilePath = path.join(loc, `${name}.${format}`);
-              const stream = writeCsv(rows, { delimiter: format === 'tsv' ? '\t' :  undefined});
-              await sg.files('output').writeStream(curFilePath, stream);
+        if (!(await sg.files('output').exists(loc))) {
+          await sg.files('output').createDirectory(loc);
+        }
+        for (const [name, data] of Object.entries(this.data)) {
+          if (isJsonArray(data[0]) || isJsonMap(data[0])) {
+            const rows = data as JsonCollection[];
+            const curFilePath = path.join(loc, `${name}.${format}`);
+            const stream = writeCsv(rows, {
+              delimiter: format === 'tsv' ? '\t' : undefined,
+            });
+            await sg.files('output').writeStream(curFilePath, stream);
 
-              this.status.finished++;
-              this.status.files.push(curFilePath);
-            }
+            this.status.finished++;
+            this.status.files.push(curFilePath);
           }
+        }
       } else {
         for (const [name, data] of Object.entries(this.data)) {
           rpt.addSheet(data, name);
@@ -229,8 +238,8 @@ export class Report implements ReportConfig {
             this.status.finished++;
             this.status.files.push(curFilePath);
           });
-        }    
       }
+    }
   }
 
   async run(): Promise<ReportStatus> {
