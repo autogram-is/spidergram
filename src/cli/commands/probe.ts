@@ -1,38 +1,24 @@
-import { Flags, Args } from '@oclif/core';
+import { Args } from '@oclif/core';
 import {
-  Spidergram,
   CLI,
+  Spidergram,
   SgCommand,
-  BrowserTools,
   Resource,
-  Query,
-  aql,
-  NormalizedUrl,
+  analyzePage,
 } from '../../index.js';
-import { FingerprintResult } from '../../tools/browser/fingerprint.js';
 import { SpiderCli } from '../shared/spider-cli.js';
+import { launchPlaywright } from 'crawlee';
+import { formatAxeReport, getAxeReport } from '../../tools/browser/get-axe-report.js';
 
 export default class Probe extends SgCommand {
-  static summary = 'Probe a web site to determine its technology stack';
+  static summary = 'Probe a web page with the current configured analyzer settings.';
 
   static usage = '<%= config.bin %> <%= command.id %> [url]';
 
-  static flags = {
-    ...CLI.globalFlags,
-    fetch: Flags.boolean({
-      char: 'f',
-      description: 'Always fetch the URL.',
-      allowNo: true,
-    }),
-    refresh: Flags.boolean({
-      char: 'r',
-      description: 'Refresh the fingerprint definitions.',
-      default: false,
-    }),
-  };
+  static flags = {};
 
   static args = {
-    url: Args.string({
+    url: Args.url({
       description: 'A valid URL to analyze',
       required: true,
     }),
@@ -42,66 +28,83 @@ export default class Probe extends SgCommand {
 
   async run() {
     const sg = await Spidergram.load();
-    const { args, flags } = await this.parse(Probe);
+    const { args } = await this.parse(Probe);
 
-    const url = new NormalizedUrl(args.url.toString());
-    const fp = new BrowserTools.Fingerprint();
+    this.ux.action.start('Fetching page');
 
-    this.ux.action.start('Loading tech fingerprint patterns');
-    await fp.loadDefinitions({
-      ignoreCache: flags.force ?? false,
-      forceReload: true,
-    });
+    const browser = await launchPlaywright();
+    const page = await browser.newPage();
+    const response = await page.goto(args.url.toString()) ?? undefined;
+
+    const body = await page.content();
+
+    const cookies = sg.config.spider?.saveCookies
+      ? (await page.context().cookies()).map(
+          cookie => Object.fromEntries(Object.entries(cookie))
+        )
+      : [];
+
+    const accessibility = sg.config.spider?.auditAccessibility
+      ? await getAxeReport(page).then(results =>
+            sg.config.spider?.auditAccessibility === 'summary'
+            ? formatAxeReport(results)
+            : results,
+        )
+      : undefined;
+
+    await page.close();
+    await browser.close();
+
     this.ux.action.stop();
 
-    let res: Resource | undefined = undefined;
-    const technologies: BrowserTools.FingerprintResult[] = [];
-
-    if (flags.fetch !== true) {
-      const id = (
-        await Query.run<string>(aql`
-        for uu in unique_urls
-        filter uu.parsed.href == ${url.href}
-        for rw in responds_with FILTER rw._from == uu._id
-        for r in resources FILTER r._id == rw._to
-        LIMIT 1
-        return r._id
-      `)
-      ).pop();
-      if (id) res = await sg.arango.findById<Resource>(id);
-    }
-
-    if (res instanceof Resource) {
-      console.log('analyzing stored resource');
-      technologies.push(...(await BrowserTools.getPageTechnologies(res)));
+    if (response === undefined) {
+      this.ux.error('No response from the server.');
     } else {
-      if (flags.fetch !== false) {
-        console.log('analyzing fetched response');
-        const response = await fetch(url);
-        technologies.push(
-          ...(await BrowserTools.getPageTechnologies(response)),
-        );
-      } else {
-        this.ux.error('Could not find resource for url');
-      }
-    }
+      const resource = new Resource({
+        url: response.url(),
+        code: response.status(),
+        message: response.statusText(),
+        headers: response.headers(),
+        size: Number.parseInt(response.headers()['content-length']),
+        mime: response.headers()['content-type'],
+        body,
+        cookies,
+        accessibility
+      });
 
-    if (technologies.length === 0) {
-      this.ux.info('No technologies detected.');
-    } else {
-      this.ux.info(sg.cli.infoList(categorize(technologies)));
+      await analyzePage(resource);
+
+      this.displaySummary(resource);
     }
+  }
+
+  displaySummary(r: Resource) {
+    const c = new SpiderCli();
+    const overview: Record<string, number | string | string[]> = {
+      Title: r.get('data.title') as string | undefined ?? '',
+      URL: r.url,
+      Status: r.code,
+      Type: r.mime ?? 'unknown',
+      'Body classes': r.get('data.attributes.classes') as string[] | undefined ?? '',
+    };
+
+    this.log(c.header('Overview'));
+    this.ux.info(CLI.infoList(overview));
+
+    this.log(c.header('Page Content'));
+    this.ux.info(CLI.infoList((r.get('content.readability') ?? {}) as Record<string, number>));
+
+    this.log(c.header('Accessibility Issues'));
+    this.ux.info(CLI.infoList((r.accessibility ?? {}) as Record<string, number>));
+
+    this.log(c.header('Detected Technologies'));
+    const detected = r.get('tech' ?? []) as Array<Record<string, string[]>>;
+    const tech: Record<string, number | string | string[]> = {};
+    for (const t of detected) {
+      const label = `${t.name}${t.version ? ' ' + t.version : ''}`;
+      tech[label] = t.categories;
+    }
+    this.ux.info(CLI.infoList(tech));
   }
 }
 
-function categorize(input: FingerprintResult[]): Record<string, string[]> {
-  const scl = new SpiderCli();
-  const output: Record<string, string[]> = {};
-  for (const t of input) {
-    for (const c of t.categories) {
-      output[c.name] ??= [];
-      output[c.name].push(scl.url(t.website, t.name));
-    }
-  }
-  return output;
-}
