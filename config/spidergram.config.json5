@@ -1,0 +1,24 @@
+{
+  extends: ['./queries.json5', './reports.json5'],
+  arango: {
+    databaseName: "spidergram",
+    url: "http://127.0.0.1:8529",
+    auth: {
+      username: "root",
+    }
+  },
+  storageDirectory: './storage',
+  outputDirectory: './output',
+  spider: {
+    urlOptions: {
+      regions: {
+        header: 'header',
+        footer: 'footer',
+        main: 'body',
+      }
+    },
+  },
+  pageAnalysis: {
+    content: { selector: ["main", "body"] }
+  }
+}

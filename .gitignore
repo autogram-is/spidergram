@@ -68,3 +68,4 @@ storage
 output
 dist
 site
+/spidergram.config.*
