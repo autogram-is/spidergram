@@ -7,14 +7,15 @@ import {
   PageAnalysisOptions,
 } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
+import { buildFilter } from '../shared/flag-query-tools.js';
+import { queryFilterFlag } from '../shared/flags.js';
 
 export default class Analyze extends SgCommand {
   static summary = 'Analyze the content of all crawled pages';
 
   static flags = {
-    config: CLI.globalFlags.config,
-    options: CLI.globalFlags.options,
     ...CLI.analysisFlags,
+    filter: queryFilterFlag,
     verbose: CLI.outputFlags.verbose,
   };
 
@@ -36,9 +37,12 @@ export default class Analyze extends SgCommand {
 
     this.startProgress('Analyzing saved pages...');
 
-    const worker = new WorkerQuery<Resource>('resources')
-      .filterBy('code', 200)
-      .filterBy('mime', 'text/html');
+    const worker = new WorkerQuery<Resource>('resources');
+
+    // Filters
+    for (const f of flags.filter ?? []) {
+      worker.filterBy(buildFilter(f));
+    }
 
     worker.on('progress', status => this.updateProgress(status));
     worker.on('end', status => {

@@ -1,4 +1,4 @@
-import { SgCommand, CLI } from '../../index.js';
+import { SgCommand } from '../../index.js';
 import { ux } from '@oclif/core';
 import chalk from 'chalk';
 import { Spidergram } from '../../../index.js';
@@ -6,10 +6,6 @@ import is from '@sindresorhus/is';
 
 export default class ProjectInfo extends SgCommand {
   static description = 'Settings and stats for the current project';
-
-  static flags = {
-    config: CLI.globalFlags.config,
-  };
 
   async run() {
     const sg = await Spidergram.load();

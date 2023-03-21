@@ -1,4 +1,4 @@
-import { SgCommand, CLI } from '../../index.js';
+import { SgCommand } from '../../index.js';
 import { GoogleTools } from '../../../index.js';
 import { Flags } from '@oclif/core';
 
@@ -8,7 +8,6 @@ export default class GA extends SgCommand {
   static description = 'Test Google analytics credentials';
 
   static flags = {
-    config: CLI.globalFlags.config,
     view: Flags.string({
       summary: 'Universal Analytics View ID',
       required: true,

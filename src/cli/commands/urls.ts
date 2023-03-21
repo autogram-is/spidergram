@@ -2,7 +2,6 @@ import { Flags, Args } from '@oclif/core';
 import { NormalizedUrlSet } from '@autogram/url-tools';
 import {
   Spidergram,
-  CLI,
   Query,
   SgCommand,
   aql,
@@ -26,7 +25,6 @@ export default class Urls extends SgCommand {
   ];
 
   static flags = {
-    config: CLI.globalFlags.config,
     summary: Flags.boolean({
       summary: 'Display summary information about the full pool of URLs',
       default: true,

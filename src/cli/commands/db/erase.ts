@@ -4,7 +4,6 @@ export default class Erase extends SgCommand {
   static description = 'Discard stored crawling data';
 
   static flags = {
-    config: CLI.globalFlags.config,
     force: CLI.globalFlags.force,
     all: Flags.boolean({
       char: 'a',

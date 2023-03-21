@@ -1,11 +1,7 @@
-import { Spidergram, CLI, SgCommand } from '../../../index.js';
+import { Spidergram, SgCommand } from '../../../index.js';
 import { Args } from '@oclif/core';
 export default class Compact extends SgCommand {
   static description = 'Compact existing data';
-
-  static flags = {
-    config: CLI.globalFlags.config,
-  };
 
   static args = {
     collections: Args.string({

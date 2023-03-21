@@ -18,23 +18,7 @@ import { UrlMatchStrategy } from '../../spider/index.js';
 
 export const tableFlags = ux.table.flags;
 
-export enum OutputFormats {
-  JSON = 'json',
-  XML = 'xml',
-  CSV = 'csv',
-  TSV = 'tsv',
-  INTERACTIVE = 'interactive',
-}
-
 export const globalFlags = {
-  config: Flags.string({
-    summary: 'Path to project configuration file',
-    helpGroup: 'GLOBAL',
-  }),
-  options: Flags.string({
-    summary: 'Use flags and args from YML or JSON',
-    helpGroup: 'GLOBAL',
-  }),
   force: Flags.boolean({
     char: 'f',
     default: false,
@@ -43,46 +27,20 @@ export const globalFlags = {
   }),
 };
 
-export const queryFlags = {
-  limit: Flags.integer({
-    default: 20,
-    summary: 'Max number of results to return',
-    helpGroup: 'QUERY',
-  }),
-  ascending: Flags.string({
-    aliases: ['asc'],
-    summary: 'Sort ascending by a property',
-    multiple: true,
-    helpGroup: 'QUERY',
-  }),
-  descending: Flags.string({
-    aliases: ['desc'],
-    summary: 'Sort descending by a property',
-    multiple: true,
-    helpGroup: 'QUERY',
-  }),
-  property: Flags.string({
-    aliases: ['prop'],
-    summary: 'Document property to be returned',
-    multiple: true,
-    default: ['key:_key'],
-    helpGroup: 'QUERY',
-  }),
-};
+export const queryFilterFlag = Flags.string({
+  char: 'f',
+  summary: 'Filter records by a property',
+  description: `"path" returns records where the property IS NOT null
+"path = value} returns records where property equals value
+"path != value" returns records where property DOES NOT equal value
+"path > value" returns records where property is greater than value
+"path < value" returns records where property is less than value
+"path { value,value" returns records where values contain property
+"path } value" returns records where value is contained in property`,
+  multiple: true,
+});
 
 export const outputFlags = {
-  output: Flags.string({
-    default: OutputFormats.INTERACTIVE,
-    options: [
-      OutputFormats.INTERACTIVE,
-      OutputFormats.JSON,
-      OutputFormats.CSV,
-      OutputFormats.TSV,
-      OutputFormats.XML,
-    ],
-    summary: 'Control console output format',
-    helpGroup: 'OUTPUT',
-  }),
   verbose: Flags.boolean({
     char: 'v',
     default: false,
@@ -163,4 +121,10 @@ export const analysisFlags = {
     allowNo: true,
     summary: 'Rebuild outgoing link metadata',
   }),
+  mapping: Flags.boolean({
+    char: 'p',
+    default: true,
+    allowNo: true,
+    summary: 'Detect page technologies',
+  })
 };

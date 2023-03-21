@@ -1,4 +1,4 @@
-import { CLI, SgCommand, ScreenshotTool, Spidergram } from '../../index.js';
+import { SgCommand, ScreenshotTool, Spidergram } from '../../index.js';
 import { Flags, Args } from '@oclif/core';
 import { PlaywrightCrawler } from 'crawlee';
 import is from '@sindresorhus/is';
@@ -23,7 +23,6 @@ export default class Screenshot extends SgCommand {
   };
 
   static flags = {
-    config: CLI.globalFlags.config,
     selector: Flags.string({
       summary: 'CSS selector for element to capture',
     }),
