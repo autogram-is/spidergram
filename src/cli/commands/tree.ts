@@ -4,16 +4,17 @@ import {
   Spidergram,
   Query,
   SgCommand,
-  aql,
   HierarchyTools,
   TextTools,
 } from '../../index.js';
 import { URL_WITH_COMMAS_REGEX } from 'crawlee';
 import { readFile } from 'fs/promises';
 import minimatch from 'minimatch';
+import { queryFilterFlag } from '../shared/flags.js';
+import { buildFilter } from '../shared/flag-query-tools.js';
 
-export default class Urls extends SgCommand {
-  static summary = 'Summarize a list of URLs';
+export default class Tree extends SgCommand {
+  static summary = 'Build a tree from a list of URLs';
 
   static usage = '<%= config.bin %> <%= command.id %> [options] <filename.txt>';
 
@@ -25,6 +26,7 @@ export default class Urls extends SgCommand {
   ];
 
   static flags = {
+    filter: { ...queryFilterFlag, summary: 'Filter URLs when querying the database' },
     summary: Flags.boolean({
       summary: 'Display summary information about the full pool of URLs',
       default: true,
@@ -124,7 +126,7 @@ export default class Urls extends SgCommand {
   };
 
   async run() {
-    const { args, flags } = await this.parse(Urls);
+    const { args, flags } = await this.parse(Tree);
     const sg = await Spidergram.load();
 
     let rawUrls: string[] = [];
@@ -150,9 +152,16 @@ export default class Urls extends SgCommand {
       if ((await collection.exists()) === false) {
         this.error(`Collection ${args.input} doesn't exist`);
       }
-      rawUrls = await Query.run<string>(
-        aql`FOR item IN ${collection} FILTER item.url != null RETURN item.url`,
-      );
+
+      const q = new Query(collection)
+        .filterBy('url')
+        .return('url');
+
+      for (const f of flags.filter ?? []) {
+        q.filterBy(buildFilter(f));
+      }
+    
+      rawUrls = await q.run<string>();
     }
 
     if (rawUrls.length === 0) {

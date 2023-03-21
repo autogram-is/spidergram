@@ -2,10 +2,12 @@
 
 ## v0.9.11 - 23-03-21
 
-- The `spidergram analyze` command now supports the `--filter <x>` and `--limit <n>` flags, making it easier to reprocess specific subsets of the craw data after tweaking content extraction rules.
-- The `spidergram ping` (formerly `probe`) command now uses the core data extraction and page analysis functions; this makes it a useful way to preview what kinds of data Spidergram will find at a given URL.
-- The `spidergram query` command no longer defaults to a limit of 20 records; while it's now easier to spam yourself, it's also less frustrating to generate useful output.
 - Axe accessibility testing can be enabled for all pages in a crawl using the `spider.auditAccessibility` configuration flag. Setting it to TRUE returns full raw results for every page, while setting it to 'summary' yields a more manageable summary of a11y violations by severity.
+- The `spidergram ping` (formerly `probe`) command now uses the core data extraction and page analysis functions; this makes it a useful way to preview what kinds of data Spidergram will find at a given URL.
+- The `spidergram analyze` command now supports the `--filter <x>` and `--limit <n>` flags, making it easier to reprocess specific subsets of the craw data after tweaking content extraction rules.
+- The `spidergram tree` (formerly `urls`) command now supports the `--filter <x>` flag when pulling URLs from the database. This makes it easier to build trees of specific sections or subsites.
+- The `spidergram query` command no longer defaults to a limit of 20 records; while it's now easier to spam yourself, it's also less frustrating to generate useful output.
+- The `spidergram ga`, `spidergram init`, and `spidergram sitemap` commands have been removed, as they rely on deprecated internal helpers or have been superceded by other functions.
 - Technology fingerprinting now correctly includes header, meta tag, and script data when processing saved resources; technology fingerprinting should be noticably more accurate.
 
 ## v0.9.10 - 23-03-20
