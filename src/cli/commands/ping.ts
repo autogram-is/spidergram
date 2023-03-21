@@ -10,8 +10,8 @@ import { SpiderCli } from '../shared/spider-cli.js';
 import { launchPlaywright } from 'crawlee';
 import { formatAxeReport, getAxeReport } from '../../tools/browser/get-axe-report.js';
 
-export default class Probe extends SgCommand {
-  static summary = 'Probe a web page with the current configured analyzer settings.';
+export default class Ping extends SgCommand {
+  static summary = 'Examine a page with the current analyzer settings';
 
   static usage = '<%= config.bin %> <%= command.id %> [url]';
 
@@ -28,7 +28,7 @@ export default class Probe extends SgCommand {
 
   async run() {
     const sg = await Spidergram.load();
-    const { args } = await this.parse(Probe);
+    const { args } = await this.parse(Ping);
 
     this.ux.action.start(`Fetching ${args.url.toString()}`);
 
