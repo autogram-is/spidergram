@@ -30,7 +30,7 @@ export default class Probe extends SgCommand {
     const sg = await Spidergram.load();
     const { args } = await this.parse(Probe);
 
-    this.ux.action.start('Fetching page');
+    this.ux.action.start(`Fetching ${args.url.toString()}`);
 
     const browser = await launchPlaywright();
     const page = await browser.newPage();
