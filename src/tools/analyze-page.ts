@@ -65,7 +65,7 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
   propertyMap?: Record<
     string,
     (string | PropertySource) | (string | PropertySource)[]
-  >;
+  > | boolean;
 }
 
 export async function analyzePage(

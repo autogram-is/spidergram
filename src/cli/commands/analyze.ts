@@ -30,19 +30,31 @@ export default class Analyze extends SgCommand {
     }
 
     const options: PageAnalysisOptions = {};
-    options.data = flags.metadata;
-    options.content = flags.content;
-    options.tech = flags.tech;
-    options.links = flags.links;
+    if (flags.metadata === false) {
+      options.data = false;
+    }
+    if (flags.tech === false) {
+      options.tech = false;
+    }
+    if (flags.content === false) {
+      options.content = false;
+    } else if (flags.body !== undefined) {
+      options.content = { selector: flags.body };
+    }
+    if (flags.links === false) {
+      options.links = false;
+    }
+    if (flags.properties === false) {
+      options.propertyMap = false;
+    }
 
-    this.startProgress('Analyzing saved pages...');
 
     const worker = new WorkerQuery<Resource>('resources');
-
-    // Filters
     for (const f of flags.filter ?? []) {
       worker.filterBy(buildFilter(f));
     }
+
+    this.startProgress('Analyzing saved pages...');
 
     worker.on('progress', status => this.updateProgress(status));
     worker.on('end', status => {
