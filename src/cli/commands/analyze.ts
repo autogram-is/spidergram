@@ -9,6 +9,7 @@ import {
 import { CLI, SgCommand } from '../index.js';
 import { buildFilter } from '../shared/flag-query-tools.js';
 import { queryFilterFlag } from '../shared/flags.js';
+import { Flags } from '@oclif/core';
 
 export default class Analyze extends SgCommand {
   static summary = 'Analyze the content of all crawled pages';
@@ -16,6 +17,10 @@ export default class Analyze extends SgCommand {
   static flags = {
     ...CLI.analysisFlags,
     filter: queryFilterFlag,
+    limit: Flags.integer({
+      char: 'l',
+      summary: 'The maximum number of results to process',
+    }),
     verbose: CLI.outputFlags.verbose,
   };
 
@@ -53,6 +58,7 @@ export default class Analyze extends SgCommand {
     for (const f of flags.filter ?? []) {
       worker.filterBy(buildFilter(f));
     }
+    if (flags.limit) worker.limit(flags.limit);
 
     this.startProgress('Analyzing saved pages...');
 

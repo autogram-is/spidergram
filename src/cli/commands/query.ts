@@ -99,7 +99,6 @@ debug: Display the query spec and generated AQL statement without running it
       char: 'l',
       exclusive: ['aql'],
       summary: 'The maximum number of results to display',
-      default: 40,
       helpGroup: 'Query',
     }),
 
