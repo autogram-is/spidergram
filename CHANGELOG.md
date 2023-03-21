@@ -2,6 +2,7 @@
 
 ## v0.9.11 - 23-03-21
 
+- The `spidergram analyze` command now supports the `--filter <x>` flag, making it easy to reprocess specific subsets of the craw data after tweaking content extraction rules.
 - Axe accessibility testing can be enabled for all pages in a crawl using the `spider.auditAccessibility` configuration flag. Setting it to TRUE returns full raw results for every page, while setting it to 'summary' yields a more manageable summary of a11y violations by severity.
 
 ## v0.9.10 - 23-03-20
