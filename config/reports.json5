@@ -2,7 +2,7 @@
   reports: {
     default: {
       name: 'Spidergram Report',
-      category: 'Core',
+      category: 'core',
       description: 'Page, error, and link summaries',
       queries: {
         'Overview': 'summary',

@@ -3,7 +3,7 @@
     summary: {
       metadata: {
         source: 'Core',
-        category: 'CLI',
+        category: 'core',
         description: "Summary of crawled URLs",
       },
       collection: 'resources',
@@ -62,7 +62,7 @@
     pages: {
       metadata: {
         source: 'Core',
-        category: 'CLI',
+        category: 'core',
         description: "HTML pages checked or crawled by Spidergram",
       },
       collection: 'resources',
@@ -127,7 +127,7 @@
     media: {
       metadata: {
         source: 'Core',
-        category: 'CLI',
+        category: 'core',
         description: "All non-HTML resources crawled by Spidergram",
       },
       collection: 'resources',
@@ -171,7 +171,7 @@
     errors: {
       metadata: {
         source: 'Core',
-        category: 'CLI',
+        category: 'core',
         description: "Resources that returned errors when visited",
       },
       collection: 'resources',
@@ -214,7 +214,7 @@
     links: {
       metadata: {
         source: 'Core',
-        category: 'CLI',
+        category: 'core',
         description: "Links to other sites",
       },
       collection: 'unique_urls',
@@ -247,7 +247,7 @@
     inlinks: {
       metadata: {
         source: 'Spidergram Core',
-        category: 'CLI',
+        category: 'core',
         description: "Internal links within the site",
       },
       collection: 'resources',
