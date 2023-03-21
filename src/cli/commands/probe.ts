@@ -99,12 +99,15 @@ export default class Probe extends SgCommand {
 
     this.log(c.header('Detected Technologies'));
     const detected = r.get('tech' ?? []) as Array<Record<string, string[]>>;
-    const tech: Record<string, number | string | string[]> = {};
+    const tech: Record<string, string[]> = {};
     for (const t of detected) {
       const label = `${t.name}${t.version ? ' ' + t.version : ''}`;
-      tech[label] = t.categories;
+      for (const cat of t.categories ?? []) {
+        tech[cat] ??= [];
+        tech[cat].push(label);
+      }
     }
-    this.ux.info(CLI.infoList(tech));
+    this.ux.info(CLI.infoList(tech, { sort: true }));
   }
 }
 

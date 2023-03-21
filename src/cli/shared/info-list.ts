@@ -1,8 +1,10 @@
+import _ from 'lodash';
 import { chalk, joinOxford } from './format.js';
 
 type InfoListOptions = {
   title?: string;
   align?: boolean;
+  sort?: boolean;
 };
 
 type InfoListInput = Record<string, (number | string) | (number | string)[]>;
@@ -11,7 +13,16 @@ export function infoList(
   input: InfoListInput,
   customOptions: InfoListOptions = {},
 ) {
-  const options = { align: true, ...customOptions };
+  const options = { align: true, sort: false, ...customOptions };
+
+  if (options.sort) {
+    const tmp: InfoListInput = {};
+    _(input).keys().sort().each(function (key) {
+      tmp[key] = input[key];
+    });
+    input = tmp;
+  }
+
   const maxWidth = Object.keys(input).reduce((prev, current) =>
     prev.length > current.length ? prev : current,
   ).length;
