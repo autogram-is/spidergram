@@ -68,7 +68,11 @@ export default class Go extends SgCommand {
 
     this.startProgress('Analyzing crawled resources');
     await analyzer
-      .run(resource => analyzePage(resource))
+      .run(async resource => {
+        return analyzePage(resource)
+          .then(resource => sg.arango.push(resource))
+          .then(() => resource.url)
+      })
       .then(status => this.ux.info(sg.cli.summarizeStatus(status)));
 
     // Report

@@ -15,7 +15,7 @@ import { EnqueueLinksOptions } from 'crawlee';
 export type PageAnalyzer = (
   input: Resource,
   options: PageAnalysisOptions,
-) => Promise<void>;
+) => Promise<Resource>;
 
 /**
  * Options to control the behavior of the processPage utility function.
@@ -71,7 +71,7 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
 export async function analyzePage(
   resource: Resource,
   customOptions: PageAnalysisOptions = {},
-): Promise<void> {
+): Promise<Resource> {
   const sg = await Spidergram.load();
   if (is.function_(sg.config.analyzePageFn)) {
     return sg.config.analyzePageFn(resource, customOptions);
@@ -83,7 +83,7 @@ export async function analyzePage(
 async function _analyzePage(
   resource: Resource,
   customOptions: PageAnalysisOptions = {},
-): Promise<void> {
+): Promise<Resource> {
   const options: PageAnalysisOptions = _.defaultsDeep(
     customOptions,
     Spidergram.config.pageAnalysis,
@@ -123,5 +123,5 @@ async function _analyzePage(
     }
   }
 
-  return Promise.resolve();
+  return Promise.resolve(resource);
 }
