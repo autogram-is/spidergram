@@ -1,4 +1,4 @@
-import load, { Config, LoadOptions } from '@proload/core';
+import load, { Config, LoadOptions, resolve } from '@proload/core';
 import json from '@proload/plugin-json';
 import yaml from '@proload/plugin-yaml';
 import typescript from '@proload/plugin-typescript';
@@ -21,6 +21,7 @@ import { globalNormalizer } from './global-normalizer.js';
 import { SpidergramConfig } from './spidergram-config.js';
 import { setTimeout } from 'timers/promises';
 import { SpiderCli } from '../cli/shared/index.js';
+import path from 'path';
 
 export class SpidergramError extends Error {}
 
@@ -170,7 +171,18 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     // Reset the active configuration to the baseline defaults, load any user-defined
     // configuration, and merge them.
     this._activeConfig = Spidergram.defaults as T;
-    this._loadedConfig = await load('spidergram', options);
+
+    // If a directory-local config file can't be found, try Spidergram's standard ./config
+    if (await resolve('spidergram', options)) {
+      this._loadedConfig = await load('spidergram', options);
+    } else if (options.filePath === undefined) {
+      options.filePath = path.join(
+        path.dirname(process.argv[1]),
+        '../config/spidergram.config.json5'
+      );
+      this._loadedConfig = await load('spidergram', options);
+    }
+
     this._activeConfig = _.defaultsDeep(
       this._loadedConfig?.value,
       this._activeConfig,
