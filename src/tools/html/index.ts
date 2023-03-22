@@ -5,6 +5,7 @@ export * from './get-plaintext.js';
 export * from './get-cheerio.js';
 export * from './get-markup.js';
 export * from './get-html-regions.js';
+export * from './get-unique-selector.js';
 
 export * from './find-element-data.js';
 export * from './find-links.js';

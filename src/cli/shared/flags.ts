@@ -117,7 +117,7 @@ export const analysisFlags = {
     required: false,
   }),
   links: Flags.boolean({
-    char: 'l',
+    char: 'k',
     allowNo: true,
     summary: 'Rebuild outgoing link metadata',
     required: false,

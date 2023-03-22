@@ -46,8 +46,8 @@ export default class Analyze extends SgCommand {
     } else if (flags.body !== undefined) {
       options.content = { selector: flags.body };
     }
-    if (flags.links === false) {
-      options.links = false;
+    if (flags.links === true) {
+      options.links = true;
     }
     if (flags.properties === false) {
       options.propertyMap = false;
@@ -68,7 +68,7 @@ export default class Analyze extends SgCommand {
     });
 
     await worker.run(async resource => {
-      return analyzePage(resource)
+      return analyzePage(resource, options)
         .then(resource => sg.arango.push(resource))
         .then(() => resource.url);
     });

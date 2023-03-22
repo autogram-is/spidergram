@@ -1,6 +1,7 @@
 import { HtmlTools } from '../index.js';
 import { getCheerio } from './get-cheerio.js';
 import arrify from 'arrify';
+import { getUniqueSelector } from './get-unique-selector.js';
 
 export interface FoundLink {
   [keyof: string]: unknown;
@@ -123,13 +124,14 @@ export function getLinkElementAttributes(
 ) {
   const attributes = $(element).attr();
   const dataAttributes = $(element).data() ?? {};
-  const html = $(element).html()?.trim() ?? ''
+  const html = $.html(element)?.trim() ?? ''
   const result = {
     url: attributes.href ?? attributes.src,
     attributes: attributes,
     data: Object.keys(dataAttributes).length > 0 ? dataAttributes : undefined,
-    visible: HtmlTools.getVisibleText(html),
-    readable: HtmlTools.getReadableText(html),
+    text: HtmlTools.getVisibleText(html),
+    readableText: HtmlTools.getReadableText(html),
+    uniqueSelector: getUniqueSelector(element, $),
     html: html,
     tag: (element as { tagName?: string }).tagName
   } as FoundLink;
