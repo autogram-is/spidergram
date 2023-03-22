@@ -1,15 +1,8 @@
 # Spidergram Changelog
 
-## v0.10.0 - 23-03-22 - Ham
+## v0.9.12 - 23-03-21
 
-This release is dedicated to Peter Porker of Earth-8311, an innocent pig raised by animal scientist May Porker. After a freak acident with the world's first atomic powered hairdryer, Peter was bitten by the scientist and transformed into a crime-fighting superhero pig.
-
-- Major Changes
-  - Spidergram's CLI commands have been overhauled; vestigial commands from the 0.5.0 era have been removed and replaced. Of particular interest: `spidergram status`, which summarizes the current config and DB state; `spidergram ping`, which tests a remote URL using the current analysis settings; and `spidergram go`, which crawls one or more URLs, analyzes the crawled files, and generates a report in a single step.
-  - CLI consistency is significantly improved. For example: `analyze`, `query`, and `tree` all support the same `--filter` syntax for controlling which records are loaded from the crawl database.
-- New Additions
-  - Custom queries and multi-query reports can be defined in the Spidergram config files; Spidergram now ships with a handful of simple queries and an overview report as part of its core configuration.
-  - Spidergram can run an Axe Accessibility Report on every page as it crawls a site; this behavior can be turned on and off via the `spider.auditAccessiblity` config property.
+- Including the config directory helps the config work better.
 
 ## v0.9.11 - 23-03-21
 
