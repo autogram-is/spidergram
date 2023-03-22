@@ -7,7 +7,7 @@ type InfoListOptions = {
   sort?: boolean;
 };
 
-type InfoListInput = Record<string, (number | string) | (number | string)[]>;
+type InfoListInput = Record<string, (number | string) | (number | string)[] | undefined>;
 
 export function infoList(
   input: InfoListInput,
@@ -37,7 +37,7 @@ export function infoList(
     const padding = options.align ? ' '.repeat(maxWidth - key.length) : '';
     const values = Array.isArray(value) ? value : [value];
     const content = joinOxford(
-      values.map(v => (typeof v === 'string' ? v : v.toLocaleString())),
+      values.map(v => (typeof v === 'string' ? v : v?.toLocaleString())),
     );
 
     lines.push(`${title}:${padding} ${content}`);

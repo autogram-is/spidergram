@@ -53,14 +53,6 @@
     "bin": "spidergram",
     "dirname": "spidergram",
     "commands": "./dist/cli/commands",
-    "topics": {
-      "project": {
-        "description": "Configure crawl projects"
-      },
-      "db": {
-        "description": "Manage and query stored crawl data"
-      }
-    },
     "topicSeparator": " ",
     "plugins": [
       "@oclif/plugin-help"
