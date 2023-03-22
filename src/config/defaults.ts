@@ -53,8 +53,14 @@ export const urlDiscoveryDefaults: EnqueueUrlOptions = {
   discardExisting: true,
 };
 
+// See https://github.com/html-to-text/node-html-to-text/blob/master/packages/html-to-text/README.md#predefined-formatters
+// for additional tricks.
 export const htmlToTextDefaults: HtmlToTextOptions = {
   wordwrap: false,
+  selectors: [
+    { selector: 'img', format: 'skip' },
+    { selector: 'a', options: { ignoreHref: true } }
+  ],
 };
 
 export const spiderDefaults: Partial<SpiderOptions> = {

@@ -32,7 +32,7 @@ export function getReadableText(
   input: string | cheerio.Root,
   options?: HtmlToTextOptions,
 ): string {
-  const opt = _.defaultsDeep(options, visibleTextOptions);
+  const opt = _.defaultsDeep(options, readableTextOptions);
   return getPlaintext(input, opt).trim();
 }
 
@@ -50,7 +50,7 @@ export function getVisibleText(
 
 export const readableTextOptions: HtmlToTextOptions = {
   selectors: [
-    { selector: 'img', format: 'hide', options: { prefix: 'image', ignoreHref: true } },
+    { selector: 'img', format: 'readableImage' },
     { selector: 'a', options: { ignoreHref: true } }
   ],
   formatters: {
@@ -65,7 +65,7 @@ export const readableTextOptions: HtmlToTextOptions = {
 
 export const visibleTextOptions: HtmlToTextOptions = {
   selectors: [
-    { selector: 'img', format: 'hide' },
+    { selector: 'img', format: 'skip' },
     { selector: 'a', options: { ignoreHref: true } }
   ],
 }
