@@ -4,6 +4,8 @@
 
 - Fixing overly-optimistic handling of page data in the `spidergram ping` command.
 - The `spidergram crawl` command no longer dumps a pile of JSON to the console; now it just summarizes the pages crawled.
+- The `HtmlTools.getPlaintext` helper function now has `getReadableText` and `getVisibleText` variations that use different rendering presets to approximate visible-in-browser and heard-by-screenreader text. While it's imperfect and likely to be refined, it can be useful for quick smoke tests.
+- The `HtmlTools.getUniqueSelector` helper function constructs a best-guess unique CSS selector string for a given cheerio element.
 
 ## v0.9.13 - 23-03-21
 
