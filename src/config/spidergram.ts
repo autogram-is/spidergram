@@ -178,7 +178,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     } else if (options.filePath === undefined) {
       options.filePath = path.join(
         path.dirname(process.argv[1]),
-        '../config/spidergram.config.json5'
+        '../config/spidergram.config.json5',
       );
       this._loadedConfig = await load('spidergram', options);
     }

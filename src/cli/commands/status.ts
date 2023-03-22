@@ -10,12 +10,12 @@ export default class SpidergramStatus extends SgCommand {
   static flags = {
     config: Flags.boolean({
       char: 'c',
-      summary: 'Display detailed information about current settings'
+      summary: 'Display detailed information about current settings',
     }),
     database: Flags.boolean({
       char: 'd',
-      summary: 'Summarize the data stored in ArangoDB'
-    })
+      summary: 'Summarize the data stored in ArangoDB',
+    }),
   };
 
   async run() {
@@ -24,7 +24,9 @@ export default class SpidergramStatus extends SgCommand {
     const sg = await Spidergram.load();
 
     this.log(cli.header('Spidergram Config'));
-    this.log(cli.infoList({ 'Config file': Spidergram.status.configFile ?? '<none>' }));
+    this.log(
+      cli.infoList({ 'Config file': Spidergram.status.configFile ?? '<none>' }),
+    );
     if (flags.config && Spidergram.status.configFile) {
       ux.styledJSON(sg.rawConfig);
     }
@@ -32,14 +34,16 @@ export default class SpidergramStatus extends SgCommand {
     if (flags.env && !is.emptyObject(Spidergram.status.env)) {
       this.log(cli.header('Environment Variables'));
       this.log(cli.infoList(Spidergram.status.env));
-    }  
+    }
 
     this.log(cli.header('ArangoDB'));
-    this.log(cli.infoList({
-      'Status': Spidergram.status.arango ? 'online' : 'offline',
-      'URL': sg.config.arango?.url,
-      'Database': sg.config.arango?.databaseName,
-    }));
+    this.log(
+      cli.infoList({
+        Status: Spidergram.status.arango ? 'online' : 'offline',
+        URL: sg.config.arango?.url,
+        Database: sg.config.arango?.databaseName,
+      }),
+    );
 
     if (flags.database && Spidergram.status.arango) {
       this.log();
@@ -80,5 +84,5 @@ export default class SpidergramStatus extends SgCommand {
     if (name.startsWith('ds_')) return 'dataset';
     else if (name.startsWith('kv_')) return 'key-value';
     else return type === 2 ? 'entity' : 'relationship';
-  }  
+  }
 }

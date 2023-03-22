@@ -8,7 +8,10 @@ import {
 } from '../../index.js';
 import { SpiderCli } from '../shared/spider-cli.js';
 import { launchPlaywright } from 'crawlee';
-import { formatAxeReport, getAxeReport } from '../../tools/browser/get-axe-report.js';
+import {
+  formatAxeReport,
+  getAxeReport,
+} from '../../tools/browser/get-axe-report.js';
 
 export default class Ping extends SgCommand {
   static summary = 'Examine a page with the current analyzer settings';
@@ -34,19 +37,19 @@ export default class Ping extends SgCommand {
 
     const browser = await launchPlaywright();
     const page = await browser.newPage();
-    const response = await page.goto(args.url.toString()) ?? undefined;
+    const response = (await page.goto(args.url.toString())) ?? undefined;
 
     const body = await page.content();
 
     const cookies = sg.config.spider?.saveCookies
-      ? (await page.context().cookies()).map(
-          cookie => Object.fromEntries(Object.entries(cookie))
+      ? (await page.context().cookies()).map(cookie =>
+          Object.fromEntries(Object.entries(cookie)),
         )
       : [];
 
     const accessibility = sg.config.spider?.auditAccessibility
       ? await getAxeReport(page).then(results =>
-            sg.config.spider?.auditAccessibility === 'summary'
+          sg.config.spider?.auditAccessibility === 'summary'
             ? formatAxeReport(results)
             : results,
         )
@@ -69,7 +72,7 @@ export default class Ping extends SgCommand {
         mime: response.headers()['content-type'],
         body,
         cookies,
-        accessibility
+        accessibility,
       });
 
       await analyzePage(resource);
@@ -81,21 +84,28 @@ export default class Ping extends SgCommand {
   displaySummary(r: Resource) {
     const c = new SpiderCli();
     const overview: Record<string, number | string | string[]> = {
-      Title: r.get('data.title') as string | undefined ?? '',
+      Title: (r.get('data.title') as string | undefined) ?? '',
       URL: r.url,
       Status: r.code,
       Type: r.mime ?? 'unknown',
-      'Body classes': r.get('data.attributes.classes') as string[] | undefined ?? '',
+      'Body classes':
+        (r.get('data.attributes.classes') as string[] | undefined) ?? '',
     };
 
     this.log(c.header('Overview'));
     this.ux.info(CLI.infoList(overview));
 
     this.log(c.header('Page Content'));
-    this.ux.info(CLI.infoList((r.get('content.readability') ?? {}) as Record<string, number>));
+    this.ux.info(
+      CLI.infoList(
+        (r.get('content.readability') ?? {}) as Record<string, number>,
+      ),
+    );
 
     this.log(c.header('Accessibility Issues'));
-    this.ux.info(CLI.infoList((r.accessibility ?? {}) as Record<string, number>));
+    this.ux.info(
+      CLI.infoList((r.accessibility ?? {}) as Record<string, number>),
+    );
 
     this.log(c.header('Detected Technologies'));
     const detected = r.get('tech' ?? []) as Array<Record<string, string[]>>;
@@ -110,4 +120,3 @@ export default class Ping extends SgCommand {
     this.ux.info(CLI.infoList(tech, { sort: true }));
   }
 }
-

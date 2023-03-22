@@ -26,7 +26,10 @@ export default class Tree extends SgCommand {
   ];
 
   static flags = {
-    filter: { ...queryFilterFlag, summary: 'Filter URLs when querying the database' },
+    filter: {
+      ...queryFilterFlag,
+      summary: 'Filter URLs when querying the database',
+    },
     summary: Flags.boolean({
       summary: 'Display summary information about the full pool of URLs',
       default: true,
@@ -153,14 +156,12 @@ export default class Tree extends SgCommand {
         this.error(`Collection ${args.input} doesn't exist`);
       }
 
-      const q = new Query(collection)
-        .filterBy('url')
-        .return('url');
+      const q = new Query(collection).filterBy('url').return('url');
 
       for (const f of flags.filter ?? []) {
         q.filterBy(buildFilter(f));
       }
-    
+
       rawUrls = await q.run<string>();
     }
 

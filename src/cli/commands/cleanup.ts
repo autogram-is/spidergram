@@ -1,7 +1,5 @@
 import { Flags } from '@oclif/core';
-import {
-  Spidergram,
-} from '../../index.js';
+import { Spidergram } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
 
 export default class Cleanup extends SgCommand {
@@ -12,7 +10,7 @@ export default class Cleanup extends SgCommand {
   static flags = {
     compact: Flags.boolean({
       description: 'Compact the spidergram database',
-      default: true
+      default: true,
     }),
 
     eraseDb: Flags.boolean({
@@ -42,7 +40,7 @@ export default class Cleanup extends SgCommand {
         await sg.arango.erase({ eraseAll: true });
         this.log(`Data erased from ${dbName}.`);
       } else {
-        this.log(`Data wipe canceled; ${dbName} was not modified.`)
+        this.log(`Data wipe canceled; ${dbName} was not modified.`);
       }
     }
   }

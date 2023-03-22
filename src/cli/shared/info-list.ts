@@ -7,7 +7,10 @@ type InfoListOptions = {
   sort?: boolean;
 };
 
-type InfoListInput = Record<string, (number | string) | (number | string)[] | undefined>;
+type InfoListInput = Record<
+  string,
+  (number | string) | (number | string)[] | undefined
+>;
 
 export function infoList(
   input: InfoListInput,
@@ -17,9 +20,12 @@ export function infoList(
 
   if (options.sort) {
     const tmp: InfoListInput = {};
-    _(input).keys().sort().each(function (key) {
-      tmp[key] = input[key];
-    });
+    _(input)
+      .keys()
+      .sort()
+      .each(function (key) {
+        tmp[key] = input[key];
+      });
     input = tmp;
   }
 
