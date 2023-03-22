@@ -55,7 +55,6 @@ export const urlDiscoveryDefaults: EnqueueUrlOptions = {
 
 export const htmlToTextDefaults: HtmlToTextOptions = {
   wordwrap: false,
-  selectors: [{ selector: 'a', options: { ignoreHref: true } }],
 };
 
 export const spiderDefaults: Partial<SpiderOptions> = {

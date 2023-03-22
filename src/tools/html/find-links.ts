@@ -1,3 +1,4 @@
+import { HtmlTools } from '../index.js';
 import { getCheerio } from './get-cheerio.js';
 import arrify from 'arrify';
 
@@ -6,10 +7,12 @@ export interface FoundLink {
   url?: string;
   title?: string;
   text?: string;
+  html?: string;
   attributes?: Record<string, string>;
   data?: Record<string, string>;
   tagName?: string;
   selector?: string;
+  region?: string;
   label?: string;
 }
 
@@ -119,14 +122,16 @@ export function getLinkElementAttributes(
   $: cheerio.Root,
 ) {
   const attributes = $(element).attr();
-  const text = $(element).text().trim();
   const dataAttributes = $(element).data() ?? {};
+  const html = $(element).html()?.trim() ?? ''
   const result = {
     url: attributes.href ?? attributes.src,
     attributes: attributes,
-    text: text ?? undefined,
     data: Object.keys(dataAttributes).length > 0 ? dataAttributes : undefined,
-    tag: (element as { tagName?: string }).tagName,
+    visible: HtmlTools.getVisibleText(html),
+    readable: HtmlTools.getReadableText(html),
+    html: html,
+    tag: (element as { tagName?: string }).tagName
   } as FoundLink;
   return result;
 }
