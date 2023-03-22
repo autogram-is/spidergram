@@ -1,6 +1,6 @@
 import { Flags, Args } from '@oclif/core';
 import { LogLevel } from 'crawlee';
-import { Spidergram, Spider, SpiderStatus } from '../../index.js';
+import { Spidergram, Spider } from '../../index.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
 import is from '@sindresorhus/is';
 
@@ -71,13 +71,7 @@ export default class Crawl extends SgCommand {
     this.startProgress('Crawling...');
 
     await spider.run(urls).then(status => {
-      this.summarizeStatus(status);
+      this.log(sg.cli.summarizeStatus(status));
     });
-  }
-
-  summarizeStatus(stats: SpiderStatus) {
-    this.log();
-    this.ux.styledJSON(stats);
-    this.ux.styledHeader('Crawl complete.');
   }
 }

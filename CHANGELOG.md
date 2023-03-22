@@ -1,5 +1,10 @@
 # Spidergram Changelog
 
+## v0.9.14 - 23-03-21
+
+- Fixing overly-optimistic handling of page data in the `spidergram ping` command.
+- The `spidergram crawl` command no longer dumps a pile of JSON to the console; now it just summarizes the pages crawled.
+
 ## v0.9.13 - 23-03-21
 
 - Fixing path resolution for core configuration when installed globally.
