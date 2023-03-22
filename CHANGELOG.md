@@ -7,7 +7,7 @@
 - The `spidergram analyze` command now supports the `--filter <x>` and `--limit <n>` flags, making it easier to reprocess specific subsets of the craw data after tweaking content extraction rules.
 - The `spidergram tree` (formerly `urls`) command now supports the `--filter <x>` flag when pulling URLs from the database. This makes it easier to build trees of specific sections or subsites.
 - The `spidergram query` command no longer defaults to a limit of 20 records; while it's now easier to spam yourself, it's also less frustrating to generate useful output.
-- The `spidergram ga`, `spidergram init`, and `spidergram sitemap` commands have been removed, as they rely on deprecated internal helpers or have been superceded by other functions.
+- The `spidergram ga`, `spidergram init`, `spidergram db`, `spidergram project`, and `spidergram sitemap` commands have been removed, as they rely on deprecated internal helpers or have been superceded by other functions. In particular, `spidergram status` now displays global settings and DB connection info, while `spidergram cleanup` performs a variety of tidying tasks that were previously `db` subcommands.
 - Technology fingerprinting now correctly includes header, meta tag, and script data when processing saved resources; technology fingerprinting should be noticably more accurate.
 
 ## v0.9.10 - 23-03-20
