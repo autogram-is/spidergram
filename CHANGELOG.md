@@ -1,5 +1,9 @@
 # Spidergram Changelog
 
+## v0.9.13 - 23-03-21
+
+- Fixing path resolution for core configuration when installed globally.
+
 ## v0.9.12 - 23-03-21
 
 - Including the config directory helps the config work better.

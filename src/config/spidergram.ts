@@ -22,6 +22,7 @@ import { SpidergramConfig } from './spidergram-config.js';
 import { setTimeout } from 'timers/promises';
 import { SpiderCli } from '../cli/shared/index.js';
 import path from 'path';
+import * as url from 'url';
 
 export class SpidergramError extends Error {}
 
@@ -176,11 +177,11 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     if (await resolve('spidergram', options)) {
       this._loadedConfig = await load('spidergram', options);
     } else if (options.filePath === undefined) {
-      options.filePath = path.join(
-        path.dirname(process.argv[1]),
-        '../config/spidergram.config.json5',
-      );
-      this._loadedConfig = await load('spidergram', options);
+      const coreConfig = this.getCoreConfigPath();
+      if (coreConfig) {
+        options.filePath = coreConfig;
+        this._loadedConfig = await load('spidergram', options);
+      }
     }
 
     this._activeConfig = _.defaultsDeep(
@@ -337,4 +338,17 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
   get crawlee() {
     return CrawleeConfig.getGlobalConfig();
   }
+
+  private getCoreConfigPath() {
+    const __filename = url.fileURLToPath(import.meta.url);
+    const segments = __filename.split('/');
+    while (segments.length > 0) {
+      if (segments.pop() === 'spidergram') {
+        segments.push('spidergram', 'config', 'spidergram.config.json5');
+        return '/' + path.join(...segments);
+      }
+    }
+    return false;
+  }
 }
+
