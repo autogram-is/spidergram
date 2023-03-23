@@ -17,11 +17,7 @@ import {
   PageDataOptions,
 } from '../tools/html/index.js';
 
-import {
-  PageTechnologyExtractor,
-  PageTechnologyOptions,
-} from '../tools/browser/index.js';
-
+import { PageTechOptions } from '../tools/browser/index.js';
 import { Configuration as FileConfiguration } from 'typefs';
 import { Config as ArangoConfig } from 'arangojs/connection';
 import { LoggerOptions } from 'caterpillar';
@@ -178,13 +174,7 @@ export interface SpidergramConfig extends Record<string, unknown> {
   /**
    * Extraction options for structured metadata on crawled pages.
    */
-  pageTechnologies?: PageTechnologyOptions;
-
-  /**
-   * An async {@link PageTechnologyExtractor|Extractor} function to be used as an override
-   * for the default technology fingerprinting function.
-   */
-  getPageTechnologiesFn?: PageTechnologyExtractor;
+  pageTechnologies?: PageTechOptions;
 
   /**
    * A key/value collection of pre-written queries that can be used

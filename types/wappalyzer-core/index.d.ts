@@ -213,7 +213,7 @@ declare module 'wappalyzer-core' {
         url?: string;
 
         /**
-         * The URL of the web page to be analyzed.
+         * The raw HTML markup of the web page to be analyzed.
          */
         html?: string;
 
@@ -233,7 +233,7 @@ declare module 'wappalyzer-core' {
         certIssuer?: string;
 
         /**
-         * A dictionary of cookies set by the pages's HTTP response.
+         * A dictionary of the page's cookie names and values.
          */
         cookies?: Record<string, string[]>;
 
@@ -243,20 +243,17 @@ declare module 'wappalyzer-core' {
         css?: string;
 
         /**
-         * A dictionary of DNS records; keys should be the record type. Valid
-         * types are: 
+         * A dictionary of DNS records; keys should be the record type.
          */
         dns?: Record<string, string[]>;
 
-        probe?: Record<string, string[]>;
-
         /**
-         * The raw text of the site's Robots.txt file.
+         * The raw text of the site's Robots.txt file, if available.
          */
         robots?: string;
 
         /**
-         * An array of URLs for all remote scripts loaded by the page.
+         * An array of URLs containg the URLs of all remote scripts loaded by the page.
          */
         scriptSrc?: string[];
 
