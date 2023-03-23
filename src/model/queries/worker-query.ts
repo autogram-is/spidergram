@@ -3,9 +3,44 @@ import { ArangoCollection, isArangoCollection } from 'arangojs/collection.js';
 import { AqStrict, AqQuery, AqBuilder } from 'aql-builder';
 import { Query } from './query.js';
 import { Entity, JobStatus, Spidergram } from '../../index.js';
+import _ from 'lodash';
+import PQueue from 'p-queue';
+
+/**
+ * Options to manage the {@link WorkerQuery}'s rate and concurrency. 
+ */
+export interface WorkerQueryOptions extends Record<string, unknown> {
+  /**
+   * The number of workers to run simultaneously.
+   * 
+   * @defaultValue 1
+   */
+  concurrency?: number;
+
+  /**
+   * The maximum number of workers to launch within the interval period.
+   * Setting the limit to -1 disables rate limiting.
+   * 
+   * @defaultValue Infinity
+   */
+  intervalCap?: number;
+
+  /**
+   * The time (in ms) that the limit applies to.
+   * 
+   * @defaultValue 0
+   */
+  interval?: number;
+}
+
+const defaults: Required<WorkerQueryOptions> = {
+  concurrency: 1,
+  intervalCap: Infinity,
+  interval: 0
+}
 
 type WorkerEventMap = Record<PropertyKey, unknown[]> & {
-  progress: [status: JobStatus, item: Entity, message?: string];
+  progress: [status: JobStatus, item?: Entity, message?: string];
   failure: [status: JobStatus, error?: Error, message?: string];
   end: [status: JobStatus];
 };
@@ -22,13 +57,19 @@ export type WorkerQueryTask<T extends Entity = Entity> = (
 ) => Promise<string | void>;
 
 export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
-  status: JobStatus;
   protected events: AsyncEventEmitter<WorkerEventMap>;
+  protected queue?: PQueue;
+
+  status: JobStatus;
+  options: Required<WorkerQueryOptions>;
 
   /**
    * Returns a new {@link AqBuilder} containing a buildable {@link AqStrict}.
    */
-  constructor(input: string | ArangoCollection | AqStrict | AqQuery) {
+  constructor(
+    input: string | ArangoCollection | AqStrict | AqQuery,
+    options: WorkerQueryOptions = {}
+  ) {
     const validCollections = [...Entity.types.keys()];
     let collectionName = '';
 
@@ -52,6 +93,8 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
     // Force the query to return only the key
     this.spec.return = [{ name: '_id' }];
 
+    // Set up the internal queue options and event emitter
+    this.options = _.defaultsDeep(options, defaults);
     this.events = new AsyncEventEmitter<WorkerEventMap>();
 
     this.status = {
@@ -91,19 +134,14 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
   }
 
   async run(task: WorkerQueryTask<T>): Promise<JobStatus> {
-    const sg = await Spidergram.load();
     const ids = await Query.run<string>(this.build());
 
+    this.queue = new PQueue(this.options);
     this.status.total = ids.length;
     this.status.startTime = Date.now();
 
     for (const id of ids) {
-      const v = await sg.arango.findById<T>(Entity.idFromReference(id));
-      if (v === undefined) {
-        this.status.failed++;
-      } else {
-        await this.performTask(v, task);
-      }
+      await this.queue?.add(() => this.performTask(id, task));
     }
 
     this.status.finishTime = Date.now();
@@ -112,9 +150,16 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
   }
 
   protected async performTask(
-    item: T,
+    id: string,
     task: WorkerQueryTask<T>,
   ): Promise<void> {
+    const sg = await Spidergram.load();
+    const item = await sg.arango.findById<T>(Entity.idFromReference(id));
+    if (item === undefined) {
+      this.status.failed++;
+      return Promise.reject();
+    }
+
     return task(item, this.status)
       .then(message => {
         this.updateStatus();

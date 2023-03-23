@@ -1,5 +1,9 @@
 # Spidergram Changelog
 
+## v0.9.15 - 23-03-24
+
+- The `WorkerQuery` class now supports concurrency and rate-limiting. This is most useful when loading a bunch of entities and performing a remote API request for each of them.
+
 ## v0.9.14 - 23-03-21
 
 - Fixing overly-optimistic handling of page data in the `spidergram ping` command.
