@@ -103,9 +103,9 @@ async function _analyzePage(
   }
 
   if (options.tech) {
-    if (typeof options.tech !== 'boolean') {
-      await BrowserTools.TechAuditor.init(options.tech);
-    }
+    await BrowserTools.TechAuditor.init(
+      options.tech === true ? undefined : options.tech
+    );
     resource.tech = await BrowserTools.TechAuditor.run(resource)
       .then(results => BrowserTools.TechAuditor.summarize(results));
   }
