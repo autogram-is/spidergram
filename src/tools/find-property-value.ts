@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import minimatch from 'minimatch';
 import { getCheerio } from './html/index.js';
 
 /**
@@ -18,21 +19,27 @@ export interface PropertySource extends Record<string, unknown> {
   selector?: string;
 
   /**
-   * Limit the number of items returned in an array property.
-   *
-   *    0: Return all items concatenated into a single value.
-   *    1: Return the first item as a single value.
-   *  2-n: Return the first n items as an array.
-   *
-   * @defaultValue: 0
+   * If the propertyy value is found and is an array, limit the number of results
+   * to this number.
+   * 
+   * @defaultValue: undefined
    */
   limit?: number;
+
+  /**
+   * If the property value is found and is an array, collapse it to a string
+   * using the specified delimiter. If `delimiter` is undefined or false, array
+   * will remain arrays.
+   * 
+   * @defaultValue: undefined
+   */
+  join?: string;
 
   /**
    * If the source property is found, use this function to filter it or convert it to
    * another format.
    *
-   * If this property is set, conditional properties (eq, lt, gt, in, contains, megate,
+   * If this property is set, conditional properties (eq, lt, gt, in, contains, negate,
    * and match) **WILL NOT** be evaluated.
    */
   fn?: (value: unknown, conditions: PropertySource) => unknown | undefined;
@@ -45,7 +52,7 @@ export interface PropertySource extends Record<string, unknown> {
    * PropertySources, its default value will be returned and all subsequent PropertySources
    * will be ignored.
    */
-  default?: unknown;
+  fallback?: unknown;
 
   /**
    * Only return the value if it's equal to this.
@@ -69,9 +76,10 @@ export interface PropertySource extends Record<string, unknown> {
   in?: unknown[] | string;
 
   /**
-   * Only return the value if it is a string that matches this.
+   * Only return the value if it is a string that matches this. If it is an array,
+   * only return values of the array that match this.
    */
-  match?: string;
+  matching?: string;
 
   /**
    * Only return the value if it contains this.
@@ -118,20 +126,12 @@ export function findPropertyValue<T = unknown>(
           const $ = getCheerio(v);
           const matches = $(source.selector);
           if (matches.length > 0) {
-            const limit = source.limit ?? 0;
-            if (limit === 1) {
-              // Return a single value
-              v = matches.first().text().trim();
-            } else if (limit > 1) {
-              // Slice the array to length and text-ify each element
-              v = matches
-                .toArray()
-                .slice(0, limit)
-                .map(e => $(e).text().trim());
-            } else {
-              // Concatenate all values
-              v = matches.text().trim();
-            }
+            v = matches
+              .toArray()
+              .slice(0, source.limit)
+              .map(e => $(e).text().trim());
+            
+            v = (source.join || v.length === 1) ? v.join(source.join) : v;
             if (v?.length === 0) v = undefined;
           } else {
             v = undefined;
@@ -188,6 +188,21 @@ function checkPropertyValue(
   } else if (conditions.contains !== undefined) {
     if (Array.isArray(value) && value.includes(conditions.contains)) {
       return conditions.negate ? undefined : value;
+    }
+  } else if (conditions.matching !== undefined) {
+    if (typeof value === 'string') {
+      if (minimatch(value, conditions.matching)) {
+        return conditions.negate ? undefined : value;
+      }
+    } else if (Array.isArray(value)) {
+      const returnList = value.filter(
+        v => (typeof v === 'string' && conditions.matching && minimatch(v, conditions.matching))
+      );
+      if (conditions.join || returnList.length === 1) {
+        return returnList.slice(conditions.limit).join(conditions.join);
+      } else {
+        return returnList.slice(conditions.limit);
+      }
     }
   }
 
