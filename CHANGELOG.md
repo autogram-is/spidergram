@@ -3,7 +3,8 @@
 ## v0.9.15 - 23-03-24
 
 - The `WorkerQuery` class now supports concurrency and rate-limiting. This is most useful when loading a bunch of entities and performing a remote API request for each of them.
-- Speaking of remote APIs, Google's PageSpeed Insights API is now supported via the `GoogleTools.Pagespeed` class.
+- Speaking of remote APIs, Google's PageSpeed Insights API is now supported via the `GoogleTools.PageSpeed` class.
+- The Axe Accessibility auditor and Wappalyzer fingerprinting tool have been refactored to match the PageSpeed class's conventions. Each has a static class with an async run() method that kicks off its remote API request, and optional formatting functions that can be used on the results. This change is invisible for anyone who was using the CLI tools, but it does change the syntax slightly for anyone who was using the Spidergram API in a custom NodeJS project.
 
 ## v0.9.14 - 23-03-21
 
