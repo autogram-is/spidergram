@@ -2,7 +2,6 @@ import { IncomingHttpHeaders } from 'node:http';
 import {
   PlaywrightCrawlingContext,
   Request,
-  CheerioRoot,
   PlaywrightGotoOptions,
   PlaywrightRequestHandler,
   PlaywrightHook,
@@ -46,13 +45,6 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
   requestMeta?: RequestMeta;
 
   /**
-   * On parsable HTML pages, a pre-populated Cheerio instance.
-   *
-   * @type {CheerioRoot}
-   */
-  $?: CheerioRoot;
-
-  /**
    * Execute a `HEAD` request for the current URL; used to populate
    * the crawl context's `requestMeta` property.
    *
@@ -71,8 +63,8 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * checking for 404s without downloading the full HTTP payload.
    *
    * @example
-   * function myCustomHandler({$, saveResource}) {
-   *   await saveResource({ body: $.html() })
+   * async function myCustomHandler({page, saveResource}) {
+   *   await saveResource({ body: await page.content() })
    * }
    *
    * @type {Function}

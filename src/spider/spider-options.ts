@@ -33,8 +33,8 @@ export interface InternalSpiderOptions extends Dictionary {
    *
    * @example
    * async function defaultPageHandler(context: SpiderContext) {
-   *   const {$, saveResource, enqueueUrls} = context;
-   *   await saveResource({body: $?.html()});
+   *   const {page, saveResource, enqueueUrls} = context;
+   *   await saveResource({ body: await page.content() });
    *   await enqueueUrls();
    * }
    *

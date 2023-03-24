@@ -15,7 +15,6 @@ import {
   PlaywrightCrawlerOptions,
   Configuration,
   createPlaywrightRouter,
-  playwrightUtils,
   RequestOptions,
 } from 'crawlee';
 import { NormalizedUrl, ParsedUrl } from '@autogram/url-tools';
@@ -98,7 +97,6 @@ export class Spider extends PlaywrightCrawler {
     ];
 
     crawler.postNavigationHooks = [
-      contextualizeHook(playwrightPostNavigate),
       ...(internal.postNavigationHooks ?? []).map(hook =>
         contextualizeHook(hook),
       ),
@@ -251,14 +249,13 @@ export class Spider extends PlaywrightCrawler {
     this.status.startTime = Date.now();
 
     await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)));
-    const crawl_stats = await Dataset.open('crawl_stats');
 
-    return super.run().then(stats => {
-      this.status.finishTime = Date.now();
-      const finalStats = { ...this.status, ...stats };
-      this._events.emit('end', finalStats);
-      return crawl_stats.pushData(finalStats).then(() => finalStats)
-    });
+    const results = await super.run();
+    this.status.finishTime = Date.now();
+    const finalStats = { ...this.status, ...results };
+    this._events.emit('end', finalStats);
+    await Dataset.open('crawl_stats').then(ds => ds.pushData(finalStats));
+    return Promise.resolve(finalStats);
   }
 
   /**
@@ -274,17 +271,15 @@ export class Spider extends PlaywrightCrawler {
     log.setLevel(this.spiderOptions.logLevel);
 
     const queue = await this.getRequestQueue();
-
     await queue.addRequests(urls.map(uu => uniqueUrlToRequest(uu)));
-    return super.run().then(stats => {
-      this.status.finishTime = Date.now();
-      return { ...this.status, ...stats };
-    });
-  }
-}
 
-async function playwrightPostNavigate(context: SpiderContext) {
-  context.$ = await playwrightUtils.parseWithCheerio(context.page);
+    const results = await super.run()
+    this.status.finishTime = Date.now();
+    const finalStats = { ...this.status, ...results };
+    this._events.emit('end', finalStats);
+    await Dataset.open('crawl_stats').then(ds => ds.pushData(finalStats));
+    return Promise.resolve(finalStats);
+  }
 }
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
