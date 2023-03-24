@@ -11,6 +11,7 @@ import {
 import { Uuid, UuidFactory } from '../uuid.js';
 import { ensureJsonMap, JsonMap, has } from '@salesforce/ts-types';
 import _ from 'lodash';
+import { DateTime } from 'luxon';
 
 export { Transform, Exclude, Expose } from 'class-transformer';
 export type Reference<T extends Entity = Entity> = T | [string, Uuid] | string;
@@ -56,6 +57,8 @@ export abstract class Entity {
   _key: Uuid = UuidFactory.nil;
   _collection!: string;
   _id!: string;
+  _created = DateTime.now().toISO();
+  _modified = DateTime.now().toISO();
 
   @Exclude({ toClassOnly: true })
   _rev?: string;

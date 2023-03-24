@@ -15,12 +15,11 @@ import {
   PlaywrightCrawlerOptions,
   Configuration,
   createPlaywrightRouter,
-  playwrightUtils,
   RequestOptions,
 } from 'crawlee';
 import { NormalizedUrl, ParsedUrl } from '@autogram/url-tools';
 import { Spidergram } from '../index.js';
-import { UniqueUrl, UniqueUrlSet } from '../model/index.js';
+import { Dataset, UniqueUrl, UniqueUrlSet } from '../model/index.js';
 import { SpiderRequestHandler } from './handlers/index.js';
 import {
   InternalSpiderOptions,
@@ -98,7 +97,6 @@ export class Spider extends PlaywrightCrawler {
     ];
 
     crawler.postNavigationHooks = [
-      contextualizeHook(playwrightPostNavigate),
       ...(internal.postNavigationHooks ?? []).map(hook =>
         contextualizeHook(hook),
       ),
@@ -194,6 +192,9 @@ export class Spider extends PlaywrightCrawler {
     if (context.request.errorMessages.length === 0) {
       this.updateStats(context);
     } else {
+      if (context.request.retryCount === this.crawlerOptions.maxRequestRetries) {
+        this.updateStats(context);
+      }
       const errors = context.request.errorMessages;
       this.status.lastError = errors[errors.length];
     }
@@ -249,11 +250,12 @@ export class Spider extends PlaywrightCrawler {
 
     await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)));
 
-    return super.run().then(stats => {
-      this.status.finishTime = Date.now();
-      this._events.emit('end', { ...this.status, ...stats });
-      return { ...this.status, ...stats };
-    });
+    const results = await super.run();
+    this.status.finishTime = Date.now();
+    const finalStats = { ...this.status, ...results };
+    this._events.emit('end', finalStats);
+    await Dataset.open('crawl_stats').then(ds => ds.pushData(finalStats));
+    return Promise.resolve(finalStats);
   }
 
   /**
@@ -269,17 +271,15 @@ export class Spider extends PlaywrightCrawler {
     log.setLevel(this.spiderOptions.logLevel);
 
     const queue = await this.getRequestQueue();
-
     await queue.addRequests(urls.map(uu => uniqueUrlToRequest(uu)));
-    return super.run().then(stats => {
-      this.status.finishTime = Date.now();
-      return { ...this.status, ...stats };
-    });
-  }
-}
 
-async function playwrightPostNavigate(context: SpiderContext) {
-  context.$ = await playwrightUtils.parseWithCheerio(context.page);
+    const results = await super.run()
+    this.status.finishTime = Date.now();
+    const finalStats = { ...this.status, ...results };
+    this._events.emit('end', finalStats);
+    await Dataset.open('crawl_stats').then(ds => ds.pushData(finalStats));
+    return Promise.resolve(finalStats);
+  }
 }
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
