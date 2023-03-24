@@ -3,6 +3,7 @@
 ## v0.9.15 - 23-03-24
 
 - The `WorkerQuery` class now supports concurrency and rate-limiting. This is most useful when loading a bunch of entities and performing a remote API request for each of them.
+- Speaking of remote APIs, Google's PageSpeed Insights API is now supported via the `GoogleTools.Pagespeed` class.
 
 ## v0.9.14 - 23-03-21
 

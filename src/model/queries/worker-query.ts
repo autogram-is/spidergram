@@ -58,7 +58,6 @@ export type WorkerQueryTask<T extends Entity = Entity> = (
 
 export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
   protected events: AsyncEventEmitter<WorkerEventMap>;
-  protected queue?: PQueue;
 
   status: JobStatus;
   options: Required<WorkerQueryOptions>;
@@ -133,16 +132,14 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
     return this;
   }
 
-  async run(task: WorkerQueryTask<T>): Promise<JobStatus> {
+  async run(task: WorkerQueryTask<T> = () => Promise.resolve()): Promise<JobStatus> {
     const ids = await Query.run<string>(this.build());
 
-    this.queue = new PQueue(this.options);
+    const queue = new PQueue(this.options);
     this.status.total = ids.length;
     this.status.startTime = Date.now();
 
-    for (const id of ids) {
-      await this.queue?.add(() => this.performTask(id, task));
-    }
+    await queue.addAll(ids.map(id => () => this.performTask(id, task)))
 
     this.status.finishTime = Date.now();
     this.events.emit('end', this.status);
