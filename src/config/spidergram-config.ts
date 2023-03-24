@@ -17,7 +17,7 @@ import {
   PageDataOptions,
 } from '../tools/html/index.js';
 
-import { PageTechOptions } from '../tools/browser/index.js';
+import { TechAuditOptions } from '../tools/browser/index.js';
 import { Configuration as FileConfiguration } from 'typefs';
 import { Config as ArangoConfig } from 'arangojs/connection';
 import { LoggerOptions } from 'caterpillar';
@@ -174,7 +174,7 @@ export interface SpidergramConfig extends Record<string, unknown> {
   /**
    * Extraction options for structured metadata on crawled pages.
    */
-  pageTechnologies?: PageTechOptions;
+  pageTechnologies?: TechAuditOptions;
 
   /**
    * A key/value collection of pre-written queries that can be used

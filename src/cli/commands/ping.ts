@@ -8,10 +8,7 @@ import {
 } from '../../index.js';
 import { SpiderCli } from '../shared/spider-cli.js';
 import { launchPlaywright } from 'crawlee';
-import {
-  formatAxeReport,
-  getAxeReport,
-} from '../../tools/browser/get-axe-report.js';
+import { AxeAuditor } from '../../tools/browser/axe-auditor.js';
 
 export default class Ping extends SgCommand {
   static summary = 'Examine a page with the current analyzer settings';
@@ -48,9 +45,9 @@ export default class Ping extends SgCommand {
       : [];
 
     const accessibility = sg.config.spider?.auditAccessibility
-      ? await getAxeReport(page).then(results =>
+      ? await AxeAuditor.run(page).then(results =>
           sg.config.spider?.auditAccessibility === 'summary'
-            ? formatAxeReport(results)
+            ? AxeAuditor.totalByImpact(results)
             : results,
         )
       : undefined;

@@ -20,7 +20,7 @@ import {
   PageContentOptions,
   HtmlToTextOptions,
 } from '../tools/html/index.js';
-import { PageTechOptions } from '../tools/browser/index.js';
+import { TechAuditOptions } from '../tools/browser/index.js';
 import { readPackageUpSync } from 'read-pkg-up';
 import { AqQuery } from 'aql-builder';
 import { PageAnalysisOptions } from '../tools/analyze-page.js';
@@ -89,7 +89,7 @@ export const pageDataDefaults: PageDataOptions = {
   templates: false,
 };
 
-export const pageTechnologyDefaults: PageTechOptions = {
+export const pageTechnologyDefaults: TechAuditOptions = {
   forceReload: false,
   technologiesUrl:
     'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/technologies',

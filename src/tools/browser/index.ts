@@ -1,2 +1,2 @@
-export * from './fingerprint.js';
-export * from './get-page-technologies.js';
+export * from './tech-auditor.js';
+export * from './axe-auditor.js';

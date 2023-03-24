@@ -1,7 +1,4 @@
-import {
-  getAxeReport,
-  formatAxeReport,
-} from '../../tools/browser/get-axe-report.js';
+import { BrowserTools } from '../../tools/index.js';
 import { SpiderContext } from '../context.js';
 
 export async function pageHandler(context: SpiderContext) {
@@ -13,9 +10,9 @@ export async function pageHandler(context: SpiderContext) {
     : undefined;
 
   const accessibility = context.auditAccessibility
-    ? await getAxeReport(page).then(results =>
+    ? await BrowserTools.AxeAuditor.run(page).then(results =>
         context.auditAccessibility === 'summary'
-          ? formatAxeReport(results)
+          ? BrowserTools.AxeAuditor.totalByImpact(results)
           : results,
       )
     : undefined;

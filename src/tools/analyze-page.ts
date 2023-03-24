@@ -6,7 +6,7 @@ import {
   relinkResource,
 } from '../index.js';
 import { PageDataOptions, PageContentOptions } from './html/index.js';
-import { PageTechOptions, simplifyTechList } from './browser/index.js';
+import { TechAuditOptions } from './browser/index.js';
 import { PropertySource, findPropertyValue } from './find-property-value.js';
 import is from '@sindresorhus/is';
 import _ from 'lodash';
@@ -44,7 +44,7 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
   /**
    * Options for technology fingerprinting. Setting this to `false` skips all fingerprinting.
    */
-  tech?: PageTechOptions | boolean;
+  tech?: TechAuditOptions | boolean;
 
   /**
    * Options for rebuilding the metadata for a page's outgoing links.
@@ -103,10 +103,11 @@ async function _analyzePage(
   }
 
   if (options.tech) {
-    resource.tech = await BrowserTools.getPageTechnologies(
-      resource,
-      options.tech === true ? undefined : options.tech,
-    ).then(results => simplifyTechList(results));
+    if (typeof options.tech !== 'boolean') {
+      await BrowserTools.TechAuditor.init(options.tech);
+    }
+    resource.tech = await BrowserTools.TechAuditor.run(resource)
+      .then(results => BrowserTools.TechAuditor.summarize(results));
   }
 
   if (options.links) {
