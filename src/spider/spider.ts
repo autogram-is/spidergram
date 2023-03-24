@@ -20,7 +20,7 @@ import {
 } from 'crawlee';
 import { NormalizedUrl, ParsedUrl } from '@autogram/url-tools';
 import { Spidergram } from '../index.js';
-import { UniqueUrl, UniqueUrlSet } from '../model/index.js';
+import { Dataset, UniqueUrl, UniqueUrlSet } from '../model/index.js';
 import { SpiderRequestHandler } from './handlers/index.js';
 import {
   InternalSpiderOptions,
@@ -194,6 +194,9 @@ export class Spider extends PlaywrightCrawler {
     if (context.request.errorMessages.length === 0) {
       this.updateStats(context);
     } else {
+      if (context.request.retryCount === this.crawlerOptions.maxRequestRetries) {
+        this.updateStats(context);
+      }
       const errors = context.request.errorMessages;
       this.status.lastError = errors[errors.length];
     }
@@ -248,11 +251,13 @@ export class Spider extends PlaywrightCrawler {
     this.status.startTime = Date.now();
 
     await queue.addRequests([...uniques].map(uu => uniqueUrlToRequest(uu)));
+    const crawl_stats = await Dataset.open('crawl_stats');
 
     return super.run().then(stats => {
       this.status.finishTime = Date.now();
-      this._events.emit('end', { ...this.status, ...stats });
-      return { ...this.status, ...stats };
+      const finalStats = { ...this.status, ...stats };
+      this._events.emit('end', finalStats);
+      return crawl_stats.pushData(finalStats).then(() => finalStats)
     });
   }
 
