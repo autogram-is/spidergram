@@ -20,6 +20,7 @@ import {
 } from '../model/index.js';
 import { JsonMap, JsonPrimitive } from '@salesforce/ts-types';
 import { join, AqlQuery, literal } from 'arangojs/aql.js';
+import { DateTime } from 'luxon';
 
 export const INVALID_KEY_CHARS_REGEX = /[^a-zA-Z0-9_:.@()+,=;$!*'%-]/g;
 export const INVALID_COLLECTION_CHARS_REGEX = /[^a-zA-Z0-9_-]/g;
@@ -223,6 +224,7 @@ export class ArangoStore {
     // To ensure we don't have any premature reference insertions, we
     // save all entities before saving relationships.
     for (const entity of input) {
+      entity._modified = DateTime.now().toISO();
       if (!isRelationship(entity)) {
         promises.push(
           this.db
@@ -234,6 +236,7 @@ export class ArangoStore {
 
     for (const relationship of input) {
       if (isRelationship(relationship)) {
+        relationship._modified = DateTime.now().toISO();
         promises.push(
           this.db
             .collection(relationship._collection)
