@@ -150,7 +150,7 @@ export class TechAuditor {
     return project
       .files()
       .write(
-        'wappalyzer-technologies.json',
+        'tech-definitions-cache.json',
         Buffer.from(JSON.stringify(technologies)),
       );
   }
@@ -163,7 +163,7 @@ export class TechAuditor {
     return project
       .files()
       .write(
-        'wappalyzer-categories.json',
+        'tech-categories-cache.json',
         Buffer.from(JSON.stringify(categories)),
       );
   }
