@@ -42,7 +42,7 @@ export class Resource extends Entity {
     if (transformation.type === 1 && Resource.offloadBodyHtml) {
       return undefined;
     } else {
-      return transformation;
+      return transformation.value;
     }
   })
   body?: string;
