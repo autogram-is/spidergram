@@ -12,8 +12,7 @@ import is from '@sindresorhus/is';
 import _ from 'lodash';
 import { EnqueueLinksOptions } from 'crawlee';
 import { DateTime } from 'luxon';
-import { processResourceFile } from './file/process-resource-file.js';
-import minimatch from 'minimatch';
+import { MimeTypeMap, processResourceFile } from './file/process-resource-file.js';
 
 export type PageAnalyzer = (
   input: Resource,
@@ -34,15 +33,14 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
   data?: PageDataOptions | boolean;
 
   /**
-   * If a resource passed in for analysis has a file attachment, a handler is available
-   * for the resource's MIME type, and that MIME type is listed in the `files` property
-   * of the analysis options, it will be loaded and parsed as part of the analysis process. 
+   * If a resource passed in for analysis has a file attachment, this mapping dictionary
+   * determines which GenericFile class will be responsible for parsing it.
    * 
    * Setting this value to `false` will bypass all downloaded file parsing.
    * 
    * @defaultValues 
    */
-  files?: string[] | false;
+  files?: MimeTypeMap | false;
 
   /**
    * Options for content analysis, including the transformation of core page content
@@ -115,12 +113,10 @@ async function _analyzePage(
     );
   }
 
-  if (options.files) {
-    if (options.files.find(mime => minimatch(resource.mime ?? '', mime))) {
-      const fileData = await processResourceFile(resource);
-      if (fileData.metadata) resource.data = fileData.metadata;
-      if (fileData.content) resource.content = fileData.content;
-    }
+  if (options.files !== false) {
+    const fileData = await processResourceFile(resource, options.files ? options.files : {});
+    if (fileData.metadata) resource.data = fileData.metadata;
+    if (fileData.content) resource.content = fileData.content;
   }
 
   if (options.tech) {

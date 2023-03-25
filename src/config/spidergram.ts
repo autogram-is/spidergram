@@ -24,8 +24,7 @@ import { SpiderCli } from '../cli/shared/index.js';
 import path from 'path';
 import * as url from 'url';
 import { MimeTypeMap } from '../tools/file/process-resource-file.js';
-import { Pdf } from '../tools/file/pdf.js';
-import { DocX } from '../tools/file/docx.js';
+import { Pdf, DocX } from '../tools/file/index.js';
 
 export class SpidergramError extends Error {}
 
@@ -248,7 +247,6 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
   protected _cli?: SpiderCli;
 
   protected _mimeTypeMap?: MimeTypeMap;
-  protected _fileTypeMap?: MimeTypeMap;
 
   protected constructor() {
     Spidergram._instance = this;
