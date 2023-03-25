@@ -2,9 +2,13 @@
 
 ## v0.9.15 - 23-03-24
 
+- Saved entities now include `_created` and `_modified` timestamps in ISO format; this can make identifying stale crawl data much simpler.
+- When a crawl completes, the final statistics are saved to the `ds_crawl_stats` Dataset. Again, this can be useful for tracking the time windows and performance profiles of multiple crawls, or partial crawls of a single site.
 - The `WorkerQuery` class now supports concurrency and rate-limiting. This is most useful when loading a bunch of entities and performing a remote API request for each of them.
 - Speaking of remote APIs, Google's PageSpeed Insights API is now supported via the `GoogleTools.PageSpeed` class.
 - The Axe Accessibility auditor and Wappalyzer fingerprinting tool have been refactored to match the PageSpeed class's conventions. Each has a static class with an async run() method that kicks off its remote API request, and optional formatting functions that can be used on the results. This change is invisible for anyone who was using the CLI tools, but it does change the syntax slightly for anyone who was using the Spidergram API in a custom NodeJS project.
+- The `getPageData` function can now (attempt to) parse out Schema.org metadata; if `options.schemaOrg` is set to FALSE, it will leave the Schema.org structures untouched as raw JSON+LD in the `pageData.json` values.
+- Property maps can include `matches`, `limit`, and `join`  properties; if a property value is found during mapping, and it's an array, `matches` filters the list to items matching a wildcard; `limit` ensures a max number of results; and `join` concatenates them into a single string using a specified delimiter. While they can't cover every scenario, when combined they can handle simple tasks like turning multiple found tags and authors into a delimited list, or grabbing the first class that starts with 'tmpl-' from the body attributes.
 
 ## v0.9.14 - 23-03-21
 
