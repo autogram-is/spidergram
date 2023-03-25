@@ -65,7 +65,7 @@ export class PageSpeed extends WorkerQuery<Resource> {
       performance: report?.lighthouseResult?.categories?.performance?.score ?? undefined,
       pwa: report?.lighthouseResult?.categories?.pwa?.score ?? undefined,
       seo: report?.lighthouseResult?.categories?.seo?.score ?? undefined,
-      timestamp: report?.analysisUTCTimestamp
+      timestamp: report?.analysisUTCTimestamp ? new Date(report?.analysisUTCTimestamp).toISOString() : undefined
     };
   }
 
