@@ -2,6 +2,8 @@
 
 ## v0.9.16 - 23-03-25
 
+- On extremely large crawls (100K+ pages, 500K+ HTML for each page) ad-hoc queries and reports can become very slow; the 'resources' collection that holds page metadata also holds the raw HTML, and scans through it for other properties can bog down. We've introduced a very experimental `offloadBodyHtml` flag to the global Spidergram options: when it's set to `db`, Spidergram will stick Resource body HTML into a separate key-value store and look it up as needed. The intent is to be as invisible as possible to most code, though there may be some situations where it's necessary to call `await res.loadBody()` manually after loading a resource. In the future we'll be experimenting with filesystem-based storage of body HTML as well.
+
 ## v0.9.15 - 23-03-24
 
 - Saved entities now include `_created` and `_modified` timestamps in ISO format; this can make identifying stale crawl data much simpler.
