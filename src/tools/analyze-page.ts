@@ -12,8 +12,9 @@ import is from '@sindresorhus/is';
 import _ from 'lodash';
 import { EnqueueLinksOptions } from 'crawlee';
 import { DateTime } from 'luxon';
-import { processResourceFile } from './file/process-resource-file.js';
+import { MimeTypeMap, processResourceFile } from './file/process-resource-file.js';
 import minimatch from 'minimatch';
+import { GenericFile } from './file/generic-file.js';
 
 export type PageAnalyzer = (
   input: Resource,
@@ -34,15 +35,16 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
   data?: PageDataOptions | boolean;
 
   /**
-   * If a resource passed in for analysis has a file attachment, a handler is available
-   * for the resource's MIME type, and that MIME type is listed in the `files` property
-   * of the analysis options, it will be loaded and parsed as part of the analysis process. 
+   * If a resource passed in for analysis has a file attachment, this mapping dictionary
+   * determines which types are handled by which plugins. Each key is a MIME type (or 
+   * a glob string that matches a number of mimetypes) and each value is the constructor
+   * for a GenericFile class capable of parsing the file.
    * 
-   * Setting this value to `false` will bypass all downloaded file parsing.
+   * Setting the value to `false` will bypass all downloaded file parsing.
    * 
    * @defaultValues 
    */
-  files?: string[] | false;
+  files?: MimeTypeMap | false;
 
   /**
    * Options for content analysis, including the transformation of core page content
@@ -96,6 +98,7 @@ async function _analyzePage(
   resource: Resource,
   customOptions: PageAnalysisOptions = {},
 ): Promise<Resource> {
+  const sg = await Spidergram.load();
   const options: PageAnalysisOptions = _.defaultsDeep(
     customOptions,
     Spidergram.config.pageAnalysis,
@@ -115,8 +118,27 @@ async function _analyzePage(
     );
   }
 
-  if (options.files) {
-    if (options.files.find(mime => minimatch(resource.mime ?? '', mime))) {
+  if (options.files !== false) {
+    const map = options.files ?? sg.mimeHandlers;
+    const mimes = Object.keys(map);
+    let handler: GenericFile | undefined;
+    for (const mime of mimes) {
+      if (mime === resource.mime) {
+        handler = new map[mime](resource.payload?.path);
+        continue;
+      }
+    }
+
+    if (handler === undefined) {
+      for (const mime of mimes) {
+        if (minimatch(resource.mime ?? '', mime)) {
+          handler = new map[mime](resource.payload?.path);
+          continue;
+        }
+      }
+    }
+
+    if (handler) {
       const fileData = await processResourceFile(resource);
       if (fileData.metadata) resource.data = fileData.metadata;
       if (fileData.content) resource.content = fileData.content;

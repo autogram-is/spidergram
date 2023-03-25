@@ -127,7 +127,6 @@ export const analyzePageDefaults: PageAnalysisOptions = {
   data: pageDataDefaults,
   content: true,
   tech: true,
-  files: [],
   regions: true,
   rebuildLinks: false,
   propertyMap: {},

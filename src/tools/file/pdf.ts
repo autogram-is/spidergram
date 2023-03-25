@@ -1,6 +1,7 @@
 import PdfParse from 'pdf-parse';
 export type PdfOptions = PdfParse.DocumentInitParameters & PdfParse.Options;
 import { GenericFile } from './generic-file.js';
+import _ from 'lodash';
 
 type PdfResults = {
   info: Record<string, unknown>;
@@ -17,29 +18,34 @@ export class Pdf extends GenericFile {
   public static extensions = ['pdf'];
 
   async getAll(): Promise<PdfResults> {
-    const buffer = await this.load();
-    const result = await PdfParse(buffer);
-
-    return Promise.resolve({
-      info: result.info ?? {},
-      metadata: result.metadata ?? {},
-      content: { text: result.text },
-    });
+    return this.getBuffer()
+      .then(buffer => PdfParse(buffer))
+      .then(result => {
+        return {
+          info: result.info ?? {},
+          metadata: result.metadata ?? {},
+          content: { text: result.text },
+        }
+      })
   }
 
   async getMetadata() {
-    const buffer = await this.load();
-    const result = await PdfParse(buffer);
-
-    return Promise.resolve({
-      info: result.info,
-      metadata: result.metadata,
-    });
+    return this.getBuffer()
+      .then(buffer => PdfParse(buffer))
+      .then(result => {
+        const tree: Record<string, unknown> = { pages: result.numpages };
+        for (const [key, value] of Object.entries(result.metadata)) {
+          _.set(tree, key.split(':'), value)
+        }
+        return tree;
+      });
   }
 
   async getContent() {
-    const buffer = await this.load();
-    const result = await PdfParse(buffer);
-    return Promise.resolve({ text: result.text });
+    return this.getBuffer()
+      .then(buffer => PdfParse(buffer))
+      .then(result => {
+        return { text: result.text }
+      });
   }
 }

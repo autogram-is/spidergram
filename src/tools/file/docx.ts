@@ -15,8 +15,8 @@ export class DocX extends GenericFile {
   ];
   public static extensions = ['docx'];
 
-  async getContent(): Promise<{ html?: string; text?: string }> {
-    const buffer = await this.load();
+  async getContent() {
+    const buffer = await this.getBuffer();
     return Promise.resolve({
       html: await mammoth
         .convertToHtml({ buffer })
@@ -28,7 +28,7 @@ export class DocX extends GenericFile {
   }
 
   async getMetadata(): Promise<DocxProperties> {
-    const buffer = await this.load();
+    const buffer = await this.getBuffer();
     return new Promise((resolve, reject) =>
       fromBuffer(buffer, (error, data) => {
         if (error) reject(error);

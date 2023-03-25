@@ -1,8 +1,7 @@
 import { GenericFile } from './generic-file.js';
-import {ExifParserFactory} from "ts-exif-parser";
+import { ExifParserFactory } from "ts-exif-parser";
 
-
-export class Audio extends GenericFile {
+export class Image extends GenericFile {
   public static mimeTypes = ['image/*'];
 
   public static extensions = [
@@ -12,17 +11,18 @@ export class Audio extends GenericFile {
   /**
    * We're not currently generating content for image files; only metadata.
    */
-  async getContent(): Promise<{ html?: string; text?: string }> {
-    return Promise.resolve({})
+  async getContent() {
+    return Promise.resolve(undefined)
   }
 
-  async getMetadata(): Promise<Record<string, unknown>> {
-    const buffer = await this.load();
-    ExifParserFactory.create(buffer);
-    const data = ExifParserFactory.create(buffer).parse();
-    return Promise.resolve({
-      size: data.getImageSize(),
-      ...data.tags
-    })
+  async getMetadata() {
+    return this.getBuffer()
+      .then(buffer => ExifParserFactory.create(buffer).parse())
+      .then(data => {
+        return {
+          size: data.getImageSize(),
+          ...data.tags    
+        }
+      })
   }
 }
