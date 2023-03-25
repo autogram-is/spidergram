@@ -32,7 +32,7 @@ export default class Cleanup extends SgCommand {
       this.ux.action.stop();
     }
 
-    if (flags.erase) {
+    if (flags.eraseDb) {
       const dbName = sg.arango.db.name;
       const message = `Empty ${CLI.chalk.bold.red('all data')} from ${dbName}?`;
       const confirmation = flags.force ? true : await CLI.confirm(message);
