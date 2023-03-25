@@ -72,7 +72,7 @@ export class KeyValueStore extends GenericStore {
     defaultValue?: T,
   ): Promise<T | undefined> {
     if (!isValidKey(key)) throw new TypeError('Invalid key');
-    const record = await this.collection.document(key);
+    const record = await this.collection.document(key, { graceful: true });
     return (record?.value as T) ?? defaultValue ?? undefined;
   }
 }
