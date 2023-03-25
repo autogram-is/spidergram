@@ -10,6 +10,8 @@ import {
 } from './parse-elements.js';
 import { parseMetaTags, MetaValues } from './parse-meta-tags.js';
 import { findElementData, ElementData } from './find-element-data.js';
+import { JsonMap, isJsonMap, toAnyJson } from '@salesforce/ts-types';
+import { HtmlTools } from '../index.js';
 
 export type PageDataExtractor = (
   input: string | cheerio.Root | Resource,
@@ -63,6 +65,11 @@ export type PageDataOptions = {
   json?: boolean;
 
   /**
+   * If present, move Schema.org JSON+LD data to a dedicated property in the results.
+   */
+  schemaOrg?: boolean;
+
+  /**
    * Parse and list any CSS `<style>` tags present in the document.
    */
   styles?: boolean;
@@ -102,6 +109,7 @@ export interface PageData {
   templates?: Record<string, string | undefined>[];
   scripts?: Record<string, string | undefined>[];
   json?: Record<string, unknown>[];
+  schemaOrg?: JsonMap;
   styles?: Record<string, string | undefined>[];
   noscript?: Record<string, string | undefined>[];
 }
@@ -187,14 +195,18 @@ async function _getPageData(
     }
   }
 
-  if (options.scripts || options.json || options.all) {
+  if (options.scripts || options.json || options.schemaOrg || options.all) {
     const json: Record<string, string | unknown>[] = [];
     const scripts: Record<string, string | undefined>[] = [];
 
     parseElementsToArray($, 'script').forEach(script => {
       if (script.type?.includes('json') && typeof script.content === 'string') {
-        script.content = JSON.parse(script.content);
-        json.push(script);
+        const jsonData = toAnyJson(JSON.parse(script.content)) ?? {};
+        if (options.schemaOrg && isJsonMap(jsonData) && HtmlTools.isSchemaOrg(jsonData)) {
+          results.schemaOrg = HtmlTools.getSchemaOrgData(jsonData);
+        } else {
+          json.push({ ...script, content: jsonData });
+        }
       } else if (options.scripts) {
         scripts.push(script);
       }
@@ -209,3 +221,4 @@ async function _getPageData(
 
   return Promise.resolve(results);
 }
+
