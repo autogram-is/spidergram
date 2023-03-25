@@ -24,7 +24,7 @@ import { SpiderCli } from '../cli/shared/index.js';
 import path from 'path';
 import * as url from 'url';
 import { MimeTypeMap } from '../tools/file/process-resource-file.js';
-import { Pdf, DocX } from '../tools/file/index.js';
+import { Pdf, DocX, Image, Audio } from '../tools/file/index.js';
 
 export class SpidergramError extends Error {}
 
@@ -130,7 +130,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     // Set up the Mime Type mapping. We'll probably want this done somewhere
     // else eventually.
     this._mimeTypeMap = {};
-    for (const c of [Pdf, DocX]) {
+    for (const c of [Image, Audio, Pdf, DocX]) {
       for (const t of c.mimeTypes) {
         this._mimeTypeMap[t] = c;
       }

@@ -1,5 +1,5 @@
 import { GenericFile } from './generic-file.js';
-import { parseBuffer, orderTags } from 'music-metadata/lib/core';
+import { parseStream, orderTags } from 'music-metadata';
 
 export class Audio extends GenericFile {
   public static mimeTypes = ['audio/*'];
@@ -40,17 +40,15 @@ export class Audio extends GenericFile {
     'wma'
   ];
 
-  
   /**
    * We're not currently generating content for audio files; only metadata.
    */
-  async getContent(): Promise<{ html?: string; text?: string }> {
-    return Promise.resolve({})
+  async getContent() {
+    return Promise.resolve(undefined)
   }
 
-  async getMetadata(): Promise<Record<string, unknown>> {
-    const buffer = await this.load();
-    return parseBuffer(buffer, undefined, { duration: true, skipCovers: true })
+  async getMetadata() {
+    return parseStream(await this.getStream(), undefined, { duration: true, skipCovers: true })
       .then(metadata => {
         return {
           ...metadata.common,
