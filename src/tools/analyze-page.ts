@@ -11,6 +11,7 @@ import { PropertySource, findPropertyValue } from './find-property-value.js';
 import is from '@sindresorhus/is';
 import _ from 'lodash';
 import { EnqueueLinksOptions } from 'crawlee';
+import { DateTime } from 'luxon';
 
 export type PageAnalyzer = (
   input: Resource,
@@ -122,6 +123,8 @@ async function _analyzePage(
       resource.set(prop, findPropertyValue(resource, source));
     }
   }
+
+  resource._analyzed = DateTime.now().toISO();
 
   return Promise.resolve(resource);
 }
