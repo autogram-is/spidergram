@@ -1,5 +1,11 @@
-import { readFile } from 'fs/promises';
 import { Stream } from 'stream';
+import { Spidergram } from '../../index.js';
+
+export interface GenericFileData extends Record<string, unknown> {
+  metadata?: Record<string, unknown>,
+  content?: Record<string, unknown>,
+  error?: Error
+}
 
 /**
  * A general-purpose base class for extracting data from downloaded
@@ -18,7 +24,7 @@ export abstract class GenericFile {
   protected fileData?: Buffer;
   protected filePath?: string;
 
-  constructor(file?: string | Buffer | Stream) {
+  constructor(file?: string | Buffer) {
     if (file === undefined) {
       // Do nothing here
     }
@@ -33,21 +39,16 @@ export abstract class GenericFile {
     }
   }
 
-  protected async load(): Promise<Buffer> {
-    return new Promise<Buffer>((resolve, reject) => {
-      if (this.fileData) {
-        resolve(this.fileData);
-      } else if (this.filePath) {
-        resolve(
-          readFile(this.filePath).then(buffer => {
-            this.fileData = buffer;
-            return this.fileData;
-          }),
-        );
-      } else {
-        reject(`No file data or path`);
-      }
-    });
+  protected async load(): Promise<Buffer> {    
+    if (this.fileData) {
+      return Promise.resolve(this.fileData);
+    } else if (this.filePath) {
+      const sg = await Spidergram.load();
+      this.fileData = await sg.files().read(this.filePath);
+      return Promise.resolve(this.fileData);
+    } else {
+      return Promise.reject(new Error('No file exists'));
+    }
   }
 
   async getBuffer(): Promise<Buffer> {
@@ -64,7 +65,7 @@ export abstract class GenericFile {
     return Promise.resolve({});
   }
 
-  async getAll() {
+  async getAll(): Promise<GenericFileData> {
     await this.load();
     return Promise.resolve({
       metadata: await this.getMetadata(),

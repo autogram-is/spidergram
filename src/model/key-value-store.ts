@@ -1,4 +1,4 @@
-import { isValidKey } from '../services/arango-store.js';
+import { isValidKey } from './arango-store.js';
 import { GenericStore } from './generic-storage.js';
 import { CreateCollectionOptions } from 'arangojs/collection.js';
 import _ from 'lodash';

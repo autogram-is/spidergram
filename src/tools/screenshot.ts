@@ -4,7 +4,7 @@ import is from '@sindresorhus/is';
 import { Readable } from 'node:stream';
 import arrify from 'arrify';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
-import { JobStatus } from '../services/job-status.js';
+import { JobStatus } from './job-status.js';
 
 export interface Viewport {
   width: number;

@@ -8,7 +8,7 @@ import {
 } from 'crawlee';
 import { DiskDriver } from 'typefs';
 import { UniqueUrl, Resource } from '../model/index.js';
-import { ArangoStore } from '../services/arango-store.js';
+import { ArangoStore } from '../model/arango-store.js';
 import { EnqueueUrlOptions } from './links/index.js';
 import { HtmlTools } from '../index.js';
 import { InternalSpiderOptions } from './spider-options.js';

@@ -17,7 +17,7 @@ import {
   IsVariantOf,
   AppearsOn,
   Fragment,
-} from '../model/index.js';
+} from './index.js';
 import { JsonMap, JsonPrimitive } from '@salesforce/ts-types';
 import { join, AqlQuery, literal } from 'arangojs/aql.js';
 import { DateTime } from 'luxon';

@@ -110,6 +110,12 @@ export const analysisFlags = {
     summary: 'Extract page metadata',
     required: false,
   }),
+  files: Flags.boolean({
+    char: 'f',
+    allowNo: true,
+    summary: 'Parse and analyze supported downloads',
+    required: false
+  }),
   tech: Flags.boolean({
     char: 't',
     allowNo: true,

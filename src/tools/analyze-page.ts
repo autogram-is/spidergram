@@ -12,6 +12,8 @@ import is from '@sindresorhus/is';
 import _ from 'lodash';
 import { EnqueueLinksOptions } from 'crawlee';
 import { DateTime } from 'luxon';
+import { processResourceFile } from './file/process-resource-file.js';
+import minimatch from 'minimatch';
 
 export type PageAnalyzer = (
   input: Resource,
@@ -32,13 +34,23 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
   data?: PageDataOptions | boolean;
 
   /**
+   * If a resource passed in for analysis has a file attachment, a handler is available
+   * for the resource's MIME type, and that MIME type is listed in the `files` property
+   * of the analysis options, it will be loaded and parsed as part of the analysis process. 
+   * 
+   * Setting this value to `false` will bypass all downloaded file parsing.
+   * 
+   * @defaultValues 
+   */
+  files?: string[] | false;
+
+  /**
    * Options for content analysis, including the transformation of core page content
    * to plaintext, readability analysis, etc. Setting this to `false` skips all content
    * analysis.
    *  
    * Note: By default, running content analysis will overwrite any information in a
    * Resource object's existing `content` property.
-
    */
   content?: PageContentOptions | boolean;
 
@@ -101,6 +113,14 @@ async function _analyzePage(
       resource,
       options.content === true ? undefined : options.content,
     );
+  }
+
+  if (options.files) {
+    if (options.files.find(mime => minimatch(resource.mime ?? '', mime))) {
+      const fileData = await processResourceFile(resource);
+      if (fileData.metadata) resource.data = fileData.metadata;
+      if (fileData.content) resource.content = fileData.content;
+    }
   }
 
   if (options.tech) {

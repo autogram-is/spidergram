@@ -1,4 +1,4 @@
-import { JobStatus } from '../../services/index.js';
+import { JobStatus } from '../../index.js';
 import { Duration } from 'luxon';
 
 /**

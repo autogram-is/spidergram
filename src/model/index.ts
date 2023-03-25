@@ -1,3 +1,5 @@
+export * from './arango-store.js';
+
 export * from './entities/index.js';
 export * from './relationships/index.js';
 export * from './helpers/index.js';

@@ -23,6 +23,9 @@ import { setTimeout } from 'timers/promises';
 import { SpiderCli } from '../cli/shared/index.js';
 import path from 'path';
 import * as url from 'url';
+import { MimeTypeMap } from '../tools/file/process-resource-file.js';
+import { Pdf } from '../tools/file/pdf.js';
+import { DocX } from '../tools/file/docx.js';
 
 export class SpidergramError extends Error {}
 
@@ -122,6 +125,15 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
             },
           },
         };
+      }
+    }
+
+    // Set up the Mime Type mapping. We'll probably want this done somewhere
+    // else eventually.
+    this._mimeTypeMap = {};
+    for (const c of [Pdf, DocX]) {
+      for (const t of c.mimeTypes) {
+        this._mimeTypeMap[t] = c;
       }
     }
 
@@ -235,6 +247,9 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
   protected _normalizer?: UrlMutators.UrlMutator;
   protected _cli?: SpiderCli;
 
+  protected _mimeTypeMap?: MimeTypeMap;
+  protected _fileTypeMap?: MimeTypeMap;
+
   protected constructor() {
     Spidergram._instance = this;
     this._activeConfig = Spidergram.defaults as T;
@@ -250,6 +265,13 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
 
   get rawConfig() {
     return this._loadedConfig?.raw ?? {};
+  }
+
+  get mimeHandlers(): MimeTypeMap {
+    if (this._mimeTypeMap === undefined) {
+      this._mimeTypeMap = {};
+    }
+    return this._mimeTypeMap;
   }
 
   setNormalizer(input: UrlMutators.UrlMutator) {
