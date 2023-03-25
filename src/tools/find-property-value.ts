@@ -195,9 +195,11 @@ function checkPropertyValue(
         return conditions.negate ? undefined : value;
       }
     } else if (Array.isArray(value)) {
-      const returnList = value.filter(
-        v => (typeof v === 'string' && conditions.matching && minimatch(v, conditions.matching))
-      );
+      const returnList = value
+        .map(v => v.toString().trim())
+        .filter(v =>
+          typeof v === 'string' && conditions.matching && minimatch(v, conditions.matching)
+        );
       if (conditions.join || returnList.length === 1) {
         return returnList.slice(conditions.limit).join(conditions.join);
       } else {
