@@ -104,6 +104,14 @@ export interface SpidergramConfig extends Record<string, unknown> {
   arango?: ArangoConfig;
 
   /**
+   * Alter the behavior of the core 'Resource' class by saving body HTML to a separate 
+   * key/value store, or the filesystem. On extremely large crawls with large sites (100K+  
+   * pages with 1M+ html payloads) switching to an alternative body storage mechanism can 
+   * make reporting queries significantly faster.
+   */
+  offloadBodyHtml?: 'db' | 'file';
+
+  /**
    * Settings for the project's default URL normalizer. These control
    * which URLs will be considered duplicates of each other.
    *

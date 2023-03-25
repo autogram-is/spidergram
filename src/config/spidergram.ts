@@ -16,7 +16,7 @@ import is from '@sindresorhus/is';
 import _ from 'lodash';
 
 import * as defaults from './defaults.js';
-import { ArangoStore } from '../index.js';
+import { ArangoStore, Resource } from '../index.js';
 import { globalNormalizer } from './global-normalizer.js';
 import { SpidergramConfig } from './spidergram-config.js';
 import { setTimeout } from 'timers/promises';
@@ -83,6 +83,10 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
   protected async init(filePath?: string) {
     this._initializing = true;
     await this.loadConfigFile(filePath);
+
+    // A very weird special case. This would be nice to generalize when we replace the 
+    // Object serializer and persistence code.
+    Resource.offloadBodyHtml = this.config.offloadBodyHtml;
 
     // Shared Arango connection. In the future we may instantiate custom Entities, build
     // indexes, and so on here.

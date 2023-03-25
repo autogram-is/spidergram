@@ -7,7 +7,9 @@ import {
   Transform,
 } from './entity.js';
 import { parse as parseContentType } from 'content-type';
-import { SavedFile } from '../index.js';
+import { KeyValueStore, SavedFile } from '../index.js';
+import { Spidergram } from '../../config/spidergram.js';
+import path from 'path';
 
 export interface ResourceConstructorOptions extends EntityConstructorOptions {
   url?: string | URL;
@@ -22,6 +24,8 @@ export interface ResourceConstructorOptions extends EntityConstructorOptions {
 }
 
 export class Resource extends Entity {
+  static offloadBodyHtml?: 'db' | 'file' ;
+
   readonly _collection = 'resources';
 
   url!: string;
@@ -30,9 +34,18 @@ export class Resource extends Entity {
   headers: Record<string, string | string[] | undefined>;
   mime?: string;
   size?: number;
-  body?: string;
   cookies?: Record<string, string | number | boolean>[];
   payload?: SavedFile;
+
+  // Hide this property from the serializer if 
+  @Transform(transformation => {
+    if (transformation.type === 1 && Resource.offloadBodyHtml) {
+      return undefined;
+    } else {
+      return transformation;
+    }
+  })
+  body?: string;
 
   constructor(data: ResourceConstructorOptions = {}) {
     const {
@@ -93,6 +106,65 @@ export class Resource extends Entity {
 
   protected override keySeed(): unknown {
     return { url: this.url, label: this.label };
+  }
+
+
+  /**
+   * In certain situations, it's useful to offload storage of body
+   * text to a separate table rather than keeping it in the Resource
+   * proper.
+   * 
+   * If you need to work directly with a resource's HTML, call:
+   * `await r.loadBody()` after loading and `await r.saveBody()` just
+   * before persisting it.
+   * 
+   * This is wonky. We don't like it. It's only really necessary when
+   * you're offloading the HTML — in other situations, things should work
+   * without it.
+   */
+  async loadBody(): Promise<this> {
+    if (Resource.offloadBodyHtml === undefined) {
+      // No operation; normal body handling in effect
+
+    } else if (typeof this.body === 'string' && this.body.length > 0) {
+      // No operation; body already loaded
+
+    } else if (Resource.offloadBodyHtml === 'db') {
+      this.body = await KeyValueStore.open('body_html')
+        .then(kv => kv.getValue(this.key));
+
+    } else if (Resource.offloadBodyHtml === 'file') {
+      const bodyPath = path.join('body_html', `${this.key}.html`);
+      this.body = await Spidergram.load()
+        .then(sg => sg.files().read(bodyPath))
+        .then(buffer => buffer.toString())
+        .catch(error => error instanceof Error ? error.message : undefined);
+    }
+
+    return Promise.resolve(this);
+  }
+
+  async saveBody(): Promise<this> {
+    if (
+      Resource.offloadBodyHtml === undefined ||
+      this.body === undefined ||
+      this.body.length === 0
+    ) {
+      // No operation; body is empty
+    } else if (Resource.offloadBodyHtml === 'db') {
+      await KeyValueStore.open('body_html')
+        .then(kv => kv.setValue(this.key, this.body ?? ''));
+    } else if (Resource.offloadBodyHtml === 'file') {
+      const bodyPath = path.join('body_html', `${this.key}.html`);
+      await Spidergram.load()
+        .then(sg => 
+          sg.files().write(bodyPath, Buffer.from(this.body ?? ''))
+        )
+        .then(() => true)
+        .catch(() => false);
+    }
+    
+    return Promise.resolve(this);
   }
 }
 

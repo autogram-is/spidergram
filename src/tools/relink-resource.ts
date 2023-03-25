@@ -47,7 +47,7 @@ export async function relinkResource(
   // a context object.
 
   const fakeContext = {
-    resource,
+    resource: await resource.loadBody(),
     graph: sg.arango,
     uniqueUrl: uu,
   } as SpiderContext;
