@@ -1,5 +1,7 @@
 # Spidergram Changelog
 
+## v0.9.16 - 23-03-25
+
 ## v0.9.15 - 23-03-24
 
 - Saved entities now include `_created` and `_modified` timestamps in ISO format; this can make identifying stale crawl data much simpler.
