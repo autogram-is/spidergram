@@ -101,6 +101,7 @@
     "robots-parser": "^3.0.0",
     "set-cookie-parser": "^2.5.1",
     "terminal-link": "^3.0.0",
+    "ts-exif-parser": "^0.2.2",
     "typefs": "^2.0.0",
     "uuid": "^9.0.0",
     "wappalyzer-core": "^6.10.54"
