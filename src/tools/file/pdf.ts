@@ -1,15 +1,8 @@
 import PdfParse from 'pdf-parse';
+import { Result as PdfResult } from 'pdf-parse';
 export type PdfOptions = PdfParse.DocumentInitParameters & PdfParse.Options;
-import { GenericFile } from './generic-file.js';
+import { GenericFile, GenericFileData } from './generic-file.js';
 import _ from 'lodash';
-
-type PdfResults = {
-  info: Record<string, unknown>;
-  metadata: Record<string, unknown>;
-  content: {
-    text: string;
-  };
-};
 
 export class Pdf extends GenericFile {
   // Application/pdf is the "correct" one but some legacy applications
@@ -17,35 +10,42 @@ export class Pdf extends GenericFile {
   public static mimeTypes = ['application/pdf', 'application/x-pdf'];
   public static extensions = ['pdf'];
 
-  async getAll(): Promise<PdfResults> {
+  async getAll(): Promise<GenericFileData> {
     return this.getBuffer()
       .then(buffer => PdfParse(buffer))
       .then(result => {
         return {
-          info: result.info ?? {},
-          metadata: result.metadata ?? {},
-          content: { text: result.text },
-        }
-      })
+          content: { text: result.text.trim() },
+          metadata: this.formatMetadata(result)
+        };
+      });
   }
 
   async getMetadata() {
-    return this.getBuffer()
-      .then(buffer => PdfParse(buffer))
-      .then(result => {
-        const tree: Record<string, unknown> = { pages: result.numpages };
-        for (const [key, value] of Object.entries(result.metadata)) {
-          _.set(tree, key.split(':'), value)
-        }
-        return tree;
-      });
+    return this.getAll().then(results => results.metadata );
   }
 
   async getContent() {
-    return this.getBuffer()
-      .then(buffer => PdfParse(buffer))
-      .then(result => {
-        return { text: result.text }
-      });
+    return this.getAll().then(results => results.content );
+  }
+
+  // PDFJS spits things out in some very strange formats.
+  // Down the line we want to make it better, but for now
+  // we'll just try to move things around as best we can.
+  protected formatMetadata(input: PdfResult) {
+    const output: Record<string, unknown> = {
+      pages: input.numpages,
+      ...input.info ?? undefined,
+      ...input.metadata ?? undefined
+    }
+
+    for (const [key, value] of Object.entries(output._metadata ?? {})) {
+      if (key.includes(':')) {
+        _.set(output ?? {}, key.split(':'), value)
+      }
+      delete output._metadata;
+    }
+
+    return output;
   }
 }
