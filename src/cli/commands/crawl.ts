@@ -1,6 +1,6 @@
 import { Flags, Args } from '@oclif/core';
 import { LogLevel } from 'crawlee';
-import { Spidergram, Spider } from '../../index.js';
+import { Spidergram, Spider, EntityQuery, NormalizedUrlSet, QueryFragments, UniqueUrl } from '../../index.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
 import is from '@sindresorhus/is';
 
@@ -18,6 +18,9 @@ export default class Crawl extends SgCommand {
     ...CLI.globalFlags,
     erase: Flags.boolean({
       description: 'Erase database before crawling',
+    }),
+    resume: Flags.boolean({
+      description: 'Resume a stopped crawl',
     }),
     ...CLI.crawlFlags,
     verbose: CLI.outputFlags.verbose,
@@ -66,12 +69,43 @@ export default class Crawl extends SgCommand {
       },
     });
     spider.on('progress', status => this.updateProgress(status));
-    spider.on('end', () => this.stopProgress());
-
-    this.startProgress('Crawling...');
-
-    await spider.run(urls).then(status => {
+    spider.on('end', status => {
+      this.stopProgress();
       this.log(sg.cli.summarizeStatus(status));
     });
+
+    if (flags.resume && flags.enqueue !== 'none') {
+      this.ux.action.start('Retrieving already-queued URLs')
+      const uq = new EntityQuery<UniqueUrl>(QueryFragments.uncrawledUrls);
+
+      if (flags.enqueue === 'same-hostname') {
+        // Grab just the hostnames of the specified URLS, and filter by them
+        uq.filterBy({
+          path: 'parsed.hostname',
+          in: [...new NormalizedUrlSet(urls).values()].map(url => url.hostname)
+        });
+
+      } else if (flags.enqueue === 'same-domain') {
+        // Default is 'same-domain'. Grab the domains of the specified URLs
+        // and filter by them.
+        uq.filterBy({
+          path: 'parsed.domain',
+          in: [...new NormalizedUrlSet(urls).values()].map(url => url.domain)
+        });
+      }
+      const uus = await uq.run();
+      this.ux.action.stop();
+
+      if (uus.length === 0) {
+        this.error('No uncrawled URLs matched the requested domains.')
+      } else {
+        this.startProgress('Resuming crawl');
+        await spider.resume(uus);  
+      }
+
+    } else {
+      this.startProgress('Crawling');
+      await spider.run(urls);
+    }
   }
 }
