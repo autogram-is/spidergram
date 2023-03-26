@@ -1,7 +1,10 @@
 import { ClassConstructor } from "class-transformer";
 import { GenericFile, GenericFileData } from "./generic-file.js";
-import { Resource, Spidergram } from "../../index.js";
+import { Resource } from "../../index.js";
+import { Pdf, DocX, Image, Audio } from './index.js';
+
 import minimatch from "minimatch";
+
 
 export type MimeTypeMap = Record<string, ClassConstructor<GenericFile>>;
 
@@ -9,7 +12,7 @@ export async function processResourceFile(resource: Resource, customMap: MimeTyp
   const { mime, payload } = resource;
   const map = {
     ...customMap,
-    ...await Spidergram.load().then(sg => sg.mimeHandlers)
+    ...defaultMimeHandlers()
   }
 
   if (mime && payload) {
@@ -22,4 +25,14 @@ export async function processResourceFile(resource: Resource, customMap: MimeTyp
     }
   }
   return Promise.resolve({});
+}
+
+function defaultMimeHandlers(): MimeTypeMap {
+  const map: MimeTypeMap = {};
+  for (const c of [Image, Audio, Pdf, DocX]) {
+    for (const t of c.mimeTypes) {
+      map[t] = c;
+    }
+  }
+  return map;
 }
