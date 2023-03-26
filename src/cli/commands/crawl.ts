@@ -94,7 +94,7 @@ export default class Crawl extends SgCommand {
         });
       }
       const uus = await uq.run();
-      this.ux.action.stop();
+      this.ux.action.stop(`${uus.length} found.`);
 
       if (uus.length === 0) {
         this.error('No uncrawled URLs matched the requested domains.')
