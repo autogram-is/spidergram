@@ -1,8 +1,10 @@
-import PdfParse from 'pdf-parse';
-import { Result as PdfResult } from 'pdf-parse';
-export type PdfOptions = PdfParse.DocumentInitParameters & PdfParse.Options;
+import pdfd from 'pdfjs-dist'
+import { PDFPageProxy, PDFDocumentProxy } from 'pdfjs-dist'
 import { GenericFile, GenericFileData } from './generic-file.js';
+import { TextTools } from '../index.js';
 import _ from 'lodash';
+
+const { getDocument, VerbosityLevel } = pdfd;
 
 export class Pdf extends GenericFile {
   // Application/pdf is the "correct" one but some legacy applications
@@ -12,13 +14,13 @@ export class Pdf extends GenericFile {
 
   async getAll(): Promise<GenericFileData> {
     return this.getBuffer()
-      .then(buffer => PdfParse(buffer))
-      .then(result => {
-        return {
-          content: { text: result.text.trim() },
-          metadata: this.formatMetadata(result)
-        };
-      });
+      .then(buffer => getDocument({
+        data: Uint8Array.from(buffer),
+        verbosity: VerbosityLevel.ERRORS,
+        disableFontFace: true
+      }))
+      .then(loader => loader.promise)
+      .then(pdf => this.formatPdfDocument(pdf))
   }
 
   async getMetadata() {
@@ -29,23 +31,55 @@ export class Pdf extends GenericFile {
     return this.getAll().then(results => results.content );
   }
 
-  // PDFJS spits things out in some very strange formats.
-  // Down the line we want to make it better, but for now
-  // we'll just try to move things around as best we can.
-  protected formatMetadata(input: PdfResult) {
-    const output: Record<string, unknown> = {
-      pages: input.numpages,
-      ...input.info ?? undefined,
-      ...input.metadata ?? undefined
-    }
+  protected async formatPdfDocument(pdf: PDFDocumentProxy, pageDelimiter = "\n"): Promise<GenericFileData> {
+    const data = await pdf.getMetadata();
+    const formattedMetadata: Record<string, unknown> = {};
 
-    for (const [key, value] of Object.entries(output._metadata ?? {})) {
-      if (key.includes(':')) {
-        _.set(output ?? {}, key.split(':'), value)
+    if (data.metadata) {
+      for (const [key, value] of Object.entries(data.metadata.getAll())) {
+        if (key.includes(':')) {
+          _.set(formattedMetadata ?? {}, key.split(':'), value)
+        }
       }
-      delete output._metadata;
     }
 
-    return output;
+    const lines: Promise<string>[] = [];
+    for (let p = 1; p <= pdf.numPages; p++) {
+      lines.push(pdf.getPage(p).then(this.renderPage))
+    }
+    const text = await Promise.all(lines).then(strings => strings.join(pageDelimiter))
+
+    return Promise.resolve({
+      metadata: {
+        pages: pdf.numPages,
+        ...data.info,
+        ...formattedMetadata
+      },
+      content: {
+        text,
+        readability: TextTools.getReadabilityScore(text)
+      }
+    })
+  }
+
+  protected async renderPage(page: PDFPageProxy): Promise<string> {
+    const text: string[] = [];
+    const content = await page.getTextContent();
+
+    // It may be useful to us Y-offset to detect newlines.
+    // https://github.com/mozilla/pdf.js/issues/8963 
+    for (const i of content.items) {
+      if ('str' in i && i.str.length > 0) { 
+        text.push(i.str);
+      }
+    }
+
+    const output = text.join(' ')
+      .replaceAll(/\s+/g, " ")
+      .replaceAll(/\n+/g, "\n")
+      .trim();
+
+    page.cleanup();
+    return Promise.resolve(output);
   }
 }

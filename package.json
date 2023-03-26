@@ -92,7 +92,7 @@
     "object-hash": "^3.0.0",
     "office-document-properties": "^1.1.0",
     "p-queue": "^7.3.4",
-    "pdf-parse": "autogram-is/pdf-parse",
+    "pdfjs-dist": "^3.4.120",
     "prepend-http": "^4.0.0",
     "proload-plugin-json5": "github:autogram-is/proload-plugin-json5",
     "read-pkg-up": "^9.1.0",
