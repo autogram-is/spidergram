@@ -85,12 +85,19 @@ export default class Ping extends SgCommand {
       URL: r.url,
       Status: r.code,
       Type: r.mime ?? 'unknown',
-      'Body classes':
-        (r.get('data.attributes.classes') as string[] | undefined) ?? '',
+      'Body classes': (r.get('data.attributes.classes') as string[] | undefined) ?? '',
+      Cookies: r.cookies?.length ?? 0,
     };
-
     this.log(c.header('Overview'));
     this.ux.info(CLI.infoList(overview));
+
+    const structuredData: Record<string, string> = {
+      OpenGraph: r.get('data.meta.og') === undefined ? this.chalk.red('missing') : this.chalk.greenBright('present'),
+      Twitter: r.get('data.meta.twitter') === undefined ? this.chalk.red('missing') : this.chalk.greenBright('present'),
+      'Schema.org': r.get('data.schemaOrg') === undefined ? this.chalk.red('missing') : this.chalk.greenBright('present'),
+    }
+    this.log(c.header('Structured Data'));
+    this.ux.info(CLI.infoList(structuredData));
 
     const readability = r.get('content.readability', {}) as Record<
       string,
