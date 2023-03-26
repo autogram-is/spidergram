@@ -112,8 +112,13 @@ export class Spider extends PlaywrightCrawler {
       crawler.launchContext = { userAgent: internal.userAgent };
     }
 
-    // We're bumping this WAY up to deal with large sitemaps
-    crawler.requestHandlerTimeoutSecs = internal.handlerTimeout;
+    // We're bumping this up to deal with exceptionally horrible sites.
+    if (options.auditAccessibility) {
+      // …And adding an extra buffer when the all1 checker is turned on.
+      crawler.requestHandlerTimeoutSecs = (internal.handlerTimeout ?? 60) + 30;
+    } else {
+      crawler.requestHandlerTimeoutSecs = internal.handlerTimeout;
+    }
 
     super(crawler, config);
 

@@ -35,6 +35,7 @@ interface AxeReport {
   incomplete: Result[];
   inapplicable: Result[];
   timestamp: string;
+  error?: Error | true;
 }
 
 interface Result {
@@ -82,7 +83,17 @@ export class AxeAuditor {
     const ab = new AxeBuilder.default({ page }) as AxeBuilder;
 
     // In the future we may want to set additional options before running the analysis.
-    return ab.analyze() as Promise<AxeReport>;
+    return ab.analyze().catch(error => {
+      return {
+        toolOptions: {},
+        passes: [],
+        violations: [],
+        incomplete: [],
+        inapplicable: [],     
+        timestamp: new Date(Date.now()).toISOString(),
+        error: (error instanceof Error) ? error : true
+      }
+    }) as Promise<AxeReport>;
   }
 
   static totalByImpact(input: AxeReport) {
