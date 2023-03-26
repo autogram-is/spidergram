@@ -85,7 +85,7 @@ export default class Go extends SgCommand {
 
       this.ux.action.start('Crawl reports');
       await r.run();
-      console.log(`Saved ${joinOxford(r.status.files)}.`);
+      this.log(`Saved ${joinOxford(r.status.files)}.`);
     }
 
     // We should perform some kin of wrapup step here.

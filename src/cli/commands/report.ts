@@ -84,6 +84,6 @@ export default class DoReport extends SgCommand {
 
     this.ux.action.start('Running report');
     await report.run();
-    console.log(`Saved ${joinOxford(report.status.files)}.`);
+    this.log(`Saved ${joinOxford(report.status.files)}.`);
   }
 }
