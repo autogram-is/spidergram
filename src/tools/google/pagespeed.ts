@@ -2,8 +2,6 @@ import { JobStatus, Resource, Spidergram, WorkerQuery, WorkerQueryOptions } from
 import { google, pagespeedonline_v5 } from 'googleapis';
 import _ from 'lodash';
 
-const pagespeed = google.pagespeedonline('v5');
-
 export type PageSpeedRequest =
   pagespeedonline_v5.Params$Resource$Pagespeedapi$Runpagespeed;
 
@@ -42,6 +40,8 @@ export class PageSpeed extends WorkerQuery<Resource> {
    * Retrieve a Google Pagespeed Insights report for a single URL. 
    */
   static async getReport(url: URL | string, input: PageSpeedRequest = {}) {
+    const pagespeed = google.pagespeedonline('v5');
+
     const opt: PageSpeedRequest = _.defaultsDeep({ url: url.toString() }, input, defaults);
     return pagespeed.pagespeedapi.runpagespeed(opt)
       .then(response => {

@@ -25,7 +25,7 @@ export function fileNameFromHeaders(
   fallback = 'response',
 ): string {
   const filenameRx = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-  let filename: string | undefined;
+  let filename: string | undefined = undefined;
 
   if (!is.nonEmptyStringAndNotWhitespace(filename)) {
     filename = (filenameRx.exec(headers['content-disposition'] ?? '') ?? [])[0];

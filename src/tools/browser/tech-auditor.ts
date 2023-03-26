@@ -1,10 +1,10 @@
 import { parse as parseCookie } from 'set-cookie-parser';
-import pkg from 'wappalyzer-core';
-const { analyze, resolve, setCategories, setTechnologies } = pkg;
-
+import wlc from 'wappalyzer-core';
 import { Spidergram, Resource, HtmlTools } from '../../index.js';
 import _ from 'lodash';
 import is from '@sindresorhus/is';
+
+const { analyze, resolve, setCategories, setTechnologies } = wlc;
 
 import type {
   Technology as PageTechDefinition,
