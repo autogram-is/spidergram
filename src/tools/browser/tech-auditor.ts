@@ -1,8 +1,8 @@
 import { parse as parseCookie } from 'set-cookie-parser';
 import wlc from 'wappalyzer-core';
-import { Spidergram, Resource, HtmlTools } from '../../index.js';
 import _ from 'lodash';
 import is from '@sindresorhus/is';
+import { Spidergram, Resource, HtmlTools } from '../../index.js';
 
 const { analyze, resolve, setCategories, setTechnologies } = wlc;
 

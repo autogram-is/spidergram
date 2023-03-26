@@ -1,10 +1,9 @@
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import { ArangoCollection, isArangoCollection } from 'arangojs/collection.js';
 import { AqStrict, AqQuery, AqBuilder } from 'aql-builder';
-import { Query } from './query.js';
-import { Entity, JobStatus, Spidergram } from '../../index.js';
 import _ from 'lodash';
 import PQueue from 'p-queue';
+import { Entity, Query, JobStatus, Spidergram } from '../../index.js';
 
 /**
  * Options to manage the {@link WorkerQuery}'s rate and concurrency. 

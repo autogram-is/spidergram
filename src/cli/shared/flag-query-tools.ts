@@ -4,7 +4,7 @@ import arrify from 'arrify';
 import is from '@sindresorhus/is';
 
 export function buildFilter(input: string): AqFilter {
-  let filterSpec: AqFilter;
+  let filterSpec: AqFilter | undefined;
 
   if (input.indexOf('!=') >= 0) {
     // property must not equal

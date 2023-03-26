@@ -1,6 +1,6 @@
-import { JobStatus, Resource, Spidergram, WorkerQuery, WorkerQueryOptions } from '../../index.js';
 import { google, pagespeedonline_v5 } from 'googleapis';
 import _ from 'lodash';
+import { JobStatus, Resource, Spidergram, WorkerQuery, WorkerQueryOptions } from '../../index.js';
 
 export type PageSpeedRequest =
   pagespeedonline_v5.Params$Resource$Pagespeedapi$Runpagespeed;
