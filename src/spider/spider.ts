@@ -164,7 +164,7 @@ export class Spider extends PlaywrightCrawler {
     }
   }
 
-  protected updateStats({ request, requestMeta }: SpiderContext) {
+  protected updateStats({ request, requestMeta }: SpiderContext, error = false) {
     const type =
       requestMeta?.type ?? requestMeta?.headers['content-type'] ?? 'unknown';
     const status = requestMeta?.statusCode ?? -1;
@@ -182,20 +182,21 @@ export class Spider extends PlaywrightCrawler {
     this.status.requestsByType[type]++;
 
     this.status.total = this.requestQueue?.assumedTotalCount ?? 0;
+    if (error) this.status.failed++;
     this.status.finished++;
   }
 
   protected override async _cleanupContext(context: SpiderContext) {
-    // This is pretty sketchy way of capturing a non-error; we need to verify that
-    // a request that previously failed but then succeeded will still be noticed.
-    // Improving is on the to-do list when we stop subclassing PlaywrightCrawler.
     if (context.request.errorMessages.length === 0) {
+      // We're finishing a request, and there were no errors.
       this.updateStats(context);
     } else {
       if (
         context.request.retryCount === this.crawlerOptions.maxRequestRetries
       ) {
-        this.updateStats(context);
+        // It's a request with errors, and we're at the max retries; update the
+        // stats because it's about to leave the queue.
+        this.updateStats(context, true);
       }
       const errors = context.request.errorMessages;
       this.status.lastError = errors[errors.length];
