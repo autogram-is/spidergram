@@ -73,9 +73,8 @@ interface RelatedNode {
   html: string;
 }
 
-
 /**
- * This is bare bones for now, but 
+ * This is bare bones for now, but
  */
 export class AxeAuditor {
   static async run(page: Page) {
@@ -90,7 +89,9 @@ export class AxeAuditor {
     const output: Record<string, string | number | undefined> = {
       needsReview: input.incomplete?.length ?? 0,
       totalViolations: 0,
-      timestamp: input.timestamp ? new Date(input.timestamp).toISOString() : undefined
+      timestamp: input.timestamp
+        ? new Date(input.timestamp).toISOString()
+        : undefined,
     };
 
     for (const v of input.violations ?? []) {

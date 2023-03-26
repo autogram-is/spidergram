@@ -59,7 +59,7 @@ export const htmlToTextDefaults: HtmlToTextOptions = {
   wordwrap: false,
   selectors: [
     { selector: 'img', format: 'skip' },
-    { selector: 'a', options: { ignoreHref: true } }
+    { selector: 'a', options: { ignoreHref: true } },
   ],
 };
 

@@ -51,21 +51,21 @@ export function getVisibleText(
 export const readableTextOptions: HtmlToTextOptions = {
   selectors: [
     { selector: 'img', format: 'readableImage' },
-    { selector: 'a', options: { ignoreHref: true } }
+    { selector: 'a', options: { ignoreHref: true } },
   ],
   formatters: {
     readableImage: (el, walk, builder) => {
-      const alt = el.attribs.alt ?.toString().trim() ?? '';
-      const src = el.attribs.src ?.toString().trim() ?? '';
-      const text = (alt.trim().length) ? alt : src;
+      const alt = el.attribs.alt?.toString().trim() ?? '';
+      const src = el.attribs.src?.toString().trim() ?? '';
+      const text = alt.trim().length ? alt : src;
       builder.addInline(text + ' ', { noWordTransform: true });
-    }
-  }
-}
+    },
+  },
+};
 
 export const visibleTextOptions: HtmlToTextOptions = {
   selectors: [
     { selector: 'img', format: 'skip' },
-    { selector: 'a', options: { ignoreHref: true } }
+    { selector: 'a', options: { ignoreHref: true } },
   ],
-}
+};

@@ -37,24 +37,26 @@ export class Audio extends GenericFile {
     'opus',
     'wav',
     'wave',
-    'wma'
+    'wma',
   ];
 
   /**
    * We're not currently generating content for audio files; only metadata.
    */
   async getContent() {
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }
 
   async getMetadata() {
-    return parseStream(await this.getStream(), undefined, { duration: true, skipCovers: true })
-      .then(metadata => {
-        return {
-          ...metadata.common,
-          format: metadata.format,
-          tags: orderTags(metadata.native['ID3v2.3'])
-        }
-      });
+    return parseStream(await this.getStream(), undefined, {
+      duration: true,
+      skipCovers: true,
+    }).then(metadata => {
+      return {
+        ...metadata.common,
+        format: metadata.format,
+        tags: orderTags(metadata.native['ID3v2.3']),
+      };
+    });
   }
 }

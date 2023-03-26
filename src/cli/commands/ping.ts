@@ -92,20 +92,19 @@ export default class Ping extends SgCommand {
     this.log(c.header('Overview'));
     this.ux.info(CLI.infoList(overview));
 
-    const readability = r.get('content.readability', {}) as Record<string, number | string>;
+    const readability = r.get('content.readability', {}) as Record<
+      string,
+      number | string
+    >;
     if (Object.keys(readability).length > 0) {
       this.log(c.header('Page Content'));
-      this.ux.info(
-        CLI.infoList(readability),
-      );
+      this.ux.info(CLI.infoList(readability));
     }
 
     const violations = r.get('accessibility', {}) as Record<string, number>;
     if (Object.keys(violations).length > 0) {
       this.log(c.header('Accessibility Issues'));
-      this.ux.info(
-        CLI.infoList(violations),
-      );
+      this.ux.info(CLI.infoList(violations));
     }
 
     const detected = r.get('tech' ?? []) as Array<Record<string, string[]>>;

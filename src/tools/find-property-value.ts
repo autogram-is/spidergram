@@ -21,7 +21,7 @@ export interface PropertySource extends Record<string, unknown> {
   /**
    * If the propertyy value is found and is an array, limit the number of results
    * to this number.
-   * 
+   *
    * @defaultValue: undefined
    */
   limit?: number;
@@ -30,7 +30,7 @@ export interface PropertySource extends Record<string, unknown> {
    * If the property value is found and is an array, collapse it to a string
    * using the specified delimiter. If `delimiter` is undefined or false, array
    * will remain arrays.
-   * 
+   *
    * @defaultValue: undefined
    */
   join?: string;
@@ -130,8 +130,8 @@ export function findPropertyValue<T = unknown>(
               .toArray()
               .slice(0, source.limit)
               .map(e => $(e).text().trim());
-            
-            v = (source.join || v.length === 1) ? v.join(source.join) : v;
+
+            v = source.join || v.length === 1 ? v.join(source.join) : v;
             if (v?.length === 0) v = undefined;
           } else {
             v = undefined;
@@ -197,8 +197,11 @@ function checkPropertyValue(
     } else if (Array.isArray(value)) {
       const returnList = value
         .map(v => v.toString().trim())
-        .filter(v =>
-          typeof v === 'string' && conditions.matching && minimatch(v, conditions.matching)
+        .filter(
+          v =>
+            typeof v === 'string' &&
+            conditions.matching &&
+            minimatch(v, conditions.matching),
         );
       if (conditions.join || returnList.length === 1) {
         return returnList.slice(conditions.limit).join(conditions.join);

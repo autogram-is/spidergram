@@ -202,7 +202,11 @@ async function _getPageData(
     parseElementsToArray($, 'script').forEach(script => {
       if (script.type?.includes('json') && typeof script.content === 'string') {
         const jsonData = toAnyJson(JSON.parse(script.content)) ?? {};
-        if (options.schemaOrg && isJsonMap(jsonData) && HtmlTools.isSchemaOrg(jsonData)) {
+        if (
+          options.schemaOrg &&
+          isJsonMap(jsonData) &&
+          HtmlTools.isSchemaOrg(jsonData)
+        ) {
           results.schemaOrg = HtmlTools.getSchemaOrgData(jsonData);
         } else {
           json.push({ ...script, content: jsonData });
@@ -221,4 +225,3 @@ async function _getPageData(
 
   return Promise.resolve(results);
 }
-

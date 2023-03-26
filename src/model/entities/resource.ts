@@ -24,7 +24,7 @@ export interface ResourceConstructorOptions extends EntityConstructorOptions {
 }
 
 export class Resource extends Entity {
-  static offloadBodyHtml?: 'db' | 'file' ;
+  static offloadBodyHtml?: 'db' | 'file';
 
   readonly _collection = 'resources';
 
@@ -37,7 +37,7 @@ export class Resource extends Entity {
   cookies?: Record<string, string | number | boolean>[];
   payload?: SavedFile;
 
-  // Hide this property from the serializer if 
+  // Hide this property from the serializer if
   @Transform(transformation => {
     if (transformation.type === 1 && Resource.offloadBodyHtml) {
       return undefined;
@@ -108,16 +108,15 @@ export class Resource extends Entity {
     return { url: this.url, label: this.label };
   }
 
-
   /**
    * In certain situations, it's useful to offload storage of body
    * text to a separate table rather than keeping it in the Resource
    * proper.
-   * 
+   *
    * If you need to work directly with a resource's HTML, call:
    * `await r.loadBody()` after loading and `await r.saveBody()` just
    * before persisting it.
-   * 
+   *
    * This is wonky. We don't like it. It's only really necessary when
    * you're offloading the HTML — in other situations, things should work
    * without it.
@@ -125,20 +124,18 @@ export class Resource extends Entity {
   async loadBody(): Promise<this> {
     if (Resource.offloadBodyHtml === undefined) {
       // No operation; normal body handling in effect
-
     } else if (typeof this.body === 'string' && this.body.length > 0) {
       // No operation; body already loaded
-
     } else if (Resource.offloadBodyHtml === 'db') {
-      this.body = await KeyValueStore.open('body_html')
-        .then(kv => kv.getValue(this.key));
-
+      this.body = await KeyValueStore.open('body_html').then(kv =>
+        kv.getValue(this.key),
+      );
     } else if (Resource.offloadBodyHtml === 'file') {
       const bodyPath = path.join('body_html', `${this.key}.html`);
       this.body = await Spidergram.load()
         .then(sg => sg.files().read(bodyPath))
         .then(buffer => buffer.toString())
-        .catch(error => error instanceof Error ? error.message : undefined);
+        .catch(error => (error instanceof Error ? error.message : undefined));
     }
 
     return Promise.resolve(this);
@@ -152,18 +149,17 @@ export class Resource extends Entity {
     ) {
       // No operation; body is empty
     } else if (Resource.offloadBodyHtml === 'db') {
-      await KeyValueStore.open('body_html')
-        .then(kv => kv.setValue(this.key, this.body ?? ''));
+      await KeyValueStore.open('body_html').then(kv =>
+        kv.setValue(this.key, this.body ?? ''),
+      );
     } else if (Resource.offloadBodyHtml === 'file') {
       const bodyPath = path.join('body_html', `${this.key}.html`);
       await Spidergram.load()
-        .then(sg => 
-          sg.files().write(bodyPath, Buffer.from(this.body ?? ''))
-        )
+        .then(sg => sg.files().write(bodyPath, Buffer.from(this.body ?? '')))
         .then(() => true)
         .catch(() => false);
     }
-    
+
     return Promise.resolve(this);
   }
 }

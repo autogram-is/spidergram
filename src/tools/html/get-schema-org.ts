@@ -1,4 +1,10 @@
-import { JsonCollection, JsonMap, asJsonArray, isJsonArray, isJsonMap } from "@salesforce/ts-types";
+import {
+  JsonCollection,
+  JsonMap,
+  asJsonArray,
+  isJsonArray,
+  isJsonMap,
+} from '@salesforce/ts-types';
 
 // This is the ugliest, nastiest set of Schema.Org JSON+LD mangling functions ever.
 // We should deal with it later; sadly there are VERY few libraries that actually
@@ -20,11 +26,11 @@ export function isSchemaOrg(input: JsonCollection): input is AnySchemaOrg {
   return false;
 }
 
-// This is easily the most naive 
+// This is easily the most naive
 export function getSchemaOrgData(input: AnySchemaOrg): JsonMap {
   let resultList: JsonMap[] = [];
   if ('@graph' in input) {
-    resultList = (input['@graph'] as JsonMap[] || undefined) ?? [];
+    resultList = ((input['@graph'] as JsonMap[]) || undefined) ?? [];
   } else {
     delete input['@context'];
     resultList = [input];
@@ -34,7 +40,7 @@ export function getSchemaOrgData(input: AnySchemaOrg): JsonMap {
   for (const item of resultList) {
     const { '@type': key, ...values } = item;
     if (typeof key === 'string') {
-      if(results[key]) {
+      if (results[key]) {
         if (isJsonArray(results[key])) {
           asJsonArray(results[key])?.push(values);
         } else {

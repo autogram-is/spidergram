@@ -114,7 +114,7 @@ export const analysisFlags = {
     char: 'd',
     allowNo: true,
     summary: 'Parse and analyze supported downloads',
-    required: false
+    required: false,
   }),
   tech: Flags.boolean({
     char: 't',

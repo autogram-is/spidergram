@@ -6,12 +6,12 @@ import PQueue from 'p-queue';
 import { Entity, Query, JobStatus, Spidergram } from '../../index.js';
 
 /**
- * Options to manage the {@link WorkerQuery}'s rate and concurrency. 
+ * Options to manage the {@link WorkerQuery}'s rate and concurrency.
  */
 export interface WorkerQueryOptions extends Record<string, unknown> {
   /**
    * The number of workers to run simultaneously.
-   * 
+   *
    * @defaultValue 1
    */
   concurrency?: number;
@@ -19,14 +19,14 @@ export interface WorkerQueryOptions extends Record<string, unknown> {
   /**
    * The maximum number of workers to launch within the interval period.
    * Setting the limit to -1 disables rate limiting.
-   * 
+   *
    * @defaultValue Infinity
    */
   intervalCap?: number;
 
   /**
    * The time (in ms) that the limit applies to.
-   * 
+   *
    * @defaultValue 0
    */
   interval?: number;
@@ -35,8 +35,8 @@ export interface WorkerQueryOptions extends Record<string, unknown> {
 const defaults: Required<WorkerQueryOptions> = {
   concurrency: 1,
   intervalCap: Infinity,
-  interval: 0
-}
+  interval: 0,
+};
 
 type WorkerEventMap = Record<PropertyKey, unknown[]> & {
   progress: [status: JobStatus, item?: Entity, message?: string];
@@ -66,7 +66,7 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
    */
   constructor(
     input: string | ArangoCollection | AqStrict | AqQuery,
-    options: WorkerQueryOptions = {}
+    options: WorkerQueryOptions = {},
   ) {
     const validCollections = [...Entity.types.keys()];
     let collectionName = '';
@@ -131,14 +131,16 @@ export class WorkerQuery<T extends Entity = Entity> extends AqBuilder {
     return this;
   }
 
-  async run(task: WorkerQueryTask<T> = () => Promise.resolve()): Promise<JobStatus> {
+  async run(
+    task: WorkerQueryTask<T> = () => Promise.resolve(),
+  ): Promise<JobStatus> {
     const ids = await Query.run<string>(this.build());
 
     const queue = new PQueue(this.options);
     this.status.total = ids.length;
     this.status.startTime = Date.now();
 
-    await queue.addAll(ids.map(id => () => this.performTask(id, task)))
+    await queue.addAll(ids.map(id => () => this.performTask(id, task)));
 
     this.status.finishTime = Date.now();
     this.events.emit('end', this.status);

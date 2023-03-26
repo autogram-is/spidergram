@@ -1,9 +1,6 @@
 // Adapted from https://github.com/bertyhell/cheerio-get-css-selector
 
-export function getUniqueSelector(
-  element: cheerio.Element,
-  $: cheerio.Root,
-) {
+export function getUniqueSelector(element: cheerio.Element, $: cheerio.Root) {
   const parents = $(element).parents();
   if (!parents[0]) {
     // Element doesn't have any parents
@@ -25,10 +22,7 @@ export function getUniqueSelector(
   return selector;
 }
 
-function getElementSelector(
-  element: cheerio.Element,
-  $: cheerio.Root,    
-): string {
+function getElementSelector(element: cheerio.Element, $: cheerio.Root): string {
   const el = $(element);
   if (el.attr('id')) {
     return '#' + el.attr('id');
@@ -43,9 +37,9 @@ function getElementSelector(
     if (el.index() === 0) {
       return el.get(0).tagName + ':first-child';
     }
-    if (el.index() === el.siblings().length){
+    if (el.index() === el.siblings().length) {
       return el.get(0).tagName + ':last-child';
     }
-    return el.get(0).tagName+ ':nth-child(' + (el.index() + 1) + ')';
+    return el.get(0).tagName + ':nth-child(' + (el.index() + 1) + ')';
   }
 }

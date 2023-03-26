@@ -12,7 +12,10 @@ import is from '@sindresorhus/is';
 import _ from 'lodash';
 import { EnqueueLinksOptions } from 'crawlee';
 import { DateTime } from 'luxon';
-import { MimeTypeMap, processResourceFile } from './file/process-resource-file.js';
+import {
+  MimeTypeMap,
+  processResourceFile,
+} from './file/process-resource-file.js';
 
 export type PageAnalyzer = (
   input: Resource,
@@ -35,10 +38,10 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
   /**
    * If a resource passed in for analysis has a file attachment, this mapping dictionary
    * determines which GenericFile class will be responsible for parsing it.
-   * 
+   *
    * Setting this value to `false` will bypass all downloaded file parsing.
-   * 
-   * @defaultValues 
+   *
+   * @defaultValues
    */
   files?: MimeTypeMap | false;
 
@@ -46,7 +49,7 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
    * Options for content analysis, including the transformation of core page content
    * to plaintext, readability analysis, etc. Setting this to `false` skips all content
    * analysis.
-   *  
+   *
    * Note: By default, running content analysis will overwrite any information in a
    * Resource object's existing `content` property.
    */
@@ -114,17 +117,21 @@ async function _analyzePage(
   }
 
   if (options.files !== false) {
-    const fileData = await processResourceFile(resource, options.files ? options.files : {});
+    const fileData = await processResourceFile(
+      resource,
+      options.files ? options.files : {},
+    );
     if (fileData.metadata) resource.data = fileData.metadata;
     if (fileData.content) resource.content = fileData.content;
   }
 
   if (options.tech) {
     await BrowserTools.TechAuditor.init(
-      options.tech === true ? undefined : options.tech
+      options.tech === true ? undefined : options.tech,
     );
-    resource.tech = await BrowserTools.TechAuditor.run(resource)
-      .then(results => BrowserTools.TechAuditor.summarize(results));
+    resource.tech = await BrowserTools.TechAuditor.run(resource).then(results =>
+      BrowserTools.TechAuditor.summarize(results),
+    );
   }
 
   if (options.links) {

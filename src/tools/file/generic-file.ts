@@ -2,9 +2,9 @@ import { Readable } from 'stream';
 import { Spidergram } from '../../index.js';
 
 export interface GenericFileData extends Record<string, unknown> {
-  metadata?: Record<string, unknown>,
-  content?: Record<string, unknown>,
-  error?: Error
+  metadata?: Record<string, unknown>;
+  content?: Record<string, unknown>;
+  error?: Error;
 }
 
 /**
@@ -43,11 +43,11 @@ export abstract class GenericFile {
 
   async getBuffer(): Promise<Buffer> {
     if (this.stream) {
-      return Promise.resolve(this.streamToBuffer(this.stream))
+      return Promise.resolve(this.streamToBuffer(this.stream));
     } else if (this.fileData) {
       return this.fileData;
     } else if (this.filePath) {
-      const sg = await Spidergram.load()
+      const sg = await Spidergram.load();
       return sg.files().read(this.filePath);
     }
     throw new Error('No file information');
@@ -59,14 +59,14 @@ export abstract class GenericFile {
     } else if (this.fileData) {
       return Promise.resolve(Readable.from(this.fileData));
     } else if (this.filePath) {
-      const sg = await Spidergram.load()
+      const sg = await Spidergram.load();
       return sg.files().readStream(this.filePath);
     }
     throw new Error('No file information');
   }
 
-  abstract getMetadata(): Promise<Record<string, unknown> | undefined>
-  abstract getContent(): Promise<Record<string, unknown> | undefined> 
+  abstract getMetadata(): Promise<Record<string, unknown> | undefined>;
+  abstract getContent(): Promise<Record<string, unknown> | undefined>;
 
   async getAll(): Promise<GenericFileData> {
     return Promise.resolve({
@@ -75,11 +75,11 @@ export abstract class GenericFile {
     });
   }
 
-  protected streamToBuffer(stream: Readable): Promise<Buffer>{
-    return new Promise<Buffer>((resolve) => {
+  protected streamToBuffer(stream: Readable): Promise<Buffer> {
+    return new Promise<Buffer>(resolve => {
       const _buf = Array<Uint8Array>();
       stream.on('data', chunk => _buf.push(chunk));
       stream.on('end', () => resolve(Buffer.concat(_buf)));
-    })
+    });
   }
 }

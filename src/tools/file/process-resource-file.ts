@@ -1,19 +1,21 @@
-import { ClassConstructor } from "class-transformer";
-import { GenericFile, GenericFileData } from "./generic-file.js";
-import { Resource } from "../../index.js";
+import { ClassConstructor } from 'class-transformer';
+import { GenericFile, GenericFileData } from './generic-file.js';
+import { Resource } from '../../index.js';
 import { Pdf, DocX, Image, Audio } from './index.js';
 
-import minimatch from "minimatch";
-
+import minimatch from 'minimatch';
 
 export type MimeTypeMap = Record<string, ClassConstructor<GenericFile>>;
 
-export async function processResourceFile(resource: Resource, customMap: MimeTypeMap = {}): Promise<GenericFileData> {
+export async function processResourceFile(
+  resource: Resource,
+  customMap: MimeTypeMap = {},
+): Promise<GenericFileData> {
   const { mime, payload } = resource;
   const map = {
     ...customMap,
-    ...defaultMimeHandlers()
-  }
+    ...defaultMimeHandlers(),
+  };
 
   if (mime && payload) {
     for (const [type, handler] of Object.entries(map)) {

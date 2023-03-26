@@ -22,11 +22,11 @@ export type {
 
 /**
  * Options for detecting the technologies used on a given page.
- * 
+ *
  * Spidergram's technology fingerprinting relies on the {@link https://github.com/wappalyzer/wappalyzer|wappalyzer},
  * library, and full documentation on that project can be found at that project's home page.
  */
-export interface TechAuditOptions {    
+export interface TechAuditOptions {
   /**
    * An array of custom {@link PageTechDefinition} definitions to use in addition to
    * the base tech library.
@@ -35,10 +35,10 @@ export interface TechAuditOptions {
 
   /**
    * An array of custom {@link PageTechCategory} definitions to supplement the base
-   * tech categories. 
+   * tech categories.
    */
   categories?: Record<string, PageTechCategory>;
-  
+
   /**
    * Rebuild the local cache of technology definitions; remote copies of the technology
    * and category JSON files will be downloaded and cached.
@@ -70,13 +70,13 @@ export class TechAuditor {
     await this.init();
 
     if (typeof input === 'string') {
-      fp = { ...fp, ...await TechAuditor.extractBodyData(input) };
+      fp = { ...fp, ...(await TechAuditor.extractBodyData(input)) };
     } else if (is.function_(input)) {
-      fp = { ...fp, ...await TechAuditor.extractBodyData(input.html()) };
+      fp = { ...fp, ...(await TechAuditor.extractBodyData(input.html())) };
     } else if (input instanceof Resource) {
-      fp = { ...fp, ...await TechAuditor.extractResourceInput(input) };
+      fp = { ...fp, ...(await TechAuditor.extractResourceInput(input)) };
     } else if (input instanceof Response) {
-      fp = { ...fp, ...await TechAuditor.extractResponseInput(input) };
+      fp = { ...fp, ...(await TechAuditor.extractResponseInput(input)) };
     }
 
     return Promise.resolve(resolve(analyze(fp)));
@@ -84,14 +84,19 @@ export class TechAuditor {
 
   static async init(customOptions: TechAuditOptions = {}) {
     const sg = await Spidergram.load();
-    const options: TechAuditOptions = _.defaultsDeep(customOptions, sg.config.pageTechnologies);
+    const options: TechAuditOptions = _.defaultsDeep(
+      customOptions,
+      sg.config.pageTechnologies,
+    );
 
     if (!this.loaded || options.forceReload) {
       let categories: Record<string, PageTechCategory> = {};
       let technology: Record<string, PageTechDefinition> = {};
 
       const catIsCached = await sg.files().exists('tech-categories-cache.json');
-      const techIsCached = await sg.files().exists('tech-definitions-cache.json');
+      const techIsCached = await sg
+        .files()
+        .exists('tech-definitions-cache.json');
 
       if (!catIsCached)
         await this.cacheCategories(
@@ -111,9 +116,7 @@ export class TechAuditor {
       ).toString();
       categories = JSON.parse(json) as Record<string, PageTechCategory>;
 
-      json = (
-        await sg.files().read('tech-definitions-cache.json')
-      ).toString();
+      json = (await sg.files().read('tech-definitions-cache.json')).toString();
       technology = JSON.parse(json) as Record<string, PageTechDefinition>;
 
       setCategories({ ...categories, ...options.categories });
@@ -168,7 +171,9 @@ export class TechAuditor {
       );
   }
 
-  protected static async extractBodyData(html: string): Promise<PageTechFingerprint> {
+  protected static async extractBodyData(
+    html: string,
+  ): Promise<PageTechFingerprint> {
     const data = await HtmlTools.getPageData(html, { all: true });
 
     const input: PageTechFingerprint = {
@@ -197,7 +202,9 @@ export class TechAuditor {
     return input;
   }
 
-  protected static async extractResponseInput(res: Response): Promise<PageTechFingerprint> {
+  protected static async extractResponseInput(
+    res: Response,
+  ): Promise<PageTechFingerprint> {
     const input: PageTechFingerprint = {
       url: res.url,
       ...(await this.extractBodyData(await res.text())),
@@ -222,7 +229,9 @@ export class TechAuditor {
     return input;
   }
 
-  protected static async extractResourceInput(res: Resource): Promise<PageTechFingerprint> {
+  protected static async extractResourceInput(
+    res: Resource,
+  ): Promise<PageTechFingerprint> {
     const input: PageTechFingerprint = {
       url: res.url,
       ...(await this.extractBodyData(res.body ?? '')),
@@ -274,9 +283,9 @@ export class TechAuditor {
         version: tech.version.length ? tech.version : undefined,
         categories: tech.categories.map(cat => cat.name),
       };
-    })
+    });
   }
-  
+
   static summarizeByCategory(input: PageTechnology[]) {
     const results: Record<string, string[]> = {};
     for (const tech of input) {
@@ -291,16 +300,20 @@ export class TechAuditor {
         results['Other'].push(techName);
       }
     }
-    return results;  
+    return results;
   }
 
-  protected static wapifyDict(input: Record<string, undefined | string | string[]>) {
+  protected static wapifyDict(
+    input: Record<string, undefined | string | string[]>,
+  ) {
     const output: Record<string, string[]> = {};
     for (const [key, value] of Object.entries(input)) {
       if (value !== undefined) {
-        output[key.toLocaleLowerCase()] = Array.isArray(value) ? value : [value];
+        output[key.toLocaleLowerCase()] = Array.isArray(value)
+          ? value
+          : [value];
       }
     }
     return output;
-  }  
+  }
 }

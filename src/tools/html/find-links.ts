@@ -124,7 +124,7 @@ export function getLinkElementAttributes(
 ) {
   const attributes = $(element).attr();
   const dataAttributes = $(element).data() ?? {};
-  const html = $.html(element)?.trim() ?? ''
+  const html = $.html(element)?.trim() ?? '';
   const result = {
     url: attributes.href ?? attributes.src,
     attributes: attributes,
@@ -133,7 +133,7 @@ export function getLinkElementAttributes(
     readableText: HtmlTools.getReadableText(html),
     uniqueSelector: getUniqueSelector(element, $),
     html: html,
-    tag: (element as { tagName?: string }).tagName
+    tag: (element as { tagName?: string }).tagName,
   } as FoundLink;
   return result;
 }

@@ -39,7 +39,9 @@ export default class SpidergramStatus extends SgCommand {
     this.log(cli.header('ArangoDB'));
     this.log(
       cli.infoList({
-        Status: Spidergram.status.arango ? this.chalk.bold.green('online') : this.chalk.bold.red('offline'),
+        Status: Spidergram.status.arango
+          ? this.chalk.bold.green('online')
+          : this.chalk.bold.red('offline'),
         URL: sg.config.arango?.url,
         Database: sg.config.arango?.databaseName,
       }),

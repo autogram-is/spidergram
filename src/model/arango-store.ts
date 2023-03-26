@@ -189,7 +189,9 @@ export class ArangoStore {
       .collection<JsonMap>(collection)
       .document(key)
       .then(json => Entity.fromJSON(json) as T)
-      .then(entity => entity instanceof Resource ? entity.loadBody() : entity)
+      .then(entity =>
+        entity instanceof Resource ? entity.loadBody() : entity,
+      );
   }
 
   async findAll<T extends Entity = Entity>(
@@ -211,8 +213,10 @@ export class ArangoStore {
       .query<JsonMap>(query)
       .then(async cursor => cursor.all())
       .then(results => results.map(value => Entity.fromJSON(value) as T))
-      .then(results => results.map(
-        async entity => entity instanceof Resource ? await entity.loadBody() : entity)
+      .then(results =>
+        results.map(async entity =>
+          entity instanceof Resource ? await entity.loadBody() : entity,
+        ),
       );
   }
 

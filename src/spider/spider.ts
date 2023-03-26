@@ -192,7 +192,9 @@ export class Spider extends PlaywrightCrawler {
     if (context.request.errorMessages.length === 0) {
       this.updateStats(context);
     } else {
-      if (context.request.retryCount === this.crawlerOptions.maxRequestRetries) {
+      if (
+        context.request.retryCount === this.crawlerOptions.maxRequestRetries
+      ) {
         this.updateStats(context);
       }
       const errors = context.request.errorMessages;
@@ -273,7 +275,7 @@ export class Spider extends PlaywrightCrawler {
     const queue = await this.getRequestQueue();
     await queue.addRequests(urls.map(uu => uniqueUrlToRequest(uu)));
 
-    const results = await super.run()
+    const results = await super.run();
     this.status.finishTime = Date.now();
     const finalStats = { ...this.status, ...results };
     this._events.emit('end', finalStats);

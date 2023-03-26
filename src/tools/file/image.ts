@@ -1,18 +1,16 @@
 import { GenericFile } from './generic-file.js';
-import { ExifParserFactory } from "ts-exif-parser";
+import { ExifParserFactory } from 'ts-exif-parser';
 
 export class Image extends GenericFile {
   public static mimeTypes = ['image/*'];
 
-  public static extensions = [
-    'jpg', 'jpeg', 'tif', 'tiff', 'png', 'webp'
-  ];
+  public static extensions = ['jpg', 'jpeg', 'tif', 'tiff', 'png', 'webp'];
 
   /**
    * We're not currently generating content for image files; only metadata.
    */
   async getContent() {
-    return Promise.resolve(undefined)
+    return Promise.resolve(undefined);
   }
 
   async getMetadata() {
@@ -21,8 +19,8 @@ export class Image extends GenericFile {
       .then(data => {
         return {
           size: data.getImageSize(),
-          ...data.tags    
-        }
-      })
+          ...data.tags,
+        };
+      });
   }
 }

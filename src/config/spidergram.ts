@@ -84,7 +84,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     this._initializing = true;
     await this.loadConfigFile(filePath);
 
-    // A very weird special case. This would be nice to generalize when we replace the 
+    // A very weird special case. This would be nice to generalize when we replace the
     // Object serializer and persistence code.
     Resource.offloadBodyHtml = this.config.offloadBodyHtml;
 
@@ -355,4 +355,3 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     return false;
   }
 }
-
