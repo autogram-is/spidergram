@@ -18,8 +18,8 @@ export class Image extends GenericFile {
       .then(buffer => ExifParserFactory.create(buffer).parse())
       .then(data => {
         return {
-          size: data.getImageSize(),
-          ...data.tags,
+          ...data.getImageSize(),
+          ...data.tags
         };
       });
   }

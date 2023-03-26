@@ -1,8 +1,10 @@
 import { GenericFile } from './generic-file.js';
-import { parseStream, orderTags } from 'music-metadata';
+import { parseStream } from 'music-metadata';
 
 export class Audio extends GenericFile {
-  public static mimeTypes = ['audio/*'];
+  public static mimeTypes = [
+    'audio/*', 'video/mp4', 'video/x-matroska'
+  ];
 
   public static extensions = [
     'aiff',
@@ -55,7 +57,7 @@ export class Audio extends GenericFile {
       return {
         ...metadata.common,
         format: metadata.format,
-        tags: orderTags(metadata.native['ID3v2.3']),
+        tags: metadata.native,
       };
     });
   }
