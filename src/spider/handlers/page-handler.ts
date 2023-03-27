@@ -17,7 +17,11 @@ export async function pageHandler(context: SpiderContext) {
       )
     : undefined;
 
-  await saveResource({ body, cookies, accessibility });
+  const timing = context.savePerformance
+    ? await BrowserTools.getPageTiming(page)
+    : undefined;
+
+  await saveResource({ body, cookies, accessibility, timing });
   await enqueueUrls();
 
   return Promise.resolve();
