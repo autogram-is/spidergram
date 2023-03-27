@@ -64,8 +64,8 @@ export class Pdf extends GenericFile {
     return Promise.resolve({
       metadata: {
         pages: pdf.numPages,
+        formFields: fields?.length ?? undefined,
         info: data.info,
-        fields: fields ? Object.keys(fields) : undefined,
         ...formattedMetadata,
       },
       content: {
@@ -76,9 +76,9 @@ export class Pdf extends GenericFile {
     });
   }
 
-
   /**
-   * Returns a dictionary of URLs, 
+   * Returns an array of URLs. This only catches URLs that are explicitly
+   * clickable in the PDF itself — not url-like text in the PDF's body text.
    */
   protected async getPageLinks(page: PDFPageProxy) {
     const results = new Set<string>();
