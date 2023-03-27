@@ -38,6 +38,7 @@ export class Pdf extends GenericFile {
     pageDelimiter = '\n',
   ): Promise<GenericFileData> {
     const data = await pdf.getMetadata();
+    const fields = await pdf.getFieldObjects();
     const formattedMetadata: Record<string, unknown> = {};
 
     if (data.metadata) {
@@ -49,24 +50,53 @@ export class Pdf extends GenericFile {
     }
 
     const lines: Promise<string>[] = [];
+    const foundUrls: Promise<string[]>[] = [];
     for (let p = 1; p <= pdf.numPages; p++) {
-      lines.push(pdf.getPage(p).then(this.renderPage));
+      const page = await pdf.getPage(p);
+      lines.push(this.renderPage(page));
+      foundUrls.push(this.getPageLinks(page));
     }
     const text = await Promise.all(lines).then(strings =>
       strings.join(pageDelimiter),
     );
+    const urls = await Promise.all(foundUrls).then(_.flatten);
 
     return Promise.resolve({
       metadata: {
         pages: pdf.numPages,
-        ...data.info,
+        info: data.info,
+        fields: fields ? Object.keys(fields) : undefined,
         ...formattedMetadata,
       },
       content: {
         text,
+        urls: urls.length > 0 ? urls : undefined,
         readability: TextTools.getReadabilityScore(text),
       },
     });
+  }
+
+
+  /**
+   * Returns a dictionary of URLs, 
+   */
+  protected async getPageLinks(page: PDFPageProxy) {
+    const results = new Set<string>();
+
+    // First we look for clickable link annotations, the most reliable method of
+    // locating URLs in the document.
+    const annotations = await page.getAnnotations({ intent: 'display' });
+
+    for (const a of annotations) {
+      if (a?.subtype === 'Link' && !!a.url) {
+        results.add(a.url);
+      }
+    }
+
+    // We may want to use Crawlee's getSocialLinks function, or a general url regex,
+    // to hunt for URLs that aren't explicitly clickable.
+
+    return Promise.resolve([...results]);
   }
 
   protected async renderPage(page: PDFPageProxy): Promise<string> {
