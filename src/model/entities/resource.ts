@@ -10,6 +10,7 @@ import { parse as parseContentType } from 'content-type';
 import { KeyValueStore, SavedFile } from '../index.js';
 import { Spidergram } from '../../config/spidergram.js';
 import path from 'path';
+import { sha1 } from 'object-hash';
 
 export interface ResourceConstructorOptions extends EntityConstructorOptions {
   url?: string | URL;
@@ -46,6 +47,12 @@ export class Resource extends Entity {
     }
   })
   body?: string;
+
+  // This property is only used when the `offloadBodyHtml` mode has been set.
+  // The hash is read in when loaded, and before saving the HTML the hash is
+  // compared to the hash of the 'current' HTML. If they match, no attempt is
+  // made to re-save the body html.
+  _bodyHash?: string;
 
   constructor(data: ResourceConstructorOptions = {}) {
     const {
@@ -130,12 +137,14 @@ export class Resource extends Entity {
       this.body = await KeyValueStore.open('body_html').then(kv =>
         kv.getValue(this.key),
       );
+      this._bodyHash = sha1({ html: this.body });
     } else if (Resource.offloadBodyHtml === 'file') {
       const bodyPath = path.join('body_html', `${this.key}.html`);
       this.body = await Spidergram.load()
         .then(sg => sg.files().read(bodyPath))
         .then(buffer => buffer.toString())
         .catch(error => (error instanceof Error ? error.message : undefined));
+      this._bodyHash = sha1({ html: this.body });
     }
 
     return Promise.resolve(this);
@@ -149,15 +158,23 @@ export class Resource extends Entity {
     ) {
       // No operation; body is empty
     } else if (Resource.offloadBodyHtml === 'db') {
-      await KeyValueStore.open('body_html').then(kv =>
-        kv.setValue(this.key, this.body ?? ''),
-      );
+      const freshHash = sha1({ html: this.body });
+      if (this._bodyHash !== freshHash) {
+        await KeyValueStore.open('body_html').then(kv =>
+          kv.setValue(this.key, this.body ?? ''),
+        );  
+        this._bodyHash = freshHash;
+      }
     } else if (Resource.offloadBodyHtml === 'file') {
       const bodyPath = path.join('body_html', `${this.key}.html`);
-      await Spidergram.load()
-        .then(sg => sg.files().write(bodyPath, Buffer.from(this.body ?? '')))
-        .then(() => true)
-        .catch(() => false);
+      const freshHash = sha1({ html: this.body });
+      if (this._bodyHash !== freshHash) {
+        await Spidergram.load()
+          .then(sg => sg.files().write(bodyPath, Buffer.from(this.body ?? '')))
+          .then(() => true)
+          .catch(() => false);
+        this._bodyHash = freshHash;
+      }
     }
 
     return Promise.resolve(this);
