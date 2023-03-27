@@ -31,9 +31,9 @@ export const uncrawledUrls: AqQuery = {
  * number of redirects that were encountered when retrieving a page. Only pages
  * that *were* redirected are returned by this query.
  * 
- * The query has three documents:
- * - uu: UniqueUrls, the default document.
- * - rw: RespondsWith, the relationship between a UniqueUrl and a Resource. It contains request headers and redirect information.
+ * The query connects three documents:
+ * - uu: UniqueUrls, the default document if none is specified.
+ * - rw: RespondsWith, the relationship between a UniqueUrl and a Resource.
  * - rs: Resource, information about the final destination page.
  * 
  * @example Retrieve requests for example.com URLs that were redirected
