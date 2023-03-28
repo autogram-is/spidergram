@@ -28,7 +28,11 @@ export default class SpidergramStatus extends SgCommand {
       cli.infoList({ 'Config file': Spidergram.status.configFile ?? '<none>' }),
     );
     if (flags.config && Spidergram.status.configFile) {
-      ux.styledJSON(sg.rawConfig);
+      if (is.function_(sg.rawConfig)) {
+        this.log(this.chalk.dim('File contains dynamic code and cannot be displayed.'));
+      } else {
+        ux.styledJSON(sg.rawConfig);
+      }
     }
 
     if (flags.env && !is.emptyObject(Spidergram.status.env)) {
