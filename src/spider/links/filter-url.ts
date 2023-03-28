@@ -18,12 +18,12 @@ export function filterUrl(
   if (is.boolean(filters)) return filters;
 
   for (const filter of arrify(filters)) {
-    if (!singleFilter(context, incomingUrl, filter)) {
-      return false;
+    if (singleFilter(context, incomingUrl, filter)) {
+      return true;
     }
   }
 
-  return true;
+  return false;
 }
 
 function singleFilter(
