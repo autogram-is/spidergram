@@ -132,7 +132,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean | string | RegExp | UrlMatchStrategy | UrlFilterWithContext}
    * @default UrlMatchStrategy.SameDomain
    */
-  enqueue?: FilterInput;
+  crawl?: FilterInput;
 
   /**
    * Don't save or enqueue the link if it already exists in the graph.

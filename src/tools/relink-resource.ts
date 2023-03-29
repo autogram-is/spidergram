@@ -20,7 +20,7 @@ export async function relinkResource(
   const sg = await Spidergram.load();
   const options: EnqueueUrlOptions = _.defaultsDeep(
     customOptions,
-    Spidergram.config.spider?.urlOptions,
+    Spidergram.config.spider?.urls,
   );
   options.discardExisting = true;
 

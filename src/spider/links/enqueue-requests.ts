@@ -15,8 +15,8 @@ export async function enqueueRequests(
 ) {
   const options: EnqueueUrlOptions = _.defaultsDeep(
     customOptions,
-    context.urlOptions,
-    Spidergram.config.spider?.urlOptions,
+    context.urls,
+    Spidergram.config.spider?.urls,
   );
   const input = arrify(urls);
   const queue =
@@ -35,7 +35,7 @@ export async function enqueueRequests(
       continue;
     }
 
-    if (!filterUrl(context, uu, options.enqueue)) {
+    if (!filterUrl(context, uu, options.crawl)) {
       continue;
     }
 

@@ -2,7 +2,6 @@ import { Dictionary, LogLevel, PlaywrightCrawlerOptions } from 'crawlee';
 import { SpiderHook } from './hooks/index.js';
 import { EnqueueUrlOptions } from './links/index.js';
 import { SpiderRequestHandler } from './handlers/index.js';
-import { PageAnalysisOptions } from '../tools/analyze-page.js';
 
 export type SpiderOptions = InternalSpiderOptions &
   Omit<
@@ -44,14 +43,6 @@ export interface InternalSpiderOptions extends Dictionary {
   pageHandler?: SpiderRequestHandler;
 
   /**
-   * Options to control the pageHandler's parsing of HTML content. This can be
-   * used to frontload certain analysis work (like technology fingerprinting) or
-   * delay time consuming operations (like named entity extraction) until a post-
-   * crawl analysis step.
-   */
-  pageOptions?: PageAnalysisOptions;
-
-  /**
    * A dictionary of request handlers, keyed by the request label they're
    * responsible for. Handlers for `page`, `download`, and `status` are
    * populated by default; using those keys will override the spider's
@@ -83,7 +74,7 @@ export interface InternalSpiderOptions extends Dictionary {
    *
    * @type {EnqueueUrlOptions}
    */
-  urlOptions: EnqueueUrlOptions;
+  urls: EnqueueUrlOptions;
 
   /**
    * An array of MIME type strings used to recognize HTTP requests as

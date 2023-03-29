@@ -11,7 +11,7 @@
   outputDirectory: './output',
   offloadBodyHtml: 'db',
   spider: {
-    urlOptions: {
+    urls: {
       regions: {
         header: 'header',
         footer: 'footer',

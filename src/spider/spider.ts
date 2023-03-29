@@ -235,7 +235,7 @@ export class Spider extends PlaywrightCrawler {
 
     // Normalize and deduplicate any incoming URLs.
     const currentNormalizer =
-      this.spiderOptions.urlOptions.normalizer ?? NormalizedUrl.normalizer;
+      this.spiderOptions.urls.normalizer ?? NormalizedUrl.normalizer;
     const uniques = new UniqueUrlSet(undefined, {
       normalizer: currentNormalizer,
       guessProtocol: true,
@@ -296,7 +296,7 @@ function splitOptions(options: Partial<SpiderOptions> = {}) {
     logLevel,
     pageHandler,
     requestHandlers,
-    urlOptions,
+    urls: urlOptions,
     parseMimeTypes,
     downloadMimeTypes,
     preNavigationHooks,

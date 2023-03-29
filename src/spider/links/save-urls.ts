@@ -19,7 +19,7 @@ export async function saveUrls(
 ) {
   const options: EnqueueUrlOptions = _.defaultsDeep(
     customOptions,
-    context.urlOptions,
+    context.urls,
   );
   const { graph, uniqueUrl, resource } = context;
   const results: {

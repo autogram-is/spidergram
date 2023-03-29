@@ -63,9 +63,9 @@ export default class Crawl extends SgCommand {
       maxConcurrency: flags.concurrency,
       maxRequestsPerMinute: flags.rate,
       downloadMimeTypes: flags.download,
-      urlOptions: {
+      urls: {
         save: flags.discover === 'none' ? () => false : flags.discover,
-        enqueue: flags.enqueue === 'none' ? () => false : flags.enqueue,
+        crawl: flags.enqueue === 'none' ? () => false : flags.enqueue,
       },
     });
     spider.on('progress', status => this.updateProgress(status));

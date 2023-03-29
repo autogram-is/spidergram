@@ -13,7 +13,7 @@ export function findUrls(
 ) {
   const options: EnqueueUrlOptions = _.defaultsDeep(
     customOptions,
-    context.urlOptions,
+    context.urls,
   );
   const { selectors, discardlocalAnchors, discardEmpty } = options;
 

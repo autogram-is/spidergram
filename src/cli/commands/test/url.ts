@@ -37,13 +37,13 @@ export default class TestUrl extends SgCommand {
     const cli = new SpiderCli();
     const sg = await Spidergram.load();
 
-    const saveRule = sg.config.spider?.urlOptions?.save;
-    const enqueueRule = sg.config.spider?.urlOptions?.enqueue;  
+    const saveRule = sg.config.spider?.urls?.save;
+    const enqueueRule = sg.config.spider?.urls?.crawl;  
 
     const fakeContext: SpiderContext = _.cloneDeep(sg.config.spider) as SpiderContext;
     if (flags.base) {
-      fakeContext.urlOptions.baseUrl = flags.base.toString();
-      fakeContext.uniqueUrl = new UniqueUrl({ url: fakeContext.urlOptions.baseUrl });
+      fakeContext.urls.baseUrl = flags.base.toString();
+      fakeContext.uniqueUrl = new UniqueUrl({ url: fakeContext.urls.baseUrl });
     }
 
     if (flags.config) {
@@ -104,7 +104,7 @@ export default class TestUrl extends SgCommand {
 
   softNormalize(url: string, opt: SpiderOptions) {
     try {
-      return new NormalizedUrl(url, opt.urlOptions.baseUrl);
+      return new NormalizedUrl(url, opt.urls.baseUrl);
     } catch {
       return undefined;
     }
@@ -112,7 +112,7 @@ export default class TestUrl extends SgCommand {
   
   softParse(url: string, opt: SpiderOptions) {
     try {
-      return new ParsedUrl(url, opt.urlOptions.baseUrl);
+      return new ParsedUrl(url, opt.urls.baseUrl);
     } catch {
       return undefined;
     }
@@ -120,8 +120,8 @@ export default class TestUrl extends SgCommand {
 
   checkUrl(url: NormalizedUrl, opt: SpiderContext) {
     return {
-      save: filterUrl(opt, url, opt.urlOptions.save),
-      crawl: filterUrl(opt, url, opt.urlOptions.enqueue)
+      save: filterUrl(opt, url, opt.urls.save),
+      crawl: filterUrl(opt, url, opt.urls.crawl)
     }
   }
 }

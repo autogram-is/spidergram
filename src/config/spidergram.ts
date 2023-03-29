@@ -260,7 +260,6 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     return NormalizedUrl.normalizer;
   }
 
-
   /**
    * This is here so that custom config scripts can quickly reuse the
    * default normalizer with a few customizations — in addition to their
