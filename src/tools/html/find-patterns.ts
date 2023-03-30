@@ -49,12 +49,14 @@ export function findPatterns(
         return {
           pattern: pattern.name,
           selector: pattern.selector,
+          uniqueSelector: HtmlTools.getUniqueSelector(element, $),
           ...HtmlTools.findElementData(
             $(element),
             _.defaultsDeep(pattern, defaults),
           ),
         };
       });
+
     results.push(...search);
   }
   return results;
