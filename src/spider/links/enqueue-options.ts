@@ -47,18 +47,29 @@ export enum UrlMatchStrategy {
   All = 'all',
 
   /**
-   * Matches any URLs that have the same hostname.
-   * For example, `https://wow.example.com/hello` will be matched for a comparison url of
+   * Matches a URL if it has the same hostname as the current URL.
+   *
+   * For example, `https://wow.example.com/hello` will be matched for a current url of
    * `https://wow.example.com/`, but `https://example.com` will not be matched.
    */
   SameHostname = 'same-hostname',
 
   /**
-   * Matches URLs that have the same domain as the comparison URL.
+   * Matches a URL if it has the same domain as the current URL.
+   *
    * For example, `https://wow.an.example.com` and `https://example.com` will both be matched for
-   * a comparison url of `https://example.com`.
+   * a current url of `https://example.com`.
    */
   SameDomain = 'same-domain',
+
+  /**
+   * Matches a URL if it has the same domain, and its path starts with the same string, as the
+   * current URL.
+   *
+   * For example, `https://example.com/news/2023` will be matched with a current url of
+   * `https://example.com/news/`, but 'https://example.com/updates/' will not.
+   */
+  SameDirectory = 'same-directory',
 
   /**
    * Matches no URLs; useful when all or some URLs should be saved, but none should be enqueued.

@@ -41,10 +41,7 @@ export const urlNormalizerDefaults: NormalizerOptions = {
 };
 
 export const urlDiscoveryDefaults: EnqueueUrlOptions = {
-  limit: 1_000_000,
-  selectors: 'a',
-  regions: {},
-  save: UrlMatchStrategy.All,
+  save: true,
   crawl: UrlMatchStrategy.SameDomain,
   discardEmpty: true,
   discardlocalAnchors: true,

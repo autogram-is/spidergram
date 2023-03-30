@@ -3,22 +3,50 @@ import { ParsedUrl } from '@autogram/url-tools';
 import minimatch from 'minimatch';
 import arrify from 'arrify';
 import { UniqueUrl } from '../../model/index.js';
-import { SpiderContext, UrlMatchStrategy } from '../index.js';
+import { UrlMatchStrategy } from './enqueue-options.js';
 
+/**
+ * Returns true if the input URL matches ALL of the specified filters.
+ */
+export function filterUrlStrict(
+  input: UniqueUrl | ParsedUrl,
+  filters: FilterInput,
+  currentUrl?: ParsedUrl,
+): boolean {
+  const incomingUrl = input instanceof UniqueUrl ? input.parsed : input;
+
+  if (is.undefined(incomingUrl)) return false;
+  if (filters === 'all') return true;
+  else if (filters === 'none') return false;
+  else if (is.boolean(filters)) return filters;
+
+  for (const filter of arrify(filters)) {
+    if (!singleFilter(incomingUrl, filter, currentUrl)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Returns true if the input URL matches any of the specified filters.
+ */
 export function filterUrl(
-  context: SpiderContext,
   input: UniqueUrl | ParsedUrl,
   filters: FilterInput = UrlMatchStrategy.SameDomain,
+  currentUrl?: ParsedUrl,
 ): boolean {
   const incomingUrl = input instanceof UniqueUrl ? input.parsed : input;
   if (is.undefined(incomingUrl)) {
     return false;
   }
-
-  if (is.boolean(filters)) return filters;
+  if (filters === 'all') return true;
+  else if (filters === 'none') return false;
+  else if (is.boolean(filters)) return filters;
 
   for (const filter of arrify(filters)) {
-    if (singleFilter(context, incomingUrl, filter)) {
+    if (singleFilter(incomingUrl, filter, currentUrl)) {
       return true;
     }
   }
@@ -27,58 +55,49 @@ export function filterUrl(
 }
 
 function singleFilter(
-  context: SpiderContext,
   url: ParsedUrl,
   filter: Filter,
+  currentUrl?: ParsedUrl,
 ): boolean {
-  const currentUrl = context.uniqueUrl?.parsed;
-
   if (is.enumCase(filter, UrlMatchStrategy)) {
-    // We're much lazier than crawlee, and ignore ugly IP address scenarios.
+
     switch (filter) {
-      case UrlMatchStrategy.None:
-        return false;
+      case UrlMatchStrategy.All:
+        return true;
+
+      case UrlMatchStrategy.SameDirectory:
+        if (currentUrl === undefined) return false;
+        if (url.domain !== currentUrl.domain) return false;
+        return url.pathname.startsWith(currentUrl.pathname);
 
       case UrlMatchStrategy.SameDomain:
-        if (currentUrl === undefined) {
-          return false;
-        }
-
+        if (currentUrl === undefined) return false;
         return url.domain === currentUrl.domain;
-      case UrlMatchStrategy.SameHostname:
-        if (currentUrl === undefined) {
-          return false;
-        }
 
+      case UrlMatchStrategy.SameHostname:
+        if (currentUrl === undefined) return false;
         return url.hostname === currentUrl.hostname;
+
       default:
-        return true;
+        return false;
     }
   } else if (is.string(filter)) {
     // Treat it as a glob to match against the url's href
     return minimatch(url.href, filter, { dot: true });
   } else if (is.regExp(filter)) {
-    // This is extremely naive; we should rip off crawlee's handling, but this will do for now..
     return url.href.match(filter) !== null;
   } else if (is.function_(filter)) {
-    // This hood old fashioned Spidergram UrlFilter function stuff.
-    return filter(url, context);
+    return filter(url, currentUrl);
   }
 
   return false;
 }
 
-export type FilterFunction = (
-  link: FilterableLink,
-  context?: SpiderContext,
-) => boolean;
-export type FilterableLink = UniqueUrl | ParsedUrl;
-
 // We accept a staggering array of filter types. Come, behold our filters.
 export type FilterInput = Filter | Filter[] | boolean;
-export type Filter = string | RegExp | UrlFilterWithContext | UrlMatchStrategy;
+export type Filter = UrlMatchStrategy | string | RegExp | UrlFilterFunction;
 
-export type UrlFilterWithContext = (
-  found: ParsedUrl,
-  context?: SpiderContext,
+export type UrlFilterFunction = (
+  candidate: ParsedUrl,
+  current?: ParsedUrl,
 ) => boolean;

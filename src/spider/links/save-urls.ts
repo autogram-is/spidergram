@@ -51,7 +51,10 @@ export async function saveUrls(
       continue;
     }
 
-    if (!filterUrl(context, uu, options.save)) {
+    if (
+      uu.parsed === undefined ||
+      !filterUrl(uu.parsed, options.save, uniqueUrl?.parsed)
+    ) {
       continue;
     }
 

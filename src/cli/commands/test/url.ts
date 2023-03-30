@@ -1,6 +1,13 @@
 import { SgCommand } from '../../index.js';
 import { Args, Flags } from '@oclif/core';
-import { ParsedUrl, SpiderContext, SpiderOptions, Spidergram, UniqueUrl, filterUrl } from '../../../index.js';
+import {
+  ParsedUrl,
+  SpiderContext,
+  SpiderOptions,
+  Spidergram,
+  UniqueUrl,
+  filterUrl,
+} from '../../../index.js';
 import { SpiderCli } from '../../shared/spider-cli.js';
 import { NormalizedUrl } from '../../../index.js';
 import is from '@sindresorhus/is';
@@ -12,23 +19,23 @@ export default class TestUrl extends SgCommand {
   static flags = {
     config: Flags.boolean({
       char: 'c',
-      summary: 'Display current URL related configuration'
+      summary: 'Display current URL related configuration',
     }),
     base: Flags.url({
       char: 'b',
-      summary: "A URL to treat as the 'current' one"
+      summary: "A URL to treat as the 'current' one",
     }),
     details: Flags.url({
       char: 'd',
-      summary: "A URL to treat as the 'current' one"
-    })
-  }
+      summary: "A URL to treat as the 'current' one",
+    }),
+  };
 
   static args = {
     urls: Args.string({
-      description: 'One or more URLs to test'
-    })
-  }
+      description: 'One or more URLs to test',
+    }),
+  };
 
   static hidden = true;
 
@@ -38,9 +45,11 @@ export default class TestUrl extends SgCommand {
     const sg = await Spidergram.load();
 
     const saveRule = sg.config.spider?.urls?.save;
-    const enqueueRule = sg.config.spider?.urls?.crawl;  
+    const enqueueRule = sg.config.spider?.urls?.crawl;
 
-    const fakeContext: SpiderContext = _.cloneDeep(sg.config.spider) as SpiderContext;
+    const fakeContext: SpiderContext = _.cloneDeep(
+      sg.config.spider,
+    ) as SpiderContext;
     if (flags.base) {
       fakeContext.urls.baseUrl = flags.base.toString();
       fakeContext.uniqueUrl = new UniqueUrl({ url: fakeContext.urls.baseUrl });
@@ -49,25 +58,25 @@ export default class TestUrl extends SgCommand {
     if (flags.config) {
       this.log(cli.header('Save URLs matching:'));
       if (is.function_(saveRule)) {
-        this.log('Custom function')
+        this.log('Custom function');
       } else if (is.string(saveRule)) {
         console.log(saveRule);
       } else {
         this.ux.styledObject(saveRule);
       }
-  
+
       this.log(cli.header('Crawl URLs matching:'));
       if (is.function_(enqueueRule)) {
-        this.log('Custom function')
+        this.log('Custom function');
       } else if (is.string(enqueueRule)) {
         console.log(enqueueRule);
       } else {
         this.ux.styledObject(enqueueRule);
       }
 
-      this.log(cli.header('Normalizer Settings:'))
+      this.log(cli.header('Normalizer Settings:'));
       if (is.function_(sg.config.urlNormalizer)) {
-        this.log('Custom function')
+        this.log('Custom function');
       } else {
         this.ux.styledObject(sg.config.urlNormalizer ?? false);
       }
@@ -93,13 +102,19 @@ export default class TestUrl extends SgCommand {
       matches = this.checkUrl(normalized, opt);
     }
 
-    this.log(cli.infoList({
-      Raw: url,
-      Parsed: (parsed ?? this.chalk.bold.red('malformed')).toString(),
-      Normalized: (normalized ?? this.chalk.bold.red('malformed')).toString(),
-      'Will be saved': matches.save ? this.chalk.bold.green('yes') : this.chalk.bold.red('no'),
-      'Will be crawled': matches.crawl ? this.chalk.bold.green('yes') : this.chalk.bold.red('no')
-    }));
+    this.log(
+      cli.infoList({
+        Raw: url,
+        Parsed: (parsed ?? this.chalk.bold.red('malformed')).toString(),
+        Normalized: (normalized ?? this.chalk.bold.red('malformed')).toString(),
+        'Will be saved': matches.save
+          ? this.chalk.bold.green('yes')
+          : this.chalk.bold.red('no'),
+        'Will be crawled': matches.crawl
+          ? this.chalk.bold.green('yes')
+          : this.chalk.bold.red('no'),
+      }),
+    );
   }
 
   softNormalize(url: string, opt: SpiderOptions) {
@@ -109,7 +124,7 @@ export default class TestUrl extends SgCommand {
       return undefined;
     }
   }
-  
+
   softParse(url: string, opt: SpiderOptions) {
     try {
       return new ParsedUrl(url, opt.urls.baseUrl);
@@ -119,9 +134,13 @@ export default class TestUrl extends SgCommand {
   }
 
   checkUrl(url: NormalizedUrl, opt: SpiderContext) {
-    return {
-      save: filterUrl(opt, url, opt.urls.save),
-      crawl: filterUrl(opt, url, opt.urls.crawl)
+    let base: ParsedUrl | undefined = undefined;
+    if (opt.urls.baseUrl) {
+      base = new ParsedUrl(opt.urls.baseUrl);
     }
+    return {
+      save: filterUrl(url, opt.urls.save, base),
+      crawl: filterUrl(url, opt.urls.crawl, base),
+    };
   }
 }

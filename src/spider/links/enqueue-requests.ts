@@ -3,7 +3,6 @@ import { Request, RequestOptions } from 'crawlee';
 import { UniqueUrl } from '../../model/index.js';
 import { SpiderContext } from '../context.js';
 import { Spidergram } from '../../config/index.js';
-import { Robots } from '../../tools/robots.js';
 import { EnqueueUrlOptions, filterUrl } from './index.js';
 import _ from 'lodash';
 
@@ -18,6 +17,8 @@ export async function enqueueRequests(
     context.urls,
     Spidergram.config.spider?.urls,
   );
+  const { uniqueUrl } = context;
+
   const input = arrify(urls);
   const queue =
     options.requestQueue ?? (await context.crawler.getRequestQueue());
@@ -25,7 +26,7 @@ export async function enqueueRequests(
   for (const uu of input) {
     // Unparsable and non-web URLs can't be crawled; even if they're not
     // flagged in the URL Discovery Options, we'll toss them as we filter.
-    if (!uu.parsable) {
+    if (uu.parsed === undefined) {
       continue;
     }
 
@@ -35,11 +36,7 @@ export async function enqueueRequests(
       continue;
     }
 
-    if (!filterUrl(context, uu, options.crawl)) {
-      continue;
-    }
-
-    if (Robots.isDisallowed(uu.url, context.userAgent)) {
+    if (!filterUrl(uu.parsed, options.crawl, uniqueUrl?.parsed)) {
       continue;
     }
 

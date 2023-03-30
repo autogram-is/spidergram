@@ -116,7 +116,7 @@ export function findFeedLinks(input: string | cheerio.Root) {
   return results;
 }
 
-// TODO: Convert this code to use getElementData
+// TODO: Convert this code to use HtmlTools.findElementData
 
 export function getLinkElementAttributes(
   element: cheerio.Element,
