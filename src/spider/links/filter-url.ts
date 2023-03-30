@@ -10,7 +10,7 @@ import { UrlMatchStrategy } from './enqueue-options.js';
  */
 export function filterUrlStrict(
   input: UniqueUrl | ParsedUrl,
-  filters: FilterInput,
+  filters: UrlFilterInput,
   currentUrl?: ParsedUrl,
 ): boolean {
   const incomingUrl = input instanceof UniqueUrl ? input.parsed : input;
@@ -34,7 +34,7 @@ export function filterUrlStrict(
  */
 export function filterUrl(
   input: UniqueUrl | ParsedUrl,
-  filters: FilterInput = UrlMatchStrategy.SameDomain,
+  filters: UrlFilterInput = UrlMatchStrategy.SameDomain,
   currentUrl?: ParsedUrl,
 ): boolean {
   const incomingUrl = input instanceof UniqueUrl ? input.parsed : input;
@@ -56,7 +56,7 @@ export function filterUrl(
 
 function singleFilter(
   url: ParsedUrl,
-  filter: Filter,
+  filter: UrlFilter,
   currentUrl?: ParsedUrl,
 ): boolean {
   if (is.enumCase(filter, UrlMatchStrategy)) {
@@ -94,8 +94,8 @@ function singleFilter(
 }
 
 // We accept a staggering array of filter types. Come, behold our filters.
-export type FilterInput = Filter | Filter[] | boolean;
-export type Filter = UrlMatchStrategy | string | RegExp | UrlFilterFunction;
+export type UrlFilter = UrlMatchStrategy | string | RegExp | UrlFilterFunction;
+export type UrlFilterInput = UrlFilter | UrlFilter[] | boolean;
 
 export type UrlFilterFunction = (
   candidate: ParsedUrl,

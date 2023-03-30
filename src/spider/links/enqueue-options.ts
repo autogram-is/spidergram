@@ -1,7 +1,7 @@
 import { RequestQueue } from 'crawlee';
 import { ParsedUrl } from '@autogram/url-tools';
 
-import { FilterInput } from './index.js';
+import { UrlFilterInput } from './index.js';
 import { InternalSpiderContext } from '../../index.js';
 import { PageRegion } from '../../tools/html/index.js';
 
@@ -19,13 +19,13 @@ export type PageLinkRegion = PageRegion & {
    * Region-specific override for the filter that determines whether a URL should be saved
    * to the crawl database.
    */
-  save?: FilterInput;
+  save?: UrlFilterInput;
 
   /**
    * Region-specific override for the filter that determines whether a URL should be enqueued
    * for crawling.
    */
-  enqueue?: FilterInput;
+  enqueue?: UrlFilterInput;
 
   /**
    * Region-specific override for the label for each saved URL and Link. If none is specified,
@@ -135,7 +135,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean | string | RegExp | UrlMatchStrategy | UrlFilterWithContext}
    * @default UrlMatchStrategy.All
    */
-  save?: FilterInput;
+  save?: UrlFilterInput;
 
   /**
    * A filter condition to determine which links will be enqueued for crawling.
@@ -143,7 +143,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean | string | RegExp | UrlMatchStrategy | UrlFilterWithContext}
    * @default UrlMatchStrategy.SameDomain
    */
-  crawl?: FilterInput;
+  crawl?: UrlFilterInput;
 
   /**
    * Don't save or enqueue the link if it already exists in the graph.
