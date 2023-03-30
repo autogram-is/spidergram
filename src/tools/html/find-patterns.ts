@@ -1,6 +1,5 @@
-import { HtmlTools } from '../index.js';
+import { HtmlTools, UrlTools } from '../index.js';
 import _ from 'lodash';
-import { UrlFilterInput, filterUrl } from '../../spider/index.js';
 import { Fragment, Reference, Resource } from '../../model/index.js';
 import { getCheerio } from './get-cheerio.js';
 import { ParsedUrl } from '@autogram/url-tools';
@@ -35,7 +34,7 @@ export interface PatternDefinition extends HtmlTools.ElementDataOptions {
    * One or more URL filters this pattern should apply to. Only applicable when
    * the input is a {@link Resource} object.
    */
-  urlFilter?: UrlFilterInput;
+  urlFilter?: UrlTools.UrlFilterInput;
 }
 
 const defaults: HtmlTools.ElementDataOptions = {
@@ -89,7 +88,7 @@ export function findPatternInstances(
   url ??= options.url ? new ParsedUrl(options.url.toString()) : undefined;
   if (pattern.urlFilter) {
     if (!url) return [];
-    if (!filterUrl(url, pattern.urlFilter)) return [];
+    if (!UrlTools.filterUrl(url, pattern.urlFilter)) return [];
   }
 
   const $ = getCheerio(input);

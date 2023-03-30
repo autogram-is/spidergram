@@ -6,7 +6,7 @@ import {
   SpiderOptions,
   Spidergram,
   UniqueUrl,
-  filterUrl,
+  UrlTools,
 } from '../../../index.js';
 import { SpiderCli } from '../../shared/spider-cli.js';
 import { NormalizedUrl } from '../../../index.js';
@@ -139,8 +139,8 @@ export default class TestUrl extends SgCommand {
       base = new ParsedUrl(opt.urls.baseUrl);
     }
     return {
-      save: filterUrl(url, opt.urls.save, base),
-      crawl: filterUrl(url, opt.urls.crawl, base),
+      save: UrlTools.filterUrl(url, opt.urls.save, base),
+      crawl: UrlTools.filterUrl(url, opt.urls.crawl, base),
     };
   }
 }

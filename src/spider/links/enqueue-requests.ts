@@ -3,7 +3,8 @@ import { Request, RequestOptions } from 'crawlee';
 import { UniqueUrl } from '../../model/index.js';
 import { SpiderContext } from '../context.js';
 import { Spidergram } from '../../config/index.js';
-import { EnqueueUrlOptions, filterUrl } from './index.js';
+import { EnqueueUrlOptions } from './index.js';
+import { UrlTools } from '../../tools/index.js';
 import _ from 'lodash';
 
 export async function enqueueRequests(
@@ -36,7 +37,7 @@ export async function enqueueRequests(
       continue;
     }
 
-    if (!filterUrl(uu.parsed, options.crawl, uniqueUrl?.parsed)) {
+    if (!UrlTools.filterUrl(uu.parsed, options.crawl, uniqueUrl?.parsed)) {
       continue;
     }
 

@@ -1,7 +1,7 @@
 import { RequestQueue } from 'crawlee';
 import { ParsedUrl } from '@autogram/url-tools';
 
-import { UrlFilterInput } from './index.js';
+import { UrlFilterInput } from '../../tools/urls/filter-url.js';
 import { InternalSpiderContext } from '../../index.js';
 import { PageRegion } from '../../tools/html/index.js';
 
@@ -25,7 +25,7 @@ export type PageLinkRegion = PageRegion & {
    * Region-specific override for the filter that determines whether a URL should be enqueued
    * for crawling.
    */
-  enqueue?: UrlFilterInput;
+  crawl?: UrlFilterInput;
 
   /**
    * Region-specific override for the label for each saved URL and Link. If none is specified,

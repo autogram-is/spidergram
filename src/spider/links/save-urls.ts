@@ -5,7 +5,7 @@ import {
   UniqueUrl,
   LinksTo,
   EnqueueUrlOptions,
-  filterUrl,
+  UrlTools,
   HtmlTools,
   NormalizedUrl,
   aql,
@@ -53,7 +53,7 @@ export async function saveUrls(
 
     if (
       uu.parsed === undefined ||
-      !filterUrl(uu.parsed, options.save, uniqueUrl?.parsed)
+      !UrlTools.filterUrl(uu.parsed, options.save, uniqueUrl?.parsed)
     ) {
       continue;
     }

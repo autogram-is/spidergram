@@ -56,14 +56,17 @@ export function findUrls(
           link.region = region;
           link.label = linkOptions?.label;
           link.handler = linkOptions?.handler ?? options.handler;
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+          /* eslint-disable @typescript-eslint/no-unused-vars */
           const {
             selector,
             save,
-            enqueue,
+            crawl,
             linkSelectors,
             ...linkOptionsToSave
           } = linkOptions ?? {};
+          /* eslint-enable @typescript-eslint/no-unused-vars */
+
           results.push({ ...link, ...linkOptionsToSave });
         }
       }
