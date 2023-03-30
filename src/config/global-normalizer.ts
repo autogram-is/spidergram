@@ -10,6 +10,7 @@ export interface NormalizerOptions {
     | 'pathname'
     | false;
   discardSubdomain?: string | false;
+  supplySubdomain?: string | false;
   discardAnchor?: boolean;
   discardAuth?: boolean;
   discardIndex?: string | false;
@@ -27,6 +28,8 @@ export function globalNormalizer(
     url[opts.forceLowercase] = url[opts.forceLowercase].toLocaleLowerCase();
   if (opts.discardSubdomain)
     UrlMutators.stripSubdomains(url, opts.discardSubdomain);
+  if (opts.supplySubdomain && url.subdomain.length == 0)
+    url.subdomain = opts.supplySubdomain;
   if (opts.discardAnchor) UrlMutators.stripAnchor(url);
   if (opts.discardAuth) UrlMutators.stripAuthentication(url);
   if (opts.discardIndex) UrlMutators.stripIndexPages(url, opts.discardIndex);
