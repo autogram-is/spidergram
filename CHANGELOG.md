@@ -1,14 +1,14 @@
 # Spidergram Changelog
 
-## v0.9.16 - 23-03-31
+## v0.9.17 - 23-03-30
 
-- QueryFragments
-- Resume Flag
-- PDF URLs
-- TEST URL cli command
-- Expose fallback normalizer
-- URL Filtering clarity (match any)
-- 'urlOptions' to 'urls' and 'enqueue' to 'crawl' in the options structure
+- The new `QueryFragment` utility collection reusable query specs that can be used to instantiate a new Query object before adding custom filters and aggregations.
+- The `spidergram crawl` CLI command features a `--resume` flag that attempts to pick up a crawl where it was paused or aborted. It will be improved in coming versions, but for now it can be tinkered with.
+- When PDF files are parsed, any clickable links inside the file are saved as URLs; although they're not yet fed back into the crawler, it's a start.
+- The `spider.urlOptions` setting has been renamed to `spider.urls`, and and `spider.urlOptions.enqueue` is now `spider.urls.crawl`. This is the visible part of a broader refactoring of URL filtering to make it faster, more flexible, and more reliable when using wildcard matches or custom filter logic.
+- The "generic" fallback normalizer is now exposed as the `genericNormalizer` property on any Spidergram instance. That makes it easier for custom normalizer functions to leverage it for most URLs while special-casing exceptions.
+- The genericNormalizer now supports a `supplySubdomain` option; it's FALSE by default but if it's set to a string, that string will be used as the subdomain when raw TLDs are encountered. For example, if it's set to 'www', `http://example.com` will be transformed to `http://www.example.com` but `http://news.example.com` will remain untouched.
+- A new (hidden) `spidergram test url` command allows you to paste in any URL and see how the current normalizer settings will process it. In addition, it will make a best guess at whether the URL will be saved or enqueued during the crawling process, based on the current config settings.
 
 ## v0.9.16 - 23-03-25
 
