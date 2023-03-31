@@ -7,7 +7,7 @@ import {
   SpiderContext,
   findUrls,
   saveUrls,
-} from '../index.js';
+} from '../../index.js';
 import _ from 'lodash';
 
 /**

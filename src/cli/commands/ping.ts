@@ -4,7 +4,7 @@ import {
   Spidergram,
   SgCommand,
   Resource,
-  analyzePage,
+  GraphTools,
 } from '../../index.js';
 import { SpiderCli } from '../shared/spider-cli.js';
 import { launchPlaywright } from 'crawlee';
@@ -72,7 +72,7 @@ export default class Ping extends SgCommand {
         accessibility,
       });
 
-      await analyzePage(resource);
+      await GraphTools.analyzePage(resource);
 
       this.displaySummary(resource);
     }

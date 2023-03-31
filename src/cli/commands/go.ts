@@ -3,7 +3,7 @@ import {
   Spidergram,
   Spider,
   WorkerQuery,
-  analyzePage,
+  GraphTools,
   Resource,
   Report,
 } from '../../index.js';
@@ -69,7 +69,7 @@ export default class Go extends SgCommand {
     this.startProgress('Analyzing crawled resources');
     await analyzer
       .run(async resource => {
-        return analyzePage(resource)
+        return GraphTools.analyzePage(resource)
           .then(resource => sg.arango.push(resource))
           .then(() => resource.url);
       })

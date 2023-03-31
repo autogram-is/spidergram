@@ -1,8 +1,3 @@
-export * from './hierarchy-builder.js';
-export * from './hierarchy-item.js';
-export * from './url-hierarchy-builder.js';
-export * from './render.js';
-
 /**
  * Tools for building and working with parent/child hierarchies
  *
@@ -39,3 +34,8 @@ export * from './render.js';
  * const orphans = builder.findOrphans();
  * ```
  */
+
+export * from './hierarchy-builder.js';
+export * from './hierarchy-item.js';
+export * from './url-hierarchy-builder.js';
+export * from './render.js';

@@ -2,8 +2,6 @@ import { Spidergram } from './spidergram.js';
 import {
   SpiderOptions,
   Query,
-  PageAnalysisOptions,
-  PageAnalyzer,
   Report,
   ReportConfig,
 } from '../index.js';
@@ -16,7 +14,10 @@ import {
   PageDataExtractor,
   PageDataOptions,
 } from '../tools/html/index.js';
-
+import {
+  PageAnalysisOptions,
+  PageAnalyzer
+} from '../tools/graph/analyze-page.js'
 import { TechAuditOptions } from '../tools/browser/index.js';
 import { Configuration as FileConfiguration } from 'typefs';
 import { Config as ArangoConfig } from 'arangojs/connection';

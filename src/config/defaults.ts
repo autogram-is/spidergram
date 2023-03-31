@@ -23,7 +23,7 @@ import {
 import { TechAuditOptions } from '../tools/browser/index.js';
 import { readPackageUpSync } from 'read-pkg-up';
 import { AqQuery } from 'aql-builder';
-import { PageAnalysisOptions } from '../tools/analyze-page.js';
+import { PageAnalysisOptions } from '../tools/graph/analyze-page.js';
 import { GeneratedAqlQuery } from 'arangojs/aql.js';
 import { Report, ReportConfig } from '../reports/report.js';
 import { Query } from '../model/index.js';

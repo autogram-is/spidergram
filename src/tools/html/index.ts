@@ -1,3 +1,7 @@
+/**
+ * Tools for parsing and transforming HTML markup.
+ */
+
 export * from './get-page-content.js';
 export * from './get-page-data.js';
 

@@ -3,8 +3,7 @@ import {
   Resource,
   WorkerQuery,
   OutputLevel,
-  analyzePage,
-  PageAnalysisOptions,
+  GraphTools
 } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
 import { buildFilter } from '../shared/flag-query-tools.js';
@@ -34,7 +33,7 @@ export default class Analyze extends SgCommand {
       this.output = OutputLevel.verbose;
     }
 
-    const options: PageAnalysisOptions = {};
+    const options: GraphTools.PageAnalysisOptions = {};
     if (flags.metadata === false) {
       options.data = false;
     }
@@ -68,7 +67,7 @@ export default class Analyze extends SgCommand {
     });
 
     await worker.run(async resource => {
-      return analyzePage(resource, options)
+      return GraphTools.analyzePage(resource, options)
         .then(resource => sg.arango.push(resource))
         .then(() => resource.url);
     });

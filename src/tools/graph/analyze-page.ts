@@ -3,11 +3,11 @@ import {
   Resource,
   HtmlTools,
   BrowserTools,
-  relinkResource,
-} from '../index.js';
-import { PageDataOptions, PageContentOptions } from './html/index.js';
-import { TechAuditOptions } from './browser/index.js';
-import { PropertySource, findPropertyValue } from './find-property-value.js';
+} from '../../index.js';
+import { relinkResource } from './relink-resource.js';
+import { PageDataOptions, PageContentOptions } from '../html/index.js';
+import { TechAuditOptions } from '../browser/index.js';
+import { PropertySource, findPropertyValue } from '../find-property-value.js';
 import is from '@sindresorhus/is';
 import _ from 'lodash';
 import { EnqueueLinksOptions } from 'crawlee';
@@ -15,7 +15,7 @@ import { DateTime } from 'luxon';
 import {
   MimeTypeMap,
   processResourceFile,
-} from './file/process-resource-file.js';
+} from '../file/process-resource-file.js';
 
 export type PageAnalyzer = (
   input: Resource,
