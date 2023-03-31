@@ -11,10 +11,10 @@ import path from 'path';
 import { NormalizerOptions, SpidergramConfig } from './index.js';
 import { mimeGroups } from '../spider/helpers/mime.js';
 import {
-  UrlMatchStrategy,
   EnqueueUrlOptions,
   SpiderOptions,
 } from '../spider/index.js';
+import { UrlMatchStrategy } from '../tools/urls/index.js'
 import {
   PageDataOptions,
   PageContentOptions,

@@ -40,43 +40,6 @@ export type PageLinkRegion = PageRegion & {
   handler?: string;
 };
 
-export enum UrlMatchStrategy {
-  /**
-   * Matches any URLs found
-   */
-  All = 'all',
-
-  /**
-   * Matches a URL if it has the same hostname as the current URL.
-   *
-   * For example, `https://wow.example.com/hello` will be matched for a current url of
-   * `https://wow.example.com/`, but `https://example.com` will not be matched.
-   */
-  SameHostname = 'same-hostname',
-
-  /**
-   * Matches a URL if it has the same domain as the current URL.
-   *
-   * For example, `https://wow.an.example.com` and `https://example.com` will both be matched for
-   * a current url of `https://example.com`.
-   */
-  SameDomain = 'same-domain',
-
-  /**
-   * Matches a URL if it has the same domain, and its path starts with the same string, as the
-   * current URL.
-   *
-   * For example, `https://example.com/news/2023` will be matched with a current url of
-   * `https://example.com/news/`, but 'https://example.com/updates/' will not.
-   */
-  SameDirectory = 'same-directory',
-
-  /**
-   * Matches no URLs; useful when all or some URLs should be saved, but none should be enqueued.
-   */
-  None = 'none',
-}
-
 /**
  * Configuration options for Spidergram's URL enqueing options.
  */

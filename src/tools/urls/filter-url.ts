@@ -3,7 +3,7 @@ import { ParsedUrl } from '@autogram/url-tools';
 import minimatch from 'minimatch';
 import arrify from 'arrify';
 import { UniqueUrl } from '../../model/index.js';
-import { UrlMatchStrategy } from '../../spider/links/enqueue-options.js';
+import { UrlMatchStrategy } from './url-match-strategy.js';
 
 /**
  * Returns true if the input URL matches ALL of the specified filters.

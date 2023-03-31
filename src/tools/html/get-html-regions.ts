@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { getCheerio } from './get-cheerio.js';
-import { UrlFilter } from '../../spider/index.js';
+import { UrlFilter } from '../urls/index.js';
 
 
 /**
