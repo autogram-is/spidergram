@@ -85,7 +85,6 @@ export interface InternalSpiderOptions extends Dictionary {
    * grouped by document type. (Word processing files, web assets, media, etc.)
    *
    * @default ['text/html']
-   * @type {EnqueueUrlOptions}
    */
   parseMimeTypes: string[];
 
@@ -95,9 +94,6 @@ export interface InternalSpiderOptions extends Dictionary {
    *
    * @see {@apilink mimeGroups}, a helper collection of common mime types
    * grouped by document type. (Word processing files, web assets, media, etc.)
-   *
-   * @default empty
-   * @type {EnqueueUrlOptions}
    */
   downloadMimeTypes: string[];
 
@@ -106,8 +102,6 @@ export interface InternalSpiderOptions extends Dictionary {
    * along with other page metadata. While this is not as accurate as services like
    * Google PageSpeed Insights, it can be a useful point of comparison between multiple
    * pages crawled under the same conditions.
-   *
-   * @type {?boolean}
    */
   savePerformance?: boolean;
 
@@ -117,17 +111,19 @@ export interface InternalSpiderOptions extends Dictionary {
    *
    * This can be used to add additional headers or custom authentication cookies
    * for sites that require logins.
-   *
-   * @type {Array<SpiderHook>}
    */
   preNavigationHooks: SpiderHook[];
+
+  /**
+   * An array of functions to run after a page has been loaded and the page's
+   * resource has been created, but before data is saved or the page is closed.
+   */
+  preSaveHooks: SpiderHook[];
 
   /**
    * An array of functions to run after a request has been processed.
    * May be useful for logging, destroying any expensive resources created
    * during processing, etc.
-   *
-   * @type {Array<SpiderHook>}
    */
   postNavigationHooks: SpiderHook[];
 
