@@ -99,7 +99,7 @@ export function findPatternInstances(
         pattern: pattern.name,
         selector: pattern.selector,
         uniqueSelector: HtmlTools.getUniqueSelector(element, $),
-        location: input instanceof Resource ? input._id : undefined,
+        location: input instanceof Resource ? input.documentId : undefined,
         ...HtmlTools.findElementData(
           $(element),
           _.defaultsDeep(pattern, defaults),
