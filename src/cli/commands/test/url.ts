@@ -139,8 +139,8 @@ export default class TestUrl extends SgCommand {
       base = new ParsedUrl(opt.urls.baseUrl);
     }
     return {
-      save: UrlTools.filterUrl(url, opt.urls.save, base),
-      crawl: UrlTools.filterUrl(url, opt.urls.crawl, base),
+      save: UrlTools.filterUrl(url, opt.urls.save, { contextUrl: base }),
+      crawl: UrlTools.filterUrl(url, opt.urls.crawl, { contextUrl: base }),
     };
   }
 }

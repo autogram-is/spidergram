@@ -37,7 +37,7 @@ export async function enqueueRequests(
       continue;
     }
 
-    if (!UrlTools.filterUrl(uu.parsed, options.crawl, uniqueUrl?.parsed)) {
+    if (!UrlTools.filterUrl(uu.parsed, options.crawl, { contextUrl: uniqueUrl?.parsed })) {
       continue;
     }
 
