@@ -39,11 +39,12 @@ export async function saveUrls(
       normalizer: options.normalizer ?? NormalizedUrl.normalizer,
     });
 
-    // Run each URL through a few gauntlets
+    // If discardUnparsable is turned on, filter out the bad ones.
     if (options.discardUnparsable && is.undefined(uu.parsed)) {
       continue;
     }
 
+    // If discardNonWeb is turned on, ensure they all have http or https protocols.
     if (
       options.discardNonWeb &&
       !['http:', 'https:'].includes(uu.parsed?.protocol.toLowerCase() ?? '')
@@ -51,11 +52,15 @@ export async function saveUrls(
       continue;
     }
 
-    if (
-      uu.parsed === undefined ||
-      !UrlTools.filterUrl(uu.parsed, options.save, { contextUrl: uniqueUrl?.parsed })
-    ) {
-      continue;
+    // IF the URL is parsable, ensure it passes our save filters.
+    // Since they only work on parsable URLs, we skip the step and rely on the 
+    // earlier 'discardUnparsable' flag to weed out undesirables.
+    if (uu.parsed) {
+      if (UrlTools.filterUrl(
+        uu.parsed,
+        options.save,
+        { contextUrl: uniqueUrl?.parsed
+      }) === false) continue;
     }
 
     // If 'discardExistingLinks' is set, we don't bother including URLs
