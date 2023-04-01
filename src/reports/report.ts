@@ -18,12 +18,7 @@ import path from 'node:path';
  */
 export interface ReportConfig {
   /**
-   * A unique name for the report.
-   *
-   * For reports that generate a single file, this name will be used as the
-   * filename, though the file extension will be determined by the report itself.
-   *
-   * Reports that generate multiple files will use this value as a directory name.
+   * A readable, user-facing name for the report.
    *
    * @defaultValue `report`
    */
@@ -43,7 +38,23 @@ export interface ReportConfig {
   category?: string;
 
   /**
-   * A dictionary of report-specific options.
+   * The path where the final report will be saved. `outputPath` supports the following
+   * placeholder tokens:
+   * 
+   * - `{{name}}`: The name of the report
+   * - `{{date}}`: The current date in YYYY-MM-DD format
+   * 
+   * In addition, any values used the `options` property of the Report configuration
+   * can be used as tokens. The file extension (.json, .xlsx, etc) will be appended
+   * automatically.
+   * 
+   * @defaultValue `{{name}} {{date}}`
+   */
+  outputPath?: string;
+
+  /**
+   * A dictionary of report-specific options whose values can be changed each time
+   * the report is run. For examp.
    */
   options?: Record<string, unknown>;
 
