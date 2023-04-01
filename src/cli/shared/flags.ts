@@ -31,7 +31,7 @@ export const queryFilterFlag = Flags.string({
   char: 'f',
   summary: 'Filter records by a property',
   description: `"path" returns records where the property IS NOT null
-"path = value} returns records where property equals value
+"path = value" returns records where property equals value
 "path != value" returns records where property DOES NOT equal value
 "path > value" returns records where property is greater than value
 "path < value" returns records where property is less than value

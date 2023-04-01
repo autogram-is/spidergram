@@ -1,5 +1,10 @@
 # Spidergram Changelog
 
+## v0.9.18 - 23-04-01
+
+- Moved a number of our standalone browser manpipulation hooks to the BrowserTools collection
+- Added `--concurrency` flag to `spidergram analyze`, allowing multiple pages to be processed simultaneously.
+
 ## v0.9.17 - 23-03-30
 
 - The new `QueryFragment` utility collection reusable query specs that can be used to instantiate a new Query object before adding custom filters and aggregations.
