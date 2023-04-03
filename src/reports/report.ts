@@ -12,6 +12,7 @@ import { FileTools } from '../index.js';
 import { write as writeCsv } from '@fast-csv/format';
 import _ from 'lodash';
 import path from 'node:path';
+import { DateTime } from 'luxon';
 
 /**
  * Configuration options for a {@link Report}
@@ -48,7 +49,7 @@ export interface ReportConfig {
    * can be used as tokens. The file extension (.json, .xlsx, etc) will be appended
    * automatically.
    * 
-   * @defaultValue `{{name}} {{date}}`
+   * @defaultValue `{{name}} - {{date}}`
    */
   outputPath?: string;
 
@@ -126,6 +127,7 @@ export class Report implements ReportConfig {
   description?: string;
   category?: string;
   options?: Record<string, unknown>;
+  outputPath: string;
 
   protected _buildFn?: (report: this) => Promise<void>;
   protected _processFn?: (report: this) => Promise<void>;
@@ -142,6 +144,7 @@ export class Report implements ReportConfig {
     this.description = config.description;
     this.category = config.category;
     this.options = config.options ?? { format: 'xslx' };
+    this.outputPath = config.outputPath ?? '{{date}} {{name}}';
 
     this.queries = config.queries ?? {};
 
@@ -218,7 +221,10 @@ export class Report implements ReportConfig {
       const opt = _.get(this.options, 'format');
       const format = typeof opt === 'string' ? opt : 'xlsx';
       const rpt = new FileTools.Spreadsheet();
-      const loc = this.name ?? 'report';
+
+      let loc = this.outputPath;
+      loc = loc.replace('{{name}}', this.name ?? 'report');
+      loc = loc.replace('{{date}}', DateTime.now().toISODate());
 
       if (format === 'json') {
         if (!(await sg.files('output').exists(loc))) {

@@ -130,7 +130,7 @@ async function _analyzePage(
       options.tech === true ? undefined : options.tech,
     );
     resource.tech = await BrowserTools.TechAuditor.run(resource).then(results =>
-      BrowserTools.TechAuditor.summarize(results),
+      BrowserTools.TechAuditor.summarizeByCategory(results),
     );
   }
 

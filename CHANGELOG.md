@@ -2,6 +2,7 @@
 
 ## v0.9.18 - 23-04-01
 
+- Reports definitions can specify their output filename. `report.outputPath` can also unclude `{{date}}` and `{{name}}` wildcards; the name of the report and the current ISO date will be inserted when the file is written. If no output path is given, `{{date}} - {{name}}` is the fallback.
 - Moved a number of our standalone browser manpipulation hooks to the BrowserTools collection
 - Added `--concurrency` flag to `spidergram analyze`, allowing multiple pages to be processed simultaneously.
 
