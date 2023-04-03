@@ -1,5 +1,5 @@
 import { GeneratedAqlQuery } from 'arangojs/aql';
-import { AqQuery } from 'aql-builder';
+import { AqQuery, AqFilter } from 'aql-builder';
 import { Query, JobStatus, Spidergram } from '../index.js';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import {
@@ -51,6 +51,19 @@ export interface ReportConfig {
    * @defaultValue `{{name}} {{date}}`
    */
   outputPath?: string;
+
+  /**
+   * A dictionary mapping incoming options to a query filter. 
+   * 
+   * @example
+   * ```
+   * filterMap: {
+   *   customOptionKey: { path: 'filter.property', eq: '{{customOptionKey}}' },
+   *   anotherOption: { path: 'some.other.property, lt: '{{anotherOption}}' }
+   * }
+   * ```
+   */
+  filterMap?: Record<string, AqFilter>
 
   /**
    * A dictionary of report-specific options whose values can be changed each time
