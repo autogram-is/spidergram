@@ -1,10 +1,13 @@
 # Spidergram Changelog
 
-## v0.9.18 - 23-04-01
+## v0.9.18 - 23-04-04
 
 - Reports definitions can specify their output filename. `report.outputPath` can also unclude `{{date}}` and `{{name}}` wildcards; the name of the report and the current ISO date will be inserted when the file is written. If no output path is given, `{{date}} - {{name}}` is the fallback.
-- Moved a number of our standalone browser manpipulation hooks to the BrowserTools collection
+- Moved a number of our standalone browser manpipulation functions to the `BrowserTools` collection
+- Moved core URL filtering code out of the 'spider' codebase into `UrlTools`, where it's easier to use outside of the browser context.
+- Added the ability to save a list of XMLHTTPRequests made during the page load. This can be toggled on and off with the `spider.saveXhrList` option.
 - Added `--concurrency` flag to `spidergram analyze`, allowing multiple pages to be processed simultaneously.
+- Added `PropertySource.value` so mapped properties can return a 'clean' hard-coded value after finding an ugly one.
 
 ## v0.9.17 - 23-03-30
 
