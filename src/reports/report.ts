@@ -1,5 +1,5 @@
 import { GeneratedAqlQuery } from 'arangojs/aql';
-import { AqQuery, AqFilter } from 'aql-builder';
+import { AqQuery, AqFilter, isAqQuery, isAqFilter, isAqAggregate, isAqProperty, isAqSort } from 'aql-builder';
 import { Query, JobStatus, Spidergram } from '../index.js';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import {
@@ -13,6 +13,40 @@ import { write as writeCsv } from '@fast-csv/format';
 import _ from 'lodash';
 import path from 'node:path';
 import { DateTime } from 'luxon';
+import is from '@sindresorhus/is';
+
+
+/**
+ * A query definition with additional filters, return values, or limits.
+ * This allows a report to reuse a pre-existing query with minor alterations.
+ */
+export type ModifiedQuery = {
+  /**
+   * The core query to use as a starting point. If this value is a string,
+   * it will be treated as the name of a saved query to look up in the global
+   * configuration.
+   */
+  base: string | AqQuery | Query,
+
+  /**
+   * Any parts of an AqQuery structure; this includes filters, aggregates,
+   * return values, limits, sorts, and so on. These elements will be merged
+   * into the base query before it's executed.
+   */
+  modifications?: Omit<AqQuery, 'collection'>
+  
+  /**
+   * Separate and group the results based on the values in of the result set's
+   * properties. Treat each of the resulting groups as a separate result set in 
+   * the final export.
+   * 
+   * If this property is set to a string, it is assumed to be the property name
+   * to group by. If it's an object, it's assumed to be the property name and a
+   * a list of values to separate; all others will be left as part of an '_other'
+   * result set.
+   */
+  expand?: string | { property: string, values: (string | number)[] }
+}
 
 /**
  * Configuration options for a {@link Report}
@@ -75,31 +109,7 @@ export interface ReportConfig {
   /**
    * A named collection of queries that should be run to build the report's data
    */
-  queries?: Record<string, string | GeneratedAqlQuery | AqQuery | Query>;
-
-  /**
-   * An optional pre-processing function responsible for executing the queries and
-   * gathering any additional data for the report.
-   *
-   * By default, a report's queries are run in the sequence they appear in its 'queries'
-   * collection, and results are placed in its 'data' collection.
-   */
-  build?: (report: this) => Promise<void>;
-
-  /**
-   * An optional post-processing function to be executed after the report's queries
-   * are run. It may add additional data sets, modify the data from the report's own
-   * queries, and so on.
-   *
-   * By default, no operations are performend in this phase.
-   */
-  process?: (report: this) => Promise<void>;
-
-  /**
-   * An optional processing function responsible for outputting the final representation
-   * of the report.
-   */
-  generate?: (report: this) => Promise<void>;
+  queries?: Record<string, string | GeneratedAqlQuery | AqQuery | Query | ModifiedQuery>;
 }
 
 interface ReportStatus extends JobStatus {
@@ -120,7 +130,7 @@ type ReportEventListener<T extends ReportEventType> = (
 ) => unknown;
 
 export class Report implements ReportConfig {
-  queries: Record<string, string | GeneratedAqlQuery | AqQuery | Query>;
+  queries: Record<string, string | GeneratedAqlQuery | AqQuery | Query | ModifiedQuery>;
   data: Record<string, AnyJson[]> = {};
 
   name?: string;
@@ -128,10 +138,6 @@ export class Report implements ReportConfig {
   category?: string;
   options?: Record<string, unknown>;
   outputPath: string;
-
-  protected _buildFn?: (report: this) => Promise<void>;
-  protected _processFn?: (report: this) => Promise<void>;
-  protected _generateFn?: (report: this) => Promise<void>;
 
   status: ReportStatus;
   protected events: AsyncEventEmitter<ReportEventMap>;
@@ -147,10 +153,6 @@ export class Report implements ReportConfig {
     this.outputPath = config.outputPath ?? '{{date}} {{name}}';
 
     this.queries = config.queries ?? {};
-
-    this._buildFn = config.build;
-    this._generateFn = config.generate;
-    this._processFn = config.process;
 
     // Set up status
     this.status = {
@@ -186,38 +188,85 @@ export class Report implements ReportConfig {
   }
 
   async build(): Promise<void> {
-    if (this._buildFn) {
-      return this._buildFn(this).then(() => {
-        this.events.emit('progress', this.status, 'Data retrieved');
-      });
-    } else {
-      for (const [name, query] of Object.entries(this.queries)) {
-        this.events.emit('progress', this.status, `Running '${name}' query`);
+    const sg = await Spidergram.load();
+    for (const [name, query] of Object.entries(this.queries)) {
+      this.events.emit('progress', this.status, `Running '${name}' query`);
+
+      if (isModifiedQuery(query)) {
+        let q = new Query('resources');
+
+        // This is ugly AF, but we'll get to it later.
+        if (typeof query.base === 'string') {
+          const storedQuery = sg.config.queries?.[query.base];
+          if (isAqQuery(storedQuery)) q = new Query(storedQuery);
+          else if (storedQuery instanceof Query) q = storedQuery;
+        } else if (isAqQuery(query.base)) {
+          q = new Query(query.base);
+        } else if (query.base instanceof Query) {
+          q = query.base;
+        }
+
+        // Alter query — this is also where user values might be injected.
+        if (query.modifications) {
+          for (const f of query.modifications.filters ?? []) {
+            if (isAqFilter(f)) q.filterBy(f);
+            else if (typeof f === 'string') q.filterBy(f);
+          }
+          for (const a of query.modifications.aggregates ?? []) {
+            if (isAqAggregate(a)) q.aggregate(a);
+            else if (typeof a === 'string') q.aggregate(a);
+          }
+          for (const r of query.modifications.return ?? []) {
+            if (typeof r === 'string' || isAqProperty(r)) q.return(r);
+          }
+          for (const s of query.modifications.sorts ?? []) {
+            if (typeof s === 'string' || isAqSort(s)) q.return(s);
+          }
+          if (query.modifications.limit) q.limit(query.modifications.limit);
+        }
+        
+        if (query.expand) {
+          const propName = (typeof query.expand === 'string') ? query.expand : query.expand.property;
+          const allowedValues = (typeof query.expand === 'string') ? undefined : query.expand.values;
+
+          const rawData = await q.run();
+          const groups = _.groupBy(rawData, datum => {
+            let group = name;
+            if (isJsonMap(datum)) {
+              const datumValue = datum[propName];
+              if (allowedValues) {
+                if (
+                  (is.string(datumValue) || is.number(datumValue)) && 
+                  allowedValues.includes(datumValue)
+                ) group = datumValue.toString();
+              } else if (datumValue !== undefined && datumValue !== null) {
+                group = datumValue.toString();
+              }
+            }
+            return group;
+          });
+          for (const [k, v] of Object.entries(groups)) {
+            this.data[k] = v;
+            this.status.records[k] = this.data[k].length;
+          }
+        } else {
+          this.data[name] = await q.run();
+          this.status.records[name] = this.data[name].length;
+        }
+
+      } else {
         this.data[name] = await Query.run(query);
         this.status.records[name] = this.data[name].length;
-        this.status.finished++;
       }
-      this.events.emit('progress', this.status, 'Data retrieved');
+      this.status.finished++;
     }
-  }
-
-  async process(): Promise<void> {
-    if (this._processFn) {
-      return this._processFn(this).then(() => {
-        this.status.finished++;
-      });
-    } else return Promise.resolve();
+    this.events.emit('progress', this.status, 'Data retrieved');
   }
 
   async generate(): Promise<void> {
     const sg = await Spidergram.load();
     this.events.emit('progress', this.status, 'Generating files');
 
-    if (this._generateFn) {
-      return this._generateFn(this).then(() => {
-        this.status.finished++;
-      });
-    } else {
       const opt = _.get(this.options, 'format');
       const format = typeof opt === 'string' ? opt : 'xlsx';
       const rpt = new FileTools.Spreadsheet();
@@ -258,7 +307,7 @@ export class Report implements ReportConfig {
         }
       } else {
         for (const [name, data] of Object.entries(this.data)) {
-          rpt.addSheet(data, name);
+          rpt.addSheet(data, name.slice(0,31));
         }
         const curFilePath = `${loc}.xlsx`;
         return sg
@@ -269,7 +318,6 @@ export class Report implements ReportConfig {
             this.status.files.push(curFilePath);
           });
       }
-    }
   }
 
   async run(): Promise<ReportStatus> {
@@ -279,7 +327,6 @@ export class Report implements ReportConfig {
     this.status.total = 2 + Object.keys(this.queries).length;
 
     return this.build()
-      .then(() => this.process())
       .then(() => this.generate())
       .then(() => {
         this.status.finishTime = Date.now();
@@ -287,4 +334,16 @@ export class Report implements ReportConfig {
         return this.status;
       });
   }
+}
+
+function isModifiedQuery(input: unknown) : input is ModifiedQuery {
+  if (input) {
+    if (typeof input !== 'object') return false
+    if ('base' in input) {
+      if (isAqQuery(input.base) || input.base instanceof Query || typeof input.base === 'string') {
+        return true;
+      }
+    }
+  }
+  return false;
 }
