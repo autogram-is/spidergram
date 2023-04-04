@@ -28,6 +28,7 @@
   },
   "files": [
     "dist/**/*",
+    "CHANGELOG.md",
     "config",
     "bin"
   ],
