@@ -33,13 +33,6 @@ test('css selectors', t => {
   t.is(findPropertyValue(obj, { source: 'html', selector: 'iframe' }), undefined);
 });
 
-test('predicate', t => {
-  t.is(findPropertyValue(obj, {
-    source: 'arr',
-    fn: val => Array.isArray(val) ? val[1] : undefined
-  }), 'second');
-});
-
 test('filters', t => {
   // gotta investigate the 'contains' operator
   

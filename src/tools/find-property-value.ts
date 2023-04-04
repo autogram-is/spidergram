@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import minimatch from 'minimatch';
 import { getCheerio } from './html/index.js';
+import is from '@sindresorhus/is';
 
 /**
  * Describes the location of a piece of data on another object.
@@ -36,23 +37,26 @@ export interface PropertySource extends Record<string, unknown> {
   join?: string;
 
   /**
-   * If the source property is found, use this function to filter it or convert it to
-   * another format.
-   *
-   * If this property is set, conditional properties (eq, lt, gt, in, contains, negate,
-   * and match) **WILL NOT** be evaluated.
-   */
-  fn?: (value: unknown, conditions: PropertySource) => unknown | undefined;
-
-  /**
-   * If the property is not found, or the selector and fn properties are used but return
-   * empty results, return this value as a fallback.
+   * If the property is not found, or the selector returns empty results, return this value
+   * as a fallback.
    *
    * Note: If a PropertySource with a default value is placed in the middle of an array of
    * PropertySources, its default value will be returned and all subsequent PropertySources
    * will be ignored.
    */
   fallback?: unknown;
+
+  /**
+   * If set, this value will be returned in place of the found value.
+   * 
+   * This can be useful when you're *looking for* a messy value in one property
+   * and want to set a clean flag or value in another property depending on the
+   * ugly one.
+   * 
+   * If the `value` property contains a function, that function will be called to
+   * generate the return value.
+   */
+  value?: string | number | boolean | ((value: unknown, conditions: PropertySource) => unknown | undefined)
 
   /**
    * Only return the value if it's equal to this.
@@ -117,9 +121,7 @@ export function findPropertyValue<T = unknown>(
     } else {
       let v = _.get(object, source.source);
       if (!undef(v, source.nullIsValue)) {
-        if (source.fn) {
-          v = source.fn(v, source);
-        } else if (
+        if (
           typeof v === 'string' &&
           typeof source.selector === 'string'
         ) {
@@ -149,8 +151,7 @@ export function findPropertyValue<T = unknown>(
 
 /**
  * This internal function applies the filtering logic for potential property values;
- * if `conditions.selector` was populated, these checks are run after the selector.
- * if `conditions.fn` is populated, thse checks **WILL NOT** be run.
+ * if `conditions.selector` was populated.
  */
 function checkPropertyValue(
   value: unknown,
@@ -158,41 +159,41 @@ function checkPropertyValue(
 ): unknown {
   if (conditions.eq !== undefined) {
     if (_.isEqual(conditions.eq, value)) {
-      return conditions.negate ? undefined : value;
+      return conditions.negate ? undefined : getReturnValue(value, conditions);
     }
   } else if (conditions.gt !== undefined && value) {
     if (value > conditions.gt) {
-      return conditions.negate ? undefined : value;
+      return conditions.negate ? undefined : getReturnValue(value, conditions);
     }
   } else if (conditions.lt !== undefined && value) {
     if (value < conditions.lt) {
-      return conditions.negate ? undefined : value;
+      return conditions.negate ? undefined : getReturnValue(value, conditions);
     }
   } else if (conditions.in !== undefined && conditions.in.length > 0) {
     let foundMatch = false;
     if (Array.isArray(value)) {
       const returnValue = _.intersection(conditions.in, value);
-      if (returnValue.length === 0) return undefined;
-      if (returnValue.length === 1) return returnValue[0];
-      return returnValue;
+      if (returnValue.length === 0) return getReturnValue(undefined, conditions);
+      if (returnValue.length === 1) return getReturnValue(returnValue[0], conditions);
+      return getReturnValue(returnValue, conditions);
     } else {
       for (const condition of conditions.in) {
         if (_.isEqual(condition, value)) {
           foundMatch = true;
           if (conditions.negate) continue;
-          return value;
+          return getReturnValue(value, conditions);
         }
       }
     }
     if (conditions.negate && foundMatch) return undefined;
   } else if (conditions.contains !== undefined) {
     if (Array.isArray(value) && value.includes(conditions.contains)) {
-      return conditions.negate ? undefined : value;
+      return conditions.negate ? undefined : getReturnValue(value, conditions);
     }
   } else if (conditions.matching !== undefined) {
     if (typeof value === 'string') {
       if (minimatch(value, conditions.matching)) {
-        return conditions.negate ? undefined : value;
+        return conditions.negate ? undefined : getReturnValue(value, conditions);
       }
     } else if (Array.isArray(value)) {
       const returnList = value
@@ -204,9 +205,9 @@ function checkPropertyValue(
             minimatch(v, conditions.matching),
         );
       if (conditions.join || returnList.length === 1) {
-        return returnList.slice(conditions.limit).join(conditions.join);
+        return getReturnValue(returnList.slice(conditions.limit).join(conditions.join), conditions);
       } else {
-        return returnList.slice(conditions.limit);
+        return getReturnValue(returnList.slice(conditions.limit), conditions);
       }
     }
   }
@@ -217,4 +218,19 @@ function checkPropertyValue(
 function undef(value: unknown, nullIsValue = false): value is undefined {
   if (value === undefined || (value === null && !nullIsValue)) return true;
   return false;
+}
+
+function getReturnValue(value: unknown, definition: PropertySource) {
+  if (value !== undefined) {
+    if (definition.value !== undefined) {
+      if (is.function_(definition.value)) {
+        return definition.value(value, definition);
+      }
+      return definition.value;
+    }
+    else return value;
+  } else if (definition.fallback !== undefined) {
+    return definition.fallback;
+  }
+  return undefined;
 }
