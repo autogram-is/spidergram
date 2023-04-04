@@ -98,14 +98,6 @@ export interface InternalSpiderOptions extends Dictionary {
   downloadMimeTypes: string[];
 
   /**
-   * After a page has loaded, save information about its load speed and performance
-   * along with other page metadata. While this is not as accurate as services like
-   * Google PageSpeed Insights, it can be a useful point of comparison between multiple
-   * pages crawled under the same conditions.
-   */
-  savePerformance?: boolean;
-
-  /**
    * An array of functions to run *before* a request is processed but *after*
    * the router has evaluated its headers and labeled the request.
    *
@@ -136,14 +128,22 @@ export interface InternalSpiderOptions extends Dictionary {
   userAgent?: string;
 
   /**
+   * After a page has loaded, save information about its load speed and performance
+   * along with other page metadata. While this is not as accurate as services like
+   * Google PageSpeed Insights, it can be a useful point of comparison between multiple
+   * pages crawled under the same conditions.
+   */
+  savePerformance?: boolean | 'summary';
+
+  /**
    * Save any browser cookies set during page rendering.
    */
-  saveCookies?: boolean;
+  saveCookies?: boolean | 'summary';
 
   /**
    * Save a list of the XmlHttpRequests sent while the page loads.
    */
-  saveXhrList?: boolean;
+  saveXhrList?: boolean | 'summary';
 
   /**
    * Run an accessibility audit on the page; this may increase crawl time on large pages.
@@ -153,7 +153,7 @@ export interface InternalSpiderOptions extends Dictionary {
    *
    * @defaultValue false
    */
-  auditAccessibility?: 'summary' | boolean;
+  auditAccessibility?: boolean | 'summary';
 
   /**
    * Number of seconds to wait for a handler before cancelling the request and
