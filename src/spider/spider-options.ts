@@ -141,6 +141,11 @@ export interface InternalSpiderOptions extends Dictionary {
   saveCookies?: boolean;
 
   /**
+   * Save a list of the XmlHttpRequests sent while the page loads.
+   */
+  saveXhrList?: boolean;
+
+  /**
    * Run an accessibility audit on the page; this may increase crawl time on large pages.
    *
    * Can be toggled on and off with a boolean value, or set to summarize violations by
