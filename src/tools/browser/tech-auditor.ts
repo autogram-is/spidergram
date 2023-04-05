@@ -119,8 +119,8 @@ export class TechAuditor {
       json = (await sg.files().read('tech-definitions-cache.json')).toString();
       technology = JSON.parse(json) as Record<string, PageTechDefinition>;
 
-      setCategories({ ...categories, ...options.categories });
-      setTechnologies({ ...technology, ...options.technologies });
+      setCategories(_.merge(categories, options.categories));
+      setTechnologies(_.merge(technology, options.technologies));
 
       this.loaded = true;
     }

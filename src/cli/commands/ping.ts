@@ -114,18 +114,10 @@ export default class Ping extends SgCommand {
       this.ux.info(CLI.infoList(violations));
     }
 
-    const detected = r.get('tech' ?? []) as Array<Record<string, string[]>>;
+    const detected = r.get('tech' ?? {}) as Record<string, string | string[]>;
     if (Object.keys(detected).length > 0) {
       this.log(c.header('Detected Technologies'));
-      const tech: Record<string, string[]> = {};
-      for (const t of detected) {
-        const label = `${t.name}${t.version ? ' ' + t.version : ''}`;
-        for (const cat of t.categories ?? []) {
-          tech[cat] ??= [];
-          tech[cat].push(label);
-        }
-      }
-      this.ux.info(CLI.infoList(tech, { sort: true }));
+      this.ux.info(CLI.infoList(detected, { sort: true }));
     }
   }
 }
