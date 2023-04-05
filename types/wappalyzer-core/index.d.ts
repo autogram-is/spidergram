@@ -261,6 +261,11 @@ declare module 'wappalyzer-core' {
          * The concatenated text of all embedded scripts on the page.
          */
         scripts?: string;
+
+        /**
+         * An array of URLs to which XmlHttpRequests were made.
+         */
+        xhr?: unknown,
     }
 
     export interface Resolution {

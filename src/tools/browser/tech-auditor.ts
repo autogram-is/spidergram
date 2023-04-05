@@ -239,6 +239,7 @@ export class TechAuditor {
 
     input.headers = {};
     input.cookies = {};
+    input.xhr = res.xhr;
 
     for (const [name, value] of Object.entries(res.headers ?? {})) {
       if (value === undefined) continue;

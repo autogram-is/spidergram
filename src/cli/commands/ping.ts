@@ -5,6 +5,7 @@ import {
   SgCommand,
   Resource,
   GraphTools,
+  BrowserTools,
 } from '../../index.js';
 import { SpiderCli } from '../shared/spider-cli.js';
 import { launchPlaywright } from 'crawlee';
@@ -52,6 +53,14 @@ export default class Ping extends SgCommand {
         )
       : undefined;
 
+    const timing = sg.config.spider?.savePerformance
+      ? await BrowserTools.getPageTiming(page)
+      : undefined;
+  
+    const xhr = sg.config.spider?.saveXhrList
+      ? await BrowserTools.getXhrList(page)
+      : undefined;
+  
     await page.close();
     await browser.close();
 
@@ -70,6 +79,8 @@ export default class Ping extends SgCommand {
         body,
         cookies,
         accessibility,
+        timing,
+        xhr
       });
 
       await GraphTools.analyzePage(resource);
