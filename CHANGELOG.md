@@ -3,6 +3,14 @@
 ## v0.9.19 - 23-04-05
 
 - Added `PropertySource.value` so mapped properties can return a 'clean' hard-coded value after finding an ugly one.
+- Expanded the configuration options for reports
+  - `report.dropEmptyQueries` does what it says on the tin
+  - `report.pivotSingleResults` triggers a check for queries that return only one row, and pivots them for friendlier display. Still experimental.
+  - The `report.queries` list allows a new 'modified query' structure, which includes both a pointer to an already-defined base query and a set of additional filters, return values, and so on. This allows you to reuse complex base, then filter them to a specific subdomain or other criteria without copying and pasting the underlying definition.
+  - `report.modifications` is an optional list of modifications that will be made to _each query_ in the report.
+  - The `spidergram report` command now supports the `--filter` flag; any filters from the command line will be added as 'modifications' to the report when it runs, allowing you to build a universal report and run it multiple times with different filters.
+- XmlHttpRequests detected during page load are fed into the Tech Fingerprinting tool; this improves the detection rate for many third-party APIs.
+- Custom technology figerprint rules can be added to the project configuration for site-specific libraries and APIs.
 
 ## v0.9.18 - 23-04-04
 
