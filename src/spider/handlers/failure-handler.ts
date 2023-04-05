@@ -51,23 +51,25 @@ export enum InternalError {
   TYPE = -3000,
 
   PLAYWRIGHT = -4000,
+  CERTIFICATE = -4010,
 }
 
 const internalErrorLookup = {
   // Network errors
-  ENOTFOUND: InternalError.DNS,
-  ECONNRESET: InternalError.RESET,
-  ETIMEDOUT: InternalError.TIMEOUT,
+  'ENOTFOUND': InternalError.DNS,
+  'ECONNRESET': InternalError.RESET,
+  'ETIMEDOUT': InternalError.TIMEOUT,
 
   // Server response errors
-  TimeoutError: InternalError.SERVERTIMEOUT,
-  ERR_EMPTY_RESPONSE: InternalError.EMPTY,
-  MaxRedirectsError: InternalError.REDIRECT,
+  'TimeoutError': InternalError.SERVERTIMEOUT,
+  'ERR_EMPTY_RESPONSE': InternalError.EMPTY,
+  'MaxRedirectsError': InternalError.REDIRECT,
   'RequestError: Cookie failed to parse': InternalError.COOKIE,
   "RequestError: Cookie not in this host's domain": InternalError.COOKIEDOMAIN,
+  'ERR_CERT_DATE_INVALID': InternalError.CERTIFICATE,
 
   // Internal type errors
-  TypeError: InternalError.TYPE,
+  'TypeError': InternalError.TYPE,
 
   // Playwright errors
   'page.content': InternalError.PLAYWRIGHT,
