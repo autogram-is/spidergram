@@ -1,5 +1,10 @@
-import { GeneratedAqlQuery } from 'arangojs/aql';
-import { AqQuery, AqFilter, isAqQuery, isAqFilter, isAqAggregate, isAqProperty, isAqSort } from 'aql-builder';
+import {
+  GeneratedAqlQuery,
+  aql,
+  isGeneratedAqlQuery,
+  literal,
+} from 'arangojs/aql.js';
+import { AqQuery, isAqQuery, isAqFilter, isAqAggregate, isAqProperty, isAqSort } from 'aql-builder';
 import { Query, JobStatus, Spidergram } from '../index.js';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import {
@@ -14,7 +19,6 @@ import _ from 'lodash';
 import path from 'node:path';
 import { DateTime } from 'luxon';
 import is from '@sindresorhus/is';
-
 
 /**
  * A query definition with additional filters, return values, or limits.
@@ -33,7 +37,7 @@ export type ModifiedQuery = {
    * return values, limits, sorts, and so on. These elements will be merged
    * into the base query before it's executed.
    */
-  modifications?: Omit<AqQuery, 'collection'>
+  modifications?: (Partial<AqQuery> | Query) | (Partial<AqQuery> | Query)[];
   
   /**
    * Separate and group the results based on the values in of the result set's
@@ -42,10 +46,17 @@ export type ModifiedQuery = {
    * 
    * If this property is set to a string, it is assumed to be the property name
    * to group by. If it's an object, it's assumed to be the property name and a
-   * a list of values to separate; all others will be left as part of an '_other'
-   * result set.
+   * a list of values to separate; all others will be left as part of the default
+   * result set for the query.
    */
-  expand?: string | { property: string, values: (string | number)[] }
+  split?: string | { property: string, values: (string | number)[] }
+
+  /**
+   * An optional post-processing function for the query data. This can be used
+   * to transform nested values into spreadsheet-friendly ones, or transform
+   * unformatted values into readable ones.
+   */
+  postProcess?: (data: AnyJson[]) => AnyJson[];
 }
 
 /**
@@ -88,19 +99,6 @@ export interface ReportConfig {
   outputPath?: string;
 
   /**
-   * A dictionary mapping incoming options to a query filter. 
-   * 
-   * @example
-   * ```
-   * filterMap: {
-   *   customOptionKey: { path: 'filter.property', eq: '{{customOptionKey}}' },
-   *   anotherOption: { path: 'some.other.property, lt: '{{anotherOption}}' }
-   * }
-   * ```
-   */
-  filterMap?: Record<string, AqFilter>
-
-  /**
    * A dictionary of report-specific options whose values can be changed each time
    * the report is run. For examp.
    */
@@ -110,6 +108,24 @@ export interface ReportConfig {
    * A named collection of queries that should be run to build the report's data
    */
   queries?: Record<string, string | GeneratedAqlQuery | AqQuery | Query | ModifiedQuery>;
+
+  /**
+   * One or more partial {@link AqQuery} structures or full Query objects;
+   * the filters, aggregates, return values, limits, sorts, and so on from these
+   * partial queries will be applied to all queries in the report (unless they're
+   * hard-coded AQL).
+   */
+  modifications?: (Partial<AqQuery> | Query) | (Partial<AqQuery> | Query)[];
+
+  /**
+   * If a query returns no results, omit it from the report.
+   */
+  dropEmptyQueries?: boolean
+
+  /**
+   * If a query returns a single row, pivot the data to turn its columns into rows.
+   */
+  pivotSingleResults?: boolean
 }
 
 interface ReportStatus extends JobStatus {
@@ -137,6 +153,9 @@ export class Report implements ReportConfig {
   description?: string;
   category?: string;
   options?: Record<string, unknown>;
+  pivotSingleResults: boolean;
+  dropEmptyQueries: boolean;
+  modifications: Partial<AqQuery>[];
   outputPath: string;
 
   status: ReportStatus;
@@ -151,6 +170,14 @@ export class Report implements ReportConfig {
     this.category = config.category;
     this.options = config.options ?? { format: 'xslx' };
     this.outputPath = config.outputPath ?? '{{date}} {{name}}';
+    if (config.modifications) {
+      const mods = Array.isArray(config.modifications) ? config.modifications : [config.modifications];
+      this.modifications = mods.map(m => m instanceof Query ? m.spec : m);
+    } else {
+      this.modifications = [];
+    }
+    this.pivotSingleResults = !!config.pivotSingleResults;
+    this.dropEmptyQueries = !!config.dropEmptyQueries;
 
     this.queries = config.queries ?? {};
 
@@ -188,48 +215,64 @@ export class Report implements ReportConfig {
   }
 
   async build(): Promise<void> {
-    const sg = await Spidergram.load();
+    // Iterate over every query, modify it if necessary, and run it.
     for (const [name, query] of Object.entries(this.queries)) {
-      this.events.emit('progress', this.status, `Running '${name}' query`);
+      this.events.emit('progress', this.status, name);
 
-      if (isModifiedQuery(query)) {
-        let q = new Query('resources');
+      let rawData: AnyJson[] = [];
 
-        // This is ugly AF, but we'll get to it later.
-        if (typeof query.base === 'string') {
-          const storedQuery = sg.config.queries?.[query.base];
-          if (isAqQuery(storedQuery)) q = new Query(storedQuery);
-          else if (storedQuery instanceof Query) q = storedQuery;
-        } else if (isAqQuery(query.base)) {
-          q = new Query(query.base);
-        } else if (query.base instanceof Query) {
-          q = query.base;
+      const q = await getReportQuery(query)
+      if (q === undefined) continue;
+
+      if (isGeneratedAqlQuery(q)) {
+        rawData = await Query.run(q);
+
+      } else {
+        // Set up the modifications list
+        const modifications = [...this.modifications];
+        if (isModifiedQuery(query)) {
+          if (query.modifications !== undefined) {
+            query.modifications = Array.isArray(query.modifications) ? query.modifications : [query.modifications];
+            query.modifications ??= [];
+            modifications.push(...query.modifications.map(m => m instanceof Query ? m.spec : m));
+          }
         }
 
         // Alter query — this is also where user values might be injected.
-        if (query.modifications) {
-          for (const f of query.modifications.filters ?? []) {
+        for (const mod of modifications) {
+          // Make an effort to weed out modifications that don't match
+          if (mod.collection && (mod.collection?.toString() !== q.spec.collection.toString())) {
+            continue;
+          }
+          
+          for (const f of mod.filters ?? []) {
             if (isAqFilter(f)) q.filterBy(f);
             else if (typeof f === 'string') q.filterBy(f);
           }
-          for (const a of query.modifications.aggregates ?? []) {
+          for (const a of mod.aggregates ?? []) {
             if (isAqAggregate(a)) q.aggregate(a);
             else if (typeof a === 'string') q.aggregate(a);
           }
-          for (const r of query.modifications.return ?? []) {
-            if (typeof r === 'string' || isAqProperty(r)) q.return(r);
-          }
-          for (const s of query.modifications.sorts ?? []) {
+          for (const s of mod.sorts ?? []) {
             if (typeof s === 'string' || isAqSort(s)) q.return(s);
           }
-          if (query.modifications.limit) q.limit(query.modifications.limit);
+          if (mod.limit) q.limit(mod.limit);
+          for (const r of mod.return ?? []) {
+            if (typeof r === 'string' || isAqProperty(r)) q.return(r);
+          }
         }
-        
-        if (query.expand) {
-          const propName = (typeof query.expand === 'string') ? query.expand : query.expand.property;
-          const allowedValues = (typeof query.expand === 'string') ? undefined : query.expand.values;
+        rawData = await q.run();
+      }
 
-          const rawData = await q.run();
+      if (isModifiedQuery(query)) {
+        if (query.postProcess) {
+          rawData = query.postProcess(rawData);
+        }
+
+        if (query.split) {
+          const propName = (typeof query.split === 'string') ? query.split : query.split.property;
+          const allowedValues = (typeof query.split === 'string') ? undefined : query.split.values;
+
           const groups = _.groupBy(rawData, datum => {
             let group = name;
             if (isJsonMap(datum)) {
@@ -249,17 +292,21 @@ export class Report implements ReportConfig {
             this.data[k] = v;
             this.status.records[k] = this.data[k].length;
           }
-        } else {
-          this.data[name] = await q.run();
-          this.status.records[name] = this.data[name].length;
         }
-
       } else {
-        this.data[name] = await Query.run(query);
+        this.data[name] = rawData;
         this.status.records[name] = this.data[name].length;
       }
-      this.status.finished++;
     }
+
+    if (this.pivotSingleResults === true) {
+      for (const k in this.data) {
+        if (this.data[k].length === 1)
+        this.data[k] = pivot(this.data[k]);
+      }
+    }
+
+    this.status.finished++;
     this.events.emit('progress', this.status, 'Data retrieved');
   }
 
@@ -280,6 +327,7 @@ export class Report implements ReportConfig {
           await sg.files('output').createDirectory(loc);
         }
         for (const [name, data] of Object.entries(this.data)) {
+          if (data.length === 0 && this.dropEmptyQueries) continue;
           const curFilePath = path.join(loc, `${name}.${format}`);
           await sg
             .files('output')
@@ -293,6 +341,7 @@ export class Report implements ReportConfig {
           await sg.files('output').createDirectory(loc);
         }
         for (const [name, data] of Object.entries(this.data)) {
+          if (data.length === 0 && this.dropEmptyQueries) continue;
           if (isJsonArray(data[0]) || isJsonMap(data[0])) {
             const rows = data as JsonCollection[];
             const curFilePath = path.join(loc, `${name}.${format}`);
@@ -307,6 +356,7 @@ export class Report implements ReportConfig {
         }
       } else {
         for (const [name, data] of Object.entries(this.data)) {
+          if (data.length === 0 && this.dropEmptyQueries) continue;
           rpt.addSheet(data, name.slice(0,31));
         }
         const curFilePath = `${loc}.xlsx`;
@@ -346,4 +396,67 @@ function isModifiedQuery(input: unknown) : input is ModifiedQuery {
     }
   }
   return false;
+}
+
+
+/**
+ * Given the various forms in which we take query definitions, take one and return either a Query
+ * or a GeneratedAqlQuery object.
+ */
+async function getReportQuery(
+  input: string | GeneratedAqlQuery | AqQuery | Query | ModifiedQuery
+): Promise<Query | GeneratedAqlQuery | undefined> {
+  
+  if (typeof input === 'string') {
+    const sg = await Spidergram.load();
+    const query = sg.config.queries?.[input];
+    if (query) {
+      return getReportQuery(query);
+    } else {
+      return Promise.resolve(aql`${literal(input)}`);
+    }
+
+  } else if (isGeneratedAqlQuery(input)) {
+    return Promise.resolve(input);
+
+  } else if (isAqQuery(input)) {
+    return Promise.resolve(new Query(input));
+
+  } else if (input instanceof Query) {
+    return Promise.resolve(input);
+
+  } else if (isModifiedQuery(input)) {
+    return getReportQuery(input.base);
+
+  } else {
+    return Promise.resolve(undefined);
+  }
+}
+
+function pivot(data: AnyJson[]) {
+  const datum = data[0];
+  if (isJsonMap(datum)) {
+    const newData: AnyJson[][] = [];
+    for (const [k, v] of Object.entries(datum)) {
+      if (isJsonArray(v)) {
+        newData.push([k, v.join(', ')]);
+      } else {
+        newData.push([k, v ?? '']);
+      }
+    }
+    return newData;
+
+  } if (isJsonArray(datum)) {
+    const newData: AnyJson[] = [];
+    for (const v of datum) {
+      if (isJsonArray(v) || isJsonMap(v)) {
+        newData.push(v);
+      } else {
+        newData.push([v]);
+      }
+    }
+    return newData;
+  } else {
+    return data;
+  }
 }
