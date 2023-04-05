@@ -1,8 +1,9 @@
 import { Flags, Args } from '@oclif/core';
-import { Spidergram, Report } from '../../index.js';
+import { Spidergram, Report, AqFilter } from '../../index.js';
 import { SgCommand } from '../index.js';
 import _ from 'lodash';
-import { joinOxford } from '../shared/index.js';
+import { joinOxford, queryFilterFlag } from '../shared/index.js';
+import { buildFilter } from '../shared/flag-query-tools.js';
 
 export default class DoReport extends SgCommand {
   static summary = 'Build and save a crawl report';
@@ -17,6 +18,10 @@ export default class DoReport extends SgCommand {
       summary: 'Add a stored query to the generated report',
       multiple: true,
     }),
+    filter: {
+      ...queryFilterFlag,
+      summary: 'Add a filter to each query in the report',
+    },
     name: Flags.string({
       char: 'n',
       summary: 'Report name',
@@ -73,12 +78,21 @@ export default class DoReport extends SgCommand {
     const definition = sg.config.reports?.[args.report ?? ''];
     const report =
       definition instanceof Report ? definition : new Report(definition);
+    
+    if (flags.filter) {
+      const filters: AqFilter[] = [];
+      for (const f of flags.filter ?? []) {
+        filters.push(buildFilter(f));
+      }
+      report.modifications.push({ filters });
+    }
+
     report.queries = { ...report.queries, ...queries };
     if (flags.name) report.name = flags.name;
 
     report
-      .on('progress', message => {
-        if (message) this.ux.action.status;
+      .on('progress', (status, message) => {
+        if (message) this.ux.action.status = message;
       })
       .on('end', () => this.ux.action.stop());
 
