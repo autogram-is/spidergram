@@ -163,14 +163,16 @@ export interface EnqueueUrlOptions {
   discardNonWeb?: boolean;
 
   /**
-   * If set, paths that end in more than this many repeated segments will not be crawled.
+   * The number of repeated path elements that cause Spidergram to consider a
+   * path 'recursive' and stop crawling it.
    *
-   * For example, a threshold of 3 would flag: `http://example.com/~/~/~`
+   * For example, a threshold of 3 would flag `http://example.com/~/~/~` as recursive,
+   * and it would not be crawled.
    *
    * @type {number}
    * @default 3
    */
-  infinitePathThreshold?: number;
+  recursivePathThreshold?: number;
 
   /**
    * The base URL that should be used when parsing relative URLs. If none
