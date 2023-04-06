@@ -37,7 +37,17 @@ export async function enqueueRequests(
       continue;
     }
 
-    if (!UrlTools.filterUrl(uu.parsed, options.crawl, { contextUrl: uniqueUrl?.parsed })) {
+    if (
+      !UrlTools.filterUrl(uu.parsed, options.crawl, {
+        contextUrl: uniqueUrl?.parsed,
+      })
+    ) {
+      continue;
+    }
+
+    if (
+      UrlTools.isRepeatingPath(uu.parsed, options.infinitePathThreshold)
+    ) {
       continue;
     }
 
