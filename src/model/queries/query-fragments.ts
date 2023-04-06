@@ -1,7 +1,7 @@
 import { AqQuery } from "aql-builder";
 
 /**
- * Returns a collection of UniqueUrls that *do* have accompanying resource
+ * Returns a collection of UniqueUrls that *do not* have accompanying resource
  * entries in the crawl database. This can be a useful starting point for
  * grabbing specific sets of unvisited URLs for follow-up crawls.
  * 
@@ -23,6 +23,7 @@ export const uncrawledUrls: AqQuery = {
   ],
   "filters": [
     { "document": false, "name": "responses", "eq": 0 },
+    { "name": "parsed.protocol", "in": ["http:", "https:"] },
   ],
 };
 
