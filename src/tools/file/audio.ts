@@ -2,9 +2,7 @@ import { GenericFile } from './generic-file.js';
 import { parseStream } from 'music-metadata';
 
 export class Audio extends GenericFile {
-  public static mimeTypes = [
-    'audio/*', 'video/mp4', 'video/x-matroska'
-  ];
+  public static mimeTypes = ['audio/*', 'video/mp4', 'video/x-matroska'];
 
   public static extensions = [
     'aiff',

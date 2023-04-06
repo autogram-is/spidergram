@@ -1,7 +1,5 @@
-import { Page } from "playwright";
+import { Page } from 'playwright';
 
 export async function getPageTiming(page: Page) {
-  return page.evaluate(() =>
-    performance.getEntriesByType('navigation').pop()
-  )
+  return page.evaluate(() => performance.getEntriesByType('navigation').pop());
 }

@@ -162,12 +162,11 @@ export interface EnqueueUrlOptions {
    */
   discardNonWeb?: boolean;
 
-  
   /**
    * If set, paths that end in more than this many repeated segments will not be crawled.
-   * 
+   *
    * For example, a threshold of 3 would flag: `http://example.com/~/~/~`
-   * 
+   *
    * @type {number}
    * @default 3
    */

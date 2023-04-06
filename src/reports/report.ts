@@ -4,7 +4,14 @@ import {
   isGeneratedAqlQuery,
   literal,
 } from 'arangojs/aql.js';
-import { AqQuery, isAqQuery, isAqFilter, isAqAggregate, isAqProperty, isAqSort } from 'aql-builder';
+import {
+  AqQuery,
+  isAqQuery,
+  isAqFilter,
+  isAqAggregate,
+  isAqProperty,
+  isAqSort,
+} from 'aql-builder';
 import { Query, JobStatus, Spidergram } from '../index.js';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import {
@@ -30,7 +37,7 @@ export type ModifiedQuery = {
    * it will be treated as the name of a saved query to look up in the global
    * configuration.
    */
-  base: string | AqQuery | Query,
+  base: string | AqQuery | Query;
 
   /**
    * Any parts of an AqQuery structure; this includes filters, aggregates,
@@ -38,18 +45,18 @@ export type ModifiedQuery = {
    * into the base query before it's executed.
    */
   modifications?: (Partial<AqQuery> | Query) | (Partial<AqQuery> | Query)[];
-  
+
   /**
    * Separate and group the results based on the values in of the result set's
-   * properties. Treat each of the resulting groups as a separate result set in 
+   * properties. Treat each of the resulting groups as a separate result set in
    * the final export.
-   * 
+   *
    * If this property is set to a string, it is assumed to be the property name
    * to group by. If it's an object, it's assumed to be the property name and a
    * a list of values to separate; all others will be left as part of the default
    * result set for the query.
    */
-  split?: string | { property: string, values: (string | number)[] }
+  split?: string | { property: string; values: (string | number)[] };
 
   /**
    * An optional post-processing function for the query data. This can be used
@@ -57,7 +64,7 @@ export type ModifiedQuery = {
    * unformatted values into readable ones.
    */
   postProcess?: (data: AnyJson[]) => AnyJson[];
-}
+};
 
 /**
  * Configuration options for a {@link Report}
@@ -86,14 +93,14 @@ export interface ReportConfig {
   /**
    * The path where the final report will be saved. `outputPath` supports the following
    * placeholder tokens:
-   * 
+   *
    * - `{{name}}`: The name of the report
    * - `{{date}}`: The current date in YYYY-MM-DD format
-   * 
+   *
    * In addition, any values used the `options` property of the Report configuration
    * can be used as tokens. The file extension (.json, .xlsx, etc) will be appended
    * automatically.
-   * 
+   *
    * @defaultValue `{{name}} - {{date}}`
    */
   outputPath?: string;
@@ -107,7 +114,10 @@ export interface ReportConfig {
   /**
    * A named collection of queries that should be run to build the report's data
    */
-  queries?: Record<string, string | GeneratedAqlQuery | AqQuery | Query | ModifiedQuery>;
+  queries?: Record<
+    string,
+    string | GeneratedAqlQuery | AqQuery | Query | ModifiedQuery
+  >;
 
   /**
    * One or more partial {@link AqQuery} structures or full Query objects;
@@ -120,12 +130,12 @@ export interface ReportConfig {
   /**
    * If a query returns no results, omit it from the report.
    */
-  dropEmptyQueries?: boolean
+  dropEmptyQueries?: boolean;
 
   /**
    * If a query returns a single row, pivot the data to turn its columns into rows.
    */
-  pivotSingleResults?: boolean
+  pivotSingleResults?: boolean;
 }
 
 interface ReportStatus extends JobStatus {
@@ -146,7 +156,10 @@ type ReportEventListener<T extends ReportEventType> = (
 ) => unknown;
 
 export class Report implements ReportConfig {
-  queries: Record<string, string | GeneratedAqlQuery | AqQuery | Query | ModifiedQuery>;
+  queries: Record<
+    string,
+    string | GeneratedAqlQuery | AqQuery | Query | ModifiedQuery
+  >;
   data: Record<string, AnyJson[]> = {};
 
   name?: string;
@@ -171,8 +184,10 @@ export class Report implements ReportConfig {
     this.options = config.options ?? { format: 'xslx' };
     this.outputPath = config.outputPath ?? '{{date}} {{name}}';
     if (config.modifications) {
-      const mods = Array.isArray(config.modifications) ? config.modifications : [config.modifications];
-      this.modifications = mods.map(m => m instanceof Query ? m.spec : m);
+      const mods = Array.isArray(config.modifications)
+        ? config.modifications
+        : [config.modifications];
+      this.modifications = mods.map(m => (m instanceof Query ? m.spec : m));
     } else {
       this.modifications = [];
     }
@@ -221,30 +236,38 @@ export class Report implements ReportConfig {
 
       let rawData: AnyJson[] = [];
 
-      const q = await getReportQuery(query)
+      const q = await getReportQuery(query);
       if (q === undefined) continue;
 
       if (isGeneratedAqlQuery(q)) {
         rawData = await Query.run(q);
-
       } else {
         // Set up the modifications list
         const modifications = [...this.modifications];
         if (isModifiedQuery(query)) {
           if (query.modifications !== undefined) {
-            query.modifications = Array.isArray(query.modifications) ? query.modifications : [query.modifications];
+            query.modifications = Array.isArray(query.modifications)
+              ? query.modifications
+              : [query.modifications];
             query.modifications ??= [];
-            modifications.push(...query.modifications.map(m => m instanceof Query ? m.spec : m));
+            modifications.push(
+              ...query.modifications.map(m =>
+                m instanceof Query ? m.spec : m,
+              ),
+            );
           }
         }
 
         // Alter query — this is also where user values might be injected.
         for (const mod of modifications) {
           // Make an effort to weed out modifications that don't match
-          if (mod.collection && (mod.collection?.toString() !== q.spec.collection.toString())) {
+          if (
+            mod.collection &&
+            mod.collection?.toString() !== q.spec.collection.toString()
+          ) {
             continue;
           }
-          
+
           for (const f of mod.filters ?? []) {
             if (isAqFilter(f)) q.filterBy(f);
             else if (typeof f === 'string') q.filterBy(f);
@@ -270,8 +293,12 @@ export class Report implements ReportConfig {
         }
 
         if (query.split) {
-          const propName = (typeof query.split === 'string') ? query.split : query.split.property;
-          const allowedValues = (typeof query.split === 'string') ? undefined : query.split.values;
+          const propName =
+            typeof query.split === 'string'
+              ? query.split
+              : query.split.property;
+          const allowedValues =
+            typeof query.split === 'string' ? undefined : query.split.values;
 
           const groups = _.groupBy(rawData, datum => {
             let group = name;
@@ -279,9 +306,10 @@ export class Report implements ReportConfig {
               const datumValue = datum[propName];
               if (allowedValues) {
                 if (
-                  (is.string(datumValue) || is.number(datumValue)) && 
+                  (is.string(datumValue) || is.number(datumValue)) &&
                   allowedValues.includes(datumValue)
-                ) group = datumValue.toString();
+                )
+                  group = datumValue.toString();
               } else if (datumValue !== undefined && datumValue !== null) {
                 group = datumValue.toString();
               }
@@ -301,8 +329,7 @@ export class Report implements ReportConfig {
 
     if (this.pivotSingleResults === true) {
       for (const k in this.data) {
-        if (this.data[k].length === 1)
-        this.data[k] = pivot(this.data[k]);
+        if (this.data[k].length === 1) this.data[k] = pivot(this.data[k]);
       }
     }
 
@@ -314,60 +341,60 @@ export class Report implements ReportConfig {
     const sg = await Spidergram.load();
     this.events.emit('progress', this.status, 'Generating files');
 
-      const opt = _.get(this.options, 'format');
-      const format = typeof opt === 'string' ? opt : 'xlsx';
-      const rpt = new FileTools.Spreadsheet();
+    const opt = _.get(this.options, 'format');
+    const format = typeof opt === 'string' ? opt : 'xlsx';
+    const rpt = new FileTools.Spreadsheet();
 
-      let loc = this.outputPath;
-      loc = loc.replace('{{name}}', this.name ?? 'report');
-      loc = loc.replace('{{date}}', DateTime.now().toISODate());
+    let loc = this.outputPath;
+    loc = loc.replace('{{name}}', this.name ?? 'report');
+    loc = loc.replace('{{date}}', DateTime.now().toISODate());
 
-      if (format === 'json') {
-        if (!(await sg.files('output').exists(loc))) {
-          await sg.files('output').createDirectory(loc);
-        }
-        for (const [name, data] of Object.entries(this.data)) {
-          if (data.length === 0 && this.dropEmptyQueries) continue;
+    if (format === 'json') {
+      if (!(await sg.files('output').exists(loc))) {
+        await sg.files('output').createDirectory(loc);
+      }
+      for (const [name, data] of Object.entries(this.data)) {
+        if (data.length === 0 && this.dropEmptyQueries) continue;
+        const curFilePath = path.join(loc, `${name}.${format}`);
+        await sg
+          .files('output')
+          .write(curFilePath, Buffer.from(JSON.stringify(data)));
+
+        this.status.finished++;
+        this.status.files.push(curFilePath);
+      }
+    } else if (format === 'csv' || format === 'tsv') {
+      if (!(await sg.files('output').exists(loc))) {
+        await sg.files('output').createDirectory(loc);
+      }
+      for (const [name, data] of Object.entries(this.data)) {
+        if (data.length === 0 && this.dropEmptyQueries) continue;
+        if (isJsonArray(data[0]) || isJsonMap(data[0])) {
+          const rows = data as JsonCollection[];
           const curFilePath = path.join(loc, `${name}.${format}`);
-          await sg
-            .files('output')
-            .write(curFilePath, Buffer.from(JSON.stringify(data)));
+          const stream = writeCsv(rows, {
+            delimiter: format === 'tsv' ? '\t' : undefined,
+          });
+          await sg.files('output').writeStream(curFilePath, stream);
 
           this.status.finished++;
           this.status.files.push(curFilePath);
         }
-      } else if (format === 'csv' || format === 'tsv') {
-        if (!(await sg.files('output').exists(loc))) {
-          await sg.files('output').createDirectory(loc);
-        }
-        for (const [name, data] of Object.entries(this.data)) {
-          if (data.length === 0 && this.dropEmptyQueries) continue;
-          if (isJsonArray(data[0]) || isJsonMap(data[0])) {
-            const rows = data as JsonCollection[];
-            const curFilePath = path.join(loc, `${name}.${format}`);
-            const stream = writeCsv(rows, {
-              delimiter: format === 'tsv' ? '\t' : undefined,
-            });
-            await sg.files('output').writeStream(curFilePath, stream);
-
-            this.status.finished++;
-            this.status.files.push(curFilePath);
-          }
-        }
-      } else {
-        for (const [name, data] of Object.entries(this.data)) {
-          if (data.length === 0 && this.dropEmptyQueries) continue;
-          rpt.addSheet(data, name.slice(0,31));
-        }
-        const curFilePath = `${loc}.xlsx`;
-        return sg
-          .files('output')
-          .write(curFilePath, rpt.toBuffer())
-          .then(() => {
-            this.status.finished++;
-            this.status.files.push(curFilePath);
-          });
       }
+    } else {
+      for (const [name, data] of Object.entries(this.data)) {
+        if (data.length === 0 && this.dropEmptyQueries) continue;
+        rpt.addSheet(data, name.slice(0, 31));
+      }
+      const curFilePath = `${loc}.xlsx`;
+      return sg
+        .files('output')
+        .write(curFilePath, rpt.toBuffer())
+        .then(() => {
+          this.status.finished++;
+          this.status.files.push(curFilePath);
+        });
+    }
   }
 
   async run(): Promise<ReportStatus> {
@@ -386,11 +413,15 @@ export class Report implements ReportConfig {
   }
 }
 
-function isModifiedQuery(input: unknown) : input is ModifiedQuery {
+function isModifiedQuery(input: unknown): input is ModifiedQuery {
   if (input) {
-    if (typeof input !== 'object') return false
+    if (typeof input !== 'object') return false;
     if ('base' in input) {
-      if (isAqQuery(input.base) || input.base instanceof Query || typeof input.base === 'string') {
+      if (
+        isAqQuery(input.base) ||
+        input.base instanceof Query ||
+        typeof input.base === 'string'
+      ) {
         return true;
       }
     }
@@ -398,15 +429,13 @@ function isModifiedQuery(input: unknown) : input is ModifiedQuery {
   return false;
 }
 
-
 /**
  * Given the various forms in which we take query definitions, take one and return either a Query
  * or a GeneratedAqlQuery object.
  */
 async function getReportQuery(
-  input: string | GeneratedAqlQuery | AqQuery | Query | ModifiedQuery
+  input: string | GeneratedAqlQuery | AqQuery | Query | ModifiedQuery,
 ): Promise<Query | GeneratedAqlQuery | undefined> {
-  
   if (typeof input === 'string') {
     const sg = await Spidergram.load();
     const query = sg.config.queries?.[input];
@@ -415,19 +444,14 @@ async function getReportQuery(
     } else {
       return Promise.resolve(aql`${literal(input)}`);
     }
-
   } else if (isGeneratedAqlQuery(input)) {
     return Promise.resolve(input);
-
   } else if (isAqQuery(input)) {
     return Promise.resolve(new Query(input));
-
   } else if (input instanceof Query) {
     return Promise.resolve(input);
-
   } else if (isModifiedQuery(input)) {
     return getReportQuery(input.base);
-
   } else {
     return Promise.resolve(undefined);
   }
@@ -445,8 +469,8 @@ function pivot(data: AnyJson[]) {
       }
     }
     return newData;
-
-  } if (isJsonArray(datum)) {
+  }
+  if (isJsonArray(datum)) {
     const newData: AnyJson[] = [];
     for (const v of datum) {
       if (isJsonArray(v) || isJsonMap(v)) {

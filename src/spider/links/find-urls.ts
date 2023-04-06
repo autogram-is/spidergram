@@ -58,13 +58,8 @@ export function findUrls(
           link.handler = linkOptions?.handler ?? options.handler;
 
           /* eslint-disable @typescript-eslint/no-unused-vars */
-          const {
-            selector,
-            save,
-            crawl,
-            linkSelectors,
-            ...linkOptionsToSave
-          } = linkOptions ?? {};
+          const { selector, save, crawl, linkSelectors, ...linkOptionsToSave } =
+            linkOptions ?? {};
           /* eslint-enable @typescript-eslint/no-unused-vars */
 
           results.push({ ...link, ...linkOptionsToSave });

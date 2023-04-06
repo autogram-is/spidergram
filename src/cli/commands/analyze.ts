@@ -3,7 +3,7 @@ import {
   Resource,
   WorkerQuery,
   OutputLevel,
-  GraphTools
+  GraphTools,
 } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
 import { buildFilter } from '../shared/flag-query-tools.js';
@@ -18,7 +18,7 @@ export default class Analyze extends SgCommand {
     filter: queryFilterFlag,
     concurrency: Flags.integer({
       summary: 'Analyze multiple pages simultaneously',
-      default: 1
+      default: 1,
     }),
     limit: Flags.integer({
       char: 'l',
@@ -56,7 +56,9 @@ export default class Analyze extends SgCommand {
       options.propertyMap = false;
     }
 
-    const worker = new WorkerQuery<Resource>('resources', { concurrency: flags.concurrency });
+    const worker = new WorkerQuery<Resource>('resources', {
+      concurrency: flags.concurrency,
+    });
     for (const f of flags.filter ?? []) {
       worker.filterBy(buildFilter(f));
     }

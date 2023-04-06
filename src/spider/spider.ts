@@ -169,7 +169,10 @@ export class Spider extends PlaywrightCrawler {
     }
   }
 
-  protected updateStats({ request, requestMeta }: SpiderContext, error = false) {
+  protected updateStats(
+    { request, requestMeta }: SpiderContext,
+    error = false,
+  ) {
     const type =
       requestMeta?.type ?? requestMeta?.headers['content-type'] ?? 'unknown';
     const status = requestMeta?.statusCode ?? -1;

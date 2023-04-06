@@ -48,15 +48,19 @@ export interface PropertySource extends Record<string, unknown> {
 
   /**
    * If set, this value will be returned in place of the found value.
-   * 
+   *
    * This can be useful when you're *looking for* a messy value in one property
    * and want to set a clean flag or value in another property depending on the
    * ugly one.
-   * 
+   *
    * If the `value` property contains a function, that function will be called to
    * generate the return value.
    */
-  value?: string | number | boolean | ((value: unknown, conditions: PropertySource) => unknown | undefined)
+  value?:
+    | string
+    | number
+    | boolean
+    | ((value: unknown, conditions: PropertySource) => unknown | undefined);
 
   /**
    * Only return the value if it's equal to this.
@@ -121,10 +125,7 @@ export function findPropertyValue<T = unknown>(
     } else {
       let v = _.get(object, source.source);
       if (!undef(v, source.nullIsValue)) {
-        if (
-          typeof v === 'string' &&
-          typeof source.selector === 'string'
-        ) {
+        if (typeof v === 'string' && typeof source.selector === 'string') {
           const $ = getCheerio(v);
           const matches = $(source.selector);
           if (matches.length > 0) {
@@ -173,8 +174,10 @@ function checkPropertyValue(
     let foundMatch = false;
     if (Array.isArray(value)) {
       const returnValue = _.intersection(conditions.in, value);
-      if (returnValue.length === 0) return getReturnValue(undefined, conditions);
-      if (returnValue.length === 1) return getReturnValue(returnValue[0], conditions);
+      if (returnValue.length === 0)
+        return getReturnValue(undefined, conditions);
+      if (returnValue.length === 1)
+        return getReturnValue(returnValue[0], conditions);
       return getReturnValue(returnValue, conditions);
     } else {
       for (const condition of conditions.in) {
@@ -193,7 +196,9 @@ function checkPropertyValue(
   } else if (conditions.matching !== undefined) {
     if (typeof value === 'string') {
       if (minimatch(value, conditions.matching)) {
-        return conditions.negate ? undefined : getReturnValue(value, conditions);
+        return conditions.negate
+          ? undefined
+          : getReturnValue(value, conditions);
       }
     } else if (Array.isArray(value)) {
       const returnList = value
@@ -205,7 +210,10 @@ function checkPropertyValue(
             minimatch(v, conditions.matching),
         );
       if (conditions.join || returnList.length === 1) {
-        return getReturnValue(returnList.slice(conditions.limit).join(conditions.join), conditions);
+        return getReturnValue(
+          returnList.slice(conditions.limit).join(conditions.join),
+          conditions,
+        );
       } else {
         return getReturnValue(returnList.slice(conditions.limit), conditions);
       }
@@ -227,8 +235,7 @@ function getReturnValue(value: unknown, definition: PropertySource) {
         return definition.value(value, definition);
       }
       return definition.value;
-    }
-    else return value;
+    } else return value;
   } else if (definition.fallback !== undefined) {
     return definition.fallback;
   }

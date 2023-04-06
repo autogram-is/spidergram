@@ -5,4 +5,4 @@
 
 export * from './filter-url.js';
 export * from './url-match-strategy.js';
-export * from './is-infinite-baseurl.js';
+export * from './is-repeating-path.js';

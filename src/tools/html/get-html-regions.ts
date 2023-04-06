@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { getCheerio } from './get-cheerio.js';
 import { UrlFilter } from '../urls/index.js';
 
-
 /**
  * Selector and metadata to identify a specific region of an HTML page.
  */
@@ -10,14 +9,14 @@ export type PageRegion = Record<string, unknown> & {
   /**
    * The unique name for this region. If one isn't specified, the selector will be used as the name.
    */
-  name?: string,
+  name?: string;
 
   /**
    * One or more {@link UrlFilter|UrlFilters} that limit the pages the selector should
    * apply to. If a urlFilter is set on the Region defintion, and no Url is supplied when
    * the page is being processed, the region will be ignored.
    */
-  urlFilter?: UrlFilter | UrlFilter[]
+  urlFilter?: UrlFilter | UrlFilter[];
 
   /**
    * The CSS selector that identifies the region.
@@ -25,15 +24,14 @@ export type PageRegion = Record<string, unknown> & {
   selector: string;
 };
 export type RegionSelector = string | PageRegion;
-export type RegionMap = Record<string, RegionSelector | RegionSelector[]>
-
+export type RegionMap = Record<string, RegionSelector | RegionSelector[]>;
 
 /**
  * One or more page region definitions. Several input formats are supported:
- * 
+ *
  * @example Simple selector
  * `const regions: RegionInput = 'footer';`
- * 
+ *
  * @example Array of simple selectors
  * `const regions: RegionInput = ['head.hero', 'article', 'footer'];`
  *
@@ -44,7 +42,7 @@ export type RegionMap = Record<string, RegionSelector | RegionSelector[]>
  *   { urlFilter: { hostname: '*example.com' }, name: 'header', selector: 'body > div:nth-child(2)' },
  * ]
  * ```
- * 
+ *
  * @example Named Regions object
  * ```
  * const regions: RegionInput = {

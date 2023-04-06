@@ -1,6 +1,10 @@
-import { Cookie, Page } from "playwright";
+import { Cookie, Page } from 'playwright';
 
 export async function getPageCookies(page: Page) {
-  return page.context().cookies()
-    .then(output => { return { cookies: output } as Record<string, Cookie[]> })
+  return page
+    .context()
+    .cookies()
+    .then(output => {
+      return { cookies: output } as Record<string, Cookie[]>;
+    });
 }

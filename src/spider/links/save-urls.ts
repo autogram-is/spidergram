@@ -53,14 +53,15 @@ export async function saveUrls(
     }
 
     // IF the URL is parsable, ensure it passes our save filters.
-    // Since they only work on parsable URLs, we skip the step and rely on the 
+    // Since they only work on parsable URLs, we skip the step and rely on the
     // earlier 'discardUnparsable' flag to weed out undesirables.
     if (uu.parsed) {
-      if (UrlTools.filterUrl(
-        uu.parsed,
-        options.save,
-        { contextUrl: uniqueUrl?.parsed
-      }) === false) continue;
+      if (
+        UrlTools.filterUrl(uu.parsed, options.save, {
+          contextUrl: uniqueUrl?.parsed,
+        }) === false
+      )
+        continue;
     }
 
     // If 'discardExistingLinks' is set, we don't bother including URLs

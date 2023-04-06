@@ -45,9 +45,7 @@ export async function enqueueRequests(
       continue;
     }
 
-    if (
-      UrlTools.isRepeatingPath(uu.parsed, options.infinitePathThreshold)
-    ) {
+    if (UrlTools.isRepeatingPath(uu.parsed, options.infinitePathThreshold)) {
       continue;
     }
 

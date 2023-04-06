@@ -89,10 +89,10 @@ export class AxeAuditor {
         passes: [],
         violations: [],
         incomplete: [],
-        inapplicable: [],     
+        inapplicable: [],
         timestamp: new Date(Date.now()).toISOString(),
-        error: (error instanceof Error) ? error : true
-      }
+        error: error instanceof Error ? error : true,
+      };
     }) as Promise<AxeReport>;
   }
 

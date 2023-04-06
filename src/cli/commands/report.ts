@@ -78,7 +78,7 @@ export default class DoReport extends SgCommand {
     const definition = sg.config.reports?.[args.report ?? ''];
     const report =
       definition instanceof Report ? definition : new Report(definition);
-    
+
     if (flags.filter) {
       const filters: AqFilter[] = [];
       for (const f of flags.filter ?? []) {

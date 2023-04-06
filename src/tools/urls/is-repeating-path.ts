@@ -9,7 +9,7 @@ export function isRepeatingPath(url: ParsedUrl, threshold = 3) {
   if (threshold < 2) return false;
 
   const segments = url.path.filter(s => s !== '');
-  let lastSegment = segments[segments.length-1];
+  let lastSegment = segments[segments.length - 1];
   let instances = 0;
 
   for (const segment of segments.reverse()) {

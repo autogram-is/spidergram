@@ -1,5 +1,5 @@
 import { Flags, ux } from '@oclif/core';
-import { UrlMatchStrategy } from '../../tools/urls/index.js'
+import { UrlMatchStrategy } from '../../tools/urls/index.js';
 
 /**
  * Flags that you can use for manipulating tables.

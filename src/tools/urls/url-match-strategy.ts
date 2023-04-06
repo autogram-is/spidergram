@@ -2,10 +2,10 @@
  * Describes a list of supported strategies for comparing two URLs to each other.
  * These are most useful in crawling scenarios where candidate URLs are evaluated
  * for potential archiving based on the URL currently being archived.
- * 
+ *
  * Critically, these strategies are only useful in situations where both the candidate
  * URL and the 'context' URL are available — in other scenarios these strategies will
- * always result in FALSE matches, and URLs will be skipped.  
+ * always result in FALSE matches, and URLs will be skipped.
  */
 export enum UrlMatchStrategy {
   /**

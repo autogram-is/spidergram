@@ -29,7 +29,9 @@ export default class SpidergramStatus extends SgCommand {
     );
     if (flags.config && Spidergram.status.configFile) {
       if (is.function_(sg.rawConfig)) {
-        this.log(this.chalk.dim('File contains dynamic code and cannot be displayed.'));
+        this.log(
+          this.chalk.dim('File contains dynamic code and cannot be displayed.'),
+        );
       } else {
         ux.styledJSON(sg.rawConfig);
       }

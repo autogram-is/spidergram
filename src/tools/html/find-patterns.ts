@@ -7,7 +7,7 @@ import { ParsedUrl } from '@autogram/url-tools';
 export interface FoundPattern extends HtmlTools.ElementData {
   pattern: string;
   selector: string;
-  location?: Reference<Resource>
+  location?: Reference<Resource>;
 }
 
 /**
@@ -26,9 +26,13 @@ export interface PatternDefinition extends HtmlTools.ElementDataOptions {
 
   /**
    * An optional post-processing function that can be used to extract additional information
-   * or alter the pattern before it's returned. 
+   * or alter the pattern before it's returned.
    */
-  fn?: (instance: FoundPattern, element: cheerio.Element, root: cheerio.Root) => FoundPattern;
+  fn?: (
+    instance: FoundPattern,
+    element: cheerio.Element,
+    root: cheerio.Root,
+  ) => FoundPattern;
 
   /**
    * One or more URL filters this pattern should apply to. Only applicable when
@@ -53,20 +57,20 @@ const defaults: HtmlTools.ElementDataOptions = {
 export function findPagePatterns(
   input: string | cheerio.Root | Resource,
   patterns: PatternDefinition | PatternDefinition[],
-  options: Record<string, unknown> = {}
+  options: Record<string, unknown> = {},
 ): Fragment[] {
   const list = Array.isArray(patterns) ? patterns : [patterns];
   const results: Fragment[] = [];
   for (const pattern of list) {
     results.push(
-      ...findPatternInstances(input, pattern, options)
-        .map(fp => new Fragment(fp))
+      ...findPatternInstances(input, pattern, options).map(
+        fp => new Fragment(fp),
+      ),
     );
   }
 
   return results;
 }
-
 
 /**
  * Identify and extract instances of markup patterns inside an HTML page.
@@ -77,7 +81,7 @@ export function findPagePatterns(
 export function findPatternInstances(
   input: string | cheerio.Root | Resource,
   pattern: PatternDefinition,
-  options: Record<string, unknown> = {}
+  options: Record<string, unknown> = {},
 ): FoundPattern[] {
   if (pattern.urlFilter && !(input instanceof Resource)) {
     return [];

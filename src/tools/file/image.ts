@@ -19,7 +19,7 @@ export class Image extends GenericFile {
       .then(data => {
         return {
           ...data.getImageSize(),
-          ...data.tags
+          ...data.tags,
         };
       });
   }

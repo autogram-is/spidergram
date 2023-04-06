@@ -162,7 +162,7 @@ export class Resource extends Entity {
       if (this._bodyHash !== freshHash) {
         await KeyValueStore.open('body_html').then(kv =>
           kv.setValue(this.key, this.body ?? ''),
-        );  
+        );
         this._bodyHash = freshHash;
       }
     } else if (Resource.offloadBodyHtml === 'file') {

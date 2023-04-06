@@ -1,6 +1,6 @@
 # Spidergram Changelog
 
-## v0.9.19 - 23-04-05
+## v0.9.19 - 23-04-06
 
 - Added `PropertySource.value` so mapped properties can return a 'clean' hard-coded value after finding an ugly one.
 - `UrlTools.filterUrl()` now supports property-scoped `{ property: 'hostname', glob: '*.example.com' }` and `{ property: 'path', regex: '.*\.pdf' }` expressions, simplifying the patterns necessary to match specific URL components.

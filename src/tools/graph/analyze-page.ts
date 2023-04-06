@@ -1,9 +1,4 @@
-import {
-  Spidergram,
-  Resource,
-  HtmlTools,
-  BrowserTools,
-} from '../../index.js';
+import { Spidergram, Resource, HtmlTools, BrowserTools } from '../../index.js';
 import { relinkResource } from './relink-resource.js';
 import { PageDataOptions, PageContentOptions } from '../html/index.js';
 import { TechAuditOptions } from '../browser/index.js';

@@ -1,10 +1,5 @@
 import { Spidergram } from './spidergram.js';
-import {
-  SpiderOptions,
-  Query,
-  Report,
-  ReportConfig,
-} from '../index.js';
+import { SpiderOptions, Query, Report, ReportConfig } from '../index.js';
 import { UrlMutators } from '@autogram/url-tools';
 import { NormalizerOptions } from './global-normalizer.js';
 import {
@@ -16,8 +11,8 @@ import {
 } from '../tools/html/index.js';
 import {
   PageAnalysisOptions,
-  PageAnalyzer
-} from '../tools/graph/analyze-page.js'
+  PageAnalyzer,
+} from '../tools/graph/analyze-page.js';
 import { TechAuditOptions } from '../tools/browser/index.js';
 import { Configuration as FileConfiguration } from 'typefs';
 import { Config as ArangoConfig } from 'arangojs/connection';

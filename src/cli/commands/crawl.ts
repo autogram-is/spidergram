@@ -1,6 +1,12 @@
 import { Flags, Args } from '@oclif/core';
 import { LogLevel } from 'crawlee';
-import { Spidergram, Spider, EntityQuery, QueryFragments, UniqueUrl } from '../../index.js';
+import {
+  Spidergram,
+  Spider,
+  EntityQuery,
+  QueryFragments,
+  UniqueUrl,
+} from '../../index.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
 import is from '@sindresorhus/is';
 import { filterUrl } from '../../tools/urls/filter-url.js';
@@ -76,21 +82,30 @@ export default class Crawl extends SgCommand {
     });
 
     if (flags.resume && flags.enqueue !== 'none') {
-      this.ux.action.start('Retrieving already-queued URLs')
+      this.ux.action.start('Retrieving already-queued URLs');
       const uq = new EntityQuery<UniqueUrl>(QueryFragments.uncrawledUrls);
 
-      const uus = await uq.run().then(
-        uus => uus.filter(uu => uu.parsed ? filterUrl(uu.parsed, flags.enqueue ?? sg.config.spider?.urls?.crawl, { contextUrl: urls[0] }) : false)
-      );
+      const uus = await uq
+        .run()
+        .then(uus =>
+          uus.filter(uu =>
+            uu.parsed
+              ? filterUrl(
+                  uu.parsed,
+                  flags.enqueue ?? sg.config.spider?.urls?.crawl,
+                  { contextUrl: urls[0] },
+                )
+              : false,
+          ),
+        );
       this.ux.action.stop(`${uus.length} found.`);
 
       if (uus.length === 0) {
-        this.error('No uncrawled URLs matched the requested domains.')
+        this.error('No uncrawled URLs matched the requested domains.');
       } else {
         this.startProgress('Resuming crawl');
-        await spider.resume(uus);  
+        await spider.resume(uus);
       }
-
     } else {
       this.startProgress('Crawling');
       await spider.run(urls);
