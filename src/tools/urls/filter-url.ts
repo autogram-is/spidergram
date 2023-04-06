@@ -47,43 +47,44 @@ export function filterUrl(
   if (filters === 'all') return true;
   else if (filters === 'none') return false;
   else if (is.boolean(filters)) return filters;
+  let softAccept = false;
 
   switch (options.mode) {
     case 'all':
       // 'all' mode is a strict filter that only passes URLs if EVERY filter returns TRUE.
       for (const filter of arrify(filters)) {
-        if (!singleFilter(input, filter, contextUrl)) {
-          return false;
-        }
+        const accept = singleFilter(input, filter, contextUrl);
+        if (!accept) return false;
       }
       return true;
 
     case 'none':
       // 'none' is an inverse check, only passing URLs if EVERY filter returns FALSE.
       for (const filter of arrify(filters)) {
-        if (singleFilter(input, filter, contextUrl)) {
-          return false;
-        }
+        const accept = singleFilter(input, filter, contextUrl);
+        if (accept) return false;
       }
       return true;
 
     default:
       // Normal mode ('any') passes URLs if AT LEAST ONE filter returns TRUE.
       for (const filter of arrify(filters)) {
-        if (singleFilter(input, filter, contextUrl)) {
-          return true;
-        }
+        const accept = singleFilter(input, filter, contextUrl);
+        if (accept === null) return false;
+        if (accept === true) softAccept = true;
       }
+      if (softAccept) return true;
   }
 
   return false;
 }
 
+// This is a bit tricky; we return a boolean OR a null; the null, confusingly, 
 function singleFilter(
   url: ParsedUrl,
   filter: UrlFilter,
   contextUrl?: ParsedUrl,
-): boolean {
+): boolean | null {
   if (is.enumCase(filter, UrlMatchStrategy)) {
     switch (filter) {
       case UrlMatchStrategy.All:
@@ -109,17 +110,25 @@ function singleFilter(
     const regex = is.regExp(filter.regex)
       ? filter.regex
       : new RegExp(filter.regex);
-    return regex.test(
+    const accept = regex.test(
       _.get(url.properties as object, filter.property ?? 'href', ''),
     );
+    if (filter.reject) {
+      return accept ? null : true
+    }
+    return accept
   } else if (is.regExp(filter)) {
     return filter.test(url.href);
   } else if (isUrlGlobFilter(filter)) {
-    return minimatch(
+    const accept = minimatch(
       _.get(url.properties as object, filter.property ?? 'href', ''),
       filter.glob,
       { dot: true },
     );
+    if (filter.reject) {
+      return accept ? null : true
+    }
+    return accept
   } else if (is.string(filter)) {
     // Treat it as a glob to match against the url's href
     return minimatch(url.href, filter, { dot: true });
@@ -150,8 +159,8 @@ export function isUrlRegexFilter(input: unknown): input is UrlRegexFilter {
   );
 }
 
-export type UrlGlobFilter = { glob: string; property?: string };
-export type UrlRegexFilter = { regex: string | RegExp; property?: string };
+export type UrlGlobFilter = { property?: string, glob: string, reject?: true };
+export type UrlRegexFilter = { property?: string, regex: string | RegExp, reject?: true };
 export type UrlFilterFunction = (
   candidate: ParsedUrl,
   current?: ParsedUrl,

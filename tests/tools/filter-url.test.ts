@@ -2,6 +2,7 @@ import { ParsedUrl, ParsedUrlSet } from "@autogram/url-tools";
 import { UrlTools } from "../../src/index.js";
 import { readFileSync } from "fs";
 import test from 'ava';
+import { UrlMatchStrategy } from "../../src/tools/urls/url-match-strategy.js";
 
 /**
  * The library we're using for glob testing -- minimatch -- is powerful but
@@ -141,6 +142,18 @@ test('multiple filters', t => {
   t.false(UrlTools.filterUrl(url, [() => true, () => false], { mode: 'none' }));
   t.false(UrlTools.filterUrl(url, [() => false, () => true], { mode: 'none' }));
   t.true(UrlTools.filterUrl(url, [() => false, () => false], { mode: 'none' }));
+});
+
+test('reject filters', t => {
+  t.true(UrlTools.filterUrl(url, [
+    { property: 'domain', glob: 'example.co.uk' },
+    UrlMatchStrategy.All
+  ]));
+
+  t.false(UrlTools.filterUrl(url, [
+    { property: 'domain', glob: 'example.co.uk', reject: true },
+    UrlMatchStrategy.All
+  ]));
 });
 
 test('multiple urls', t => {
