@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { Page } from 'playwright';
+import is from '@sindresorhus/is';
+import { KeyValueStore, Resource } from '../../index.js';
 
 // These types are yoinked from the Axe-Core project; their Typescript/ESM situation
 // is a little chaotic at the moemnt, and we want to revisit these duplicated types
@@ -74,6 +76,16 @@ interface RelatedNode {
   html: string;
 }
 
+export type AxeAuditOptions = {
+  summary?: 'full' | 'category' | 'impact' | 'omit' | ((audit: AxeReport) => unknown)
+  save?: string | boolean
+}
+
+const defaults: AxeAuditOptions = {
+  summary: 'impact',
+  save: false
+}
+
 /**
  * This is bare bones for now, but
  */
@@ -94,6 +106,44 @@ export class AxeAuditor {
         error: error instanceof Error ? error : true,
       };
     }) as Promise<AxeReport>;
+  }
+
+  static async getAuditResults(page: Page, options: true | AxeAuditOptions = true) {
+    const opt: AxeAuditOptions = { ...defaults, ...(options === true ? {} : options) };
+    const kv = await KeyValueStore.open('axe_audits');
+
+    return AxeAuditor.run(page)
+      .then(results => {
+        if (opt.save) {
+          const key = typeof opt.save === 'string' ? opt.save : Resource.getKeyForUrl(page.url());
+          return kv.setValue(key, results).then(() => results);
+        } else {
+          return results;
+        }
+      })
+      .then(results => {
+        if (results.error || opt.summary === 'full') {
+          return results;
+        } else if (opt.summary === 'category') {
+          return AxeAuditor.totalByCategory(results);
+        } else if (opt.summary === 'impact') {
+          return AxeAuditor.totalByImpact(results);
+        } else if (is.function_(opt.summary)) {
+          return opt.summary(results);
+        } else {
+          // This includes summary === 'omit'
+          return undefined;
+        }
+      })
+      .catch((error: unknown) => {
+        if (error instanceof Error) return { error }
+        else return { error: true };
+      })
+  }
+
+  static totalByCategory(input: AxeReport) {
+    // Not yet implemented
+    return AxeAuditor.totalByImpact(input);
   }
 
   static totalByImpact(input: AxeReport) {

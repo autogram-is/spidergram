@@ -2,6 +2,7 @@ import { Dictionary, LogLevel, PlaywrightCrawlerOptions } from 'crawlee';
 import { SpiderHook } from './hooks/index.js';
 import { EnqueueUrlOptions } from './links/index.js';
 import { SpiderRequestHandler } from './handlers/index.js';
+import { AxeAuditOptions } from '../tools/browser/axe-auditor.js';
 
 export type SpiderOptions = InternalSpiderOptions &
   Omit<
@@ -153,7 +154,7 @@ export interface InternalSpiderOptions extends Dictionary {
    *
    * @defaultValue false
    */
-  auditAccessibility?: boolean | 'summary';
+  auditAccessibility?: boolean | AxeAuditOptions;
 
   /**
    * Number of seconds to wait for a handler before cancelling the request and

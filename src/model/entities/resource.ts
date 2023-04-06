@@ -7,7 +7,7 @@ import {
   Transform,
 } from './entity.js';
 import { parse as parseContentType } from 'content-type';
-import { KeyValueStore, SavedFile } from '../index.js';
+import { KeyValueStore, SavedFile, UuidFactory } from '../index.js';
 import { Spidergram } from '../../config/spidergram.js';
 import path from 'path';
 import { sha1 } from 'object-hash';
@@ -26,6 +26,10 @@ export interface ResourceConstructorOptions extends EntityConstructorOptions {
 
 export class Resource extends Entity {
   static offloadBodyHtml?: 'db' | 'file';
+
+  static getKeyForUrl(url: string | ParsedUrl, label?: string): string {
+    return UuidFactory.generate({ url: url.toString(), label: label });
+  }
 
   readonly _collection = 'resources';
 

@@ -46,11 +46,7 @@ export default class Ping extends SgCommand {
       : [];
 
     const accessibility = sg.config.spider?.auditAccessibility
-      ? await AxeAuditor.run(page).then(results =>
-          sg.config.spider?.auditAccessibility === 'summary'
-            ? AxeAuditor.totalByImpact(results)
-            : results,
-        )
+      ? await AxeAuditor.getAuditResults(page, { summary: 'impact', save: false })
       : undefined;
 
     const timing = sg.config.spider?.savePerformance
