@@ -1,8 +1,9 @@
 import { Flags, Args } from '@oclif/core';
 import { LogLevel } from 'crawlee';
-import { Spidergram, Spider, EntityQuery, NormalizedUrlSet, QueryFragments, UniqueUrl } from '../../index.js';
+import { Spidergram, Spider, EntityQuery, QueryFragments, UniqueUrl } from '../../index.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
 import is from '@sindresorhus/is';
+import { filterUrl } from '../../tools/urls/filter-url.js';
 
 export default class Crawl extends SgCommand {
   static summary = 'Crawl and store a site';
@@ -78,22 +79,9 @@ export default class Crawl extends SgCommand {
       this.ux.action.start('Retrieving already-queued URLs')
       const uq = new EntityQuery<UniqueUrl>(QueryFragments.uncrawledUrls);
 
-      if (flags.enqueue === 'same-hostname') {
-        // Grab just the hostnames of the specified URLS, and filter by them
-        uq.filterBy({
-          path: 'parsed.hostname',
-          in: [...new NormalizedUrlSet(urls).values()].map(url => url.hostname)
-        });
-
-      } else if (flags.enqueue === 'same-domain') {
-        // Default is 'same-domain'. Grab the domains of the specified URLs
-        // and filter by them.
-        uq.filterBy({
-          path: 'parsed.domain',
-          in: [...new NormalizedUrlSet(urls).values()].map(url => url.domain)
-        });
-      }
-      const uus = await uq.run();
+      const uus = await uq.run().then(
+        uus => uus.filter(uu => uu.parsed ? filterUrl(uu.parsed, flags.enqueue ?? sg.config.spider?.urls?.crawl, { contextUrl: urls[0] }) : false)
+      );
       this.ux.action.stop(`${uus.length} found.`);
 
       if (uus.length === 0) {
