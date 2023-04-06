@@ -3,6 +3,7 @@
 ## v0.9.19 - 23-04-05
 
 - Added `PropertySource.value` so mapped properties can return a 'clean' hard-coded value after finding an ugly one.
+- `UrlTools.filterUrl()` now supports property-scoped `{ property: 'hostname', glob: '*.example.com' }` and `{ property: 'path', regex: '.*\.pdf' }` expressions, simplifying the patterns necessary to match specific URL components.
 - Expanded the configuration options for reports
   - `report.dropEmptyQueries` does what it says on the tin
   - `report.pivotSingleResults` triggers a check for queries that return only one row, and pivots them for friendlier display. Still experimental.
@@ -154,7 +155,7 @@ This release is dedicated to teen crime-fighter Gwen Stacy of Earth-65. She jugg
 
 ## v0.8.0 - 23-01-27
 
-This release is dedicated to Miles Morales of Earth-6160, star of *Into The Spider-Verse*.
+This release is dedicated to Miles Morales of Earth-6160, star of _Into The Spider-Verse_.
 
 - Improvements to structured **data and content parsing**; `HtmlTools.getPageData()` and `HtmlTools.getPageContent()` are now useful as general-purpose extractors across most crawl data.
 - `HtmlTools.findPattern()` now pulls **more data for each component**, including raw internal markup if desired.

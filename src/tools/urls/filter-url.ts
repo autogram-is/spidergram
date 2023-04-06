@@ -3,6 +3,7 @@ import { NormalizedUrl, ParsedUrl } from '@autogram/url-tools';
 import minimatch from 'minimatch';
 import arrify from 'arrify';
 import { UrlMatchStrategy } from './url-match-strategy.js';
+import _ from 'lodash';
 
 export interface UrlFilterOptions {
   mode?: 'any' | 'all' | 'none',
@@ -104,11 +105,27 @@ function singleFilter(
       default:
         return false;
     }
+
+  } else if(isUrlRegexFilter(filter)) {
+    const regex = is.regExp(filter.regex) ? filter.regex : new RegExp(filter.regex);
+    return regex.test(
+      _.get(url.properties as object, filter.property ?? 'href', '')
+    );
+
+  } else if (is.regExp(filter)) {
+    return filter.test(url.href);
+
+  } else if(isUrlGlobFilter(filter)) {
+    return minimatch(
+      _.get(url.properties as object, filter.property ?? 'href', ''),
+      filter.glob,
+      { dot: true }
+    );
+
   } else if (is.string(filter)) {
     // Treat it as a glob to match against the url's href
     return minimatch(url.href, filter, { dot: true });
-  } else if (is.regExp(filter)) {
-    return url.href.match(filter) !== null;
+
   } else if (is.function_(filter)) {
     return filter(url, contextUrl);
   }
@@ -117,9 +134,25 @@ function singleFilter(
 }
 
 // We accept a staggering array of filter types. Come, behold our filters.
-export type UrlFilter = UrlMatchStrategy | string | RegExp | UrlFilterFunction;
+export type UrlFilter = UrlMatchStrategy | string | UrlGlobFilter | RegExp | UrlRegexFilter| UrlFilterFunction;
 export type UrlFilterInput = UrlFilter | UrlFilter[] | boolean;
 
+export function isUrlGlobFilter(input: unknown): input is UrlGlobFilter {
+  return (
+    is.plainObject(input) &&
+    is.string(input.glob)
+  );
+}
+
+export function isUrlRegexFilter(input: unknown): input is UrlRegexFilter {
+  return (
+    is.plainObject(input) &&
+    (is.string(input.regex) || is.regExp(input.regex))
+  );
+}
+
+export type UrlGlobFilter = { glob: string, property?: string };
+export type UrlRegexFilter = { regex: string | RegExp, property?: string };
 export type UrlFilterFunction = (
   candidate: ParsedUrl,
   current?: ParsedUrl,
