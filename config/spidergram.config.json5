@@ -8,17 +8,5 @@
     }
   },
   storageDirectory: './storage',
-  outputDirectory: './output',
-  spider: {
-    urls: {
-      regions: {
-        header: 'header',
-        footer: 'footer',
-        main: 'body',
-      }
-    },
-  },
-  pageAnalysis: {
-    content: { selector: ["main", "body"] }
-  }
+  outputDirectory: './output'
 }
