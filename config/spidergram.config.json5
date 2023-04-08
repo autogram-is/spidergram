@@ -9,7 +9,6 @@
   },
   storageDirectory: './storage',
   outputDirectory: './output',
-  offloadBodyHtml: 'db',
   spider: {
     urls: {
       regions: {
@@ -18,7 +17,6 @@
         main: 'body',
       }
     },
-    downloadMimeTypes: ['*/*'],
   },
   pageAnalysis: {
     content: { selector: ["main", "body"] }
