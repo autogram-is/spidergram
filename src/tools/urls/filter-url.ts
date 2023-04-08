@@ -79,7 +79,7 @@ export function filterUrl(
   return false;
 }
 
-// This is a bit tricky; we return a boolean OR a null; the null, confusingly, 
+// This is a bit tricky; we return a boolean OR a null; the null, confusingly,
 function singleFilter(
   url: ParsedUrl,
   filter: UrlFilter,
@@ -114,9 +114,9 @@ function singleFilter(
       _.get(url.properties as object, filter.property ?? 'href', ''),
     );
     if (filter.reject) {
-      return accept ? null : true
+      return accept ? null : true;
     }
-    return accept
+    return accept;
   } else if (is.regExp(filter)) {
     return filter.test(url.href);
   } else if (isUrlGlobFilter(filter)) {
@@ -126,9 +126,9 @@ function singleFilter(
       { dot: true },
     );
     if (filter.reject) {
-      return accept ? null : true
+      return accept ? null : true;
     }
-    return accept
+    return accept;
   } else if (is.string(filter)) {
     // Treat it as a glob to match against the url's href
     return minimatch(url.href, filter, { dot: true });
@@ -159,8 +159,12 @@ export function isUrlRegexFilter(input: unknown): input is UrlRegexFilter {
   );
 }
 
-export type UrlGlobFilter = { property?: string, glob: string, reject?: true };
-export type UrlRegexFilter = { property?: string, regex: string | RegExp, reject?: true };
+export type UrlGlobFilter = { property?: string; glob: string; reject?: true };
+export type UrlRegexFilter = {
+  property?: string;
+  regex: string | RegExp;
+  reject?: true;
+};
 export type UrlFilterFunction = (
   candidate: ParsedUrl,
   current?: ParsedUrl,

@@ -10,7 +10,10 @@ export async function pageHandler(context: SpiderContext) {
     : undefined;
 
   const accessibility = context?.auditAccessibility
-    ? await BrowserTools.AxeAuditor.getAuditResults(page, context?.auditAccessibility)
+    ? await BrowserTools.AxeAuditor.getAuditResults(
+        page,
+        context?.auditAccessibility,
+      )
     : undefined;
 
   const timing = context.savePerformance

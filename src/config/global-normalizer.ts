@@ -50,7 +50,7 @@ export interface NormalizerOptions {
 
   /**
    * If the pathname matches the supplied pattern, remove its final segment.
-   * 
+   *
    * Useful for stripping `/index.html` and `/Default.aspx` style filenames that
    * fall back to `/` on well-configured servers.
    */
@@ -79,10 +79,10 @@ export function globalNormalizer(
   opts: NormalizerOptions = {},
 ): ParsedUrl {
   if (opts.forceProtocol) UrlMutators.forceProtocol(url, opts.forceProtocol);
-  
+
   if (opts.forceLowercase)
     url[opts.forceLowercase] = url[opts.forceLowercase].toLocaleLowerCase();
-    
+
   if (opts.discardSubdomain)
     UrlMutators.stripSubdomains(url, opts.discardSubdomain);
 
@@ -106,7 +106,10 @@ export function globalNormalizer(
   }
 
   if (opts.discardPort) {
-    if (opts.discardPort === true || minimatch(url.port.toString(), opts.discardPort))
+    if (
+      opts.discardPort === true ||
+      minimatch(url.port.toString(), opts.discardPort)
+    )
       url.port = '';
   }
 
@@ -119,5 +122,5 @@ export function globalNormalizer(
 
   if (opts.sortSearchParams) url.searchParams.sort();
 
-    return url;
+  return url;
 }

@@ -77,14 +77,19 @@ interface RelatedNode {
 }
 
 export type AxeAuditOptions = {
-  summary?: 'full' | 'category' | 'impact' | 'omit' | ((audit: AxeReport) => unknown)
-  save?: string | boolean
-}
+  summary?:
+    | 'full'
+    | 'category'
+    | 'impact'
+    | 'omit'
+    | ((audit: AxeReport) => unknown);
+  save?: string | boolean;
+};
 
 const defaults: AxeAuditOptions = {
   summary: 'impact',
-  save: false
-}
+  save: false,
+};
 
 /**
  * This is bare bones for now, but
@@ -108,14 +113,23 @@ export class AxeAuditor {
     }) as Promise<AxeReport>;
   }
 
-  static async getAuditResults(page: Page, options: true | AxeAuditOptions = true) {
-    const opt: AxeAuditOptions = { ...defaults, ...(options === true ? {} : options) };
+  static async getAuditResults(
+    page: Page,
+    options: true | AxeAuditOptions = true,
+  ) {
+    const opt: AxeAuditOptions = {
+      ...defaults,
+      ...(options === true ? {} : options),
+    };
     const kv = await KeyValueStore.open('axe_audits');
 
     return AxeAuditor.run(page)
       .then(results => {
         if (opt.save) {
-          const key = typeof opt.save === 'string' ? opt.save : Resource.getKeyForUrl(page.url());
+          const key =
+            typeof opt.save === 'string'
+              ? opt.save
+              : Resource.getKeyForUrl(page.url());
           return kv.setValue(key, results).then(() => results);
         } else {
           return results;
@@ -136,9 +150,9 @@ export class AxeAuditor {
         }
       })
       .catch((error: unknown) => {
-        if (error instanceof Error) return { error }
+        if (error instanceof Error) return { error };
         else return { error: true };
-      })
+      });
   }
 
   static totalByCategory(input: AxeReport) {
