@@ -55,6 +55,9 @@
     "bin": "spidergram",
     "dirname": "spidergram",
     "commands": "./dist/cli/commands",
+    "topics": {
+      "url": { "description": "URL filtering and formatting tools" }
+    },
     "topicSeparator": " ",
     "plugins": [
       "@oclif/plugin-help"

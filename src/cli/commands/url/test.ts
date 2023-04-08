@@ -38,8 +38,6 @@ export default class TestUrl extends SgCommand {
     }),
   };
 
-  static hidden = true;
-
   async run() {
     const { flags, argv } = await this.parse(TestUrl);
     const cli = new SpiderCli();
