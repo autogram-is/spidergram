@@ -9,12 +9,6 @@ export async function pageHandler(context: SpiderContext) {
     ? await page.context().cookies()
     : undefined;
 
-  const accessibility = context?.auditAccessibility
-    ? await BrowserTools.AxeAuditor.getAuditResults(
-        page,
-        context?.auditAccessibility,
-      )
-    : undefined;
 
   const timing = context.savePerformance
     ? await BrowserTools.getPageTiming(page)
@@ -22,6 +16,10 @@ export async function pageHandler(context: SpiderContext) {
 
   const xhr = context.saveXhrList
     ? await BrowserTools.getXhrList(page)
+    : undefined;
+
+  const accessibility = context?.auditAccessibility
+    ? await BrowserTools.AxeAuditor.getAuditResults(page, context?.auditAccessibility)
     : undefined;
 
   await saveResource({ body, cookies, xhr, accessibility, timing });
