@@ -27,13 +27,12 @@ import { Query } from '../model/index.js';
 
 export const urlNormalizerDefaults: NormalizerOptions = {
   forceProtocol: 'https:',
-  forceLowercase: 'host',
-  discardSubdomain: 'ww*',
+  forceLowercase: 'href',
+  discardFirstSegment: 'ww[w0-9]*',
   discardAnchor: true,
   discardAuth: true,
   discardIndex: '**/{index,default}.{htm,html,aspx,php}',
   discardSearch: '!{page,p}',
-  discardTrailingSlash: false,
   sortSearchParams: true,
 };
 

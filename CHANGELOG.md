@@ -1,7 +1,8 @@
 # Spidergram Changelog
 
-## v0.9.19 - 23-04-06
+## v0.9.19 - 23-04-09
 
+- Added a `urlNormalizer.discardFirstSegment` settings option for more focused removal of 'www' and similar prefixes. It accepts literals and globs like `urlNormalizer.discardSubdomain`, but only discards the first hostname segment. This allows `www.subdomain.domain.com` to become `subdomain.domain.com`, while the `urlNormalizer.stripSubdomain` setting would transform it to `domain.com`.
 - Added `PropertySource.value` so mapped properties can return a 'clean' hard-coded value after finding an ugly one.
 - `UrlTools.filterUrl()` now supports property-scoped `{ property: 'hostname', glob: '*.example.com' }` and `{ property: 'path', regex: '.*\.pdf' }` expressions, simplifying the patterns necessary to match specific URL components.
 - Expanded the configuration options for reports
