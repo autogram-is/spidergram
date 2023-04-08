@@ -59,7 +59,6 @@ export const outputFlags = {
 
 export const crawlFlags = {
   discover: Flags.string({
-    default: UrlMatchStrategy.All,
     options: [
       UrlMatchStrategy.All,
       UrlMatchStrategy.SameDomain,
@@ -69,7 +68,6 @@ export const crawlFlags = {
     summary: 'Link discovery strategy',
   }),
   enqueue: Flags.string({
-    default: UrlMatchStrategy.SameDomain,
     options: [
       UrlMatchStrategy.All,
       UrlMatchStrategy.SameDomain,

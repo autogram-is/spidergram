@@ -1,5 +1,9 @@
 # Spidergram Changelog
 
+## v0.9.20 - 23-04-xx
+
+- `spidergram crawl` was overwriting the save and crawl rules with the fallback defaults. Those responsible for the defaulting have been defaulted.
+
 ## v0.9.19 - 23-04-09
 
 - Changed `spidergram test url` to `spidergram url test` and `spidergram tree` to `spidergram url tree` for consistency.
