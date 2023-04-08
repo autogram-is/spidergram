@@ -20,6 +20,7 @@ export default class TestUrl extends SgCommand {
     config: Flags.boolean({
       char: 'c',
       summary: 'Display current URL related configuration',
+      default: true,
     }),
     base: Flags.url({
       char: 'b',

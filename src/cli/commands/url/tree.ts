@@ -6,14 +6,14 @@ import {
   SgCommand,
   HierarchyTools,
   TextTools,
-} from '../../index.js';
+} from '../../../index.js';
 import { URL_WITH_COMMAS_REGEX } from 'crawlee';
 import { readFile } from 'fs/promises';
 import minimatch from 'minimatch';
-import { queryFilterFlag } from '../shared/flags.js';
-import { buildFilter } from '../shared/flag-query-tools.js';
+import { queryFilterFlag } from '../../shared/flags.js';
+import { buildFilter } from '../../shared/flag-query-tools.js';
 
-export default class Tree extends SgCommand {
+export default class UrlTree extends SgCommand {
   static summary = 'Build a tree from a list of URLs';
 
   static usage = '<%= config.bin %> <%= command.id %> [options] <filename.txt>';
@@ -129,7 +129,7 @@ export default class Tree extends SgCommand {
   };
 
   async run() {
-    const { args, flags } = await this.parse(Tree);
+    const { args, flags } = await this.parse(UrlTree);
     const sg = await Spidergram.load();
 
     let rawUrls: string[] = [];
