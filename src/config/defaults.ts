@@ -76,11 +76,11 @@ export const pageDataDefaults: PageDataOptions = {
   attributes: true,
   head: true,
   meta: true,
+  json: true,
+  schemaOrg: true,
   links: false,
   noscript: false,
   scripts: false,
-  json: true,
-  schemaOrg: true,
   styles: false,
   templates: false,
 };

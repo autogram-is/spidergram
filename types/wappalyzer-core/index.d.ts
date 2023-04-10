@@ -10,12 +10,24 @@ declare module 'wappalyzer-core' {
         priority: number;
     }
 
+    export interface DomDetection {
+        exists?: string;
+        attributes?: Record<string, string>;
+        properties?: Record<string, string>;
+        text?: string;
+    }
+
     /**
      * Definition structure for a Wappalyzer technology fingerprint.
      * @see {@link https://github.com/wappalyzer/wappalyzer}
      *
      */
     export interface Technology {
+        /**
+         * The name of the technology.
+         */
+        name: string;
+
         /**
          * A short description of the technology in British English (max. 250 characters).
          */
@@ -56,7 +68,7 @@ declare module 'wappalyzer-core' {
          * @example
          * `cookies: { "cookie_name": "Cookie value" }`
          */
-        cookies?: Record<string, string[]>;
+        cookies?: Record<string, string>;
 
         /**
          * JavaScript properties (case sensitive). Avoid short property names to prevent matching minified code.
@@ -64,7 +76,7 @@ declare module 'wappalyzer-core' {
          * @example
          * `js: { "jQuery.fn.jquery": "" }`
          */
-        js?: Record<string, string[]>;
+        js?: Record<string, string>;
 
         /**
          * Uses a query selector to inspect element properties, attributes and text content.
@@ -79,7 +91,7 @@ declare module 'wappalyzer-core' {
          * }
          * ```
          */
-        dom?: string | string[] | Record<string, string[]> | Record<string, Record<string, string[]>>;
+        dom?: Record<string, DomDetection[]>;
 
         /**
          * DNS records: supports MX, TXT, SOA and NS (NPM driver only).
@@ -87,7 +99,7 @@ declare module 'wappalyzer-core' {
          * @example
          * `dns: { "MX": "example\\.com" }`
          */
-        dns?: Record<string, unknown>;
+        dns?: Record<string, string[]>;
 
         /**
          * HTTP response headers.
@@ -158,7 +170,7 @@ declare module 'wappalyzer-core' {
          * @example
          * `meta: { "generator": "^WordPress$" }`
          */
-        meta?: Record<string, unknown>;
+        meta?: Record<string, string>;
 
         /**
          * URLs of JavaScript files included on the page.
@@ -268,19 +280,19 @@ declare module 'wappalyzer-core' {
         xhr?: unknown,
     }
 
-    export interface Resolution {
+    export interface Resolution extends Record<string, unknown> {
         name: string;
-        description: string;
-        slug: string;
-        categories: Category[];
-        confidence: number;
-        version: string;
-        icon: string;
-        website: string;
-        pricing: Price[];
-        cpe: string;
-        rootPath: string;
-        lastUrl: string;
+        description?: string;
+        slug?: string;
+        categories?: Category[];
+        confidence?: number;
+        version?: string;
+        icon?: string;
+        website?: string;
+        pricing?: Price[];
+        cpe?: string;
+        rootPath?: string;
+        lastUrl?: string;
     }
 
     export const technologies: Technology[];

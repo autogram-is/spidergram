@@ -1,10 +1,10 @@
 import { parse as parseCookie } from 'set-cookie-parser';
-import wlc from 'wappalyzer-core';
+import wlc, { Resolution } from 'wappalyzer-core';
 import _ from 'lodash';
 import is from '@sindresorhus/is';
 import { Spidergram, Resource, HtmlTools } from '../../index.js';
 
-const { analyze, resolve, setCategories, setTechnologies } = wlc;
+const { analyze, resolve, setCategories, setTechnologies, technologies } = wlc;
 
 import type {
   Technology as PageTechDefinition,
@@ -12,6 +12,8 @@ import type {
   Input as PageTechFingerprint,
   Resolution as PageTechnology,
 } from 'wappalyzer-core';
+import { getCheerio } from '../html/get-cheerio.js';
+import { Page } from 'playwright';
 
 export type {
   Technology as PageTechDefinition,
@@ -62,13 +64,15 @@ export interface TechAuditOptions {
 
 export class TechAuditor {
   static loaded = false;
+  static techs: Record<string, PageTechDefinition> = {};
+  static cats: Record<string, PageTechCategory> = {};
 
   static async run(
     input: string | cheerio.Root | Response | Resource | undefined,
     fp: PageTechFingerprint = {},
   ): Promise<PageTechnology[]> {
     await this.init();
-
+    
     if (typeof input === 'string') {
       fp = { ...fp, ...(await TechAuditor.extractBodyData(input)) };
     } else if (is.function_(input)) {
@@ -78,8 +82,74 @@ export class TechAuditor {
     } else if (input instanceof Response) {
       fp = { ...fp, ...(await TechAuditor.extractResponseInput(input)) };
     }
+    
+    const found = analyze(fp);
+    found.push(...TechAuditor.getDomDetections(fp));
+    return analyze(fp)
+      .then(output => [...output, ])
+    return Promise.resolve(resolve());
+  }
 
-    return Promise.resolve(resolve(analyze(fp)));
+
+  /**
+   * DomDetections uses the 
+   */
+  static getDomDetections(input: wlc.Input): PageTechnology[] {
+    const html = input.html ?? '';
+    if (is.emptyStringOrWhitespace(html)) return [];
+    const $ = getCheerio(html);
+    const foundTech: Resolution[] = [];
+
+    for (const tech of technologies) {
+      const { name, dom } = tech;
+      if (!is.object(dom)) continue;
+
+      // Loop through the dom selectors for the current technology.
+      Object.keys(dom).forEach(selector => {
+        let nodes: cheerio.Element[] = [];
+        try {
+          nodes = $(selector).toArray();
+        } catch (error: unknown) {
+          // Continue
+        }
+        if (!nodes.length) {
+          return
+        }
+
+        dom[selector].forEach(({ exists, text, properties, attributes }) => {
+          nodes.forEach(node => {
+            // Wappalyzer post-processes things into a flat array of technologies,
+            // each with a name property. This seems to be bailing out if more than
+            // 50 technologies share the same name, but it's unclear how that could happen.
+            if (
+              foundTech.filter(tech => tech.name === name).length >= 50
+            ) {
+              return
+            }
+
+            // If an 'exists' detector for this technology/selector pair hasn't been added
+            // to the detections mix yet, add it.
+            if (
+              exists &&
+              foundTech.findIndex(t => name === t.name && selector === t.selector && exists === '') === -1
+            ) {
+              foundTech.push({
+                name,
+                selector,
+                exists: '',
+              })
+            }
+          })
+        });
+        return tech;
+      }, []);
+    };
+
+    return foundTech;
+  }
+
+  static async getScriptDetections(page: Page): Promise<PageTechnology[]> {
+    return Promise.resolve([]);
   }
 
   static async init(customOptions: TechAuditOptions = {}) {
