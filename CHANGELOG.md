@@ -1,6 +1,10 @@
 # Spidergram Changelog
 
-## v0.9.20 - 23-04-xx
+## v0.9.21 - 23-04-xx
+
+- Improved error handling for fetched downloads
+
+## v0.9.20 - 23-04-09
 
 - `spidergram crawl` was overwriting the save and crawl rules with the fallback defaults. Those responsible for the defaulting have been defaulted.
 
