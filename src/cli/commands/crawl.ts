@@ -1,6 +1,6 @@
 import { Flags, Args } from '@oclif/core';
 import { LogLevel } from 'crawlee';
-import { QueryFragments } from '../../model/queries/index.js';
+import { QueryFragments } from '../../reports/index.js'
 import {
   Spidergram,
   Spider,
