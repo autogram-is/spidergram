@@ -283,6 +283,9 @@ declare module 'wappalyzer-core' {
         lastUrl: string;
     }
 
+    export const technologies: Technology[];
+    export const categories: Category[];
+
     /**
      * Populate the Wappalyzer engine with a list of technology categories.
      */
