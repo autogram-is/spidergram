@@ -24,6 +24,9 @@ import { PageAnalysisOptions } from '../tools/graph/analyze-page.js';
 import { GeneratedAqlQuery } from 'arangojs/aql.js';
 import { Report, ReportConfig } from '../reports/report.js';
 import { Query } from '../model/index.js';
+import { urls } from '../model/queries/query-fragments/urls.js';
+import { resources } from '../model/queries/query-fragments/resources.js';
+import { linked_resources } from '../model/queries/query-fragments/linked-resources.js';
 
 export const urlNormalizerDefaults: NormalizerOptions = {
   forceProtocol: 'https:',
@@ -105,7 +108,11 @@ export const pageContentDefaults: PageContentOptions = {
 export const defaultQueries: Record<
   string,
   string | AqQuery | GeneratedAqlQuery | Query
-> = {};
+> = {
+  urls,
+  resources,
+  linked_resources,
+};
 
 export const defaultReports: Record<string, ReportConfig | Report> = {};
 

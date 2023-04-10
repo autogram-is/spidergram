@@ -1,10 +1,10 @@
 import { Flags, Args } from '@oclif/core';
 import { LogLevel } from 'crawlee';
+import { QueryFragments } from '../../model/queries/index.js';
 import {
   Spidergram,
   Spider,
   EntityQuery,
-  QueryFragments,
   UniqueUrl,
 } from '../../index.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
@@ -83,7 +83,8 @@ export default class Crawl extends SgCommand {
 
     if (flags.resume && flags.enqueue !== 'none') {
       this.ux.action.start('Retrieving already-queued URLs');
-      const uq = new EntityQuery<UniqueUrl>(QueryFragments.uncrawledUrls);
+      const uq = new EntityQuery<UniqueUrl>(QueryFragments.urls)
+        .filterBy({ document: false, path: 'crawled', eq: 0 });
 
       const uus = await uq
         .run()
