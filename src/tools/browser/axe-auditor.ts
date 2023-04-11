@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { Page } from 'playwright';
 import is from '@sindresorhus/is';
-import { KeyValueStore, Resource } from '../../index.js';
+import { KeyValueStore, Resource, SpidergramError } from '../../index.js';
 
 // These types are yoinked from the Axe-Core project; their Typescript/ESM situation
 // is a little chaotic at the moemnt, and we want to revisit these duplicated types
@@ -121,7 +121,12 @@ export class AxeAuditor {
       ...defaults,
       ...(options === true ? {} : options),
     };
-    const kv = await KeyValueStore.open('axe_audits');
+
+    if (page.isClosed()) {
+      return Promise.resolve({ error: new SpidergramError('Page was closed before action') });
+    }
+
+    const kv = await KeyValueStore.open(typeof opt.save === 'string' ? opt.save : 'axe_audits');
 
     return AxeAuditor.run(page)
       .then(results => {
@@ -156,7 +161,6 @@ export class AxeAuditor {
   }
 
   static totalByCategory(input: AxeReport) {
-    // Not yet implemented
     return AxeAuditor.totalByImpact(input);
   }
 
