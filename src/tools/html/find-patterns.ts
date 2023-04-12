@@ -1,6 +1,6 @@
 import { HtmlTools, UrlTools } from '../index.js';
 import _ from 'lodash';
-import { Fragment, Reference, Resource } from '../../model/index.js';
+import { PatternInstance, Reference, Resource } from '../../model/index.js';
 import { getCheerio } from './get-cheerio.js';
 import { ParsedUrl } from '@autogram/url-tools';
 
@@ -50,21 +50,23 @@ const defaults: HtmlTools.ElementDataOptions = {
 
 /**
  * Identify and extract instances of markup patterns inside an HTML page.
- *
- * @param html - Raw HTML markup, or a Cheerio object
- * @param patterns - One or more pattern definitions
  */
 export function findPagePatterns(
   input: string | cheerio.Root | Resource,
   patterns: PatternDefinition | PatternDefinition[],
   options: Record<string, unknown> = {},
-): Fragment[] {
+): PatternInstance[] {
   const list = Array.isArray(patterns) ? patterns : [patterns];
-  const results: Fragment[] = [];
+  const results: PatternInstance[] = [];
+  const resource = input instanceof Resource ? input : undefined;
   for (const pattern of list) {
     results.push(
       ...findPatternInstances(input, pattern, options).map(
-        fp => new Fragment(fp),
+        fp => new PatternInstance({
+          from: resource ?? 'resources/null',
+          to: `patterns/${fp.pattern ?? 'null'}`,
+          ...fp
+        }),
       ),
     );
   }
