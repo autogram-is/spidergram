@@ -114,7 +114,7 @@ export interface SpidergramConfig extends Record<string, unknown> {
    * Alternatively, a custom function can be passed in for more control
    * over the URL transformation process.
    */
-  urlNormalizer?: NormalizerOptions | UrlMutators.UrlMutator;
+  normalizer?: NormalizerOptions | UrlMutators.UrlMutator;
 
   /**
    * Configuration options for Crawlee, the web scraping toolkit used by
@@ -145,7 +145,7 @@ export interface SpidergramConfig extends Record<string, unknown> {
   /**
    * Extraction options for structured metadata on crawled pages.
    */
-  pageAnalysis?: PageAnalysisOptions;
+  analysis?: PageAnalysisOptions;
 
   /**
    * An async {@link PageAnalyzer|Processor} function to be used as an override

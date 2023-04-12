@@ -74,10 +74,10 @@ export default class TestUrl extends SgCommand {
       }
 
       this.log(cli.header('Normalizer Settings:'));
-      if (is.function_(sg.config.urlNormalizer)) {
+      if (is.function_(sg.config.normalizer)) {
         this.log('Custom function');
       } else {
-        this.ux.styledObject(sg.config.urlNormalizer ?? false);
+        this.ux.styledObject(sg.config.normalizer ?? false);
       }
     }
 

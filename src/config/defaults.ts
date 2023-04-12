@@ -124,7 +124,7 @@ export const analyzePageDefaults: PageAnalysisOptions = {
   tech: true,
   regions: true,
   rebuildLinks: false,
-  propertyMap: {},
+  properties: {},
 };
 
 export const spidergramDefaults: SpidergramConfig = {
@@ -138,9 +138,9 @@ export const spidergramDefaults: SpidergramConfig = {
   htmlToText: htmlToTextDefaults,
   queries: defaultQueries,
   reports: defaultReports,
-  pageAnalysis: analyzePageDefaults,
+  analysis: analyzePageDefaults,
   pageData: pageDataDefaults,
   pageContent: pageContentDefaults,
   pageTechnologies: pageTechnologyDefaults,
-  urlNormalizer: urlNormalizerDefaults,
+  normalizer: urlNormalizerDefaults,
 };

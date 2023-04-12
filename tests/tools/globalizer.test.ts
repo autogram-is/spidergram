@@ -6,7 +6,7 @@ import is from '@sindresorhus/is';
 await Spidergram.load();
 
 test('normalizer defaults', t => {
-  const rules = Spidergram.defaults.urlNormalizer;
+  const rules = Spidergram.defaults.normalizer;
   const input = new ParsedUrl('http://username:password@www.subdomain.Example.com/path/index.html?utm_src=1&page=1&p=2#anchor');
   // Our default rules should turn this into `https://subdomain.example.com/path/?p=2&page=1`
 
