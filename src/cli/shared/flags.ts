@@ -90,6 +90,11 @@ export const crawlFlags = {
 };
 
 export const analysisFlags = {
+  reprocess: Flags.boolean({
+    char: 'r',
+    summary: 'Reprocess already-analyzed pages',
+    default: false
+  }),
   body: Flags.string({
     char: 'b',
     multiple: true,

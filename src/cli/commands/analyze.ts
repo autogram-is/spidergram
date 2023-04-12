@@ -53,7 +53,7 @@ export default class Analyze extends SgCommand {
       options.links = true;
     }
     if (flags.properties === false) {
-      options.propertyMap = false;
+      options.properties = false;
     }
 
     const worker = new WorkerQuery<Resource>('resources', {
@@ -61,6 +61,9 @@ export default class Analyze extends SgCommand {
     });
     for (const f of flags.filter ?? []) {
       worker.filterBy(buildFilter(f));
+    }
+    if (!flags.reprocess) {
+      worker.filterBy({ path: '_analyzed', eq: null });
     }
     if (flags.limit) worker.limit(flags.limit);
 
