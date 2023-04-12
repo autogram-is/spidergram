@@ -119,11 +119,11 @@ export const arangoDefaults = {
 };
 
 export const analyzePageDefaults: PageAnalysisOptions = {
-  data: pageDataDefaults,
+  data: true,
   content: true,
   tech: true,
-  regions: true,
-  rebuildLinks: false,
+  links: false,
+  site: 'parsed.hostname',
   properties: {},
 };
 
@@ -133,7 +133,6 @@ export const spidergramDefaults: SpidergramConfig = {
   storageDirectory: path.join(process.cwd(), 'storage'),
   outputDirectory: process.cwd(),
   arango: arangoDefaults,
-  crawlee: {},
   spider: spiderDefaults,
   htmlToText: htmlToTextDefaults,
   queries: defaultQueries,

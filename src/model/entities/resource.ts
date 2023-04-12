@@ -4,6 +4,7 @@ import {
   Entity,
   EntityConstructorOptions,
   Expose,
+  Reference,
   Transform,
 } from './entity.js';
 import { parse as parseContentType } from 'content-type';
@@ -11,6 +12,7 @@ import { KeyValueStore, SavedFile, UuidFactory } from '../index.js';
 import { Spidergram } from '../../config/spidergram.js';
 import path from 'path';
 import { sha1 } from 'object-hash';
+import { Site } from './site.js';
 
 export interface ResourceConstructorOptions extends EntityConstructorOptions {
   url?: string | URL;
@@ -22,6 +24,7 @@ export interface ResourceConstructorOptions extends EntityConstructorOptions {
   body?: string;
   cookies?: Record<string, string | number | boolean>[];
   payload?: SavedFile;
+  site?: Reference<Site>;
 }
 
 export class Resource extends Entity {
@@ -41,6 +44,7 @@ export class Resource extends Entity {
   size?: number;
   cookies?: Record<string, string | number | boolean>[];
   payload?: SavedFile;
+  site?: string;
 
   // Hide this property from the serializer if
   @Transform(transformation => {
@@ -67,6 +71,7 @@ export class Resource extends Entity {
       headers,
       body,
       payload,
+      site,
       ...dataForSuper
     } = data;
     super(dataForSuper);
@@ -91,6 +96,10 @@ export class Resource extends Entity {
     if (headers && is.numericString(headers?.['content-length'])) {
       this.size = Number.parseInt(headers['content-length']?.toString() ?? '');
     }
+
+    if (site) {
+      this.site = Entity.idFromReference(site);
+    }    
 
     this.message = message ?? '';
     this.headers = headers ?? {};

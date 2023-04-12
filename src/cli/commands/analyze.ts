@@ -55,6 +55,9 @@ export default class Analyze extends SgCommand {
     if (flags.properties === false) {
       options.properties = false;
     }
+    if (!flags.site) {
+      options.site = false;
+    }
 
     const worker = new WorkerQuery<Resource>('resources', {
       concurrency: flags.concurrency,

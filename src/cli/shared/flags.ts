@@ -95,6 +95,10 @@ export const analysisFlags = {
     summary: 'Reprocess already-analyzed pages',
     default: false
   }),
+  site: Flags.boolean({
+    char: 's',
+    summary: 'Connect pages to sites',
+  }),
   body: Flags.string({
     char: 'b',
     multiple: true,
@@ -134,7 +138,7 @@ export const analysisFlags = {
   properties: Flags.boolean({
     char: 'p',
     allowNo: true,
-    summary: 'Extract page properties using rules from config',
+    summary: 'Extract and map page properties',
     required: false,
   }),
 };

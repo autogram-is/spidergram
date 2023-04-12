@@ -1,5 +1,5 @@
 import { Spidergram, Resource, HtmlTools, BrowserTools } from '../../index.js';
-import { relinkResource } from './relink-resource.js';
+import { rebuildResourceLinks } from './rebuild-resource-links.js';
 import { PageDataOptions, PageContentOptions } from '../html/index.js';
 import { TechAuditOptions } from '../browser/index.js';
 import { PropertyMap, findPropertyValue } from '../find-property-value.js';
@@ -11,6 +11,7 @@ import {
   MimeTypeMap,
   processResourceFile,
 } from '../file/process-resource-file.js';
+import { getResourceSite } from './get-resource-site.js';
 
 export type PageAnalyzer = (
   input: Resource,
@@ -46,7 +47,7 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
    * 
    * The value here corresponds to the unique key of a {@link Site}; 
    */
-  site?: PropertyMap<Resource> | PropertyMap<Resource>[] | boolean;
+  site?: PropertyMap<Resource> | PropertyMap<Resource>[] | false;
 
   /**
    * Options for content analysis, including the transformation of core page content
@@ -139,7 +140,7 @@ async function _analyzePage(
   }
 
   if (options.links) {
-    await relinkResource(
+    await rebuildResourceLinks(
       resource,
       options.links === true ? undefined : options.links,
     );
@@ -149,6 +150,10 @@ async function _analyzePage(
     for (const [prop, source] of Object.entries(options.properties)) {
       resource.set(prop, findPropertyValue(resource, source));
     }
+  }
+
+  if (options.site) {
+    resource.site = await getResourceSite(resource, options.site, true);
   }
 
   resource._analyzed = DateTime.now().toISO();
