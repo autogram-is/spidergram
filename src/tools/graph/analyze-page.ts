@@ -2,7 +2,7 @@ import { Spidergram, Resource, HtmlTools, BrowserTools } from '../../index.js';
 import { relinkResource } from './relink-resource.js';
 import { PageDataOptions, PageContentOptions } from '../html/index.js';
 import { TechAuditOptions } from '../browser/index.js';
-import { PropertySource, findPropertyValue } from '../find-property-value.js';
+import { PropertyMap, findPropertyValue } from '../find-property-value.js';
 import is from '@sindresorhus/is';
 import _ from 'lodash';
 import { EnqueueLinksOptions } from 'crawlee';
@@ -41,6 +41,14 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
   files?: MimeTypeMap | false;
 
   /**
+   * One or more {@link PropertyMap<Resource>} rules that determine what {@link Site}
+   * the {@link Resource} belongs to.
+   * 
+   * The value here corresponds to the unique key of a {@link Site}; 
+   */
+  site?: PropertyMap<Resource> | PropertyMap<Resource>[] | boolean;
+
+  /**
    * Options for content analysis, including the transformation of core page content
    * to plaintext, readability analysis, etc. Setting this to `false` skips all content
    * analysis.
@@ -63,17 +71,18 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
   links?: EnqueueLinksOptions | boolean;
 
   /**
-   * A dictionary describing simple data mapping operations that should be performed after
-   * a page is processed. Each key is the name of a target property on the page object,
-   * and each value is a string or {@link PropertySource} object describing where the target
-   * property's value should be found.
-   *
-   * If an array of sources is supplied, they will be checked in order and the first match
-   * will be
+   * A dictionary used to map existing data on a {@link Resource} to new properties.
+   * If this property is set to `false`, property mapping is skipped entirely.
+   * 
+   * The key of each entry is the destination name or dot-notation path of a property
+   * Resource, and the value of each entry is one or more {@link PropertyMap<Resource>}
+   * rules describing where the new property's value should be found.
+   * 
+   * If an array is given, the individual {@link PropertyMap<Resource>} records will be
+   * checked in order; the first one to produce a value will be used. If no value is
+   * produced, the destination property will remain undefined.
    */
-  propertyMap?:
-    | Record<string, (string | PropertySource) | (string | PropertySource)[]>
-    | boolean;
+  properties?: Record<string, PropertyMap<Resource>> | boolean;
 }
 
 export async function analyzePage(
@@ -94,7 +103,7 @@ async function _analyzePage(
 ): Promise<Resource> {
   const options: PageAnalysisOptions = _.defaultsDeep(
     customOptions,
-    Spidergram.config.pageAnalysis,
+    Spidergram.config.analysis,
   );
 
   if (options.data) {
@@ -136,8 +145,8 @@ async function _analyzePage(
     );
   }
 
-  if (options.propertyMap) {
-    for (const [prop, source] of Object.entries(options.propertyMap)) {
+  if (options.properties) {
+    for (const [prop, source] of Object.entries(options.properties)) {
       resource.set(prop, findPropertyValue(resource, source));
     }
   }

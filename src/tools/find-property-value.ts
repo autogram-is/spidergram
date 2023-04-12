@@ -6,7 +6,7 @@ import is from '@sindresorhus/is';
 /**
  * Describes the location of a piece of data on another object.
  */
-export interface PropertySource extends Record<string, unknown> {
+export interface PropertyMapRule extends Record<string, unknown> {
   /**
    * The name of the property to be checked; this can be a simple property name,
    * or the dot-delimited path to a nested property.
@@ -40,8 +40,8 @@ export interface PropertySource extends Record<string, unknown> {
    * If the property is not found, or the selector returns empty results, return this value
    * as a fallback.
    *
-   * Note: If a PropertySource with a default value is placed in the middle of an array of
-   * PropertySources, its default value will be returned and all subsequent PropertySources
+   * Note: If a PropertyMap with a default value is placed in the middle of an array of
+   * PropertyMaps, its default value will be returned and all subsequent PropertyMap
    * will be ignored.
    */
   fallback?: unknown;
@@ -60,7 +60,7 @@ export interface PropertySource extends Record<string, unknown> {
     | string
     | number
     | boolean
-    | ((value: unknown, conditions: PropertySource) => unknown | undefined);
+    | ((value: unknown, conditions: PropertyMapRule) => unknown | undefined);
 
   /**
    * Only return the value if it's equal to this.
@@ -106,21 +106,36 @@ export interface PropertySource extends Record<string, unknown> {
 }
 
 /**
- * Find a single value on an object using a {@link PropertySource} description. For simple
- * properties, a string can also be used instead of a full {@link PropertySource} object.
+ * A mapping rule used to extract a single value from a source object.
  *
- * Multiple property descriptions will be checked in order; the first one to have a defined
- * value will be returned.
+ * - a string with the name of a source property, or the dot-notation path of a
+ *   nested source property
+ * - a {@link PropertyMapRule} object with a property name or path, and optional
+ *   transformation rules
+ * - a function that accepts the object and returns a property value or `undefined`
+ */
+export type PropertyMap<T = unknown> = string | PropertyMapRule | ((input: T) => unknown);
+
+/**
+ * Find a single value on an object using one or more {@link PropertyMap<Resource>}
+ * descriptions.
+ *
+ * If an array is given, the individual {@link PropertyMap<Resource>} records will be
+ * checked in order; the first one to produce a value will be used. If none
+ * produce a value, the `fallback` parameter will be returned.
  */
 export function findPropertyValue<T = unknown>(
   object: T,
-  locations: (string | PropertySource) | (string | PropertySource)[],
+  locations: PropertyMap<T> | PropertyMap<T>[],
   fallback?: unknown,
 ): unknown | undefined {
   const sources = Array.isArray(locations) ? locations : [locations];
   for (const source of sources) {
     if (typeof source === 'string') {
       const v = _.get(object, source);
+      if (!undef(v)) return v;
+    } else if (is.function_(source)) {
+      const v = source(object);
       if (!undef(v)) return v;
     } else {
       let v = _.get(object, source.source);
@@ -156,7 +171,7 @@ export function findPropertyValue<T = unknown>(
  */
 function checkPropertyValue(
   value: unknown,
-  conditions: PropertySource,
+  conditions: PropertyMapRule,
 ): unknown {
   if (conditions.eq !== undefined) {
     if (_.isEqual(conditions.eq, value)) {
@@ -228,7 +243,7 @@ function undef(value: unknown, nullIsValue = false): value is undefined {
   return false;
 }
 
-function getReturnValue(value: unknown, definition: PropertySource) {
+function getReturnValue(value: unknown, definition: PropertyMapRule) {
   if (value !== undefined) {
     if (definition.value !== undefined) {
       if (is.function_(definition.value)) {
