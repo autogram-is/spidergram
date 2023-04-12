@@ -65,7 +65,8 @@ export function findPagePatterns(
         fp => new PatternInstance({
           from: resource ?? 'resources/null',
           to: `patterns/${fp.pattern ?? 'null'}`,
-          ...fp
+          ...fp,
+          pattern: undefined
         }),
       ),
     );
