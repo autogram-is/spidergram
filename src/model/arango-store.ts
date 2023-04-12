@@ -12,6 +12,9 @@ import {
   UniqueUrl,
   RespondsWith,
   Resource,
+  Site,
+  Pattern,
+  PatternInstance,
   LinksTo,
   IsChildOf,
   IsVariantOf,
@@ -143,11 +146,14 @@ export class ArangoStore {
       UniqueUrl,
       RespondsWith,
       Resource,
+      Site,
       LinksTo,
       IsChildOf,
       IsVariantOf,
       AppearsOn,
       Fragment,
+      Pattern,
+      PatternInstance
     ];
     assert(includedTypes.length > 0);
 
@@ -305,22 +311,23 @@ export class ArangoStore {
   }
 }
 
-export function sanitizeDbName(input: string): string {
+type validDelimiter = '-' | '_' | '.';
+export function sanitizeDbName(input: string, delimiter: validDelimiter = NAME_SEPARATOR): string {
   return input
-    .replaceAll(INVALID_COLLECTION_CHARS_REGEX, '-')
-    .replaceAll(/-+/g, NAME_SEPARATOR);
+    .replaceAll(INVALID_COLLECTION_CHARS_REGEX, delimiter)
+    .replaceAll(/-+/g, delimiter);
 }
 
-export function sanitizeCollectionName(input: string): string {
+export function sanitizeCollectionName(input: string, delimiter: validDelimiter = NAME_SEPARATOR): string {
   return input
-    .replaceAll(INVALID_COLLECTION_CHARS_REGEX, '-')
-    .replaceAll(/-+/g, NAME_SEPARATOR);
+    .replaceAll(INVALID_COLLECTION_CHARS_REGEX, delimiter)
+    .replaceAll(/-+/g, delimiter);
 }
 
-export function sanitizeKey(input: string): string {
+export function sanitizeKey(input: string, delimiter: validDelimiter = NAME_SEPARATOR): string {
   return input
-    .replaceAll(INVALID_KEY_CHARS_REGEX, '-')
-    .replaceAll(/-+/g, NAME_SEPARATOR);
+    .replaceAll(INVALID_KEY_CHARS_REGEX, delimiter)
+    .replaceAll(/-+/g, delimiter);
 }
 
 export function isValidKey(key: unknown): key is string {
