@@ -5,4 +5,4 @@
  */
 
 export * from './analyze-page.js';
-export * from './relink-resource.js';
+export * from './rebuild-resource-links.js';

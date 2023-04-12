@@ -13,7 +13,7 @@ import _ from 'lodash';
 /**
  * Rebuild the LinksTo relationships for a given Resource.
  */
-export async function relinkResource(
+export async function rebuildResourceLinks(
   resource: Resource,
   customOptions: EnqueueUrlOptions = {},
 ) {
