@@ -89,7 +89,7 @@ export function findPagePatterns(
       ...findPatternInstances(input, pattern, options).map(
         fp => new PatternInstance({
           from: resource ?? 'resources/null',
-          to: `patterns/${fp.pattern ?? fp.key ?? 'null'}`,
+          to: `patterns/${ fp.key ?? fp.pattern ?? 'null'}`,
           ...fp,
           pattern: undefined,
           key: undefined,
