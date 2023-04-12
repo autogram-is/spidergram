@@ -1,6 +1,6 @@
 import { Spidergram, Resource, HtmlTools, BrowserTools } from '../../index.js';
 import { rebuildResourceLinks } from './rebuild-resource-links.js';
-import { PageDataOptions, PageContentOptions } from '../html/index.js';
+import { PageDataOptions, PageContentOptions, PatternDefinition, findAndSavePagePatterns } from '../html/index.js';
 import { TechAuditOptions } from '../browser/index.js';
 import { PropertyMap, findPropertyValue } from '../find-property-value.js';
 import is from '@sindresorhus/is';
@@ -83,7 +83,14 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
    * checked in order; the first one to produce a value will be used. If no value is
    * produced, the destination property will remain undefined.
    */
-  properties?: Record<string, PropertyMap<Resource>> | boolean;
+  properties?: Record<string, PropertyMap<Resource>> | false;
+
+
+  /**
+   * An array of {@link PatternDefinition} rules used to detect instances of known design
+   * components in each page's markup.
+   */
+  patterns?: PatternDefinition[] | false;
 }
 
 export async function analyzePage(
@@ -150,6 +157,10 @@ async function _analyzePage(
     for (const [prop, source] of Object.entries(options.properties)) {
       resource.set(prop, findPropertyValue(resource, source));
     }
+  }
+
+  if (options.patterns) {
+    await findAndSavePagePatterns(resource, options.patterns);
   }
 
   if (options.site) {

@@ -1,8 +1,9 @@
 import { HtmlTools, UrlTools } from '../index.js';
 import _ from 'lodash';
-import { PatternInstance, Reference, Resource } from '../../model/index.js';
+import { Pattern, PatternInstance, Query, Reference, Resource, aql } from '../../model/index.js';
 import { getCheerio } from './get-cheerio.js';
 import { ParsedUrl } from '@autogram/url-tools';
+import { Spidergram } from '../../config/index.js';
 
 export interface FoundPattern extends HtmlTools.ElementData {
   pattern: string;
@@ -34,6 +35,10 @@ export interface PatternDefinition extends HtmlTools.ElementDataOptions {
     root: cheerio.Root,
   ) => FoundPattern;
 
+  description?: string;
+
+  key?: string;
+
   /**
    * One or more URL filters this pattern should apply to. Only applicable when
    * the input is a {@link Resource} object.
@@ -47,6 +52,26 @@ const defaults: HtmlTools.ElementDataOptions = {
   dataIsDictionary: true,
   classIsArray: true,
 };
+
+export async function findAndSavePagePatterns(
+  input: Resource,
+  patterns: PatternDefinition | PatternDefinition[],
+  options: Record<string, unknown> = {},
+)  {
+  const pts = (Array.isArray(patterns) ? patterns : [patterns]).map(
+    p => new Pattern({ key: p.key, name: p.name, description: p.description })
+  );
+  const instances = findPagePatterns(input, patterns, options);
+
+  const sg = await Spidergram.load();
+  await sg.arango.push(pts, false);
+  await Query.run(aql`
+    FOR pi IN pattern_instance
+    FILTER pi._from == ${input.documentId}
+    REMOVE { _key: pi._key } IN pattern_instance
+  `);
+  await sg.arango.push(instances, true);
+}
 
 /**
  * Identify and extract instances of markup patterns inside an HTML page.
@@ -64,9 +89,10 @@ export function findPagePatterns(
       ...findPatternInstances(input, pattern, options).map(
         fp => new PatternInstance({
           from: resource ?? 'resources/null',
-          to: `patterns/${fp.pattern ?? 'null'}`,
+          to: `patterns/${fp.pattern ?? fp.key ?? 'null'}`,
           ...fp,
-          pattern: undefined
+          pattern: undefined,
+          key: undefined,
         }),
       ),
     );
@@ -104,6 +130,7 @@ export function findPatternInstances(
     .map(element => {
       let found: FoundPattern = {
         pattern: pattern.name,
+        key: pattern.key,
         selector: pattern.selector,
         uniqueSelector: HtmlTools.getUniqueSelector(element, $),
         location: input instanceof Resource ? input.documentId : undefined,

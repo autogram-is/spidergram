@@ -125,6 +125,7 @@ export const analyzePageDefaults: PageAnalysisOptions = {
   links: false,
   site: 'parsed.hostname',
   properties: {},
+  patterns: []
 };
 
 export const spidergramDefaults: SpidergramConfig = {

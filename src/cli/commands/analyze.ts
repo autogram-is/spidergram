@@ -44,6 +44,9 @@ export default class Analyze extends SgCommand {
     if (flags.tech === false) {
       options.tech = false;
     }
+    if (!flags.site) {
+      options.site = false;
+    }
     if (flags.content === false) {
       options.content = false;
     } else if (flags.body !== undefined) {
@@ -55,8 +58,8 @@ export default class Analyze extends SgCommand {
     if (flags.properties === false) {
       options.properties = false;
     }
-    if (!flags.site) {
-      options.site = false;
+    if (flags.patterns === false) {
+      options.patterns = false;
     }
 
     const worker = new WorkerQuery<Resource>('resources', {

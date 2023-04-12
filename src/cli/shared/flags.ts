@@ -103,42 +103,40 @@ export const analysisFlags = {
     char: 'b',
     multiple: true,
     summary: 'CSS selector for page content',
-    required: false,
   }),
   content: Flags.boolean({
     char: 'c',
     allowNo: true,
     summary: 'Extract key page content',
-    required: false,
   }),
   metadata: Flags.boolean({
     char: 'm',
     allowNo: true,
     summary: 'Extract page metadata',
-    required: false,
   }),
   downloads: Flags.boolean({
     char: 'd',
     allowNo: true,
     summary: 'Parse and analyze supported downloads',
-    required: false,
   }),
   tech: Flags.boolean({
     char: 't',
     allowNo: true,
     summary: 'Detect page technologies',
-    required: false,
   }),
   links: Flags.boolean({
     char: 'k',
     allowNo: true,
     summary: 'Rebuild outgoing link metadata',
-    required: false,
   }),
   properties: Flags.boolean({
     char: 'p',
     allowNo: true,
     summary: 'Extract and map page properties',
-    required: false,
+  }),
+  patterns: Flags.boolean({
+    char: 'n',
+    allowNo: true,
+    summary: 'Record instances of design patterns',
   }),
 };
