@@ -36,7 +36,7 @@ test('css selectors', t => {
 test('filters', t => {
   // gotta investigate the 'contains' operator
   
-  t.is(findPropertyValue(obj, { source: 'null', eq: null, nullIsValue: true }), null);
+  t.is(findPropertyValue(obj, { source: 'null', eq: null, acceptNull: true }), null);
   t.is(findPropertyValue(obj, { source: 'null', eq: null }), undefined);
   t.is(findPropertyValue(obj, { source: 'null', eq: null, negate: true }), undefined);
 

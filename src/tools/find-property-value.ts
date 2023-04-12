@@ -97,7 +97,12 @@ export interface PropertyMapRule extends Record<string, unknown> {
   /**
    * Treat null values as values, rather than undefined.
    */
-  nullIsValue?: true;
+  acceptNull?: true;
+
+  /**
+   * Treat empty strings and arrays as values, rather than undefined.
+   */
+  acceptEmpty?: true;
 
   /**
    * Negate any conditions.
@@ -139,7 +144,7 @@ export function findPropertyValue<T = unknown>(
       if (!undef(v)) return v;
     } else {
       let v = _.get(object, source.source);
-      if (!undef(v, source.nullIsValue)) {
+      if (!undef(v, source)) {
         if (typeof v === 'string' && typeof source.selector === 'string') {
           const $ = getCheerio(v);
           const matches = $(source.selector);
@@ -158,7 +163,10 @@ export function findPropertyValue<T = unknown>(
           v = checkPropertyValue(v, source);
         }
 
-        if (!undef(v, source.nullIsValue)) return v;
+        if (undef(v, source)) {
+          if (source.fallback) return source.fallback;
+        }
+        else return v;
       }
     }
   }
@@ -238,8 +246,15 @@ function checkPropertyValue(
   return undefined;
 }
 
-function undef(value: unknown, nullIsValue = false): value is undefined {
-  if (value === undefined || (value === null && !nullIsValue)) return true;
+function undef(value: unknown, rules?: PropertyMapRule): value is undefined {
+  const nok = rules?.acceptNull ?? false;
+  const eok = rules?.acceptEmpty ?? false;
+  
+  if (value === undefined ||
+    (value === null && !nok) ||
+    (is.emptyArray(value) && !eok) ||
+    (is.emptyString(value) && !eok)
+  ) return true;
   return false;
 }
 
