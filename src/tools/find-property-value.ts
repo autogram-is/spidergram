@@ -20,12 +20,17 @@ export interface PropertyMapRule extends Record<string, unknown> {
   selector?: string;
 
   /**
-   * Rather than the text of the selected element, return the value of a specific attribute. 
+   * If a selector is used, return the number of matches rather than the content.
+   */
+  count?: boolean
+  
+  /**
+   * If a selector is used, return the value of an attribute rather than the element text. 
    */
   attribute?: string
 
   /**
-   * If the propertyy value is found and is an array, limit the number of results
+   * If the property value is found and is an array, limit the number of results
    * to this number.
    *
    * @defaultValue: undefined
@@ -153,18 +158,22 @@ export function findPropertyValue<T = unknown>(
         if (typeof v === 'string' && typeof source.selector === 'string') {
           const $ = getCheerio(v);
           const matches = $(source.selector);
-          if (matches.length > 0) {
-            v = matches
-              .toArray()
-              .slice(0, source.limit)
-              .map(e => {
-                if (source.attribute) return $(e).attr(source.attribute)?.trim();
-                else return $(e).text().trim();
-              });
-            v = source.join || v.length === 1 ? v.join(source.join) : v;
-            if (v?.length === 0) v = undefined;
+          if (source.count) {
+            v = matches.length;
           } else {
-            v = undefined;
+            if (matches.length > 0) {
+              v = matches
+                .toArray()
+                .slice(0, source.limit)
+                .map(e => {
+                  if (source.attribute) return $(e).attr(source.attribute)?.trim();
+                  else return $(e).text().trim();
+                });
+              v = source.join || v.length === 1 ? v.join(source.join) : v;
+              if (v?.length === 0) v = undefined;
+            } else {
+              v = undefined;
+            }
           }
         } else {
           v = checkPropertyValue(v, source);
