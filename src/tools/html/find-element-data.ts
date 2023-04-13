@@ -22,28 +22,28 @@ export interface ElementDataOptions {
    *
    * @defaultValue `false`
    */
-  includeTagName?: boolean;
+  saveTag?: boolean;
 
   /**
    * Convert the 'class' attribute into a 'classes' array.
    *
    * @defaultValue `true`
    */
-  classIsArray?: boolean;
+  splitClasses?: boolean;
 
   /**
    * Treat the element's internal HTML as a `content` pseudo-attribute.
    *
    * @defaultValue `false`
    */
-  contentIsAttribute?: boolean;
+  saveHtml?: boolean;
 
   /**
    * Group `data-` attributes into a dictionary for easier traversal
    *
    * @defaultValue `true`
    */
-  dataIsDictionary?: boolean;
+  parseData?: boolean;
 
   /**
    * Ignore empty attribute values, even ones like `disabled`.
@@ -51,32 +51,14 @@ export interface ElementDataOptions {
    * @defaultValue `true`
    */
   dropEmptyAttributes?: boolean;
-
-  /**
-   * A dictionary of values to mix into the return data.
-   *
-   * @defaultValue `{}`
-   */
-  userData?: Record<string, unknown>;
-
-  /**
-   * A post-processing function that modifies the ElementData before it's returned.
-   *
-   * This can be used to transform attributes/classes/data on the element, or to
-   * extract information on its nested sub-elements.
-   *
-   * @defaultValue `undefined`
-   */
-  extractor?: ($: cheerio.Cheerio, data: ElementData) => ElementData;
 }
 
 const defaults: ElementDataOptions = {
-  classIsArray: true,
-  contentIsAttribute: false,
-  dataIsDictionary: true,
+  splitClasses: true,
+  saveHtml: false,
+  parseData: true,
   dropEmptyAttributes: true,
-  includeTagName: false,
-  userData: {},
+  saveTag: false,
 };
 
 /**
@@ -101,9 +83,9 @@ export function findElementData(
   const $ =
     typeof input === 'string' ? HtmlTools.getCheerio(input).root() : input;
   const options: ElementDataOptions = _.defaultsDeep(customOptions, defaults);
-  const results: ElementData = { ...options.userData };
+  const results: ElementData = {};
 
-  if (options.includeTagName) {
+  if (options.saveTag) {
     results.tagName = $.get(0).tagName.toString();
   }
 
@@ -127,15 +109,11 @@ export function findElementData(
     }
   }
 
-  if (options.contentIsAttribute) {
-    const content = $.first().html()?.trim() ?? '';
-    if (content.length > 0) {
-      results.content = content;
+  if (options.saveHtml) {
+    const html = $.first().html()?.trim() ?? '';
+    if (html.length > 0) {
+      results.html = html;
     }
-  }
-
-  if (options.extractor !== undefined) {
-    options.extractor($, results);
   }
 
   return results;
