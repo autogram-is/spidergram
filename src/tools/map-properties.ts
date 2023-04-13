@@ -4,7 +4,18 @@ import { getCheerio } from './html/index.js';
 import is from '@sindresorhus/is';
 
 /**
- * Describes the location of a piece of data on another object.
+ * A mapping rule used to extract a single value from a source object.
+ *
+ * - a string with the name of a source property, or the dot-notation path of a
+ *   nested source property
+ * - a {@link PropertyMapRule} object with a property name or path, and optional
+ *   transformation rules
+ * - a function that accepts the object and returns a property value or `undefined`
+ */
+export type PropertyMap<T = unknown> = string | PropertyMapRule | ((input: T) => unknown);
+
+/**
+ * Describes the location of a piece of data on a source object.
  */
 export interface PropertyMapRule extends Record<string, unknown> {
   /**
@@ -120,16 +131,14 @@ export interface PropertyMapRule extends Record<string, unknown> {
   negate?: true;
 }
 
-/**
- * A mapping rule used to extract a single value from a source object.
- *
- * - a string with the name of a source property, or the dot-notation path of a
- *   nested source property
- * - a {@link PropertyMapRule} object with a property name or path, and optional
- *   transformation rules
- * - a function that accepts the object and returns a property value or `undefined`
- */
-export type PropertyMap<T = unknown> = string | PropertyMapRule | ((input: T) => unknown);
+export function mapProperties(
+  obj: object,
+  map: Record<string, PropertyMap | PropertyMap[]>
+) {
+  for (const [prop, rule] of Object.entries(map)) {
+    _.set(obj, prop, findPropertyValue(obj, rule));
+  }
+}
 
 /**
  * Find a single value on an object using one or more {@link PropertyMap<Resource>}
@@ -139,7 +148,7 @@ export type PropertyMap<T = unknown> = string | PropertyMapRule | ((input: T) =>
  * checked in order; the first one to produce a value will be used. If none
  * produce a value, the `fallback` parameter will be returned.
  */
-export function findPropertyValue<T = unknown>(
+export function findPropertyValue<T = object>(
   object: T,
   locations: PropertyMap<T> | PropertyMap<T>[],
   fallback?: unknown,

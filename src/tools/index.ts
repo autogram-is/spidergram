@@ -1,5 +1,5 @@
 export * from './job-status.js';
-export * from './find-property-value.js';
+export * from './map-properties.js';
 export * from './inspect-variable.js';
 
 export * as TextTools from './text/index.js';

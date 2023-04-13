@@ -2,7 +2,7 @@ import { Spidergram, Resource, HtmlTools, BrowserTools, EnqueueUrlOptions } from
 import { rebuildResourceLinks } from './rebuild-resource-links.js';
 import { PageDataOptions, PageContentOptions, PatternDefinition, findAndSavePagePatterns } from '../html/index.js';
 import { TechAuditOptions } from '../browser/index.js';
-import { PropertyMap, findPropertyValue } from '../find-property-value.js';
+import { PropertyMap, mapProperties } from '../map-properties.js';
 import is from '@sindresorhus/is';
 import _ from 'lodash';
 import { DateTime } from 'luxon';
@@ -82,7 +82,7 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
    * checked in order; the first one to produce a value will be used. If no value is
    * produced, the destination property will remain undefined.
    */
-  properties?: Record<string, PropertyMap<Resource>> | false;
+  properties?: Record<string, PropertyMap> | false;
 
 
   /**
@@ -153,9 +153,7 @@ async function _analyzePage(
   }
 
   if (options.properties) {
-    for (const [prop, source] of Object.entries(options.properties)) {
-      resource.set(prop, findPropertyValue(resource, source));
-    }
+    mapProperties(resource, options.properties);
   }
 
   if (options.patterns) {
