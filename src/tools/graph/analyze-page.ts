@@ -1,11 +1,10 @@
-import { Spidergram, Resource, HtmlTools, BrowserTools } from '../../index.js';
+import { Spidergram, Resource, HtmlTools, BrowserTools, EnqueueUrlOptions } from '../../index.js';
 import { rebuildResourceLinks } from './rebuild-resource-links.js';
 import { PageDataOptions, PageContentOptions, PatternDefinition, findAndSavePagePatterns } from '../html/index.js';
 import { TechAuditOptions } from '../browser/index.js';
 import { PropertyMap, findPropertyValue } from '../find-property-value.js';
 import is from '@sindresorhus/is';
 import _ from 'lodash';
-import { EnqueueLinksOptions } from 'crawlee';
 import { DateTime } from 'luxon';
 import {
   MimeTypeMap,
@@ -69,7 +68,7 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
    *
    * @defaultValue: false
    */
-  links?: EnqueueLinksOptions | boolean;
+  links?: EnqueueUrlOptions | boolean;
 
   /**
    * A dictionary used to map existing data on a {@link Resource} to new properties.
