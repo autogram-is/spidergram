@@ -1,17 +1,19 @@
 # Spidergram Changelog
 
-## v0.9.21 - 23-04-xx
+## v0.9.21 - 23-04-13
 
-- Added an `-r --reprocess` flag to `spidergram analyze`; unless this flag is set, it will ignore pages that have already been analyzed.
-- Added a new `NamedEntity` abstract base type that can be used for graph entities that shoudl be referred to by unique names rather than arbitrary IDs.
+- Added a new `NamedEntity` abstract base type that can be used for graph entities that should be referred to by unique names rather than arbitrary IDs.
 - Added `Site` and `Pattern` NamedEntity types, and a `PatternInstance` Relationship type that connects Resources to Patterns. In most cases PatternInstance can replace the `Fragment` entity type.
+- Added a `config.analysis.site` setting; it can specify either a `PropertyMap` structure or a custom function to determine the site a give page belongs to. By default, it's set to `parsed.hostname`.
+- Added a `-d --designPatterns` flag to `spidergram analyze`; when set it will use the `config.analyze.patterns` settings to extract and the patterns that appear on a given page.
+- Added an `-r --reprocess` flag to `spidergram analyze`; unless this flag is set, it will ignore pages that have already been analyzed.
 - Renamed the `PropertySource` type to `PropertyMap`
 - Renamed several configuation options:
   - `config.pageAnalysis` is now `config.analysis`
   - `config.pageAnalysis.propertyMap` is now `config.analysis.properties`
   - `config.urlNormalizer` is now `config.normalizer`
 - Improved error handling for fetched downloads
-- Added a `config.analysis.site` setting; it can specify either a `PropertyMap` structure or a custom function to determine the site a give page belongs to. By default, it's set to `parsed.hostname`.
+- Efficiency improvements to propertyMapping in situations where many rules use DOM selectors; the resulting DOM object is now created once and reused for each rule.
 
 ## v0.9.20 - 23-04-09
 
