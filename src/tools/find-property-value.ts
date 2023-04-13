@@ -20,6 +20,11 @@ export interface PropertyMapRule extends Record<string, unknown> {
   selector?: string;
 
   /**
+   * Rather than the text of the selected element, return the value of a specific attribute. 
+   */
+  attribute?: string
+
+  /**
    * If the propertyy value is found and is an array, limit the number of results
    * to this number.
    *
@@ -152,8 +157,10 @@ export function findPropertyValue<T = unknown>(
             v = matches
               .toArray()
               .slice(0, source.limit)
-              .map(e => $(e).text().trim());
-
+              .map(e => {
+                if (source.attribute) return $(e).attr(source.attribute)?.trim();
+                else return $(e).text().trim();
+              });
             v = source.join || v.length === 1 ? v.join(source.join) : v;
             if (v?.length === 0) v = undefined;
           } else {
