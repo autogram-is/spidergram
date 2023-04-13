@@ -1,4 +1,4 @@
-import { HtmlTools, UrlTools } from '../index.js';
+import { HtmlTools, PropertyMap, UrlTools, mapProperties } from '../index.js';
 import _ from 'lodash';
 import { Pattern, PatternInstance, Query, Resource, aql } from '../../model/index.js';
 import { getCheerio } from './get-cheerio.js';
@@ -19,24 +19,18 @@ export interface PatternDefinition extends HtmlTools.ElementDataOptions {
    */
   name: string;
 
+  description?: string;
+
+  patternKey?: string;
+
+  variant?: string;
+
   /**
    * A CSS selector used to identify the pattern
    */
   selector: string;
 
-  /**
-   * An optional post-processing function that can be used to extract additional information
-   * or alter the pattern before it's returned.
-   */
-  fn?: (
-    instance: FoundPattern,
-    element: cheerio.Element,
-    root: cheerio.Root,
-  ) => FoundPattern;
-
-  description?: string;
-
-  patternKey?: string;
+  properties?: Record<string, PropertyMap | PropertyMap[]>;
 
   /**
    * One or more URL filters this pattern should apply to. Only applicable when
@@ -46,10 +40,10 @@ export interface PatternDefinition extends HtmlTools.ElementDataOptions {
 }
 
 const defaults: HtmlTools.ElementDataOptions = {
-  includeTagName: true,
-  contentIsAttribute: true,
-  dataIsDictionary: true,
-  classIsArray: true,
+  saveTag: true,
+  saveHtml: true,
+  parseData: true,
+  splitClasses: true,
 };
 
 export async function findAndSavePagePatterns(
@@ -127,7 +121,7 @@ export function findPatternInstances(
   return $(pattern.selector)
     .toArray()
     .map(element => {
-      let found: FoundPattern = {
+      const found: FoundPattern = {
         pattern: pattern.name,
         patternKey: pattern.patternKey,
         selector: pattern.selector,
@@ -137,8 +131,8 @@ export function findPatternInstances(
           _.defaultsDeep(pattern, defaults),
         ),
       };
-      if (pattern.fn) {
-        found = pattern.fn(found, element, $);
+      if (pattern.properties) {
+        mapProperties(found, pattern.properties)
       }
       return found;
     });
