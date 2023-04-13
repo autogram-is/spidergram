@@ -1,6 +1,6 @@
 import { HtmlTools, UrlTools } from '../index.js';
 import _ from 'lodash';
-import { Pattern, PatternInstance, Query, Reference, Resource, aql } from '../../model/index.js';
+import { Pattern, PatternInstance, Query, Resource, aql } from '../../model/index.js';
 import { getCheerio } from './get-cheerio.js';
 import { ParsedUrl } from '@autogram/url-tools';
 import { Spidergram } from '../../config/index.js';
@@ -8,7 +8,6 @@ import { Spidergram } from '../../config/index.js';
 export interface FoundPattern extends HtmlTools.ElementData {
   pattern: string;
   selector: string;
-  location?: Reference<Resource>;
 }
 
 /**
@@ -133,7 +132,6 @@ export function findPatternInstances(
         key: pattern.key,
         selector: pattern.selector,
         uniqueSelector: HtmlTools.getUniqueSelector(element, $),
-        location: input instanceof Resource ? input.documentId : undefined,
         ...HtmlTools.findElementData(
           $(element),
           _.defaultsDeep(pattern, defaults),
