@@ -38,28 +38,30 @@ export default class Analyze extends SgCommand {
     }
 
     const options: GraphTools.PageAnalysisOptions = {};
+
+    // True-by-default options
     if (flags.metadata === false) {
       options.data = false;
     }
     if (flags.tech === false) {
       options.tech = false;
     }
-    if (!flags.site) {
-      options.site = false;
-    }
     if (flags.content === false) {
       options.content = false;
-    } else if (flags.body !== undefined) {
-      options.content = { selector: flags.body };
     }
-    if (flags.links === true) {
-      options.links = true;
+
+    // False-by-default options
+    if (!flags.links) {
+      options.links = false;
     }
-    if (flags.properties === false) {
+    if (!flags.properties) {
       options.properties = false;
     }
-    if (flags.patterns === false) {
+    if (!flags.designPatterns) {
       options.patterns = false;
+    }
+    if (!flags.site) {
+      options.site = false;
     }
 
     const worker = new WorkerQuery<Resource>('resources', {

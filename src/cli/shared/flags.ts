@@ -93,16 +93,13 @@ export const analysisFlags = {
   reprocess: Flags.boolean({
     char: 'r',
     summary: 'Reprocess already-analyzed pages',
+    allowNo: true,
     default: false
   }),
   site: Flags.boolean({
     char: 's',
     summary: 'Connect pages to sites',
-  }),
-  body: Flags.string({
-    char: 'b',
-    multiple: true,
-    summary: 'CSS selector for page content',
+    allowNo: true,
   }),
   content: Flags.boolean({
     char: 'c',
@@ -114,29 +111,24 @@ export const analysisFlags = {
     allowNo: true,
     summary: 'Extract page metadata',
   }),
-  downloads: Flags.boolean({
-    char: 'd',
-    allowNo: true,
-    summary: 'Parse and analyze supported downloads',
-  }),
   tech: Flags.boolean({
     char: 't',
     allowNo: true,
     summary: 'Detect page technologies',
-  }),
-  links: Flags.boolean({
-    char: 'k',
-    allowNo: true,
-    summary: 'Rebuild outgoing link metadata',
   }),
   properties: Flags.boolean({
     char: 'p',
     allowNo: true,
     summary: 'Extract and map page properties',
   }),
-  patterns: Flags.boolean({
-    char: 'n',
+  links: Flags.boolean({
+    char: 'k',
     allowNo: true,
-    summary: 'Record instances of design patterns',
+    summary: 'Rebuild outgoing link metadata',
+  }),
+  designPatterns: Flags.boolean({
+    char: 'd',
+    allowNo: true,
+    summary: 'Extract instances of design patterns',
   }),
 };
