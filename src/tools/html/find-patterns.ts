@@ -36,7 +36,7 @@ export interface PatternDefinition extends HtmlTools.ElementDataOptions {
 
   description?: string;
 
-  key?: string;
+  patternKey?: string;
 
   /**
    * One or more URL filters this pattern should apply to. Only applicable when
@@ -58,7 +58,7 @@ export async function findAndSavePagePatterns(
   options: Record<string, unknown> = {},
 )  {
   const pts = (Array.isArray(patterns) ? patterns : [patterns]).map(
-    p => new Pattern({ key: p.key, name: p.name, description: p.description })
+    p => new Pattern({ key: p.patternKey, name: p.name, description: p.description })
   );
   const instances = findPagePatterns(input, patterns, options);
 
@@ -69,7 +69,7 @@ export async function findAndSavePagePatterns(
     FILTER pi._from == ${input.documentId}
     REMOVE { _key: pi._key } IN pattern_instance
   `);
-  await sg.arango.push(instances, true);
+  await sg.arango.push(instances);
 }
 
 /**
@@ -88,10 +88,10 @@ export function findPagePatterns(
       ...findPatternInstances(input, pattern, options).map(
         fp => new PatternInstance({
           from: resource ?? 'resources/null',
-          to: `patterns/${ fp.key ?? fp.pattern ?? 'null'}`,
+          to: `patterns/${ fp.patternKey ?? fp.pattern ?? 'null'}`,
           ...fp,
           pattern: undefined,
-          key: undefined,
+          patternKey: undefined,
         }),
       ),
     );
@@ -129,7 +129,7 @@ export function findPatternInstances(
     .map(element => {
       let found: FoundPattern = {
         pattern: pattern.name,
-        key: pattern.key,
+        patternKey: pattern.patternKey,
         selector: pattern.selector,
         uniqueSelector: HtmlTools.getUniqueSelector(element, $),
         ...HtmlTools.findElementData(
