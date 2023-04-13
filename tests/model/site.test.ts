@@ -24,7 +24,6 @@ test('all properties', t => {
     urls: ['https://alias.com', 'https://something-else.com', 'https://test.com']
   });
 
-  console.log(s.toJSON());
   const ss = Site.fromJSON(s.toJSON());
   t.deepEqual(s, ss);
   
