@@ -135,8 +135,10 @@ export function mapProperties(
   obj: object,
   map: Record<string, PropertyMap | PropertyMap[]>
 ) {
+  const domDictionary: Record<string, cheerio.Root> = {}
+
   for (const [prop, rule] of Object.entries(map)) {
-    _.set(obj, prop, findPropertyValue(obj, rule));
+    _.set(obj, prop, findPropertyValue(obj, rule, domDictionary));
   }
 }
 
@@ -152,6 +154,7 @@ export function findPropertyValue<T = object>(
   object: T,
   locations: PropertyMap<T> | PropertyMap<T>[],
   fallback?: unknown,
+  domDictionary: Record<string, cheerio.Root> = {}
 ): unknown | undefined {
   const sources = Array.isArray(locations) ? locations : [locations];
   for (const source of sources) {
@@ -165,7 +168,9 @@ export function findPropertyValue<T = object>(
       let v = _.get(object, source.source);
       if (!undef(v, source)) {
         if (typeof v === 'string' && typeof source.selector === 'string') {
-          const $ = getCheerio(v);
+          const $ = domDictionary[source.selector] ?? getCheerio(v);
+          domDictionary[source.selector] ??= $;
+
           const matches = $(source.selector);
           if (source.count) {
             v = matches.length;
