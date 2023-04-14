@@ -28,7 +28,7 @@ export const defaultReports: Record<string, ReportConfig> = {
     group: 'builtin',
     description: 'Summary of pages, downloadable media, and errors',
     settings: {
-      type: 'xslx',
+      type: 'xlsx',
       includeEmptyResults: true
     },
     queries: {

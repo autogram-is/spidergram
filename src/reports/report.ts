@@ -7,7 +7,7 @@ import { getReportQuery } from './report-utils.js';
 
 import { outputCsvReport } from './output-csv.js';
 import { outputJsonReport } from './output-json.js';
-import { outputXslxReport } from './output-xslx.js';
+import { outputXlsxReport } from './output-xlsx.js';
 
 import is from '@sindresorhus/is';
 
@@ -115,8 +115,8 @@ export class ReportRunner {
       await outputCsvReport(this.config, this);
     } else if (this.config.settings?.type === 'json' || this.config.settings?.type === 'json5') {
       await outputJsonReport(this.config, this);
-    } else if (this.config.settings?.type === 'xslx') {
-      await outputXslxReport(this.config, this);
+    } else if (this.config.settings?.type === 'xlsx') {
+      await outputXlsxReport(this.config, this);
     } else {
       // No handler found
     }

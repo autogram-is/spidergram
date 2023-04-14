@@ -34,7 +34,7 @@ export default class DoReport extends SgCommand {
     output: Flags.string({
       char: 'o',
       summary: 'Output file type',
-      options: ['csv', 'tsv', 'json', 'json5', 'xslx', 'debug']
+      options: ['csv', 'tsv', 'json', 'json5', 'xlsx', 'debug']
     }),
     setting: Flags.string({
       char: 's',

@@ -36,7 +36,7 @@ type ColumnSettings = {
   width: number | boolean,
 }
 
-export async function outputXslxReport(config: ReportConfig, runner: ReportRunner): Promise<void> {
+export async function outputXlsxReport(config: ReportConfig, runner: ReportRunner): Promise<void> {
   const sg = await Spidergram.load();
 
   const datasets = config.data ?? {};

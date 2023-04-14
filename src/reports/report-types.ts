@@ -2,7 +2,7 @@ import { JsonCollection, JsonPrimitive } from "@salesforce/ts-types";
 import { AqQuery } from "aql-builder";
 import { Query } from "../model/index.js";
 import { GeneratedAqlQuery } from "arangojs/aql.js";
-import { XlsReportSettings } from "./output-xslx.js";
+import { XlsReportSettings } from "./output-xlsx.js";
 import { CsvReportSettings } from "./output-csv.js";
 import { JsonReportSettings } from "./output-json.js";
 import { ReportRunner } from "./report.js";
