@@ -5,13 +5,14 @@ import { GeneratedAqlQuery } from "arangojs/aql.js";
 import { XlsReportSettings } from "./output-xslx.js";
 import { CsvReportSettings } from "./output-csv.js";
 import { JsonReportSettings } from "./output-json.js";
+import { ReportRunner } from "./report.js";
 
 export type AqQueryFragment = Partial<AqQuery>;
 export type AqBindVars = Record<string, JsonPrimitive | JsonPrimitive[]>
 export type QueryInput = string | AqQuery | Query | GeneratedAqlQuery;
 
 export type ReportResult = { messages?: string[], errors?: Error[] };
-export type ReportWorker = (report: ReportConfig) => Promise<void>
+export type ReportWorker = (report: ReportConfig, runner: ReportRunner) => Promise<ReportResult>
 export type TransformOptions = Record<string, unknown>;
 
 export type BaseReportSettings = Record<string, unknown> & {

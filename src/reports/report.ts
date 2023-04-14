@@ -75,7 +75,7 @@ export class ReportRunner {
     // Give custom builder functions a chance to alter the queries,
     // populate custom data, or, you know, whatevs.
     if (this.config.build) {
-      await this.config.build(this.config);
+      await this.config.build(this.config, this);
     }
 
     this.status.total += Object.keys(this.config.queries ?? {}).length
@@ -110,19 +110,20 @@ export class ReportRunner {
     this.config.settings.path = loc;
 
     if (is.function_(this.config.output)) {
-      return this.config.output(this.config);
-    } else if (this.config.settings?.type === 'csv') {
-      return outputCsvReport(this.config);
-    } else if (this.config.settings?.type === 'json') {
-      return outputJsonReport(this.config);
+      await this.config.output(this.config, this);
+    } else if (this.config.settings?.type === 'csv' || this.config.settings?.type === 'tsv') {
+      await outputCsvReport(this.config, this);
+    } else if (this.config.settings?.type === 'json' || this.config.settings?.type === 'json5') {
+      await outputJsonReport(this.config, this);
     } else if (this.config.settings?.type === 'xslx') {
-      return outputXslxReport(this.config);
+      await outputXslxReport(this.config, this);
     } else {
       // No handler found
     }
 
     this.status.finished++;
     this.events.emit('progress', this.status, 'Report complete');
+    return Promise.resolve();
   }
 
   async run(): Promise<ReportStatus> {

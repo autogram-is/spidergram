@@ -27,6 +27,20 @@ export default class DoReport extends SgCommand {
       char: 'n',
       summary: 'Report name',
     }),
+    path: Flags.string({
+      char: 'p',
+      summary: 'Output path',
+    }),
+    output: Flags.string({
+      char: 'o',
+      summary: 'Output file type',
+      options: ['csv', 'tsv', 'json', 'json5', 'xslx', 'debug']
+    }),
+    setting: Flags.string({
+      char: 's',
+      summary: 'Add custom report setting',
+      multiple: true
+    }),
   };
 
   static args = {
@@ -92,16 +106,27 @@ export default class DoReport extends SgCommand {
 
     report.config.queries = { ...report.config.queries, ...queries };
 
+    report.config.settings ??= {};
     if (flags.name) report.config.name = flags.name;
+    if (flags.path) report.config.settings.path = flags.path;
+    for (const s of flags.setting ?? []) {
+      _.set(report.config.settings, s.split('=').shift() ?? '', s.split('=').pop() ?? true);
+    }
 
-    report
-      .on('progress', (status, message) => {
-        if (message) this.ux.action.status = message;
-      })
-      .on('end', () => this.ux.action.stop());
+    if (flags.output === 'debug') {
+      this.ux.styledHeader('Report structure')
+      this.ux.styledJSON(report.config);
+    } else {
+      if (flags.output) report.config.settings.type = flags.output;
+      report
+        .on('progress', (status, message) => {
+          if (message) this.ux.action.status = message;
+        })
+        .on('end', () => this.ux.action.stop());
 
-    this.ux.action.start('Running report');
-    await report.run();
-    this.log(`Saved ${joinOxford(report.status.files)}.`);
+      this.ux.action.start('Running report');
+      await report.run();
+      this.log(`Saved ${joinOxford(report.status.files)}.`);
+    }
   }
 }

@@ -2,13 +2,25 @@ import { Spidergram } from "../config/index.js";
 import { FileTools } from "../tools/index.js";
 import { BaseReportSettings, ReportConfig } from "./report-types.js";
 import { Properties } from "xlsx";
+import { ReportRunner } from "./report.js";
 
 /**
  * Output options specific to workbook-style spreadsheet files
  */
 export type XlsReportSettings = BaseReportSettings & {
   type: 'xlsx',
+
+  /**
+   * Internal metadata about the spreadsheet, usually displayed by a program's
+   * "document information" command.
+   */
   metadata?: Properties
+
+  /**
+   * A dictionary of per-sheet configuration options. Each key corresponds to a key
+   * in the report's `data` property; if it exists, the `default` key will be used
+   * as a fallback for sheets with no specific settings.
+   */
   sheets?: Record<string, SheetSettings>
 };
 
@@ -22,10 +34,9 @@ type SheetSettings = {
 
 type ColumnSettings = {
   width: number | boolean,
-  parse: 'date' | 'ms' | 'bytes'
 }
 
-export async function outputXslxReport(config: ReportConfig): Promise<void> {
+export async function outputXslxReport(config: ReportConfig, runner: ReportRunner): Promise<void> {
   const sg = await Spidergram.load();
 
   const datasets = config.data ?? {};
@@ -52,10 +63,9 @@ export async function outputXslxReport(config: ReportConfig): Promise<void> {
     .files('output')
     .write(curFilePath, rpt.toBuffer())
     .then(() => {
-      // this.status.finished++;
-      // this.status.files.push(curFilePath);
+      runner.status.finished++;
+      runner.status.files.push(curFilePath);
     });
-
 
   return Promise.resolve();
 }
