@@ -1,5 +1,5 @@
 import { Flags, Args } from '@oclif/core';
-import { Spidergram, Report, AqFilter } from '../../index.js';
+import { Spidergram, ReportRunner, AqFilter } from '../../index.js';
 import { SgCommand } from '../index.js';
 import _ from 'lodash';
 import { joinOxford, queryFilterFlag } from '../shared/index.js';
@@ -55,12 +55,12 @@ export default class DoReport extends SgCommand {
       } else {
         const data: Record<string, unknown>[] = Object.entries(reports).map(
           ([name, report]) => {
-            const r = report instanceof Report ? report : new Report(report);
+            const r = report instanceof ReportRunner ? report : new ReportRunner(report);
             return {
               report: name,
               category: r.config.group,
               description: r.config.description,
-              type: report instanceof Report ? 'Class' : 'Spec',
+              type: report instanceof ReportRunner ? 'Class' : 'Spec',
             };
           },
         );
@@ -79,7 +79,7 @@ export default class DoReport extends SgCommand {
 
     const definition = sg.config.reports?.[args.report ?? ''];
     const report =
-      definition instanceof Report ? definition : new Report(definition);
+      definition instanceof ReportRunner ? definition : new ReportRunner(definition);
 
     if (flags.filter) {
       const filters: AqFilter[] = [];

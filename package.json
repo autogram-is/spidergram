@@ -56,7 +56,9 @@
     "dirname": "spidergram",
     "commands": "./dist/cli/commands",
     "topics": {
-      "url": { "description": "URL filtering and formatting tools" }
+      "url": {
+        "description": "URL filtering and formatting tools"
+      }
     },
     "topicSeparator": " ",
     "plugins": [
@@ -87,6 +89,7 @@
     "fast-csv": "^4.3.6",
     "fs-extra": "^11.1.0",
     "inquirer": "^9.1.4",
+    "json5": "^2.2.3",
     "lodash": "^4.17.21",
     "luxon": "^3.1.0",
     "mammoth": "^1.5.1",

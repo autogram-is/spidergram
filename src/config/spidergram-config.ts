@@ -1,5 +1,5 @@
 import { Spidergram } from './spidergram.js';
-import { SpiderOptions, Query, Report, ReportConfig } from '../index.js';
+import { SpiderOptions, Query, ReportConfig } from '../index.js';
 import { UrlMutators } from '@autogram/url-tools';
 import { NormalizerOptions } from './global-normalizer.js';
 import {
@@ -195,7 +195,7 @@ export interface SpidergramConfig extends Record<string, unknown> {
    * An object containing named report definitions in the form of {@link ReportConfig}
    * definition objects, or an already-instantiated Report instance.
    */
-  reports?: Record<string, ReportConfig | Report>;
+  reports?: Record<string, ReportConfig>;
 
   /**
    * A class implementing the ConsoleTheme interface; this provides assorted

@@ -5,7 +5,7 @@ import {
   WorkerQuery,
   GraphTools,
   Resource,
-  Report,
+  ReportRunner,
 } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
 import is from '@sindresorhus/is';
@@ -77,7 +77,7 @@ export default class Go extends SgCommand {
 
     // Report
     for (const [name, report] of Object.entries(sg.config.reports ?? {})) {
-      const r = new Report({ name, ...report })
+      const r = new ReportRunner({ name, ...report })
         .on('progress', message => {
           if (message) this.ux.action.status;
         })

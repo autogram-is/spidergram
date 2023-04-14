@@ -61,7 +61,7 @@ export interface ReportConfig extends Record<string, unknown> {
    * output types take additional parameters here (delimiter settings for CVS/TSV
    * exports, etc.)
    */
-  settings?: Record<string, unknown>;
+  settings?: ReportSettings;
 
   /**
    * A keyed list of queries to be run when building this report's data. Query data can

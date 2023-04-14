@@ -20,6 +20,25 @@ import {
 import { TechAuditOptions } from '../tools/browser/index.js';
 import { readPackageUpSync } from 'read-pkg-up';
 import { PageAnalysisOptions } from '../tools/graph/analyze-page.js';
+import { ReportConfig } from '../reports/report-types.js';
+
+export const defaultReports: Record<string, ReportConfig> = {
+  default: {
+    name: 'Spidergram Report',
+    group: 'builtin',
+    description: 'Summary of pages, downloadable media, and errors',
+    output: 'xslx',
+    settings: {
+      includeEmptyResults: true
+    },
+    queries: {
+      'Overview': 'summary',
+      'Crawled Pages': 'pages',
+      'Downloads': 'media',
+      'Errors': 'errors'
+    }
+  }
+}
 
 export const urlNormalizerDefaults: NormalizerOptions = {
   forceProtocol: 'https:',
@@ -126,7 +145,7 @@ export const spidergramDefaults: SpidergramConfig = {
   spider: spiderDefaults,
   htmlToText: htmlToTextDefaults,
   queries: {},
-  reports: {},
+  reports: defaultReports,
   analysis: analyzePageDefaults,
   pageData: pageDataDefaults,
   pageContent: pageContentDefaults,

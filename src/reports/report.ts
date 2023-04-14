@@ -4,6 +4,11 @@ import { AnyJson } from '@salesforce/ts-types';
 import { DateTime } from 'luxon';
 import { ReportConfig } from './report-types.js';
 import { getReportQuery } from './report-utils.js';
+
+import { outputCsvReport } from './output-csv.js';
+import { outputJsonReport } from './output-json.js';
+import { outputXslxReport } from './output-xslx.js';
+
 import is from '@sindresorhus/is';
 
 interface ReportStatus extends JobStatus {
@@ -23,7 +28,7 @@ type ReportEventListener<T extends ReportEventType> = (
   ...args: ReportEventParams<T>
 ) => unknown;
 
-export class Report {
+export class ReportRunner {
   protected events: AsyncEventEmitter<ReportEventMap>;
 
   config: ReportConfig;
@@ -107,11 +112,11 @@ export class Report {
     if (is.function_(this.config.output)) {
       return this.config.output(this.config);
     } else if (this.config.output === 'csv') {
-      // call CSV output function
+      return outputCsvReport(this.config);
     } else if (this.config.output === 'json') {
-      // call JSON output function
+      return outputJsonReport(this.config);
     } else if (this.config.output === 'xslx') {
-      // call XSLX output function
+      return outputXslxReport(this.config);
     }
 
     this.status.finished++;
