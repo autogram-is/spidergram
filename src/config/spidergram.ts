@@ -1,4 +1,4 @@
-import load, { Config, LoadOptions, resolve } from '@proload/core';
+import load, { Config, LoadOptions } from '@proload/core';
 import json from '@proload/plugin-json';
 import yaml from '@proload/plugin-yaml';
 import typescript from '@proload/plugin-typescript';
@@ -16,13 +16,11 @@ import is from '@sindresorhus/is';
 import _ from 'lodash';
 
 import * as defaults from './defaults.js';
-import { ArangoStore, Resource } from '../index.js';
+import { ArangoStore, Query, QueryFragments, QueryInput, Resource } from '../index.js';
 import { globalNormalizer } from './global-normalizer.js';
 import { SpidergramConfig } from './spidergram-config.js';
 import { setTimeout } from 'timers/promises';
 import { SpiderCli } from '../cli/shared/index.js';
-import path from 'path';
-import * as url from 'url';
 
 export class SpidergramError extends Error {}
 
@@ -156,6 +154,8 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
       await this._loadedConfig?.value.finalizer(this);
     }
 
+    this.buildDefaultQueries();
+
     this._initializing = false;
     this._needsInit = false;
     return Promise.resolve(this);
@@ -176,17 +176,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     // Reset the active configuration to the baseline defaults, load any user-defined
     // configuration, and merge them.
     this._activeConfig = Spidergram.defaults as T;
-
-    // If a directory-local config file can't be found, try Spidergram's standard ./config
-    if (await resolve('spidergram', options)) {
-      this._loadedConfig = await load('spidergram', options);
-    } else if (options.filePath === undefined) {
-      const coreConfig = this.getCoreConfigPath();
-      if (coreConfig) {
-        options.filePath = coreConfig;
-        this._loadedConfig = await load('spidergram', options);
-      }
-    }
+    this._loadedConfig = await load('spidergram', options);
 
     this._activeConfig = _.defaultsDeep(
       this._loadedConfig?.value,
@@ -352,15 +342,59 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     return CrawleeConfig.getGlobalConfig();
   }
 
-  private getCoreConfigPath() {
-    const __filename = url.fileURLToPath(import.meta.url);
-    const segments = __filename.split('/');
-    while (segments.length > 0) {
-      if (segments.pop() === 'spidergram') {
-        segments.push('spidergram', 'config', 'spidergram.config.json5');
-        return '/' + path.join(...segments);
-      }
+  buildDefaultQueries() {
+    const queries: Record<string, QueryInput> = {
+      summary: new Query(QueryFragments.pages_crawled)
+        .category('builtin')
+        .description('Overview of crawled pages')
+        .collect('Site', 'parsed.hostname')
+        .collect('Content', 'mime')
+        .collect('Status', 'code')
+        .sortBy('Site', 'asc'),
+    
+      pages: new Query(QueryFragments.pages_linked)
+        .category('builtin')
+        .description('Successfully crawled HTML pages')
+        .filterBy('code', 200)
+        .filterBy('mime', 'text/html')
+        .sortBy('url', 'asc')
+        .return('Site', 'parsed.hostname')
+        .return('Path', 'parsed.pathname')
+        .return('Title', 'data.title')
+        .return('Words', 'content.readability.words')
+        .return({ document: false, name: 'Inlinks', path: 'inlinks', function: 'length' })
+        .return({ document: false, name: 'Outlinks', path: 'outlinks', function: 'length' }),
+    
+      media: new Query(QueryFragments.pages_linked)
+        .category('builtin')
+        .description('Successfully crawled non-HTML content')
+        .filterBy('code', 200)
+        .filterBy({ path: 'mime', eq: 'text/html', negate: true})
+        .sortBy('url', 'asc')
+        .return('Site', 'parsed.hostname')
+        .return('Path', 'parsed.pathname')
+        .return('Type', 'mime')
+        .return('Size', 'size')
+        .return({ document: false, name: 'Inlinks', path: 'inlinks', function: 'length' }),
+
+      errors: new Query(QueryFragments.pages_linked)
+        .category('builtin')
+        .description('Errors encountered while crawling')
+        .filterBy({ path: 'code', eq: 200, negate: true })
+        .sortBy({ document: false, path: 'inlinks', function: 'length', direction: 'desc' })
+        .return('Site', 'parsed.hostname')
+        .return('Path', 'parsed.pathname')
+        .return('Status', 'code')
+        .return('Message', 'message')
+        .return({ document: false, name: 'Inlinks', path: 'inlinks', function: 'length' }),
+  
+      ...QueryFragments.queries,
     }
-    return false;
+
+    this.config.queries ??= {};
+    this.config.queries = {
+      ...this.config.queries,
+      ...queries
+    }
   }
 }

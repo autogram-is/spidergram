@@ -7,7 +7,9 @@ import {
   literal,
 } from 'arangojs/aql.js';
 import { AnyJson } from '@salesforce/ts-types';
-import { AqBuilder, AqQuery, isAqQuery } from 'aql-builder';
+import { AqBuilder, AqQuery, AqStrict, isAqQuery } from 'aql-builder';
+import { ArangoCollection } from 'arangojs/collection.js';
+import _ from 'lodash';
 
 export class Query extends AqBuilder {
   static async run<T = AnyJson>(
@@ -38,7 +40,29 @@ export class Query extends AqBuilder {
       .then(db => db.query<T>(aq, options).then(cursor => cursor.all()));
   }
 
+  constructor(input: string | ArangoCollection | AqStrict | AqQuery, document?: string) {
+    // This avoids unpleasant situations where a base query spec is modified,
+    // each time it's used, affecting all of the other queries based on it.
+    if (isAqQuery(input)) {
+      super(_.cloneDeep(input), document);
+    } else {
+      super(input, document);
+    }
+  }
+
   async run<T = AnyJson>(options: QueryOptions = {}) {
     return Query.run<T>(this.build(), options);
+  }
+
+  category(input?: string): this {
+    this.spec.metadata ??= {};
+    this.spec.metadata.category = input;
+    return this;
+  }
+
+  description(input?: string): this {
+    this.spec.metadata ??= {};
+    this.spec.metadata.description = input;
+    return this;
   }
 }

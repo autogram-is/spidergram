@@ -4,9 +4,9 @@ import {
   Spidergram,
   Spider,
   EntityQuery,
-  QueryFragments,
   UniqueUrl,
 } from '../../index.js';
+import { QueryFragments } from '../../model/queries/query-fragments.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
 import is from '@sindresorhus/is';
 import { filterUrl } from '../../tools/urls/filter-url.js';
@@ -83,7 +83,7 @@ export default class Crawl extends SgCommand {
 
     if (flags.resume && flags.enqueue !== 'none') {
       this.ux.action.start('Retrieving already-queued URLs');
-      const uq = new EntityQuery<UniqueUrl>(QueryFragments.uncrawledUrls);
+      const uq = new EntityQuery<UniqueUrl>(QueryFragments.urls_uncrawled);
 
       const uus = await uq
         .run()

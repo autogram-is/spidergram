@@ -1,5 +1,5 @@
 import { isAqAggregate, isAqFilter, isAqProperty, isAqQuery, isAqSort } from "aql-builder";
-import { GeneratedAqlQuery, aql, isGeneratedAqlQuery, literal } from "arangojs/aql";
+import { GeneratedAqlQuery, aql, isGeneratedAqlQuery, literal } from "arangojs/aql.js";
 import { ReportQuery } from "./report-types.js";
 import { AqQueryFragment, QueryInput } from "./report-types.js";
 import { Query } from "../model/index.js";

@@ -1,7 +1,7 @@
 import { JsonCollection, JsonPrimitive } from "@salesforce/ts-types";
 import { AqQuery } from "aql-builder";
-import { Query } from "../model";
-import { GeneratedAqlQuery } from "arangojs/aql";
+import { Query } from "../model/index.js";
+import { GeneratedAqlQuery } from "arangojs/aql.js";
 
 export type AqQueryFragment = Partial<AqQuery>;
 export type AqBindVars = Record<string, JsonPrimitive | JsonPrimitive[]>

@@ -19,12 +19,7 @@ import {
 } from '../tools/html/index.js';
 import { TechAuditOptions } from '../tools/browser/index.js';
 import { readPackageUpSync } from 'read-pkg-up';
-import { AqQuery } from 'aql-builder';
 import { PageAnalysisOptions } from '../tools/graph/analyze-page.js';
-import { GeneratedAqlQuery } from 'arangojs/aql.js';
-import { Report } from '../reports/report.js';
-import { ReportConfig } from '../reports/report-types.js';
-import { Query } from '../model/index.js';
 
 export const urlNormalizerDefaults: NormalizerOptions = {
   forceProtocol: 'https:',
@@ -103,13 +98,6 @@ export const pageContentDefaults: PageContentOptions = {
   trim: true,
 };
 
-export const defaultQueries: Record<
-  string,
-  string | AqQuery | GeneratedAqlQuery | Query
-> = {};
-
-export const defaultReports: Record<string, ReportConfig | Report> = {};
-
 export const arangoDefaults = {
   databaseName: 'spidergram',
   url: 'http://127.0.0.1:8529',
@@ -133,12 +121,12 @@ export const spidergramDefaults: SpidergramConfig = {
   debug: false,
   logLevel: 'error',
   storageDirectory: path.join(process.cwd(), 'storage'),
-  outputDirectory: process.cwd(),
+  outputDirectory: path.join(process.cwd(), 'output'),
   arango: arangoDefaults,
   spider: spiderDefaults,
   htmlToText: htmlToTextDefaults,
-  queries: defaultQueries,
-  reports: defaultReports,
+  queries: {},
+  reports: {},
   analysis: analyzePageDefaults,
   pageData: pageDataDefaults,
   pageContent: pageContentDefaults,
