@@ -111,12 +111,14 @@ export class ReportRunner {
 
     if (is.function_(this.config.output)) {
       return this.config.output(this.config);
-    } else if (this.config.output === 'csv') {
+    } else if (this.config.settings?.type === 'csv') {
       return outputCsvReport(this.config);
-    } else if (this.config.output === 'json') {
+    } else if (this.config.settings?.type === 'json') {
       return outputJsonReport(this.config);
-    } else if (this.config.output === 'xslx') {
+    } else if (this.config.settings?.type === 'xslx') {
       return outputXslxReport(this.config);
+    } else {
+      // No handler found
     }
 
     this.status.finished++;

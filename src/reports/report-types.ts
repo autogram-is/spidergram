@@ -2,6 +2,9 @@ import { JsonCollection, JsonPrimitive } from "@salesforce/ts-types";
 import { AqQuery } from "aql-builder";
 import { Query } from "../model/index.js";
 import { GeneratedAqlQuery } from "arangojs/aql.js";
+import { XlsReportSettings } from "./output-xslx.js";
+import { CsvReportSettings } from "./output-csv.js";
+import { JsonReportSettings } from "./output-json.js";
 
 export type AqQueryFragment = Partial<AqQuery>;
 export type AqBindVars = Record<string, JsonPrimitive | JsonPrimitive[]>
@@ -10,9 +13,8 @@ export type QueryInput = string | AqQuery | Query | GeneratedAqlQuery;
 export type ReportResult = { messages?: string[], errors?: Error[] };
 export type ReportWorker = (report: ReportConfig) => Promise<void>
 export type TransformOptions = Record<string, unknown>;
-export type ReportOutputType = 'csv' | 'json' | 'xslx';
 
-export type ReportSettings = Record<string, unknown> & {
+export type BaseReportSettings = Record<string, unknown> & {
   /**
    * The path where the final report will be saved. `outputPath` supports the following
    * placeholder tokens:
@@ -32,7 +34,9 @@ export type ReportSettings = Record<string, unknown> & {
    * Include datasets in final output even when they're empty.
    */
   includeEmptyResults?: boolean
-}
+};
+
+export type ReportSettings = BaseReportSettings | CsvReportSettings | JsonReportSettings | XlsReportSettings;
 
 /**
  * Configuration for a specific Spidergram report
@@ -97,14 +101,10 @@ export interface ReportConfig extends Record<string, unknown> {
   transform?: TransformOptions | ReportWorker;
 
   /**
-   * The ID of a supported output format, or a custom function that receives the
-   * report's data collection and assumes responsibility for final output.
-   * 
-   * Currently supported formats are `csv`, `json`, and `xslx`.
-   * 
-   * @defaultValue `xslx`
+   * A custom report generation function that assumes responsibility for processing
+   * the final datasets and outputting the files.
    */
-  output?: ReportOutputType | ReportWorker;
+  output?: ReportWorker;
 }
 
 /**
