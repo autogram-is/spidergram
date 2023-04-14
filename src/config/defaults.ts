@@ -22,7 +22,8 @@ import { readPackageUpSync } from 'read-pkg-up';
 import { AqQuery } from 'aql-builder';
 import { PageAnalysisOptions } from '../tools/graph/analyze-page.js';
 import { GeneratedAqlQuery } from 'arangojs/aql.js';
-import { Report, ReportConfig } from '../reports/report.js';
+import { Report } from '../reports/report.js';
+import { ReportConfig } from '../reports/report-types.js';
 import { Query } from '../model/index.js';
 
 export const urlNormalizerDefaults: NormalizerOptions = {

@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { joinOxford, queryFilterFlag } from '../shared/index.js';
 import { buildFilter } from '../shared/flag-query-tools.js';
 
+
 export default class DoReport extends SgCommand {
   static summary = 'Build and save a crawl report';
 
@@ -54,10 +55,11 @@ export default class DoReport extends SgCommand {
       } else {
         const data: Record<string, unknown>[] = Object.entries(reports).map(
           ([name, report]) => {
+            const r = report instanceof Report ? report : new Report(report);
             return {
               report: name,
-              category: report.category,
-              description: report.description,
+              category: r.config.group,
+              description: r.config.description,
               type: report instanceof Report ? 'Class' : 'Spec',
             };
           },
@@ -84,11 +86,13 @@ export default class DoReport extends SgCommand {
       for (const f of flags.filter ?? []) {
         filters.push(buildFilter(f));
       }
-      report.modifications.push({ filters });
+      // TODO: Use a new mechanism to add filters?
+      // report.modifications.push({ filters });
     }
 
-    report.queries = { ...report.queries, ...queries };
-    if (flags.name) report.name = flags.name;
+    report.config.queries = { ...report.config.queries, ...queries };
+
+    if (flags.name) report.config.name = flags.name;
 
     report
       .on('progress', (status, message) => {
