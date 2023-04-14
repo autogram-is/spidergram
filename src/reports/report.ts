@@ -106,7 +106,7 @@ export class ReportRunner {
     // Supply defaults and do token-replacement on the output path
     let loc = this.config?.settings?.path as string ?? '{{date}} {{name}}';
     loc = loc.replace('{{name}}', this.config.name ?? 'report');
-    loc = loc.replace('{{date}}', DateTime.now().toISODate());
+    loc = loc.replace('{{date}}', DateTime.now().toISODate() ?? '');
     this.config.settings.path = loc;
 
     if (is.function_(this.config.output)) {

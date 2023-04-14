@@ -324,8 +324,8 @@ export function buildDateRange(
   }
 
   return {
-    startDate: start.toISODate(),
-    endDate: end.toISODate(),
+    startDate: start.toISODate() ?? '',
+    endDate: end.toISODate() ?? '',
   };
 }
 
