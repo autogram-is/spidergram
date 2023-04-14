@@ -27,8 +27,8 @@ export const defaultReports: Record<string, ReportConfig> = {
     name: 'Spidergram Report',
     group: 'builtin',
     description: 'Summary of pages, downloadable media, and errors',
-    output: 'xslx',
     settings: {
+      type: 'xslx',
       includeEmptyResults: true
     },
     queries: {
