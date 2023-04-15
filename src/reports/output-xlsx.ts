@@ -139,7 +139,8 @@ function setColumnData(sheet: WorkSheet, settings: SheetSettings, firstRow: Json
         }
 
         if (cs.autoFit) {
-          const rowWidth = cell.v?.toLocaleString().length ?? 0;
+          let rowWidth = cell.v?.toLocaleString().length ?? 0;
+          rowWidth = Math.max(1, Math.floor(rowWidth / 5)) * 5;
           colSettings[C].width = Math.max(colSettings[C].width ?? 0, rowWidth);
         }
       }
