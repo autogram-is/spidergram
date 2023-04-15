@@ -1,5 +1,14 @@
 # Spidergram Changelog
 
+## v0.9.22 - 23-04-17
+
+- Major improvements to the report structure.
+  - Reports defined in project configuration can reuse pre-defined queries with additional filters and return values.
+  - Reports can include custom settings to control output format and export options.
+  - XLSX formatted reports can override header styling, alter column header names, and populate Exel document metadata.
+  - XLSX formatted reports now auto-resize column widths (with an imposed max width) by default.
+- Useful base queries and partial "query fragments" are now available in the `config.queries` global config property. Queries in that collection can be used in reports or referenced as 'base queries'.
+
 ## v0.9.21 - 23-04-13
 
 - Added a new `NamedEntity` abstract base type that can be used for graph entities that should be referred to by unique names rather than arbitrary IDs.
