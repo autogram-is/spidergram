@@ -1,7 +1,7 @@
-// Sheets.js setup
-import * as fs from 'node:fs';
-import { Readable } from 'node:stream';
-import * as XLSX from 'xlsx';
+import { BookType, WorkBook, WritingOptions } from 'xlsx-js-style';
+import xlspkg from 'xlsx-js-style';
+const { utils, write, writeFile } = xlspkg;
+
 import {
   JsonPrimitive,
   isJsonMap,
@@ -10,9 +10,7 @@ import {
   isAnyJson,
 } from '@salesforce/ts-types';
 import { Buffer } from 'node:buffer';
-
-XLSX.set_fs(fs);
-XLSX.stream.set_readable(Readable);
+import { Readable } from 'node:stream';
 
 export type Sheet = SimpleSheet | StructuredSheet;
 export type SimpleSheet = (JsonPrimitive[] | Record<string, JsonPrimitive>)[];
@@ -34,37 +32,34 @@ export function isStructuredSheet(input: unknown): input is StructuredSheet {
 }
 
 type SpreadsheetWriteOptions = {
-  format: XLSX.BookType;
+  format: BookType;
   compression: boolean;
 };
 
-type SpreadsheetGenerateOptions = Omit<XLSX.WritingOptions, 'type'>;
+type SpreadsheetGenerateOptions = Omit<WritingOptions, 'type'>;
 
 /**
  * Builds and exports single and multi-sheet Excel Workbooks from JSON
  * arrays and dictionaries.
  */
 export class Spreadsheet {
-  static utils = XLSX.utils;
-
-  workbook: XLSX.WorkBook;
+  workbook: WorkBook;
 
   constructor() {
-    const { utils } = Spreadsheet;
     this.workbook = utils.book_new();
   }
 
   addSheet(input: unknown, name?: string) {
     if (isSimpleSheet(input)) {
-      name = Spreadsheet.utils.book_append_sheet(
+      utils.book_append_sheet(
         this.workbook,
-        XLSX.utils.json_to_sheet(input),
+        utils.json_to_sheet(input),
         name,
       );
     } else if (isStructuredSheet(input)) {
-      name = Spreadsheet.utils.book_append_sheet(
+      utils.book_append_sheet(
         this.workbook,
-        XLSX.utils.json_to_sheet(input.data, {
+        utils.json_to_sheet(input.data, {
           header: input.header,
           skipHeader: input.skipHeader,
         }),
@@ -94,7 +89,7 @@ export class Spreadsheet {
           filename = `${filename}.${options.format}`;
         }
 
-        XLSX.writeFile(this.workbook, filename, options);
+        writeFile(this.workbook, filename, options);
         resolve(filename);
       } catch (error: unknown) {
         reject(error);
@@ -109,7 +104,7 @@ export class Spreadsheet {
       ...customOptions,
     };
 
-    return XLSX.write(this.workbook, { Props: this.workbook.Props, ...options, type: 'buffer' }) as Buffer;
+    return write(this.workbook, { Props: this.workbook.Props, ...options, type: 'buffer' }) as Buffer;
   }
 
   toStream(customOptions: Partial<SpreadsheetGenerateOptions> = {}): Readable {

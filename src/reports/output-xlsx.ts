@@ -1,7 +1,10 @@
 import { Spidergram } from "../config/index.js";
 import { FileTools } from "../tools/index.js";
 import { BaseReportSettings, ReportConfig } from "./report-types.js";
-import { Properties, WorkSheet, ColInfo, utils, CellObject, ExcelDataType, NumberFormat } from "xlsx";
+import { Properties, WorkSheet, ColInfo, CellObject, ExcelDataType, NumberFormat } from "xlsx-js-style";
+import xlspkg from 'xlsx-js-style';
+const { utils } = xlspkg;
+
 import { ReportRunner } from "./report.js";
 import { JsonMap, isJsonArray, isJsonMap } from "@salesforce/ts-types";
 import { DateTime } from "luxon";
@@ -114,6 +117,7 @@ function setColumnData(sheet: WorkSheet, settings: SheetSettings, firstRow: Json
       });
     }
 
+    if (settings.formatHeader) sheet["!"]
     for(let R = 0; R <= range.e.r; ++R) {
       for(let C = 0; C <= range.e.c; ++C) {
         const cell: CellObject = dense ? sheet["!data"]?.[R]?.[C] : sheet[utils.encode_cell({r:R, c:C})];
@@ -121,13 +125,8 @@ function setColumnData(sheet: WorkSheet, settings: SheetSettings, firstRow: Json
   
         if (R === 0 && !settings.skipHeader) {
           if (settings.formatHeader) {
-            cell.s = {
-              font: { bold: true },
-              fill: { bgColor:{ rgb: "FFD3D3D3" } }
-            };
-            if (cs.comment) {
-              cell.c = [{ t: cs.comment }];
-            }
+            cell.s = { font: { bold: true } };
+            if (cs.comment) { cell.c = [{ t: cs.comment }] }
             if (cs.title) cell.v = cs.title;
           }
         } else {
