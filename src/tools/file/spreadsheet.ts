@@ -109,10 +109,10 @@ export class Spreadsheet {
       ...customOptions,
     };
 
-    return XLSX.write(this.workbook, { ...options, type: 'buffer' }) as Buffer;
+    return XLSX.write(this.workbook, { Props: this.workbook.Props, ...options, type: 'buffer' }) as Buffer;
   }
 
   toStream(customOptions: Partial<SpreadsheetGenerateOptions> = {}): Readable {
-    return Readable.from(this.toBuffer(customOptions));
+    return Readable.from(this.toBuffer({ Props: this.workbook.Props, ...customOptions }));
   }
 }
