@@ -1,12 +1,12 @@
 import { Spidergram } from "../config/index.js";
 import { FileTools } from "../tools/index.js";
 import { BaseReportSettings, ReportConfig } from "./report-types.js";
-import { Properties, WorkSheet, ColInfo, CellObject, ExcelDataType, NumberFormat } from "xlsx-js-style";
+import { Properties, WorkSheet, ColInfo, CellObject, CellStyle, ExcelDataType, NumberFormat } from "xlsx-js-style";
 import xlspkg from 'xlsx-js-style';
 const { utils } = xlspkg;
 
 import { ReportRunner } from "./report.js";
-import { JsonMap, isJsonArray, isJsonMap } from "@salesforce/ts-types";
+import { JsonCollection, isJsonArray, isJsonMap } from "@salesforce/ts-types";
 import { DateTime } from "luxon";
 import is from "@sindresorhus/is";
 
@@ -24,40 +24,118 @@ export type XlsReportSettings = BaseReportSettings & {
 
   /**
    * A dictionary of per-sheet configuration options. Each key corresponds to a key
-   * in the report's `data` property; if it exists, the `default` key will be used
+   * in the report's `data` property; if it exists, the `default` entry will be used
    * as a fallback for sheets with no specific settings.
    */
   sheets?: Record<string, SheetSettings | undefined>
 };
 
 type SheetSettings = {
+  /**
+   * A human-friendly name for the sheet.
+   */
   name?: string,
-  header?: string[],
-  skipHeader?: boolean,
-  formatHeader?: boolean,
-  columnSettings?: Record<string, ColumnSettings>,
+
+  /**
+   * A human-friendly description of the data on the sheet.
+   */
+  description?: string,
+
+  /**
+   * An output template to use when generating the sheet.
+   * 
+   * - table: A traditional columns/rows data sheet, with styled header
+   * - cover: An array of strings to turned into  
+   * - inspector: Key/Value pairs, optionally grouped under subheadings.
+   */
+  template?: 'table' | 'cover' | 'inspector'
+
+  /**
+   * Style settings for the sheet's header rows.
+   */
+  header?: CellStyle,
+
+  /**
+   * Settings for individual columns. The settings in the 'default' entry will be
+   * applied to all columns.
+   */
+  columns?: Record<string, ColumnSettings>,
 }
 
 type ColumnSettings = {
+  /**
+   * Override the text of the column's first row.
+   */
   title?: string,
+
+  /**
+   * Add a hover/tooltip comment to the column's first row.
+   */
   comment?: string,
+
+  /**
+   * Hide the column from view; its data will still be present and usable in formulas.
+   */
   hidden?: boolean,
-  width?: number,
-  maxWidth?: number,
-  minWidth?: number,
+
+  /**
+   * Adjust the column to the width of its widest row.
+   * 
+   * @defaultValue true
+   */
   autoFit?: boolean,
+
+  /**
+   * Hard-code the width of the column. This measurement is in 'approxomate characters,' not pixels.
+   */
+  width?: number,
+
+  /**
+   * The max width for the column. This measurement is in 'approxomate characters,' not pixels.
+   * 
+   * @defaultValue 80
+   */
+  maxWidth?: number,
+
+  /**
+   * The minimum width for the column. This measurement is in 'approxomate characters,' not pixels.
+   * 
+   * @defaultValue 5
+   */
+  minWidth?: number,
+
+  /**
+   * Override data type auto-detection. Possible values:
+   * 
+   * - "b": boolean
+   * - "n": number
+   * - "s": string
+   * - "d": date
+   */
   type?: ExcelDataType,
+
+  /**
+   * If the data type is set to 'n' or 'd', this format will be used used by Excel
+   * when displaying the data. it does not change the underlying cell value.
+   */
   format?: NumberFormat,
+
+  /**
+   * Attempt to parse and/or coerce the column's data before creating the sheet.
+   * This is mostly useful for dates, which are a nightmare: setting 'type' to 'd'
+   * and 'parse' to 'true' means Spidergram will ATTEMPT to turn timestamps, ISO dates,
+   * and more into "clean" dates.
+   */
   parse?: boolean,
 }
 
 const sheetDefaults: SheetSettings = {
-  formatHeader: true,
-  columnSettings: {
+  header: { font: { bold: true } },
+  template: 'table',
+  columns: {
     default: {
       autoFit: true,
-      maxWidth: 80,
-      parse: true
+      maxWidth: 80
     }
   }
 }
@@ -76,17 +154,20 @@ export async function outputXlsxReport(config: ReportConfig, runner: ReportRunne
 
   for (const [name, data] of Object.entries(datasets)) {
     if (data.length === 0 && !settings.includeEmptyResults) continue;
-
     const sheetSettings = settings.sheets[name] || settings.sheets.default || sheetDefaults;
-    if (sheetSettings) {
-      rpt.addSheet({ name, data, ...sheetSettings }, name.slice(0, 31));
-      if (isJsonArray(data) && isJsonMap(data[0])) {
-        setColumnData(rpt.workbook.Sheets[name], sheetSettings, data[0]);
-      }
-    } else {
-      rpt.addSheet(data, name.slice(0, 31));      
-    }
 
+    rpt.addSheet({ name, data }, name.slice(0, 31));
+    switch (sheetSettings.template) { 
+      case 'table':
+        buildTabularSheet(rpt.workbook.Sheets[name], sheetSettings, data);
+        break;
+      case 'inspector':
+        buildInspectorSheet(rpt.workbook.Sheets[name], sheetSettings, data);
+        break;
+      case 'cover':
+        buildCoverSheet(rpt.workbook.Sheets[name], sheetSettings, data);
+        break;
+    }
   }
   const curFilePath = `${outputPath}.xlsx`;
 
@@ -101,9 +182,16 @@ export async function outputXlsxReport(config: ReportConfig, runner: ReportRunne
   return Promise.resolve();
 }
 
-function setColumnData(sheet: WorkSheet, settings: SheetSettings, firstRow: JsonMap) {
+function buildTabularSheet(sheet: WorkSheet, settings: SheetSettings, data: JsonCollection) {
+  if (!isJsonArray(data) || !isJsonMap(data[0])) {
+    // We can only work with arrays of maps here; in the future we might be able to
+    // expand it to deal with other stuff.
+    return;
+  }
+
+  const firstRow = data[0];
   const colInfo: ColInfo[] = [];
-  settings.columnSettings ??= {};
+  settings.columns ??= {};
 
   if (sheet["!ref"]) {
     const range = utils.decode_range(sheet["!ref"]);
@@ -112,22 +200,21 @@ function setColumnData(sheet: WorkSheet, settings: SheetSettings, firstRow: Json
     const colSettings: ColumnSettings[] = [];
     for (const c of Object.keys(firstRow)) {
       colSettings.push({
-        ...settings.columnSettings[c],
-        ...settings.columnSettings['default']
+        ...settings.columns[c],
+        ...settings.columns['default']
       });
     }
 
-    if (settings.formatHeader) sheet["!"]
     for(let R = 0; R <= range.e.r; ++R) {
       for(let C = 0; C <= range.e.c; ++C) {
         const cell: CellObject = dense ? sheet["!data"]?.[R]?.[C] : sheet[utils.encode_cell({r:R, c:C})];
         const cs = colSettings[C];
   
-        if (R === 0 && !settings.skipHeader) {
-          if (settings.formatHeader) {
+        if (R === 0) {
+          if (cs.comment) { cell.c = [{ t: cs.comment }] }
+          if (cs.title) cell.v = cs.title;
+          if (settings.header) {
             cell.s = { font: { bold: true } };
-            if (cs.comment) { cell.c = [{ t: cs.comment }] }
-            if (cs.title) cell.v = cs.title;
           }
         } else {
           if (cs.type) cell.t = cs.type;
@@ -153,9 +240,18 @@ function setColumnData(sheet: WorkSheet, settings: SheetSettings, firstRow: Json
         hidden: cs.hidden,
       })
     }
-    sheet["!cols"] = colInfo;  
-    
+    sheet["!cols"] = colInfo;   
   }
+}
+
+function buildCoverSheet(sheet: WorkSheet, settings: SheetSettings, data: JsonCollection) {
+  // Not yet implemented
+  console.log(sheet, settings, data);
+}
+
+function buildInspectorSheet(sheet: WorkSheet, settings: SheetSettings, data: JsonCollection) {
+  // Not yet implemented
+  console.log(sheet, settings, data);
 }
 
 function desperatelyAttemptToParseDate(input: string | number | boolean | Date | undefined) {
