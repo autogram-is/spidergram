@@ -3,7 +3,7 @@ import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import { AnyJson } from '@salesforce/ts-types';
 import { DateTime } from 'luxon';
 import { ReportConfig } from './report-types.js';
-import { getReportQuery } from './report-utils.js';
+import { buildQueryWithParents } from '../model/queries/query-inheritance.js';
 
 import { outputCsvReport } from './output-csv.js';
 import { outputJsonReport } from './output-json.js';
@@ -82,7 +82,7 @@ export class ReportRunner {
 
     // Iterate over every query, modify it if necessary, and run it.
     for (const [name, query] of Object.entries(this.config.queries ?? {})) {
-      const q = await getReportQuery(query);
+      const q = await buildQueryWithParents(query);
       if (q === undefined) continue;
 
       this.events.emit('progress', this.status, `Running ${name} query`);

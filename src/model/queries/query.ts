@@ -1,4 +1,4 @@
-import { Spidergram } from '../../index.js';
+import { ChildQuery, Spidergram, addToParentQuery, buildQueryWithParents, isChildQuery } from '../../index.js';
 import { QueryOptions } from 'arangojs/database.js';
 import {
   GeneratedAqlQuery,
@@ -13,26 +13,29 @@ import _ from 'lodash';
 
 export class Query extends AqBuilder {
   static async run<T = AnyJson>(
-    query: string | GeneratedAqlQuery | AqQuery | Query,
+    input: string | GeneratedAqlQuery | AqQuery | Query | ChildQuery,
     options: QueryOptions = {},
   ) {
     const sg = await Spidergram.load();
     let aq = aql`RETURN null`;
 
     // Do we have the key to an existing saved query?
-    if (typeof query === 'string') {
-      if (sg.config.queries?.[query]) query = sg.config.queries?.[query];
+    if (typeof input === 'string') {
+      if (sg.config.queries?.[input]) input = sg.config.queries?.[input];
     }
 
-    // Now deal with the query type
-    if (typeof query === 'string') {
-      aq = aql`${literal(query)}`;
-    } else if (isGeneratedAqlQuery(query)) {
-      aq = query;
-    } else if (isAqQuery(query)) {
-      aq = Query.build(query);
-    } else if (query instanceof Query) {
-      aq = query.build();
+    if (isChildQuery(input)) {
+      const modified = await(buildQueryWithParents(input))
+        .then(q => q ? addToParentQuery(q, input as ChildQuery) : undefined);
+      if (modified) aq = modified;
+    } else if (typeof input === 'string') {
+      aq = aql`${literal(input)}`;
+    } else if (isGeneratedAqlQuery(input)) {
+      aq = input;
+    } else if (isAqQuery(input)) {
+      aq = Query.build(input);
+    } else if (input instanceof Query) {
+      aq = input.build();
     }
 
     return Spidergram.load()

@@ -1,15 +1,9 @@
-import { JsonCollection, JsonPrimitive } from "@salesforce/ts-types";
-import { AqQuery } from "aql-builder";
-import { Query } from "../model/index.js";
-import { GeneratedAqlQuery } from "arangojs/aql.js";
+import { JsonCollection } from "@salesforce/ts-types";
 import { XlsReportSettings } from "./output-xlsx.js";
 import { CsvReportSettings } from "./output-csv.js";
 import { JsonReportSettings } from "./output-json.js";
 import { ReportRunner } from "./report.js";
-
-export type AqQueryFragment = Partial<AqQuery>;
-export type AqBindVars = Record<string, JsonPrimitive | JsonPrimitive[]>
-export type QueryInput = string | AqQuery | Query | GeneratedAqlQuery;
+import { ChildQuery, QueryInput } from "../model/queries/query-inheritance.js";
 
 export type ReportResult = { messages?: string[], errors?: Error[] };
 export type ReportWorker = (report: ReportConfig, runner: ReportRunner) => Promise<ReportResult>
@@ -74,7 +68,7 @@ export interface ReportConfig extends Record<string, unknown> {
    * query definitions in {@link AqQuery} format, raw strings containing AQL queries,
    * etc.
    */
-  queries?: Record<string, QueryInput | ReportQuery>;
+  queries?: Record<string, QueryInput | ChildQuery>;
 
   /**
    * Custom function to be run before any queries are excecuted. This can be used
@@ -107,29 +101,3 @@ export interface ReportConfig extends Record<string, unknown> {
    */
   output?: ReportWorker;
 }
-
-/**
- * A query definition that can (optionally) include a foundational base query.
- * 
- * If the base query is a {@link Query} or an {@link AqQuery}, the properties of
- * the {@link ReportQuery} will be combined with those of the base query to
- * generate a new derivitive query.
- * 
- * If the base query is a {@link GeneratedAqlQuery}, the list of named bind variables
- * will be injected into the base query before execution.
- */
-export type ReportQuery = AqQueryFragment & {
-  /**
-   * The query to use as a starting point. If this value is a string,
-   * it will be treated as the name of a saved query to look up in the global
-   * configuration. If no query is found, it will be compiled as a raw AQL query.
-   * If that fails you're SOL.
-   */
-  base: QueryInput;
-
-  /**
-   * After a query has been compiled into a {@link GeneratedAqlQuery}, these
-   * values will be injected into its list of bound variables.
-   */
-  bind?: Record<string, JsonPrimitive | JsonPrimitive[]>
-};
