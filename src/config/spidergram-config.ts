@@ -33,6 +33,13 @@ import { SpiderCli } from '../cli/shared/index.js';
  * get more precise contextual control.
  */
 export interface SpidergramConfig extends Record<string, unknown> {
+  
+  /**
+   * The version of Spidergram the configuration data was originally created for.
+   * This allows Spidergram to warn you if your config is out of date.
+   */
+  configVersion?: string;
+
   /**
    * A global flag that can be used to control performance monitoring and other
    * non-production behaviors. Can be overidden by setting the SPIDERGRAM_DEBUG

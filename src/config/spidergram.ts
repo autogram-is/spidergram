@@ -21,6 +21,7 @@ import { globalNormalizer } from './global-normalizer.js';
 import { SpidergramConfig } from './spidergram-config.js';
 import { setTimeout } from 'timers/promises';
 import { SpiderCli } from '../cli/shared/index.js';
+import { readPackageUpSync } from 'read-pkg-up';
 
 export class SpidergramError extends Error {}
 
@@ -224,6 +225,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
   protected _crawleeConfig?: CrawleeConfig;
   protected _normalizer?: UrlMutators.UrlMutator;
   protected _cli?: SpiderCli;
+  protected _version?: string;
 
   protected constructor() {
     Spidergram._instance = this;
@@ -248,6 +250,13 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
 
   get normalizer() {
     return NormalizedUrl.normalizer;
+  }
+
+  get version() {
+    if (!this._version) {
+      this._version = readPackageUpSync()?.packageJson?.version;
+    }
+    return this._version;
   }
 
   /**
