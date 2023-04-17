@@ -154,9 +154,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     if (this._loadedConfig?.value.finalizer) {
       await this._loadedConfig?.value.finalizer(this);
     }
-
-    this.buildDefaultQueries();
-
+  
     this._initializing = false;
     this._needsInit = false;
     return Promise.resolve(this);
@@ -177,6 +175,10 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     // Reset the active configuration to the baseline defaults, load any user-defined
     // configuration, and merge them.
     this._activeConfig = Spidergram.defaults as T;
+
+    this.buildDefaultQueries();
+
+
     this._loadedConfig = await load('spidergram', options);
 
     this._activeConfig = _.defaultsDeep(
@@ -400,9 +402,9 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
       ...QueryFragments.queries,
     }
 
-    this.config.queries ??= {};
-    this.config.queries = {
-      ...this.config.queries,
+    this._activeConfig.queries ??= {};
+    this._activeConfig.queries = {
+      ...this._activeConfig.queries,
       ...queries
     }
   }
