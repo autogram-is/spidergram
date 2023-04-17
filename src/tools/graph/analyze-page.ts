@@ -3,7 +3,6 @@ import { rebuildResourceLinks } from './rebuild-resource-links.js';
 import { PageDataOptions, PageContentOptions, PatternDefinition, findAndSavePagePatterns } from '../html/index.js';
 import { TechAuditOptions } from '../browser/index.js';
 import { PropertyMap, mapProperties } from '../map-properties.js';
-import is from '@sindresorhus/is';
 import _ from 'lodash';
 import { DateTime } from 'luxon';
 import {
@@ -11,11 +10,6 @@ import {
   processResourceFile,
 } from '../file/process-resource-file.js';
 import { getResourceSite } from './get-resource-site.js';
-
-export type PageAnalyzer = (
-  input: Resource,
-  options: PageAnalysisOptions,
-) => Promise<Resource>;
 
 /**
  * Options to control the behavior of the processPage utility function.
@@ -93,18 +87,6 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
 }
 
 export async function analyzePage(
-  resource: Resource,
-  customOptions: PageAnalysisOptions = {},
-): Promise<Resource> {
-  const sg = await Spidergram.load();
-  if (is.function_(sg.config.analyzePageFn)) {
-    return sg.config.analyzePageFn(resource, customOptions);
-  } else {
-    return _analyzePage(resource, customOptions);
-  }
-}
-
-async function _analyzePage(
   resource: Resource,
   customOptions: PageAnalysisOptions = {},
 ): Promise<Resource> {

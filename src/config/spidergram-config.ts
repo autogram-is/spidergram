@@ -4,14 +4,11 @@ import { UrlMutators } from '@autogram/url-tools';
 import { NormalizerOptions } from './global-normalizer.js';
 import {
   HtmlToTextOptions,
-  PageContentExtractor,
   PageContentOptions,
-  PageDataExtractor,
   PageDataOptions,
 } from '../tools/html/index.js';
 import {
   PageAnalysisOptions,
-  PageAnalyzer,
 } from '../tools/graph/analyze-page.js';
 import { TechAuditOptions } from '../tools/browser/index.js';
 import { Configuration as FileConfiguration } from 'typefs';
@@ -155,32 +152,14 @@ export interface SpidergramConfig extends Record<string, unknown> {
   analysis?: PageAnalysisOptions;
 
   /**
-   * An async {@link PageAnalyzer|Processor} function to be used as an override
-   * for the default page processor.
-   */
-  analyzePageFn?: PageAnalyzer;
-
-  /**
    * Extraction options for structured metadata on crawled pages.
    */
   pageContent?: PageContentOptions;
 
   /**
-   * An async {@link PageContentExtractor|Extractor} function to be used as an override
-   * for the default content extractor.
-   */
-  getPageContentFn?: PageContentExtractor;
-
-  /**
    * Extraction options for structured metadata on crawled pages.
    */
   pageData?: PageDataOptions;
-
-  /**
-   * An async {@link PageDataExtractor|Extractor} function to be used as an override
-   * for the default page extractor.
-   */
-  getPageDataFn?: PageDataExtractor;
 
   /**
    * Extraction options for structured metadata on crawled pages.

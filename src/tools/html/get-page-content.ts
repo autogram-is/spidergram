@@ -2,7 +2,6 @@ import { TextTools, Resource } from '../../index.js';
 import { getPlaintext, HtmlToTextOptions } from './get-plaintext.js';
 import { Spidergram } from '../../config/spidergram.js';
 import _ from 'lodash';
-import is from '@sindresorhus/is';
 import { getCheerio } from './get-cheerio.js';
 import { getMarkup } from './get-markup.js';
 
@@ -10,11 +9,6 @@ export interface PageContent extends Record<string, unknown> {
   text?: string;
   readability?: TextTools.ReadabilityScore;
 }
-
-export type PageContentExtractor = (
-  input: string | cheerio.Root | Resource,
-  options: PageContentOptions,
-) => Promise<PageContent>;
 
 /**
  * Options to control the extraction of core content from an HTML page
@@ -86,18 +80,6 @@ export interface PageContentOptions {
  * optional configuration options.
  */
 export async function getPageContent(
-  input: string | cheerio.Root | Resource,
-  customOptions: PageContentOptions = {},
-) {
-  if (is.function_(Spidergram.config.getPageContentFn)) {
-    return Spidergram.config.getPageContentFn(input, customOptions);
-  } else {
-    return _getPageContent(input, customOptions);
-  }
-}
-
-// Internal function that actually does the heavy lifting.
-async function _getPageContent(
   input: string | cheerio.Root | Resource,
   customOptions: PageContentOptions = {},
 ) {

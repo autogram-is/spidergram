@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import is from '@sindresorhus/is';
 
 import { Resource } from '../../model/index.js';
 import { Spidergram } from '../../config/spidergram.js';
@@ -12,11 +11,6 @@ import { parseMetaTags, MetaValues } from './parse-meta-tags.js';
 import { findElementData, ElementData } from './find-element-data.js';
 import { JsonMap, isJsonMap, toAnyJson } from '@salesforce/ts-types';
 import { HtmlTools } from '../index.js';
-
-export type PageDataExtractor = (
-  input: string | cheerio.Root | Resource,
-  options: PageDataOptions,
-) => Promise<PageData>;
 
 /**
  * Options to control extraction of structured data from HTML pages
@@ -115,17 +109,6 @@ export interface PageData {
 }
 
 export async function getPageData(
-  input: string | cheerio.Root | Resource,
-  customOptions: PageDataOptions = {},
-): Promise<PageData> {
-  if (is.function_(Spidergram.config.pageData)) {
-    return Spidergram.config.pageData(input, customOptions);
-  } else {
-    return _getPageData(input, customOptions);
-  }
-}
-
-async function _getPageData(
   input: string | cheerio.Root | Resource,
   customOptions: PageDataOptions = {},
 ): Promise<PageData> {
