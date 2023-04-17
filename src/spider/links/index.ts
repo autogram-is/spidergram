@@ -1,4 +1,4 @@
-export * from './enqueue-options.js';
+export * from './url-discovery-options.js';
 export * from './enqueue-wrapper.js';
 export * from './find-urls.js';
 export * from './save-urls.js';

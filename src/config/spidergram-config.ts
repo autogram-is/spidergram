@@ -1,7 +1,5 @@
 import { Spidergram } from './spidergram.js';
-import { SpiderOptions, Query, ReportConfig } from '../index.js';
-import { UrlMutators } from '@autogram/url-tools';
-import { NormalizerOptions } from './global-normalizer.js';
+import { SpiderOptions, Query, ReportConfig, UrlDiscoveryOptions } from '../index.js';
 import {
   HtmlToTextOptions,
   PageContentOptions,
@@ -112,13 +110,9 @@ export interface SpidergramConfig extends Record<string, unknown> {
   offloadBodyHtml?: 'db' | 'file';
 
   /**
-   * Settings for the project's default URL normalizer. These control
-   * which URLs will be considered duplicates of each other.
-   *
-   * Alternatively, a custom function can be passed in for more control
-   * over the URL transformation process.
+   * Project-wide options that affect URL filtering, processing, and enqueing.
    */
-  normalizer?: NormalizerOptions | UrlMutators.UrlMutator;
+  urls?: UrlDiscoveryOptions;
 
   /**
    * Configuration options for Crawlee, the web scraping toolkit used by

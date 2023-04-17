@@ -139,11 +139,12 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     }
 
     // Global URL normalizer
-    if (is.function_(this.config.normalizer)) {
-      this.setNormalizer(this.config.normalizer);
+    const n = this.config?.urls?.normalizer;
+    if (is.function_(n)) {
+      this.setNormalizer(n);
     } else if (is.plainObject(this.config.normalizer)) {
       this.setNormalizer((url: ParsedUrl) =>
-        globalNormalizer(url, { ...this.config.normalizer }),
+        globalNormalizer(url, { ...n }),
       );
     }
 

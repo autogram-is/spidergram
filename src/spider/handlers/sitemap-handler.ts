@@ -51,7 +51,7 @@ export async function sitemapHandler(context: SpiderContext) {
     const subSitemaps = links.filter(l => l.label === 'sitemap');
     const normalLinks = links.filter(l => l.label !== 'sitemap');
 
-    await saveUrls(context, subSitemaps, { handler: 'sitemap' }).then(
+    await saveUrls(context, subSitemaps).then(
       savedLinks => enqueueRequests(context, savedLinks),
     );
     await saveUrls(context, normalLinks).then(savedLinks =>

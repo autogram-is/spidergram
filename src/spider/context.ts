@@ -9,7 +9,7 @@ import {
 import { DiskDriver } from 'typefs';
 import { UniqueUrl, Resource } from '../model/index.js';
 import { ArangoStore } from '../model/arango-store.js';
-import { EnqueueUrlOptions } from './links/index.js';
+import { UrlDiscoveryOptions } from './links/index.js';
 import { HtmlTools } from '../index.js';
 import { InternalSpiderOptions } from './spider-options.js';
 import { SpiderHook } from './hooks/index.js';
@@ -73,7 +73,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
 
   /**
    * Parses the current HTML page for links, saving them as {@apilink UniqueUrl}
-   * objects and enqueing them as crawl requests. @see {@apilink EnqueueUrlOptions}
+   * objects and enqueing them as crawl requests. @see {@apilink UrlDiscoveryOptions}
    * for default options.
    *
    * @example
@@ -91,14 +91,14 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    *
    * @type {Function}
    */
-  enqueueUrls: (options?: EnqueueUrlOptions) => Promise<unknown>;
+  enqueueUrls: (options?: UrlDiscoveryOptions) => Promise<unknown>;
 
   /**
    * Finds URLs on the current page matching the criteria specified
    * in the options; but does not save or enqueue them.
    * @type {Function}
    */
-  findUrls: (options?: EnqueueUrlOptions) => Promise<HtmlTools.FoundLink[]>;
+  findUrls: (options?: UrlDiscoveryOptions) => Promise<HtmlTools.FoundLink[]>;
 
   /**
    * Saves a list of found links as {@apilink UniqueUrl} objects, applying
@@ -108,7 +108,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    */
   saveUrls: (
     links: HtmlTools.FoundLink[],
-    options?: EnqueueUrlOptions,
+    options?: UrlDiscoveryOptions,
   ) => Promise<UniqueUrl[]>;
 
   /**
@@ -119,7 +119,7 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    */
   saveRequests: (
     urls: UniqueUrl[],
-    options?: EnqueueUrlOptions,
+    options?: UrlDiscoveryOptions,
   ) => Promise<Request[]>;
 
   /**

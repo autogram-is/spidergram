@@ -1,8 +1,6 @@
-import { RequestQueue } from 'crawlee';
 import { ParsedUrl } from '@autogram/url-tools';
-
 import { UrlFilterInput } from '../../tools/urls/filter-url.js';
-import { InternalSpiderContext } from '../../index.js';
+import { InternalSpiderContext, NormalizerOptions } from '../../index.js';
 import { PageRegion } from '../../tools/html/index.js';
 
 export type PageLinkRegion = PageRegion & {
@@ -43,7 +41,7 @@ export type PageLinkRegion = PageRegion & {
 /**
  * Configuration options for Spidergram's URL enqueing options.
  */
-export interface EnqueueUrlOptions {
+export interface UrlDiscoveryOptions {
   /**
    * Limits the number of links that will be enqueued by this call; useful for
    * selecting a subset of links on the page for testing.
@@ -149,7 +147,7 @@ export interface EnqueueUrlOptions {
    * @type {boolean}
    * @default true
    */
-  discardlocalAnchors?: boolean;
+  discardLocalAnchors?: boolean;
 
   /**
    * Ignore HTML tags with protocols other than `http` and `https`.
@@ -184,43 +182,13 @@ export interface EnqueueUrlOptions {
   baseUrl?: string;
 
   /**
-   * The RequestQueue used to enqueue the links.
+   * Settings for the project's default URL normalizer. These control
+   * which URLs will be considered duplicates of each other.
    *
-   * By default this is the current crawl's internal queue, but a custom
-   * queue can be passed in for special handling (ie, creating a separate
-   * list of URLs for page screenshots after the main crawl completes)
-   *
-   * @type {string}
+   * Alternatively, a custom function can be passed in for more control
+   * over the URL transformation process.
    */
-  requestQueue?: RequestQueue;
-
-  /**
-   * A label applied to any {@apilink Request} objects created when the
-   * URLs are enqueued for crawling. This can be used to control which
-   * handlers process the resulting HTTP responses.
-   *
-   * @default {undefined}
-   * @type {string}
-   */
-  handler?: string;
-
-  /**
-   * If URLs found in this operation are enqueued, move them to the front
-   * ofr the request queue.
-   *
-   * @default {false}
-   * @type {boolean}
-   */
-  prioritize?: boolean;
-
-  /**
-   * An optional normalizer function to override the crawl- and project-wide
-   * normalizer defaults.
-   *
-   * @default {undefined}
-   * @type {UrlMutatorWithContext}
-   */
-  normalizer?: UrlMutatorWithContext;
+  normalizer?: NormalizerOptions | UrlMutatorWithContext;
 }
 
 export type UrlMutatorWithContext<

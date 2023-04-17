@@ -1,4 +1,4 @@
-import { Spidergram, Resource, HtmlTools, BrowserTools, EnqueueUrlOptions } from '../../index.js';
+import { Spidergram, Resource, HtmlTools, BrowserTools, UrlDiscoveryOptions } from '../../index.js';
 import { rebuildResourceLinks } from './rebuild-resource-links.js';
 import { PageDataOptions, PageContentOptions, PatternDefinition, findAndSavePagePatterns } from '../html/index.js';
 import { TechAuditOptions } from '../browser/index.js';
@@ -62,7 +62,7 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
    *
    * @defaultValue: false
    */
-  links?: EnqueueUrlOptions | boolean;
+  links?: UrlDiscoveryOptions | boolean;
 
   /**
    * A dictionary used to map existing data on a {@link Resource} to new properties.

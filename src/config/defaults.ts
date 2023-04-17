@@ -10,7 +10,7 @@
 import path from 'path';
 import { NormalizerOptions, SpidergramConfig } from './index.js';
 import { mimeGroups } from '../spider/helpers/mime.js';
-import { EnqueueUrlOptions, SpiderOptions } from '../spider/index.js';
+import { UrlDiscoveryOptions, SpiderOptions } from '../spider/index.js';
 import { UrlMatchStrategy } from '../tools/urls/index.js';
 import {
   PageDataOptions,
@@ -50,14 +50,15 @@ export const urlNormalizerDefaults: NormalizerOptions = {
   sortSearchParams: true,
 };
 
-export const urlDiscoveryDefaults: EnqueueUrlOptions = {
-  save: true,
-  crawl: UrlMatchStrategy.SameDomain,
+export const urlDiscoveryDefaults: UrlDiscoveryOptions = {
+  normalizer: urlNormalizerDefaults,
   discardEmpty: true,
-  discardlocalAnchors: true,
+  discardLocalAnchors: true,
   discardNonWeb: false,
   discardUnparsable: false,
   discardExisting: true,
+  save: true,
+  crawl: UrlMatchStrategy.SameDomain,
 };
 
 // See https://github.com/html-to-text/node-html-to-text/blob/master/packages/html-to-text/README.md#predefined-formatters
@@ -79,7 +80,6 @@ export const spiderDefaults: Partial<SpiderOptions> = {
   saveCookies: false,
   savePerformance: false,
   saveXhrList: false,
-  urls: urlDiscoveryDefaults,
   parseMimeTypes: mimeGroups.page,
   downloadMimeTypes: [],
   userAgent: `Spidergram ${readPackageUpSync()?.packageJson?.version}`,
@@ -149,5 +149,5 @@ export const spidergramDefaults: SpidergramConfig = {
   pageData: pageDataDefaults,
   pageContent: pageContentDefaults,
   pageTechnologies: pageTechnologyDefaults,
-  normalizer: urlNormalizerDefaults,
+  urls: urlDiscoveryDefaults,
 };

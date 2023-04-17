@@ -3,9 +3,9 @@ import { Args, Flags } from '@oclif/core';
 import {
   ParsedUrl,
   SpiderContext,
-  SpiderOptions,
   Spidergram,
   UniqueUrl,
+  UrlDiscoveryOptions,
   UrlTools,
 } from '../../../index.js';
 import { SpiderCli } from '../../shared/spider-cli.js';
@@ -50,8 +50,9 @@ export default class TestUrl extends SgCommand {
       sg.config.spider,
     ) as SpiderContext;
     if (flags.base) {
-      fakeContext.urls.baseUrl = flags.base.toString();
-      fakeContext.uniqueUrl = new UniqueUrl({ url: fakeContext.urls.baseUrl });
+      sg.config.urls ??= {};
+      sg.config.urls.baseUrl = flags.base.toString();
+      fakeContext.uniqueUrl = new UniqueUrl({ url: sg.config.urls.baseUrl });
     }
 
     if (flags.config) {
@@ -82,11 +83,11 @@ export default class TestUrl extends SgCommand {
     }
 
     if (argv.length > 0 && typeof argv[0] === 'string') {
-      this.singleUrl(argv[0], fakeContext);
+      this.singleUrl(argv[0], sg.config.urls ?? {});
     }
   }
 
-  singleUrl(url: string, opt: SpiderContext) {
+  singleUrl(url: string, opt: UrlDiscoveryOptions) {
     const cli = new SpiderCli();
     this.log(cli.header('URL'));
 
@@ -116,30 +117,30 @@ export default class TestUrl extends SgCommand {
     );
   }
 
-  softNormalize(url: string, opt: SpiderOptions) {
+  softNormalize(url: string, opt: UrlDiscoveryOptions) {
     try {
-      return new NormalizedUrl(url, opt.urls.baseUrl);
+      return new NormalizedUrl(url, opt.baseUrl);
     } catch {
       return undefined;
     }
   }
 
-  softParse(url: string, opt: SpiderOptions) {
+  softParse(url: string, opt: UrlDiscoveryOptions) {
     try {
-      return new ParsedUrl(url, opt.urls.baseUrl);
+      return new ParsedUrl(url, opt.baseUrl);
     } catch {
       return undefined;
     }
   }
 
-  checkUrl(url: NormalizedUrl, opt: SpiderContext) {
+  checkUrl(url: NormalizedUrl, opt: UrlDiscoveryOptions) {
     let base: ParsedUrl | undefined = undefined;
-    if (opt.urls.baseUrl) {
-      base = new ParsedUrl(opt.urls.baseUrl);
+    if (opt.baseUrl) {
+      base = new ParsedUrl(opt.baseUrl);
     }
     return {
-      save: UrlTools.filterUrl(url, opt.urls.save, { contextUrl: base }),
-      crawl: UrlTools.filterUrl(url, opt.urls.crawl, { contextUrl: base }),
+      save: UrlTools.filterUrl(url, opt.save, { contextUrl: base }),
+      crawl: UrlTools.filterUrl(url, opt.crawl, { contextUrl: base }),
     };
   }
 }

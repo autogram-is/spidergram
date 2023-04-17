@@ -51,7 +51,7 @@ export async function robotsTxtHandler(context: SpiderContext) {
     const links: FoundLink[] = sitemaps.map(s => {
       return { url: s };
     });
-    await saveUrls(context, links, { handler: 'sitemap' }).then(savedLinks =>
+    await saveUrls(context, links).then(savedLinks =>
       enqueueRequests(context, savedLinks),
     );
   }

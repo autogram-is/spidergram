@@ -4,20 +4,19 @@ import { SpiderContext } from '../context.js';
 import {
   UniqueUrl,
   LinksTo,
-  EnqueueUrlOptions,
+  UrlDiscoveryOptions,
   UrlTools,
   HtmlTools,
-  NormalizedUrl,
   aql,
 } from '../../index.js';
 import _ from 'lodash';
 
-export async function saveUrls(
+export async function  saveUrls(
   context: SpiderContext,
   links: HtmlTools.FoundLink | HtmlTools.FoundLink[],
-  customOptions: EnqueueUrlOptions = {},
+  customOptions: UrlDiscoveryOptions = {},
 ) {
-  const options: EnqueueUrlOptions = _.defaultsDeep(
+  const options: UrlDiscoveryOptions = _.defaultsDeep(
     customOptions,
     context.urls,
   );
@@ -36,7 +35,6 @@ export async function saveUrls(
       base: uniqueUrl?.url,
       referer: uniqueUrl?.url,
       depth: uniqueUrl === undefined ? 0 : uniqueUrl.depth + 1,
-      normalizer: options.normalizer ?? NormalizedUrl.normalizer,
     });
 
     // If discardUnparsable is turned on, filter out the bad ones.
@@ -120,7 +118,6 @@ export async function saveCurrentUrl(context: SpiderContext): Promise<void> {
   if (is.boolean(fromUniqueUrl)) {
     context.uniqueUrl = new UniqueUrl({
       url: context.request.url,
-      normalizer: url => url,
       referer: is.string(referer) ? referer : undefined,
       depth: is.number(depth) ? depth : 0,
     });

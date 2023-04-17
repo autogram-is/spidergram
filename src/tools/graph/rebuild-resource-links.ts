@@ -1,6 +1,6 @@
 import {
   Spidergram,
-  EnqueueUrlOptions,
+  UrlDiscoveryOptions,
   Resource,
   EntityQuery,
   UniqueUrl,
@@ -15,10 +15,10 @@ import _ from 'lodash';
  */
 export async function rebuildResourceLinks(
   resource: Resource,
-  customOptions: EnqueueUrlOptions = {},
+  customOptions: UrlDiscoveryOptions = {},
 ) {
   const sg = await Spidergram.load();
-  const options: EnqueueUrlOptions = _.defaultsDeep(
+  const options: UrlDiscoveryOptions = _.defaultsDeep(
     customOptions,
     Spidergram.config.spider?.urls,
   );

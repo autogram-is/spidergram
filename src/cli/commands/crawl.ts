@@ -64,16 +64,16 @@ export default class Crawl extends SgCommand {
         await sg.arango.erase({ eraseAll: true });
       }
     }
+    
+    sg.config.urls ??= {};
+    sg.config.urls.save = flags.discover === 'none' ? () => false : flags.discover;
+    sg.config.urls.crawl = flags.enqueue === 'none' ? () => false : flags.enqueue;
 
     const spider = new Spider({
       logLevel: flags.verbose ? LogLevel.DEBUG : LogLevel.OFF,
       maxConcurrency: flags.concurrency,
       maxRequestsPerMinute: flags.rate,
       downloadMimeTypes: flags.download,
-      urls: {
-        save: flags.discover === 'none' ? () => false : flags.discover,
-        crawl: flags.enqueue === 'none' ? () => false : flags.enqueue,
-      },
     });
     spider.on('progress', status => this.updateProgress(status));
     spider.on('end', status => {

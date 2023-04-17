@@ -1,6 +1,6 @@
 import { SpiderContext } from '../context.js';
 import {
-  EnqueueUrlOptions,
+  UrlDiscoveryOptions,
   findUrls,
   saveUrls,
   enqueueRequests,
@@ -8,7 +8,7 @@ import {
 
 export async function enqueueUrls(
   context: SpiderContext,
-  customOptions: EnqueueUrlOptions = {},
+  customOptions: UrlDiscoveryOptions = {},
 ) {
   const links = findUrls(context, customOptions);
   return saveUrls(context, links, customOptions).then(async urls =>

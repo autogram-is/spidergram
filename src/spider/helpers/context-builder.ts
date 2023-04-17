@@ -17,20 +17,20 @@ export async function enhanceSpiderContext(
     saveResource: async (data?: Record<string, unknown>) =>
       helpers.saveResource(context, data),
 
-    enqueueUrls: async (options: Partial<urls.EnqueueUrlOptions> = {}) =>
+    enqueueUrls: async (options: Partial<urls.UrlDiscoveryOptions> = {}) =>
       urls.enqueueUrls(context, options),
 
-    findLinks: async (options: Partial<urls.EnqueueUrlOptions> = {}) =>
+    findLinks: async (options: Partial<urls.UrlDiscoveryOptions> = {}) =>
       urls.findUrls(context, options),
 
     saveLinks: async (
       input: HtmlTools.FoundLink[],
-      options: Partial<urls.EnqueueUrlOptions> = {},
+      options: Partial<urls.UrlDiscoveryOptions> = {},
     ) => urls.saveUrls(context, input, options),
 
     saveRequests: async (
       input: UniqueUrl[],
-      options: Partial<urls.EnqueueUrlOptions> = {},
+      options: Partial<urls.UrlDiscoveryOptions> = {},
     ) => urls.enqueueRequests(context, input, options),
 
     graph: project.arango,

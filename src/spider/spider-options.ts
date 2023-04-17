@@ -1,6 +1,5 @@
 import { Dictionary, LogLevel, PlaywrightCrawlerOptions } from 'crawlee';
 import { SpiderHook } from './hooks/index.js';
-import { EnqueueUrlOptions } from './links/index.js';
 import { SpiderRequestHandler } from './handlers/index.js';
 import { AxeAuditOptions } from '../tools/browser/axe-auditor.js';
 
@@ -63,19 +62,6 @@ export interface InternalSpiderOptions extends Dictionary {
    * @type {Record<string, SpiderRequestHandler}
    */
   requestHandlers: Record<string, SpiderRequestHandler>;
-
-  /**
-   * Overrides for the default URL filtering and enqueing options;
-   * these will apply whenever a request handler calls the `enqueueUrls`
-   * function without custom options.
-   *
-   * The default options specify that all URLs on the page will be saved
-   * but only URLs pointing to the same domain as the current page will be
-   * enqueued for crawling.
-   *
-   * @type {EnqueueUrlOptions}
-   */
-  urls: EnqueueUrlOptions;
 
   /**
    * An array of MIME type strings used to recognize HTTP requests as

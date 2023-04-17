@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { SpiderContext } from '../context.js';
-import { EnqueueUrlOptions, PageLinkRegion } from './index.js';
+import { UrlDiscoveryOptions, PageLinkRegion } from './index.js';
 import { HtmlTools } from '../../index.js';
 import _ from 'lodash';
 import { getCheerio } from '../../tools/html/get-cheerio.js';
@@ -9,13 +9,13 @@ import { getHtmlRegions } from '../../tools/html/get-html-regions.js';
 
 export function findUrls(
   context: SpiderContext,
-  customOptions?: EnqueueUrlOptions,
+  customOptions?: UrlDiscoveryOptions,
 ) {
-  const options: EnqueueUrlOptions = _.defaultsDeep(
+  const options: UrlDiscoveryOptions = _.defaultsDeep(
     customOptions,
     context.urls,
   );
-  const { selectors, discardlocalAnchors, discardEmpty } = options;
+  const { selectors, discardLocalAnchors: discardlocalAnchors, discardEmpty } = options;
 
   // We're doing this song and dance temporarily, to avoid altering the
   // underlying DOM before it's saved.
@@ -55,7 +55,7 @@ export function findUrls(
         if (!discardLink(link, discardlocalAnchors, discardEmpty)) {
           link.region = region;
           link.label = linkOptions?.label;
-          link.handler = linkOptions?.handler ?? options.handler;
+          link.handler = linkOptions?.handler;
 
           /* eslint-disable @typescript-eslint/no-unused-vars */
           const { selector, save, crawl, linkSelectors, ...linkOptionsToSave } =

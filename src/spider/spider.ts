@@ -237,12 +237,7 @@ export class Spider extends PlaywrightCrawler {
     const queue = await this.getRequestQueue();
 
     // Normalize and deduplicate any incoming URLs.
-    const currentNormalizer =
-      this.spiderOptions.urls.normalizer ?? NormalizedUrl.normalizer;
-    const uniques = new UniqueUrlSet(undefined, {
-      normalizer: currentNormalizer,
-      guessProtocol: true,
-    });
+    const uniques = new UniqueUrlSet(undefined, { guessProtocol: true });
 
     for (const value of requests) {
       if (is.string(value)) {
@@ -299,13 +294,13 @@ function splitOptions(options: Partial<SpiderOptions> = {}) {
     logLevel,
     pageHandler,
     requestHandlers,
-    urls: urlOptions,
     parseMimeTypes,
     downloadMimeTypes,
     preNavigationHooks,
     postNavigationHooks,
     userAgent,
     handlerTimeout,
+    urls,
 
     ...crawlerOptions
   } = options;
