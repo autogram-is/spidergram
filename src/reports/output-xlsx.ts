@@ -355,7 +355,9 @@ function objectToArray(data: JsonMap, cells: JsonPrimitive[][]) {
       cells.push([key, '']);
       objectToArray(value, cells);
     }
-
+    else if (is.string(value)) {
+      cells.push([key, value.slice(0, 30_000)]);
+    }
     else {
       cells.push([key, value ?? null])
     }
