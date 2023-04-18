@@ -1,14 +1,15 @@
 import { Spidergram } from "../config/index.js";
 import { FileTools } from "../tools/index.js";
 import { BaseReportSettings, ReportConfig } from "./report-types.js";
-import { Properties, WorkSheet, ColInfo, CellObject, CellStyle, ExcelDataType, NumberFormat } from "xlsx-js-style";
+import { Properties, ColInfo, CellObject, CellStyle, ExcelDataType, NumberFormat, RowInfo } from "xlsx-js-style";
 import xlspkg from 'xlsx-js-style';
 const { utils } = xlspkg;
 
 import { ReportRunner } from "./report.js";
-import { JsonCollection, isJsonArray, isJsonMap } from "@salesforce/ts-types";
+import { JsonCollection, JsonMap, JsonPrimitive, isJsonArray, isJsonMap } from "@salesforce/ts-types";
 import { DateTime } from "luxon";
 import is from "@sindresorhus/is";
+import _ from "lodash";
 
 /**
  * Output options specific to workbook-style spreadsheet files
@@ -51,15 +52,20 @@ type SheetSettings = {
   template?: 'table' | 'cover' | 'inspector'
 
   /**
-   * Style settings for the sheet's header rows.
-   */
-  header?: CellStyle,
-
-  /**
    * Settings for individual columns. The settings in the 'default' entry will be
    * applied to all columns.
    */
   columns?: Record<string, ColumnSettings>,
+
+  /**
+   * Default styling information for all cells in the sheet
+   */
+  style?: CellStyle;
+
+  /**
+   * Additional style information for heading columns and rows.
+   */
+  headingStyle?: CellStyle,
 }
 
 type ColumnSettings = {
@@ -105,6 +111,17 @@ type ColumnSettings = {
   minWidth?: number,
 
   /**
+   * Wrap the contents of this column rather than truncating or overflowing.
+   */
+  wrap?: boolean
+
+  /**
+   * If the column is populated and wrapping is turned on, its Row's height should
+   * be set to this number.
+   */
+  height?: number;
+
+  /**
    * Override data type auto-detection. Possible values:
    * 
    * - "b": boolean
@@ -129,9 +146,19 @@ type ColumnSettings = {
   parse?: boolean,
 }
 
+
+/**
+ * Default fallback settings for a sheet. Incoming values are merged with these settings.
+ */
 const sheetDefaults: SheetSettings = {
-  header: { font: { bold: true } },
   template: 'table',
+  headingStyle: { font: { bold: true } },
+  style: {
+    alignment: {
+      vertical: 'top',
+      horizontal: 'left',
+    }
+  },
   columns: {
     default: {
       autoFit: true,
@@ -154,18 +181,17 @@ export async function outputXlsxReport(config: ReportConfig, runner: ReportRunne
 
   for (const [name, data] of Object.entries(datasets)) {
     if (data.length === 0 && !settings.includeEmptyResults) continue;
-    const sheetSettings = settings.sheets[name] || settings.sheets.default || sheetDefaults;
+    const sheetSettings = _.defaultsDeep(settings.sheets[name] || settings.sheets.default, sheetDefaults);
 
-    rpt.addSheet({ name, data }, name.slice(0, 31));
     switch (sheetSettings.template) { 
       case 'table':
-        buildTabularSheet(rpt.workbook.Sheets[name], sheetSettings, data);
+        buildTabularSheet(name, data, sheetSettings, rpt);
         break;
       case 'inspector':
-        buildInspectorSheet(rpt.workbook.Sheets[name], sheetSettings, data);
+        buildInspectorSheet(name, data, sheetSettings, rpt);
         break;
       case 'cover':
-        buildCoverSheet(rpt.workbook.Sheets[name], sheetSettings, data);
+        buildCoverSheet(name, data, sheetSettings, rpt);
         break;
     }
   }
@@ -182,15 +208,22 @@ export async function outputXlsxReport(config: ReportConfig, runner: ReportRunne
   return Promise.resolve();
 }
 
-function buildTabularSheet(sheet: WorkSheet, settings: SheetSettings, data: JsonCollection) {
+function buildTabularSheet(name: string, data: JsonCollection, settings: SheetSettings, rpt: FileTools.Spreadsheet) {
   if (!isJsonArray(data) || !isJsonMap(data[0])) {
     // We can only work with arrays of maps here; in the future we might be able to
     // expand it to deal with other stuff.
     return;
   }
 
+  const displayName = (settings.name ?? name).slice(0, 31);
+
+  rpt.addSheet({ displayName, data }, displayName);
+  const sheet = rpt.workbook.Sheets[displayName];
+
   const firstRow = data[0];
   const colInfo: ColInfo[] = [];
+  const rowInfo: RowInfo[] = [];
+
   settings.columns ??= {};
 
   if (sheet["!ref"]) {
@@ -206,20 +239,23 @@ function buildTabularSheet(sheet: WorkSheet, settings: SheetSettings, data: Json
     }
 
     for(let R = 0; R <= range.e.r; ++R) {
+      const ri: RowInfo = {};
       for(let C = 0; C <= range.e.c; ++C) {
         const cell: CellObject = dense ? sheet["!data"]?.[R]?.[C] : sheet[utils.encode_cell({r:R, c:C})];
         const cs = colSettings[C];
   
+        cell.s = settings.style;
+
         if (R === 0) {
           if (cs.comment) { cell.c = [{ t: cs.comment }] }
           if (cs.title) cell.v = cs.title;
-          if (settings.header) {
-            cell.s = { font: { bold: true } };
+          if (settings.headingStyle) {
+            cell.s = { ...cell.s, ...settings.headingStyle };
           }
         } else {
           if (cs.type) cell.t = cs.type;
           if (cs.format) cell.z = cs.format;
-          if (cs.parse && cs.type === 'd') {
+          if (cell.v && cs.parse && cs.type === 'd') {
             cell.v = desperatelyAttemptToParseDate(cell.v);
           }
         }
@@ -230,6 +266,7 @@ function buildTabularSheet(sheet: WorkSheet, settings: SheetSettings, data: Json
           colSettings[C].width = Math.max(colSettings[C].width ?? 0, rowWidth);
         }
       }
+      rowInfo.push(ri);
     }
 
     for (const cs of colSettings) {
@@ -240,18 +277,94 @@ function buildTabularSheet(sheet: WorkSheet, settings: SheetSettings, data: Json
         hidden: cs.hidden,
       })
     }
-    sheet["!cols"] = colInfo;   
+
+    sheet["!cols"] = colInfo;
+    sheet["!rows"] = rowInfo;
   }
 }
 
-function buildCoverSheet(sheet: WorkSheet, settings: SheetSettings, data: JsonCollection) {
-  // Not yet implemented
-  console.log(sheet, settings, data);
+function buildInspectorSheet(name: string, input: JsonCollection, settings: SheetSettings, rpt: FileTools.Spreadsheet) {
+  const cells: JsonPrimitive[][] = [];
+  const data = (isJsonArray(input)) ? input[0] : input;
+  if (!isJsonMap(data)) {
+    return;
+  }
+
+  objectToArray(data, cells);
+  const displayName = (settings.name ?? name).slice(0, 31);
+  rpt.addSheet({ displayName, data: cells, skipHeader: true }, displayName);
+
+  // Now go through and align everything
+  const sheet = rpt.workbook.Sheets[displayName];
+
+  if (sheet["!ref"]) {
+    const range = utils.decode_range(sheet["!ref"]);
+    const dense = sheet["!data"];
+    const rowInfo: RowInfo[] = [];
+
+    for(let R = 0; R <= range.e.r; ++R) {
+      const ri: RowInfo = {};
+      for(let C = 0; C <= range.e.c; ++C) {
+        const cell: CellObject = dense ? sheet["!data"]?.[R]?.[C] : sheet[utils.encode_cell({r:R, c:C})];
+        if (!cell) continue;
+        const cs = settings.columns?.[cell.v?.toString() ?? 'default'] ?? {};
+  
+        cell.s = settings.style;
+
+        if (C === 0) {
+          if (cs.title) cell.v = cs.title;
+          if (settings.headingStyle) {
+            cell.s = { ...cell.s, ...settings.headingStyle };
+          }
+        } else {
+          if (cs.type) cell.t = cs.type;
+          if (cs.format) cell.z = cs.format;
+          if (cs.parse && cs.type === 'd') {
+            cell.v = desperatelyAttemptToParseDate(cell.v);
+          }
+
+          if (cs.wrap) {
+            const maxHeight = 10;
+            const ptSize = 12;
+            cell.s = { alignment: { wrapText: true } };
+            const lines = Math.floor((cell.v?.toLocaleString().length ?? 0) / (cs.width ?? 80));
+            ri.hpt = ptSize * Math.min(maxHeight, lines);
+          }
+        }
+      }
+      rowInfo.push(ri);
+    }
+
+    sheet["!cols"] = [{ wch: 20 }, { wch: 80 }];
+    sheet["!rows"] = rowInfo;
+  }
 }
 
-function buildInspectorSheet(sheet: WorkSheet, settings: SheetSettings, data: JsonCollection) {
+function objectToArray(data: JsonMap, cells: JsonPrimitive[][]) {
+  for (const [key, value] of Object.entries(data)) {
+
+    if (isJsonArray(value)) {
+      const rs = [...value];
+      cells.push([key, rs.shift()?.toString() ?? null]);
+      while (rs.length) {
+        cells.push(['', rs.shift()?.toString() ?? null]);
+      }
+
+    } else if (isJsonMap(value)) {
+      cells.push(['', '']);
+      cells.push([key, '']);
+      objectToArray(value, cells);
+    }
+
+    else {
+      cells.push([key, value ?? null])
+    }
+  }
+}
+
+function buildCoverSheet(name: string, data: JsonCollection, settings: SheetSettings, rpt: FileTools.Spreadsheet) {
   // Not yet implemented
-  console.log(sheet, settings, data);
+  console.log(name, data, settings, rpt);
 }
 
 function desperatelyAttemptToParseDate(input: string | number | boolean | Date | undefined) {

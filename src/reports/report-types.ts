@@ -4,6 +4,7 @@ import { CsvReportSettings } from "./output-csv.js";
 import { JsonReportSettings } from "./output-json.js";
 import { ReportRunner } from "./report.js";
 import { ChildQuery, QueryInput } from "../model/queries/query-inheritance.js";
+import { AqFilter } from "aql-builder";
 
 export type ReportResult = { messages?: string[], errors?: Error[] };
 export type ReportWorker = (report: ReportConfig, runner: ReportRunner) => Promise<ReportResult>
@@ -28,7 +29,7 @@ export type BaseReportSettings = Record<string, unknown> & {
   /**
    * Include datasets in final output even when they're empty.
    */
-  includeEmptyResults?: boolean
+  includeEmptyResults?: boolean,
 };
 
 export type ReportSettings = BaseReportSettings | CsvReportSettings | JsonReportSettings | XlsReportSettings;
@@ -63,6 +64,14 @@ export interface ReportConfig extends Record<string, unknown> {
   settings?: ReportSettings;
 
   /**
+   * Run the report multiple times, once for each entry in the 'repeat' property.
+   * 
+   * The key of each repeat entry will be used as the new report name, and the value
+   * (one or more AqFilters) will be applied to every alterable query in the report.
+   */
+  repeat?: Record<string, AqFilter | AqFilter[]>
+
+  /**
    * A keyed list of queries to be run when building this report's data. Query data can
    * be references to an existing stored query in the project configuration, standalone
    * query definitions in {@link AqQuery} format, raw strings containing AQL queries,
@@ -75,7 +84,7 @@ export interface ReportConfig extends Record<string, unknown> {
    * to alter existing queries, expand one query into multiple derivative queries,
    * etc.
    */
-  build?: ReportWorker
+  alterQueries?: ReportWorker;
 
   /**
    * Keyed JSON data containing results from the reports queries. Additional datasets
@@ -93,7 +102,7 @@ export interface ReportConfig extends Record<string, unknown> {
    * data after all queries have been run, but before output is generated. This can
    * be useful for date and number formatting and other cleanup.
    */
-  transform?: TransformOptions | ReportWorker;
+  alterData?: ReportWorker;
 
   /**
    * A custom report generation function that assumes responsibility for processing

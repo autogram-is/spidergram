@@ -57,12 +57,16 @@ export class Spreadsheet {
         name,
       );
     } else if (isStructuredSheet(input)) {
-      utils.book_append_sheet(
-        this.workbook,
+      const data = (isJsonArray(input.data) && isJsonArray(input.data[0])) ?
+        utils.aoa_to_sheet(input.data as (JsonPrimitive | Date | undefined)[][]) :
         utils.json_to_sheet(input.data, {
           header: input.header,
           skipHeader: input.skipHeader,
-        }),
+        });
+
+      utils.book_append_sheet(
+        this.workbook,
+        data,
         input.name ?? name,
       );
     } else {

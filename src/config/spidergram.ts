@@ -358,10 +358,10 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
       summary: new Query(QueryFragments.pages_crawled)
         .category('builtin')
         .description('Overview of crawled pages')
-        .collect('Site', 'parsed.hostname')
-        .collect('Content', 'mime')
-        .collect('Status', 'code')
-        .sortBy('Site', 'asc'),
+        .collect('site', 'parsed.hostname')
+        .collect('content', 'mime')
+        .collect('status', 'code')
+        .sortBy('site', 'asc'),
     
       pages: new Query(QueryFragments.pages_linked)
         .category('builtin')
@@ -369,10 +369,10 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
         .filterBy('code', 200)
         .filterBy('mime', 'text/html')
         .sortBy('url', 'asc')
-        .return('Site', 'parsed.hostname')
-        .return('Path', 'parsed.pathname')
-        .return('Title', 'data.title')
-        .return('Words', 'content.readability.words')
+        .return('site', 'parsed.hostname')
+        .return('path', 'parsed.pathname')
+        .return('title', 'data.title')
+        .return('words', 'content.readability.words')
         .return({ document: false, name: 'Inlinks', path: 'inlinks', function: 'length' })
         .return({ document: false, name: 'Outlinks', path: 'outlinks', function: 'length' }),
     
@@ -382,10 +382,10 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
         .filterBy('code', 200)
         .filterBy({ path: 'mime', eq: 'text/html', negate: true})
         .sortBy('url', 'asc')
-        .return('Site', 'parsed.hostname')
-        .return('Path', 'parsed.pathname')
-        .return('Type', 'mime')
-        .return('Size', 'size')
+        .return('site', 'parsed.hostname')
+        .return('path', 'parsed.pathname')
+        .return('type', 'mime')
+        .return('size', 'size')
         .return({ document: false, name: 'Inlinks', path: 'inlinks', function: 'length' }),
 
       errors: new Query(QueryFragments.pages_linked)
@@ -393,10 +393,10 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
         .description('Errors encountered while crawling')
         .filterBy({ path: 'code', eq: 200, negate: true })
         .sortBy({ document: false, path: 'inlinks', function: 'length', direction: 'desc' })
-        .return('Site', 'parsed.hostname')
-        .return('Path', 'parsed.pathname')
-        .return('Status', 'code')
-        .return('Message', 'message')
+        .return('site', 'parsed.hostname')
+        .return('path', 'parsed.pathname')
+        .return('status', 'code')
+        .return('message', 'message')
         .return({ document: false, name: 'Inlinks', path: 'inlinks', function: 'length' }),
   
       ...QueryFragments.queries,
