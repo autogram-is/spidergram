@@ -2,7 +2,7 @@ import { Flags, Args } from '@oclif/core';
 import { Spidergram, ReportRunner, AqFilter } from '../../index.js';
 import { SgCommand } from '../index.js';
 import _ from 'lodash';
-import { joinOxford, queryFilterFlag } from '../shared/index.js';
+import { queryFilterFlag } from '../shared/index.js';
 import { buildFilter } from '../shared/flag-query-tools.js';
 
 
@@ -126,7 +126,13 @@ export default class DoReport extends SgCommand {
 
       this.ux.action.start('Running report');
       await report.run();
-      this.log(`Saved ${joinOxford(report.status.files)}.`);
+      this.log(`Saved ${(report.status.files.length === 1) ? '1 report' : report.status.files.length + ' reports'}`);
+      report.status.files.map(file => this.log(`  ${file}`))
+
+      if (report.status.lastError) {
+        this.log('At least one error was encountered during processing:')
+        this.log(report.status.lastError);
+      }
     }
   }
 }
