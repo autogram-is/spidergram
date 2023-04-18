@@ -1,4 +1,4 @@
-import { JsonCollection } from "@salesforce/ts-types";
+import { JsonCollection, JsonPrimitive } from "@salesforce/ts-types";
 import { XlsReportSettings } from "./output-xlsx.js";
 import { CsvReportSettings } from "./output-csv.js";
 import { JsonReportSettings } from "./output-json.js";
@@ -102,7 +102,7 @@ export interface ReportConfig extends Record<string, unknown> {
    * data after all queries have been run, but before output is generated. This can
    * be useful for date and number formatting and other cleanup.
    */
-  alterData?: ReportWorker;
+  alterData?: ReportWorker | Record<string, ReportDataTransform>
 
   /**
    * A custom report generation function that assumes responsibility for processing
@@ -110,3 +110,7 @@ export interface ReportConfig extends Record<string, unknown> {
    */
   output?: ReportWorker;
 }
+
+export type ReportDataTransform = ReportDataSplit | ReportDataPivot;
+export type ReportDataSplit = { action: 'split', property: string, mustMatch?: JsonPrimitive[] };
+export type ReportDataPivot = { action: 'pivot', property: string };

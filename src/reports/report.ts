@@ -1,6 +1,6 @@
 import { Query, JobStatus, Spidergram, AqFilter } from '../index.js';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
-import { AnyJson } from '@salesforce/ts-types';
+import { AnyJson, isAnyJson, isJsonArray, isJsonMap } from '@salesforce/ts-types';
 import { DateTime } from 'luxon';
 import { ReportConfig } from './report-types.js';
 import { buildQueryWithParents } from '../model/queries/query-inheritance.js';
@@ -105,8 +105,39 @@ export class ReportRunner {
     // Alter the final data. If there's a custom function, hand off.
     // If there are settings, do the thing here.
     const config = customConfig ?? this.config;
+    config.data ??= {};
+    config.settings ??= {};
+    config.settings.sheets ??= {}
+
     if (is.function_(config.alterData)) {
       await config.alterData(config, this);
+    } else if (config.alterData) {
+      for (const [key, data] of Object.entries(config.data))  {
+        const op = config.alterData[key] ?? config.alterData['default'];
+        if (op) {
+          if (op.action === 'split' && isJsonArray(data)) {
+            const groups = _.groupBy(data, row => {
+              let group = key;
+              if (isAnyJson(row) && isJsonMap(row)) {
+                const datumValue = row[op.property];
+                if (op.mustMatch) {
+                  if (
+                    (is.string(datumValue) || is.number(datumValue)) &&
+                    op.mustMatch.includes(datumValue)
+                  )
+                    group = datumValue.toString();
+                } else if (datumValue !== undefined && datumValue !== null) {
+                  group = datumValue.toString();
+                }
+              }
+              return group;
+            });
+            for (const [k, v] of Object.entries(groups)) {
+              config.data[k] = v;
+            }
+          }
+        }
+      }
     }
     this.status.finished++;
   }
