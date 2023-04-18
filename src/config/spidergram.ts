@@ -16,7 +16,7 @@ import is from '@sindresorhus/is';
 import _ from 'lodash';
 
 import * as defaults from './defaults.js';
-import { ArangoStore, Query, QueryFragments, QueryInput, Resource } from '../index.js';
+import { ArangoStore, Query, QueryFragments, QueryInput, ReportConfig, Resource } from '../index.js';
 import { globalNormalizer } from './global-normalizer.js';
 import { SpidergramConfig } from './spidergram-config.js';
 import { setTimeout } from 'timers/promises';
@@ -175,16 +175,19 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     // Reset the active configuration to the baseline defaults, load any user-defined
     // configuration, and merge them.
     this._activeConfig = Spidergram.defaults as T;
-
-    this.buildDefaultQueries();
-
-
     this._loadedConfig = await load('spidergram', options);
 
     this._activeConfig = _.defaultsDeep(
       this._loadedConfig?.value,
       this._activeConfig,
     );
+
+    // These are dropped in after config is loaded, so we can avoid
+    // overwriting custom queries with our defaults. Long term we need to
+    // distinguish between 'properties that should be deep-merged',
+    // 'properties that should be overwritten,' and the stuff in between.
+    this.buildDefaultQueries();
+    this.buildDefaultReports();
 
     // Ensure empty defaults exist, if necessary
     this._activeConfig.arango ??= {};
@@ -353,6 +356,31 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     return CrawleeConfig.getGlobalConfig();
   }
 
+  buildDefaultReports() {
+    const reports: Record<string, ReportConfig> = {
+      default: {
+        name: 'Spidergram Report',
+        group: 'builtin',
+        description: 'Summary of pages, downloadable media, and errors',
+        settings: {
+          type: 'xlsx'
+        },
+        queries: {
+          'Overview': 'summary',
+          'Crawled Pages': 'pages',
+          'Downloads': 'media',
+          'Errors': 'errors'
+        }
+      }
+    }
+
+    this._activeConfig.reports ??= {};
+    this._activeConfig.reports = {
+      ...reports,
+      ...this._activeConfig.reports
+    }
+  }
+
   buildDefaultQueries() {
     const queries: Record<string, QueryInput> = {
       summary: new Query(QueryFragments.pages_crawled)
@@ -404,8 +432,8 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
 
     this._activeConfig.queries ??= {};
     this._activeConfig.queries = {
-      ...this._activeConfig.queries,
-      ...queries
+      ...queries,
+      ...this._activeConfig.queries
     }
   }
 }
