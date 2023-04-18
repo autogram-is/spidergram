@@ -427,8 +427,26 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
         .return('message', 'message')
         .return({ document: false, name: 'Inlinks', path: 'inlinks', function: 'length' }),
   
-      ...QueryFragments.queries,
-    }
+      network: new Query({
+        collection: 'resources',
+        subqueries: [
+          { collection: 'links_to', document: 'lt' },
+          { collection: 'responds_with', document: 'rw' },
+          { collection: 'resources', document: 'target' },
+        ],
+        filters: [
+          { path: '_id', join: 'lt._from' },
+          { document: 'lt', path: '_to', join: 'rw._from' },
+          { document: 'rw', path: '_to', join: 'target._id' },
+          { path: 'parsed.hostname', eq: 'target.parsed.hostname', negate: true, value: 'dynamic' }
+        ],
+        aggregates: [
+          { name: 'source', path: 'parsed.hostname', function: 'collect' },
+          { name: 'destination', document: 'target', path: 'parsed.hostname', function: 'collect' },
+        ],
+        count: 'strength'
+      })
+    };
 
     this._activeConfig.queries ??= {};
     this._activeConfig.queries = {

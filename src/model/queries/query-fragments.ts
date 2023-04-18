@@ -54,8 +54,8 @@ export class QueryFragments {
       },
     ],
     filters: [
-      { document: 'request', path: '_to', eq: 'resource._id', value: 'dynamic' },
-      { document: 'request', path: '_from', eq: 'url._id', value: 'dynamic' }
+      { document: 'request', path: '_to', join: 'resource._id' },
+      { document: 'request', path: '_from', join: 'url._id' }
     ],
   };
 
@@ -92,17 +92,17 @@ export class QueryFragments {
         query: {
           collection: 'responds_with',
           document: 'rw',
-          filters: [{ path: '_to', eq: 'resource._id', value: 'dynamic' }],
+          filters: [{ path: '_to', join: 'resource._id' }],
           subqueries: [
             {
               collection: 'links_to',
               document: 'lt',
-              filters: [{ path: '_to', eq: 'rw._from', value: 'dynamic' }],
+              filters: [{ path: '_to', join: 'rw._from' }],
               subqueries: [
                 {
                   collection: 'resources',
                   document: 'source',
-                  filters: [{ path: '_id', eq: 'lt._from', value: 'dynamic' }],
+                  filters: [{ path: '_id', join: 'lt._from' }],
                 },
               ],
             }
@@ -116,12 +116,12 @@ export class QueryFragments {
         query: {
           collection: 'links_to',
           document: 'lt',
-          filters: [{ path: '_from', eq: 'resource._id', value: 'dynamic' }],
+          filters: [{ path: '_from', join: 'resource._id' }],
           subqueries: [
             {
               collection: 'unique_urls',
               document: 'target',
-              filters: [{ path: '_id', eq: 'lt._to', value: 'dynamic' }],
+              filters: [{ path: '_id', join: 'lt._to' }],
             }
           ],
           return: [{ path: 'url', document: 'target' }],
@@ -151,7 +151,7 @@ export class QueryFragments {
         query: {
           collection: 'responds_with',
           document: 'rw',
-          filters: [{ path: '_from', eq: 'url._id', value: 'dynamic' }],
+          filters: [{ path: '_from', join: 'url._id' }],
         },
       },
     ],
@@ -209,9 +209,9 @@ export class QueryFragments {
       },
     ],
     filters: [
+      { document: 'request', path: '_from', join: 'requested._id' },
+      { document: 'request', path: '_to', join: 'received._id' },
       { document: 'requested', path: 'parsed.href', eq: 'received.parsed.href', value: 'dynamic', negate: true },
-      { document: 'request', path: '_from', eq: 'requested._id', value: 'dynamic' },
-      { document: 'request', path: '_to', eq: 'received._id', value: 'dynamic' },
       { document: 'request', path: 'redirects', function: 'count', gt: 1 },
     ],
   };

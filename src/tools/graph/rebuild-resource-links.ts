@@ -32,7 +32,7 @@ export async function rebuildResourceLinks(
         document: 'rw',
         collection: 'responds_with',
         filters: [
-          { path: '_from', eq: 'uu._id', value: 'dynamic' },
+          { path: '_from', join: 'uu._id' },
           { path: '_to', eq: resource._id },
         ],
       },
