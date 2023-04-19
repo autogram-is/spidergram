@@ -117,11 +117,6 @@ export function findPagePatterns(
             to: `patterns/${ fp.patternKey ?? fp.pattern ?? 'null'}`,
             ...fp,
           });
-          // Remove assorted internal properties created during
-          // the matching process
-          delete pi.patternKey;
-          delete pi.exclusive;
-          delete pi.properties;
           return pi;
         }
       ),
