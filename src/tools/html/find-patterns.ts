@@ -11,10 +11,13 @@ export interface FoundPattern extends HtmlTools.ElementData {
   selector: string;
 }
 
-export type ConditionalPatternGroup = Record<string, unknown> & PropertyFilter & { patterns: PatternDefinition[] };
+export type ConditionalPatternGroup = PropertyFilter & {
+  patterns?: PatternDefinition[],
+  pattern?: PatternDefinition,
+};
 
 export function isConditionalPatternGroup(input: unknown): input is ConditionalPatternGroup {
-  return (is.plainObject(input) && 'patterns' in input);
+  return (is.plainObject(input) && ('patterns' in input || 'pattern' in input));
 }
 
 export function isPatternDefinition(input: unknown): input is PatternDefinition {
@@ -45,7 +48,7 @@ export interface PatternDefinition extends HtmlTools.ElementDataOptions {
   selector: string;
 
   /**
-   * When an instance of this pattern is found, remove its marku from the DOM 
+   * When an instance of this pattern is found, remove its markup from the DOM 
    * so it won't be matched multiple times.
    */
   exclusive?: boolean;
@@ -75,12 +78,14 @@ export async function findAndSavePagePatterns(
         defs.push(pattern);
       }
       else if (isConditionalPatternGroup(pattern) && filterByProperty(input, pattern)) {
-        defs.push(...pattern.patterns);
+        if (pattern.pattern) defs.push(pattern.pattern);
+        if (pattern.patterns) defs.push(...pattern.patterns);
       }
     }
   }
 
   const pts = defs.map(p => new Pattern({ key: p.patternKey, name: p.name, description: p.description }));
+  
   const instances = findPagePatterns(input, defs);
 
   const sg = await Spidergram.load();
@@ -106,13 +111,20 @@ export function findPagePatterns(
   for (const pattern of list) {
     results.push(
       ...findPatternInstances(input, pattern).map(
-        fp => new PatternInstance({
-          from: resource ?? 'resources/null',
-          to: `patterns/${ fp.patternKey ?? fp.pattern ?? 'null'}`,
-          ...fp,
-          pattern: undefined,
-          patternKey: undefined,
-        }),
+        fp => {
+          const pi = new PatternInstance({
+            from: resource ?? 'resources/null',
+            to: `patterns/${ fp.patternKey ?? fp.pattern ?? 'null'}`,
+            ...fp,
+          });
+          // Remove assorted internal properties created during
+          // the matching process
+          delete pi.pattern;
+          delete pi.patternKey;
+          delete pi.exclusive;
+          delete pi.properties;
+          return pi;
+        }
       ),
     );
   }
