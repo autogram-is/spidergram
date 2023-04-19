@@ -50,7 +50,7 @@ export interface PropertyMapRule extends Record<string, unknown> {
 
   /**
    * If the property value is found and is an array, collapse it to a string
-   * using the specified delimiter. If `delimiter` is undefined or false, array
+   * using the specified delimiter. If `join` is undefined or false, array
    * will remain arrays.
    *
    * @defaultValue: undefined
@@ -153,7 +153,6 @@ export function mapProperties(
 export function findPropertyValue<T = object>(
   object: T,
   locations: PropertyMap<T> | PropertyMap<T>[],
-  fallback?: unknown,
   domDictionary: Record<string, cheerio.Root> = {}
 ): unknown | undefined {
   const sources = Array.isArray(locations) ? locations : [locations];
@@ -168,22 +167,21 @@ export function findPropertyValue<T = object>(
       let v = _.get(object, source.source);
       if (!undef(v, source)) {
         if (typeof v === 'string' && typeof source.selector === 'string') {
-          const $ = domDictionary[source.selector] ?? getCheerio(v);
-          domDictionary[source.selector] ??= $;
+          const $ = domDictionary[source.source] ?? getCheerio(v);
+          domDictionary[source.source] ??= $;
 
-          const matches = $(source.selector);
+          const matches = $(source.selector).toArray();
           if (source.count) {
             v = matches.length;
           } else {
             if (matches.length > 0) {
               v = matches
-                .toArray()
                 .slice(0, source.limit)
                 .map(e => {
                   if (source.attribute) return $(e).attr(source.attribute)?.trim();
                   else return $(e).text().trim();
                 });
-              v = source.join || v.length === 1 ? v.join(source.join) : v;
+              v = (source.join || v.length === 1) ? v.join(source.join) : v;
               if (v?.length === 0) v = undefined;
             } else {
               v = undefined;
@@ -195,12 +193,13 @@ export function findPropertyValue<T = object>(
 
         if (undef(v, source)) {
           if (source.fallback) return source.fallback;
+          return undefined;
         }
         else return v;
       }
     }
   }
-  return fallback;
+  return undefined;
 }
 
 /**
@@ -283,7 +282,8 @@ function undef(value: unknown, rules?: PropertyMapRule): value is undefined {
   if (value === undefined ||
     (value === null && !nok) ||
     (is.emptyArray(value) && !eok) ||
-    (is.emptyString(value) && !eok)
+    (is.emptyString(value) && !eok) || 
+    (is.emptyObject(value) && !eok)
   ) return true;
   return false;
 }

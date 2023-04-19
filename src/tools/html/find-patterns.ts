@@ -119,7 +119,6 @@ export function findPagePatterns(
           });
           // Remove assorted internal properties created during
           // the matching process
-          delete pi.pattern;
           delete pi.patternKey;
           delete pi.exclusive;
           delete pi.properties;
