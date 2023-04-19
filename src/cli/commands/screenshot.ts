@@ -76,6 +76,7 @@ export default class Screenshot extends SgCommand {
           : flags.orientation === 'landscape'
           ? 'landscape'
           : 'portrait',
+      storage: 'output',
       selectors: flags.selector ? [flags.selector] : undefined,
       type: flags.format === 'jpeg' ? 'jpeg' : 'png',
       fullPage: flags.fullpage,

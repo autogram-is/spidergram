@@ -5,6 +5,8 @@ import { Readable } from 'node:stream';
 import arrify from 'arrify';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import { JobStatus } from './job-status.js';
+import { ensureDir } from 'fs-extra';
+import path from 'node:path';
 
 export interface Viewport {
   width: number;
@@ -181,14 +183,15 @@ export class ScreenshotTool {
         const filename = `${directory}/${this.getFilename(
           page.url(),
           v,
-          undefined,
-          fullPage,
+          undefined
         )}.${type}`;
         if (fullPage === false) {
           pwOptions.clip = { x: 0, y: 0, ...materializedViewports[v] };
         }
 
         const buffer = await page.screenshot(pwOptions);
+        const bin = path.join(sg.config.outputDirectory ?? sg.config.storageDirectory ?? './storage');
+        await ensureDir(path.join(bin, path.dirname(filename)));
         await storage.writeStream(filename, Readable.from(buffer));
 
         this.status.finished++;
@@ -198,8 +201,7 @@ export class ScreenshotTool {
           let filename = `${directory}/${this.getFilename(
             page.url(),
             v,
-            selector,
-            fullPage,
+            selector
           )}.${type}`;
           const max = Math.min(limit, await page.locator(selector).count());
 
@@ -219,11 +221,12 @@ export class ScreenshotTool {
               filename = `${directory}/${this.getFilename(
                 page.url(),
                 v,
-                selector,
-                fullPage,
+                selector
               )}-${l}.${type}`;
             }
             const buffer = await locator.screenshot(pwOptions);
+            const bin = path.join(sg.config.outputDirectory ?? sg.config.storageDirectory ?? './storage');
+            await ensureDir(path.join(bin, path.dirname(filename)));
             await storage.writeStream(filename, Readable.from(buffer));
 
             this.status.finished++;
@@ -286,14 +289,14 @@ export class ScreenshotTool {
     url: string,
     viewport: string,
     selector?: string,
-    infinite = true,
   ) {
-    const components = [new URL(url).hostname, viewport];
+    let path = new URL(url).pathname.replaceAll('/', '-').slice(1);
+    if (path.length === 0) path = 'index';
+    const components = [new URL(url).hostname, path, viewport];
     if (selector) components.push(selector);
-    if (!infinite) components.push('cropped');
     return components
-      .join('-')
-      .replaceAll(/<>:"\/\|?\*/g, '-')
+      .map(c => c.replaceAll(/<>:"\/\|?\*/g, '-'))
+      .join('/')
       .replaceAll('--', '-');
   }
 
