@@ -1,13 +1,24 @@
-import { HtmlTools, PropertyMap, UrlTools, mapProperties } from '../index.js';
+import { HtmlTools, PropertyMap, mapProperties } from '../index.js';
 import _ from 'lodash';
 import { Pattern, PatternInstance, Query, Resource, aql } from '../../model/index.js';
 import { getCheerio } from './get-cheerio.js';
-import { ParsedUrl } from '@autogram/url-tools';
 import { Spidergram } from '../../config/index.js';
+import { PropertyFilter, filterByProperty } from '../graph/filter-by-property.js';
+import is from '@sindresorhus/is';
 
 export interface FoundPattern extends HtmlTools.ElementData {
   pattern: string;
   selector: string;
+}
+
+export type ConditionalPatternGroup = Record<string, unknown> & PropertyFilter & { patterns: PatternDefinition[] };
+
+export function isConditionalPatternGroup(input: unknown): input is ConditionalPatternGroup {
+  return (is.plainObject(input) && 'patterns' in input);
+}
+
+export function isPatternDefinition(input: unknown): input is PatternDefinition {
+  return (is.plainObject(input) && 'name' in input && 'selector' in input);
 }
 
 /**
@@ -23,6 +34,9 @@ export interface PatternDefinition extends HtmlTools.ElementDataOptions {
 
   patternKey?: string;
 
+  /**
+   * Indicates that the definition is a named variation of a more generic pattern. 
+   */
   variant?: string;
 
   /**
@@ -30,13 +44,17 @@ export interface PatternDefinition extends HtmlTools.ElementDataOptions {
    */
   selector: string;
 
-  properties?: Record<string, PropertyMap | PropertyMap[]>;
+  /**
+   * When an instance of this pattern is found, remove its marku from the DOM 
+   * so it won't be matched multiple times.
+   */
+  exclusive?: boolean;
 
   /**
-   * One or more URL filters this pattern should apply to. Only applicable when
-   * the input is a {@link Resource} object.
+   * When a pattern instance is found, attempt to extract additional information
+   * via property comparisons or DOM sub-queries.
    */
-  urlFilter?: UrlTools.UrlFilterInput;
+  properties?: Record<string, PropertyMap | PropertyMap[]>;
 }
 
 const defaults: HtmlTools.ElementDataOptions = {
@@ -48,13 +66,22 @@ const defaults: HtmlTools.ElementDataOptions = {
 
 export async function findAndSavePagePatterns(
   input: Resource,
-  patterns: PatternDefinition | PatternDefinition[],
-  options: Record<string, unknown> = {},
+  patterns: PatternDefinition | (PatternDefinition | ConditionalPatternGroup)[],
 )  {
-  const pts = (Array.isArray(patterns) ? patterns : [patterns]).map(
-    p => new Pattern({ key: p.patternKey, name: p.name, description: p.description })
-  );
-  const instances = findPagePatterns(input, patterns, options);
+  const defs: PatternDefinition[] = [];
+  if (Array.isArray(patterns)) {
+    for (const pattern of patterns) {
+      if (isPatternDefinition(pattern)) {
+        defs.push(pattern);
+      }
+      else if (isConditionalPatternGroup(pattern) && filterByProperty(input, pattern)) {
+        defs.push(...pattern.patterns);
+      }
+    }
+  }
+
+  const pts = defs.map(p => new Pattern({ key: p.patternKey, name: p.name, description: p.description }));
+  const instances = findPagePatterns(input, defs);
 
   const sg = await Spidergram.load();
   await sg.arango.push(pts, false);
@@ -72,14 +99,13 @@ export async function findAndSavePagePatterns(
 export function findPagePatterns(
   input: string | cheerio.Root | Resource,
   patterns: PatternDefinition | PatternDefinition[],
-  options: Record<string, unknown> = {},
 ): PatternInstance[] {
   const list = Array.isArray(patterns) ? patterns : [patterns];
   const results: PatternInstance[] = [];
   const resource = input instanceof Resource ? input : undefined;
   for (const pattern of list) {
     results.push(
-      ...findPatternInstances(input, pattern, options).map(
+      ...findPatternInstances(input, pattern).map(
         fp => new PatternInstance({
           from: resource ?? 'resources/null',
           to: `patterns/${ fp.patternKey ?? fp.pattern ?? 'null'}`,
@@ -103,20 +129,7 @@ export function findPagePatterns(
 export function findPatternInstances(
   input: string | cheerio.Root | Resource,
   pattern: PatternDefinition,
-  options: Record<string, unknown> = {},
 ): FoundPattern[] {
-  if (pattern.urlFilter && !(input instanceof Resource)) {
-    return [];
-  }
-
-  let url: ParsedUrl | undefined;
-  if (input instanceof Resource) url = input.parsed;
-  url ??= options.url ? new ParsedUrl(options.url.toString()) : undefined;
-  if (pattern.urlFilter) {
-    if (!url) return [];
-    if (!UrlTools.filterUrl(url, pattern.urlFilter)) return [];
-  }
-
   const $ = getCheerio(input);
   return $(pattern.selector)
     .toArray()
@@ -133,6 +146,9 @@ export function findPatternInstances(
       };
       if (pattern.properties) {
         mapProperties(found, pattern.properties)
+      }
+      if (pattern.exclusive) {
+        $(element).remove();
       }
       return found;
     });

@@ -1,6 +1,6 @@
 import { Spidergram, Resource, HtmlTools, BrowserTools, EnqueueUrlOptions } from '../../index.js';
 import { rebuildResourceLinks } from './rebuild-resource-links.js';
-import { PageDataOptions, PageContentOptions, PatternDefinition, findAndSavePagePatterns } from '../html/index.js';
+import { PageDataOptions, PageContentOptions, PatternDefinition, findAndSavePagePatterns, ConditionalPatternGroup } from '../html/index.js';
 import { TechAuditOptions } from '../browser/index.js';
 import { PropertyMap, mapProperties } from '../map-properties.js';
 import _ from 'lodash';
@@ -78,12 +78,11 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
    */
   properties?: Record<string, PropertyMap> | false;
 
-
   /**
-   * An array of {@link PatternDefinition} rules used to detect instances of known design
-   * components in each page's markup.
+   * An array of {@link PatternDefinition} rules or {@link ConditionalPatternGroup} used
+   * to detect instances of known design components in each page's markup.
    */
-  patterns?: PatternDefinition[] | false;
+  patterns?: (PatternDefinition | ConditionalPatternGroup)[] | false;
 }
 
 export async function analyzePage(
