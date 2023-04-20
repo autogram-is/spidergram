@@ -67,10 +67,11 @@ export function filterUrl(
       return true;
 
     default:
-      // Normal mode ('any') passes URLs if AT LEAST ONE filter returns TRUE.
+      // Normal mode ('any') passes URLs if AT LEAST ONE filter returns TRUE,
+      // But bails if any 'REJECT' filters return false
       for (const filter of arrify(filters)) {
         const accept = singleFilter(input, filter, contextUrl);
-        if (accept === null) return false;
+        if (accept === false) return false;
         if (accept === true) softAccept = true;
       }
       if (softAccept) return true;
@@ -110,23 +111,29 @@ function singleFilter(
     const regex = is.regExp(filter.regex)
       ? filter.regex
       : new RegExp(filter.regex);
-    const accept = regex.test(
+    let accept = regex.test(
       _.get(url.properties as object, filter.property ?? 'href', ''),
     );
+    // In 'reject' mode, failure to find a match is not acceptance.
+    // Invert the boolean and return `null | false` rather than `true | false`
     if (filter.reject) {
-      return accept ? null : true;
+      accept = !accept;
+      return accept ? null : false;
     }
     return accept;
   } else if (is.regExp(filter)) {
     return filter.test(url.href);
   } else if (isUrlGlobFilter(filter)) {
-    const accept = minimatch(
+    let accept = minimatch(
       _.get(url.properties as object, filter.property ?? 'href', ''),
       filter.glob,
       { dot: true },
     );
+    // In 'reject' mode, failure to find a match is not acceptance.
+    // Invert the boolean and return `null | false` rather than `true | false`
     if (filter.reject) {
-      return accept ? null : true;
+      accept = !accept;
+      return accept ? null : false;
     }
     return accept;
   } else if (is.string(filter)) {

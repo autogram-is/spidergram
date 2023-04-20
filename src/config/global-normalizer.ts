@@ -1,6 +1,8 @@
 import { UrlMutators, ParsedUrl } from '@autogram/url-tools';
 import minimatch from 'minimatch';
 
+type urlStringProps = 'protocol' | 'subdomain' | 'domain' | 'host' | 'hostname' | 'pathname' | 'search' | 'hash';
+
 export interface NormalizerOptions {
   /**
    * Coerce the URL's protocol; primarily useful for changing http: to https:
@@ -10,13 +12,7 @@ export interface NormalizerOptions {
   /**
    * Run a portion of the domain through strToLower().
    */
-  forceLowercase?:
-    | 'host'
-    | 'domain'
-    | 'subdomain'
-    | 'href'
-    | 'pathname'
-    | false;
+  forceLowercase?: urlStringProps | urlStringProps[] | boolean;
 
   /**
    * Discard the entire subdomain if it matches a glob pattern.
@@ -80,8 +76,17 @@ export function globalNormalizer(
 ): ParsedUrl {
   if (opts.forceProtocol) UrlMutators.forceProtocol(url, opts.forceProtocol);
 
-  if (opts.forceLowercase)
-    url[opts.forceLowercase] = url[opts.forceLowercase].toLocaleLowerCase();
+  if (opts.forceLowercase) {
+    if (opts.forceLowercase === true) {
+      url.href = url.href.toLocaleLowerCase();
+    }
+    else {
+      const props = Array.isArray(opts.forceLowercase) ? opts.forceLowercase : [opts.forceLowercase];
+      for (const prop of props) {
+        url[prop] = url[prop].toLocaleLowerCase();
+      }
+    }
+  }
 
   if (opts.discardSubdomain)
     UrlMutators.stripSubdomains(url, opts.discardSubdomain);
