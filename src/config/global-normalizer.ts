@@ -12,7 +12,7 @@ export interface NormalizerOptions {
   /**
    * Run a portion of the domain through strToLower().
    */
-  forceLowercase?: urlStringProps | urlStringProps[] | boolean;
+  forceLowercase?: string | string[] | boolean;
 
   /**
    * Discard the entire subdomain if it matches a glob pattern.
@@ -83,7 +83,7 @@ export function globalNormalizer(
     else {
       const props = Array.isArray(opts.forceLowercase) ? opts.forceLowercase : [opts.forceLowercase];
       for (const prop of props) {
-        url[prop] = url[prop].toLocaleLowerCase();
+        url[prop as urlStringProps] = url[prop as urlStringProps].toLocaleLowerCase();
       }
     }
   }
