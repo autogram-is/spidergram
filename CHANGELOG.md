@@ -1,5 +1,34 @@
 # Spidergram Changelog
 
+## v0.10.0 - 23-04-20 - Ham
+
+This release is dedicated to Peter Porker of Earth-8311, an innocent pig raised by animal scientist May Porker. After a freak acident with the world's first atomic powered hairdryer, Peter was bitten by the scientist and transformed into a crime-fighting superhero pig.
+
+### New Additions
+
+- Custom queries and multi-query reports can be defined in the Spidergram config files; Spidergram now ships with a handful of simple queries and an overview report as part of its core configuration.
+- Spidergram can run an Axe Accessibility Report on every page as it crawls a site; this behavior can be turned on and off via the `spider.auditAccessiblity` config property.
+- Spidergram can now cookies, performance data, and remote API requests made during page load using the `config.spider.saveCookies`, `.savePerformance`, and `.saveXhr` config properties.
+- Spidergram can identify and catalog design patterns during the post-crawl page analysis process; pattern definitions can also include rules for extracting pattern properties like a card's title and CTA link.
+- Resources with attached downloads can be processed using file parsing plugins; Spidergram 0.10.0 comes with support for PDF and .docx content and metadata, image EXIF metadata, and audio/video metadata in a variety of formats.
+- For large crawls, an experimental `config.offloadBodyHtml` settings flag has been added to Spidergram's global configuration. When it's set to 'db', all body HTML will be stored in a dedicated key-value collection, rather than the `resources` collection. On sites with many large pages (50k+ pages of 500k+ html or more) this can significantly improve the speed of filtering, queries and reporting.
+
+### Changes
+
+- Spidergram's CLI commands have been overhauled; vestigial commands from the 0.5.0 era have been removed and replaced. Of particular interest:
+  - `spidergram status` summarizes the current config and DB state
+  - `spidergram ping` tests a remote URL using the current analysis settings
+  - `spidergram query` displays and saves filtered snapshots of the saved crawl graph
+  - `spidergram report` outputs a collection of query results as a combined workbook or JSON file
+  - `spidergram go` crawls one or more URLs, analyzes the crawled files, and generates a report in a single step.
+  - `spidergram url test` tests a URL against the current normalizer and filter settings.
+  - `spidergram url tree` replaces the old `urls` command for building site hierarchies.
+- CLI consistency is significantly improved. For example: `analyze`, `query`, `report`, and `url tree` all support the same `--filter` syntax for controlling which records are loaded from the database.
+
+### Fixes and under-the-hood improvements
+
+- URL matching and filtering has been smoothed out, and a host of tests have been added to ensure things stay solid. Previously, filter strings were treated as globs matched against the entire URL. Now, `{ property: 'hostname', glob: '*.foo.com' }` objects can be used to explicitly specify glob orr regex matches against individual URL components.
+
 ## v0.9.22 - 23-04-18
 
 - Major improvements to the report structure.
