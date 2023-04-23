@@ -8,7 +8,6 @@ import {
   ReportRunner,
 } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
-import is from '@sindresorhus/is';
 
 export default class Go extends SgCommand {
   static summary = 'Crawl and analyze a site, then generate a report.';
@@ -25,7 +24,6 @@ export default class Go extends SgCommand {
   static args = {
     urls: Args.string({
       description: 'One or more URLs to crawl',
-      required: true,
     }),
   };
 
@@ -35,8 +33,10 @@ export default class Go extends SgCommand {
     const sg = await Spidergram.load();
     const { argv: urls, flags } = await this.parse(Go);
 
-    if (!is.array<string>(urls)) {
-      this.error('URLs must be strings.');
+    const crawlTargets: string[] = [...sg.config.spider?.seed ?? [], ...urls ?? []];
+
+    if (crawlTargets.length == 0) {
+      this.error('Crawl URLs must be provided via the command line, or via the configuration file.');
     }
 
     if (flags.erase) {
@@ -57,7 +57,7 @@ export default class Go extends SgCommand {
 
     this.startProgress('Crawling URLs');
     await spider
-      .run(urls)
+      .run(crawlTargets)
       .then(status => this.ux.info(sg.cli.summarizeStatus(status)));
 
     // Analyze

@@ -8,7 +8,6 @@ import {
 } from '../../index.js';
 import { QueryFragments } from '../../model/queries/query-fragments.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
-import is from '@sindresorhus/is';
 import { filterUrl } from '../../tools/urls/filter-url.js';
 
 export default class Crawl extends SgCommand {
@@ -36,7 +35,6 @@ export default class Crawl extends SgCommand {
   static args = {
     urls: Args.string({
       description: 'One or more URLs to crawl',
-      required: true,
     }),
   };
 
@@ -46,8 +44,10 @@ export default class Crawl extends SgCommand {
     const sg = await Spidergram.load();
     const { argv: urls, flags } = await this.parse(Crawl);
 
-    if (!is.array<string>(urls)) {
-      this.error('URLs must be strings.');
+    const crawlTargets = [...sg.config.spider?.seed ?? [], ...urls ?? []];
+
+    if (crawlTargets.length == 0) {
+      this.error('Crawl URLs must be provided via the command line, or via the configuration file.');
     }
 
     if (flags.verbose) {
@@ -93,7 +93,7 @@ export default class Crawl extends SgCommand {
               ? filterUrl(
                   uu.parsed,
                   flags.enqueue ?? sg.config.spider?.urls?.crawl,
-                  { contextUrl: urls[0] },
+                  { contextUrl: crawlTargets[0] },
                 )
               : false,
           ),
@@ -108,7 +108,7 @@ export default class Crawl extends SgCommand {
       }
     } else {
       this.startProgress('Crawling');
-      await spider.run(urls);
+      await spider.run(crawlTargets);
     }
   }
 }
