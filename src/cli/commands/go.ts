@@ -89,5 +89,6 @@ export default class Go extends SgCommand {
     }
 
     // We should perform some kin of wrapup step here.
+    return Promise.resolve();
   }
 }

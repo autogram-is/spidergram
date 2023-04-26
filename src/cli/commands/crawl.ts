@@ -110,5 +110,7 @@ export default class Crawl extends SgCommand {
       this.startProgress('Crawling');
       await spider.run(crawlTargets);
     }
+
+    return Promise.resolve();
   }
 }
