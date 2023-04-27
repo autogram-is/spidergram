@@ -1,6 +1,6 @@
 {
   "name": "spidergram",
-  "version": "0.9.23",
+  "version": "0.10.0",
   "description": "Structural analysis tools for complex web sites",
   "main": "./dist/index.js",
   "exports": "./dist/index.js",
@@ -29,7 +29,7 @@
   "files": [
     "dist/**/*",
     "CHANGELOG.md",
-    "config",
+    "docs",
     "bin"
   ],
   "author": {

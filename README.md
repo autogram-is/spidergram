@@ -1,6 +1,6 @@
-# Spidergram: Structural analysis tools for complex web sites
+# Spidergram
 
-Spidergram is a toolbox for exploring, auditing, and analyzing complicated web sites — particularly ones that use multiple CMSs, span more than one domain, and are maintained by multiple teams inside an organization. Although it works well for smaller projects, [Autogram](https://autogram.is) built it to overcome the roadblocks we hit when using existing crawling and inventory tools on complex, multi-site web properties. Using it to crawl your blog is a bit like swatting a fly with a Buick.
+Spidergram is a customizable toolkit for crawling and analyzing complicated web properties. While it can be used with large or small sites, it's designed to accomodate "ten web sites in a trench coat" scenarios where multiple CMSs, multiple domains, and multiple design systems maintained by multiple teams are all in play.
 
 ## Why this thing?
 
@@ -70,7 +70,7 @@ await spider.run('https://example.com');
 
 ## The tech
 
-Spidergram is a pure ESM Node.js project written in Typescript; it assembles a laundry list of excellent third-party open source projects including [ArangoDB](https://www.arangodb.com), [Crawlee](https://crawlee.dev), [Playwright](https://playwright.dev), [Cheerio](https://cheerio.js.org), [HtmlToText](https://github.com/html-to-text/node-html-to-text), [SheetJS](https://sheetjs.com), [Vega](https://vega.github.io), and more.
+Spidergram is a pure ESM Node.js project written in Typescript; it assembles a laundry list of excellent third-party open source projects including [ArangoDB](https://www.arangodb.com), [Crawlee](https://crawlee.dev), [Playwright](https://playwright.dev), [Cheerio](https://cheerio.js.org), [HtmlToText](https://github.com/html-to-text/node-html-to-text), [SheetJS](https://sheetjs.com), and more.
 
 ## Future plans
 
@@ -78,18 +78,18 @@ Spidergram is a tool we use when solving problems for our clients; it's been evo
 
 - Additional documentation
 - Additional example project templates
-  - [ ] Site-specific content extraction and auditing
+  - [x] Site-specific content extraction and auditing
   - [ ] Path traversal to identify hard-to-find content
-  - [ ] Pattern analysis to audit design system usage across sites
+  - [x] Pattern analysis to audit design system usage across sites
 - Reusable helpers and utilities for common analysis tasks
-  - [ ] Query-builder helpers for common reports
+  - [x] Query-builder helpers for common reports
   - [ ] A larger library of pre-built visualizations
-  - [ ] CMS detection helper functions
-  - [ ] Integration with third-party performance and A11y audit tools
+  - [x] CMS detection helper functions
+  - [x] Integration with third-party performance and A11y audit tools
 - Technical improvements
   - [ ] Better test coverage
   - [ ] Migration to a multi-project monorepo to break up the big dependency footprint
-  - [ ] Pre-configured Docker images for Arango and Playwright
+  - [x] Pre-configured Docker image for Arango
   - [ ] Cleaner support for crawling authenticated content
 - Improved Crawlee integration
   - [ ] A dedicated SpiderCrawler class
