@@ -14,7 +14,6 @@ import {
   Resource,
   Site,
   Pattern,
-  PatternInstance,
   LinksTo,
   IsChildOf,
   IsVariantOf,
@@ -153,7 +152,6 @@ export class ArangoStore {
       AppearsOn,
       Fragment,
       Pattern,
-      PatternInstance
     ];
     assert(includedTypes.length > 0);
 

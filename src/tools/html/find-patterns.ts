@@ -1,6 +1,6 @@
 import { HtmlTools, PropertyMap, mapProperties } from '../index.js';
 import _ from 'lodash';
-import { Pattern, PatternInstance, Query, Resource, aql } from '../../model/index.js';
+import { Pattern, AppearsOn, Query, Resource, aql } from '../../model/index.js';
 import { getCheerio } from './get-cheerio.js';
 import { Spidergram } from '../../config/index.js';
 import { PropertyFilter, filterByProperty } from '../graph/filter-by-property.js';
@@ -104,18 +104,18 @@ export async function findAndSavePagePatterns(
 export function findPagePatterns(
   input: string | cheerio.Root | Resource,
   patterns: PatternDefinition | PatternDefinition[],
-): PatternInstance[] {
+): AppearsOn[] {
   const list = Array.isArray(patterns) ? patterns : [patterns];
-  const results: PatternInstance[] = [];
+  const results: AppearsOn[] = [];
   const resource = input instanceof Resource ? input : undefined;
   for (const pattern of list) {
     results.push(
       ...findPatternInstances(input, pattern).map(
         fp => {
-          const pi = new PatternInstance({
-            from: resource ?? 'resources/null',
-            to: `patterns/${ fp.patternKey ?? fp.pattern ?? 'null'}`,
+          const pi = new AppearsOn({
             ...fp,
+            pattern: `patterns/${ fp.patternKey ?? fp.pattern ?? 'null'}`,
+            page: resource ?? 'resources/null',
           });
           return pi;
         }

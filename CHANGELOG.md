@@ -11,7 +11,7 @@ This release is dedicated to Peter Porker of Earth-8311, an innocent pig raised 
 - Spidergram can now cookies, performance data, and remote API requests made during page load using the `config.spider.saveCookies`, `.savePerformance`, and `.saveXhr` config properties.
 - Spidergram can identify and catalog design patterns during the post-crawl page analysis process; pattern definitions can also include rules for extracting pattern properties like a card's title and CTA link.
 - Resources with attached downloads can be processed using file parsing plugins; Spidergram 0.10.0 comes with support for PDF and .docx content and metadata, image EXIF metadata, and audio/video metadata in a variety of formats.
-- The `config.spider.seed` setting lets you set one or more URLs as the default starting points for crawling. 
+- The `config.spider.seed` setting lets you set one or more URLs as the default starting points for crawling.
 - For large crawls, an experimental `config.offloadBodyHtml` settings flag has been added to Spidergram's global configuration. When it's set to 'db', all body HTML will be stored in a dedicated key-value collection, rather than the `resources` collection. On sites with many large pages (50k+ pages of 500k+ html or more) this can significantly improve the speed of filtering, queries and reporting.
 
 ### Changes
@@ -43,7 +43,7 @@ This release is dedicated to Peter Porker of Earth-8311, an innocent pig raised 
 ## v0.9.21 - 23-04-13
 
 - Added a new `NamedEntity` abstract base type that can be used for graph entities that should be referred to by unique names rather than arbitrary IDs.
-- Added `Site` and `Pattern` NamedEntity types, and a `PatternInstance` Relationship type that connects Resources to Patterns. In most cases PatternInstance can replace the `Fragment` entity type.
+- Added `Site` and `Pattern` NamedEntity types, and refocused the unused `AppearsOn` Relationship type as a dedicated Resource-To-Pattern relationship, replacing the old `Fragment` entity type.
 - Added a `config.analysis.site` setting; it can specify either a `PropertyMap` structure or a custom function to determine the site a give page belongs to. By default, it's set to `parsed.hostname`.
 - Added a `-d --designPatterns` flag to `spidergram analyze`; when set it will use the `config.analyze.patterns` settings to extract and the patterns that appear on a given page.
 - Added an `-r --reprocess` flag to `spidergram analyze`; unless this flag is set, it will ignore pages that have already been analyzed.

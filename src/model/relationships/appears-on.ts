@@ -4,27 +4,22 @@ import {
   Entity,
   Reference,
   Resource,
+  Pattern
 } from '../index.js';
 
-export interface AppearsOnConstructorOptions<
-  F extends Entity = Entity,
-  T extends Entity = Resource,
-> extends RelationshipConstructorOptions<F, T> {
-  item?: Reference<F>;
-  location?: Reference<T>;
+export interface AppearsOnConstructorOptions extends RelationshipConstructorOptions<Pattern, Resource> {
+  page?: Reference<Resource>;
+  pattern?: Reference<Pattern>;
 }
 
-export class AppearsOn<
-  F extends Entity = Entity,
-  T extends Entity = Resource,
-> extends Relationship<F, T> {
+export class AppearsOn extends Relationship<Pattern, Resource> {
   readonly _collection = 'appears_on';
 
-  constructor(data: AppearsOnConstructorOptions<F, T> = {}) {
-    const { item, location, ...dataForSuper } = data;
+  constructor(data: AppearsOnConstructorOptions = {}) {
+    const { page, pattern, ...dataForSuper } = data;
 
-    dataForSuper.from ??= item;
-    dataForSuper.to ??= location;
+    dataForSuper.from ??= pattern;
+    dataForSuper.to ??= page;
 
     super(dataForSuper);
   }
