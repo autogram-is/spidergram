@@ -7,9 +7,9 @@ erDiagram
     RESOURCE }o--o| SITE : ""
     PATTERN }o--o{ RESOURCE : appears_on
     KEY_VALUE_STORE
-    KV_BODY_HTML |O..O| KEY_VALUE_STORES : is-a
+    KV_BODY_HTML |O..O| KEY_VALUE_STORE : is-a
     DATASET
-    DS_CRAWL_INFO |O..O| DATASETS : is-is
+    DS_CRAWL_INFO |O..O| DATASET : is-is
 ```
 
 - **UniqueUrls** and **Resources**: The central documents for most work in Spidergram. They represent discovered URLs (either from your configuration or discovered by parsing other pages) and the resources that come back when the URLs are requested. If you run a crawl, you'll get this data regardless of how you've configured things.
