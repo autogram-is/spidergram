@@ -29,7 +29,6 @@ There are tons of useful programs, hosted services, and open source projects tha
 
 `npm install -g spidergram` will install Spidergram globally, giving you access to its command line interface, and `spidergram --help` will list its available options. Importing existing sitemaps, kicking off a new crawl, generating simple reports, and checking on the status of the database can all be done from the CLI. This CLI doesn't allow as much control as creating a custom project, but it's a quick way to kick the tires.
 
-
 ## The tech
 
 Spidergram is a pure ESM Node.js project written in Typescript; it assembles a laundry list of excellent third-party open source projects including [ArangoDB](https://www.arangodb.com), [Crawlee](https://crawlee.dev), [Playwright](https://playwright.dev), [Cheerio](https://cheerio.js.org), [HtmlToText](https://github.com/html-to-text/node-html-to-text), [SheetJS](https://sheetjs.com), and more.
