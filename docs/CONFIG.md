@@ -92,9 +92,11 @@ Spidergram has a *lot* of internal settings that can be customized. We'll cover 
 
 ## Complex analysis options
 
+These settings in particular are relatively complicated sub-structures that will receive additional documentation attention shortly. For the moment, some of the examples in the `create-spidergram` project demonstrate how they can be used.
+
 | setting | notes |
 |---|---|
-|analysis.properties||
-|analysis.patterns||
-|queries||
-|reports||
+|analysis.properties|A key/value structure describing how page properties should be remapped after parsing. (e.g., moving a page's OpenGraph publish date to the `content.published` property)|
+|analysis.patterns|An array of design pattern definitions that can be used to detect individual pattern appearances on each page.|
+|queries|A key/value structure containing named, reusable ArangoDB queries|
+|reports|A key/value structure containing named, reusable reports and output formatting instructions|
