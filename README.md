@@ -25,48 +25,10 @@ There are tons of useful programs, hosted services, and open source projects tha
 
 `npx create-spidergram` will set up a fresh node.js project using one of several example crawler projects. For more details on the example projects, see the [Create Spidergram](https://github.com/autogram-is/create-spidergram) project page.
 
-### Adding to an existing project
-
-`node install --save spidergram` will add Spidergram to your node.js project's dependencies. Spidergram is a [pure ESM](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c) project; while there are still plenty of CommonJS projects out there, the ecosystem is quickly moving towards a consistent ESM standard. We bit the bullet now rather than migrating in the future as project dependencies leave CommonJS behind.
-
 ### As a command-line utility
 
 `npm install -g spidergram` will install Spidergram globally, giving you access to its command line interface, and `spidergram --help` will list its available options. Importing existing sitemaps, kicking off a new crawl, generating simple reports, and checking on the status of the database can all be done from the CLI. This CLI doesn't allow as much control as creating a custom project, but it's a quick way to kick the tires.
 
-## Usage
-
-In a node.js project, import the 'Spider' class, create an instance, and call its 'run' method. Without any other options, Spidergram will hit the URL you give it, save the contents to the database, search for other links *within the same domain*, and follow them until it's visited and saved everything it can find.
-
-``` javascript
-import { Spider } from 'spidergram';
-await new Spider().run('https://example.com');
-```
-
-An Options object can be passed into the Spider when it's created to override its default behaviors.
-
-``` javascript
-const spider = new Spider({
-  maxConcurrency: 2,                      // Run two headless browsers in parallel
-  maxRequestsPerMinute: 60,               // Limit them to 1 request per second
-  downloadMimeTypes: ['application/pdf'], // Download any PDF files encountered
-
-  pageHandler: ({ page, saveResource, enqueueUrls }) => {
-    // 'page' is the Playwright page object; you can use it to control
-    // the browser, grab HTML snippets, take screenshots, and more.
-    const html = await page.content();
-
-    // Save metadata about the current page to the database, with the raw
-    // page markup in the resource's "body" property
-    await saveResource({ body: html })
-
-    // Find URLs on the page, record them all in the database, and visit
-    // any that match our target domain.
-    await enqueueUrls();
-  }
-});
-
-await spider.run('https://example.com');
-```
 
 ## The tech
 
