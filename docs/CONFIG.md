@@ -67,7 +67,7 @@ Spidergram has a *lot* of internal settings that can be customized. We'll cover 
 |---|---|---|
 |analysis.data.all|`false`||
 |analysis.data.attributes|`true`|Parse HTML attributes on the `body` tag; these are often used to store pagewide settings and design options|
-|analysis.data.meta|`true`|Pased meta tags, including keywords, OpenGraph data, etc.|
+|analysis.data.meta|`true`|Parse meta tags, including keywords, OpenGraph data, etc.|
 |analysis.data.json|`true`|Parse JSON data embedded in `script` tags|
 |analysis.data.schemaOrg|`true`|Parse Schema.org information embedded as `JSON-LD` dta|
 |analysis.data.links|`false`|Parse `link` tags|
