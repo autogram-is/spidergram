@@ -49,4 +49,4 @@ Large-scale inventory and analysis of web content is kind of hellish. Most autom
 - Easy ways to transform and map page data, to automate as much grunt work as possible when categorizing and organizing raw crawl data.
 - A storage system that could preserve complex relationships between each page, zoom in on sub-page elements like design patterns across all sites, *and* integate third-party data like client spreadsheets, CMS exports, analytics APIs, etc.
 
-There are tons of useful programs, hosted services, and open source projects that do *some* of that, but finding anything that supported it all was a nightmare. Unforatunately, we're huge nerds, so we had to go build it.
+There are tons of useful programs, hosted services, and open source projects that do *some* of that, but finding anything that supported it all was a nightmare. Unfortunately, we're huge nerds, so we had to go build it.
