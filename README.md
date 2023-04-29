@@ -1,6 +1,6 @@
 # Spidergram
 
-Spidergram is a customizable toolkit for crawling and analyzing complicated web properties. While it can be used with large or small sites, we (the folks at [Autogram](https://autogram.is)) designed to accomodate "ten web sites in a trench coat" scenarios where multiple CMSs, multiple domains, and multiple design systems maintained by multiple teams are all in play.
+Spidergram is a customizable toolkit for crawling and analyzing complicated web properties. While it can be used to crawl any website, we (the folks at [Autogram](https://autogram.is)) designed it specifically for "ten websites in a trench coat" scenarios where a web property encompasses multiple CMSs, multiple domains, and multiple design systems, maintained by multiple teams.
 
 ## Installation
 
@@ -35,18 +35,17 @@ To re-run the crawl with different options, run `spidergram go` with the `--eras
 
 The [CLI Documentation](docs/CLI.md) includes additional details about Spidergram's subcommands and options. You can build custom reports, inspect individual URLs before crawling them, generate tree diagrams representing URL structures, and more.
 
-To customize Spidergram's crawl behavior, analysis options, and report output, check the [configuration documentation](docs/CONFIG.md). You can generate a pre-buily configuration with the standard options by running the `spidergram init` command in your project directory.
+To customize Spidergram's crawl behavior, analysis options, and report output, check the [configuration documentation](docs/CONFIG.md). You can generate a pre-built configuration with the standard options by running the `spidergram init` command in your project directory.
 
 To build your own custom NodeJS crawling and analysis tool on top of Spidergram's API, read the [API docs](docs/API.md). It'll be fun. You know you want to.
 
 ## Why this thing?
 
-Large-scale inventory and analysis of web content is kind of hellish. Most automated tools are focused on SEO, and treat spreadsheets as a dense storage medium rather than a tool to present specific views of the data. On the other hand, the programmer-friendly customizable web scraping toolkits are usually built to automate web APIs or extract specific targeted bits of data from others peoples' web sites. (Grabbing a list of every product in an Amazon category, extracting job listings, etc.)
+Large-scale inventory and analysis of web content is kind of hellish. Some automated tools focus on SEO, and treat spreadsheets as a dense storage medium rather than a tool to present specific views of the data. Programmer-friendly customizable web scraping toolkits are usually built to automate web APIs or extract specific targeted bits of data from others peoples' web sites (like grabbing a list of every product in an Amazon category, extracting job listings, etc.)
 
 [Autogram](https://autogram.is) often works with companies that are trying to get a handle on their own huge web ecosystems. We needed:
 
-- Simple exploratory spidering, with complex conditional rules for normalizing urls and traversing multiple inter-connected sites.
-- Easy ways to transform and map page data, to automate as much grunt work as possible when categorizing and organizing raw crawl data.
-- A storage system that could preserve complex relationships between each page, zoom in on sub-page elements like design patterns across all sites, *and* integate third-party data like client spreadsheets, CMS exports, analytics APIs, etc.
-
-There are tons of useful programs, hosted services, and open source projects that do *some* of that, but finding anything that supported it all was a nightmare. Unfortunately, we're huge nerds, so we had to go build it.
+- Exploratory spidering, with complex conditional rules for normalizing URLs and traversing multiple inter-connected sites.
+- Transformation and mapping page data, in order to automate as much grunt work as possible when categorizing and organizing raw crawl data.
+- Storage that can preserve complex relationships between each page, zoom in on sub-page elements like design patterns across all sites, *and* integate third-party data like client spreadsheets, CMS exports, analytics APIs, etc.
+Many useful programs, hosted services, and open source projects can do *some* of that, nothing existed that would do it all. Unfortunately, we're huge nerds, so we had to build it.

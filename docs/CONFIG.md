@@ -1,6 +1,6 @@
 # Customizing Spidergram's settings
 
-Spidergram ships with some sensible defaults for things like URL normalization and HTML parsing. Out of the box, it also assumes you're storing your data in a locally-installed copy of ArangoDB *without a password*
+Spidergram ships with some sensible defaults for things like URL normalization and HTML parsing. Out of the box, it also assumes you're storing your data in a locally-installed copy of ArangoDB *without a password*.
 
 It will treat whatever directory you're in when you run the `spidergram` command as its current "project directory," and store its temp files, downloads, final report output, etc. there.
 
