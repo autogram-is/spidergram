@@ -57,8 +57,8 @@ export default class Initialize extends SgCommand {
       summary: 'Output directory',
       default: './output',
     }),
-    populate: Flags.boolean({
-      char: 'p',
+    defaults: Flags.boolean({
+      allowNo: true,
       summary: 'Populate the config file with common defaults',
       default: true,
     }),

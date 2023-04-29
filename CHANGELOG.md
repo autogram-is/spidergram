@@ -8,7 +8,7 @@ This release is dedicated to Peter Porker of Earth-8311, an innocent pig raised 
 
 - Custom queries and multi-query reports can be defined in the Spidergram config files; Spidergram now ships with a handful of simple queries and an overview report as part of its core configuration.
 - Spidergram can run an Axe Accessibility Report on every page as it crawls a site; this behavior can be turned on and off via the `spider.auditAccessiblity` config property.
-- Spidergram can now cookies, performance data, and remote API requests made during page load using the `config.spider.saveCookies`, `.savePerformance`, and `.saveXhr` config properties.
+- Spidergram can now save cookies, performance data, and remote API requests made during page load using the `config.spider.saveCookies`, `.savePerformance`, and `.saveXhr` config properties.
 - Spidergram can identify and catalog design patterns during the post-crawl page analysis process; pattern definitions can also include rules for extracting pattern properties like a card's title and CTA link.
 - Resources with attached downloads can be processed using file parsing plugins; Spidergram 0.10.0 comes with support for PDF and .docx content and metadata, image EXIF metadata, and audio/video metadata in a variety of formats.
 - The `config.spider.seed` setting lets you set one or more URLs as the default starting points for crawling.
@@ -18,6 +18,7 @@ This release is dedicated to Peter Porker of Earth-8311, an innocent pig raised 
 
 - Spidergram's CLI commands have been overhauled; vestigial commands from the 0.5.0 era have been removed and replaced. Of particular interest:
   - `spidergram status` summarizes the current config and DB state
+  - `spidergram init` generates a fresh configuration file in the current directory
   - `spidergram ping` tests a remote URL using the current analysis settings
   - `spidergram query` displays and saves filtered snapshots of the saved crawl graph
   - `spidergram report` outputs a collection of query results as a combined workbook or JSON file
