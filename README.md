@@ -20,3 +20,16 @@ The [CLI Documentation](docs/CLI.md) includes additional details about Spidergra
 To customize Spidergram's crawl behavior, analysis options, and report output, check the [configuration documentation](docs/CONFIG.md). You can generate a pre-buily configuration with the standard options by running the `spidergram init` command in your project directory.
 
 To build your own custom NodeJS crawling and analysis tool on top of Spidergram's API, read the [API docs](docs/API.md). It'll be fun. You know you want to.
+
+## Why this thing?
+
+Large-scale inventory and analysis of web content is kind of hellish. Most automated tools are focused on SEO, and treat spreadsheets as a dense storage medium rather than a presentation tool. On the other hand, most programmer-friendly web scraping toolkits are built to automate web APIs or extract specific bits of data from others' web sites. (Grabbing a list of every product in an Amazon category, extracting job listings, etc.)
+
+[Autogram](https://autogram.is) often works with companies that are trying to get a handle on their own huge web ecosystems. We needed:
+
+- Simple exploratory spidering, *and* complex conditional rules for normalizing and traversing large multi-site content ecosystems.
+- Configuration-based transformation and mapping of page data to eliminate as much grunt work as possible when categorizing and organizing raw crawl output.
+- The ability to preserve complex relationships between each page, the sub-page elements like design patterns that appear across all the sites, *and* layers of third-party data like client spreadsheets, CMS exports, analytics APIs, etc.
+- A solid framework for iterative analysis of that multi-layered data, not just a million-row spreadsheet and two weeks with Excel.
+
+There are tons of useful programs, hosted services, and open source projects that do *some* of that, but finding anything that supported it all was a nightmare. Unforatunately, we're huge nerds, so we had to go build it.
