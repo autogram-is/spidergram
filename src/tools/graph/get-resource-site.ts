@@ -4,12 +4,14 @@ import { findPropertyValue } from '../../index.js';
 export async function getResourceSite(
   input: Resource,
   source: PropertyMap<Resource> | PropertyMap<Resource>[],
-  saveSite = true
+  saveSite = true,
 ) {
   const siteKey = findPropertyValue(input, source);
   if (typeof siteKey === 'string' && saveSite) {
     const sg = await Spidergram.load();
     sg.arango.push(new Site({ key: siteKey }), false);
   }
-  return Promise.resolve(typeof siteKey === 'string' ? 'sites/' + siteKey : undefined);
+  return Promise.resolve(
+    typeof siteKey === 'string' ? 'sites/' + siteKey : undefined,
+  );
 }

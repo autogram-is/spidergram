@@ -7,9 +7,7 @@ import {
   PageContentOptions,
   PageDataOptions,
 } from '../tools/html/index.js';
-import {
-  PageAnalysisOptions,
-} from '../tools/graph/analyze-page.js';
+import { PageAnalysisOptions } from '../tools/graph/analyze-page.js';
 import { TechAuditOptions } from '../tools/browser/index.js';
 import { Configuration as FileConfiguration } from 'typefs';
 import { Config as ArangoConfig } from 'arangojs/connection';
@@ -30,7 +28,6 @@ import { SpiderCli } from '../cli/shared/index.js';
  * get more precise contextual control.
  */
 export interface SpidergramConfig extends Record<string, unknown> {
-  
   /**
    * The version of Spidergram the configuration data was originally created for.
    * This allows Spidergram to warn you if your config is out of date.

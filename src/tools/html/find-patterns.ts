@@ -3,7 +3,10 @@ import _ from 'lodash';
 import { Pattern, AppearsOn, Query, Resource, aql } from '../../model/index.js';
 import { getCheerio } from './get-cheerio.js';
 import { Spidergram } from '../../config/index.js';
-import { PropertyFilter, filterByProperty } from '../graph/filter-by-property.js';
+import {
+  PropertyFilter,
+  filterByProperty,
+} from '../graph/filter-by-property.js';
 import is from '@sindresorhus/is';
 
 export interface FoundPattern extends HtmlTools.ElementData {
@@ -12,16 +15,20 @@ export interface FoundPattern extends HtmlTools.ElementData {
 }
 
 export type ConditionalPatternGroup = PropertyFilter & {
-  patterns?: PatternDefinition[],
-  pattern?: PatternDefinition,
+  patterns?: PatternDefinition[];
+  pattern?: PatternDefinition;
 };
 
-export function isConditionalPatternGroup(input: unknown): input is ConditionalPatternGroup {
-  return (is.plainObject(input) && ('patterns' in input || 'pattern' in input));
+export function isConditionalPatternGroup(
+  input: unknown,
+): input is ConditionalPatternGroup {
+  return is.plainObject(input) && ('patterns' in input || 'pattern' in input);
 }
 
-export function isPatternDefinition(input: unknown): input is PatternDefinition {
-  return (is.plainObject(input) && 'name' in input && 'selector' in input);
+export function isPatternDefinition(
+  input: unknown,
+): input is PatternDefinition {
+  return is.plainObject(input) && 'name' in input && 'selector' in input;
 }
 
 /**
@@ -38,7 +45,7 @@ export interface PatternDefinition extends HtmlTools.ElementDataOptions {
   patternKey?: string;
 
   /**
-   * Indicates that the definition is a named variation of a more generic pattern. 
+   * Indicates that the definition is a named variation of a more generic pattern.
    */
   variant?: string;
 
@@ -48,7 +55,7 @@ export interface PatternDefinition extends HtmlTools.ElementDataOptions {
   selector: string;
 
   /**
-   * When an instance of this pattern is found, remove its markup from the DOM 
+   * When an instance of this pattern is found, remove its markup from the DOM
    * so it won't be matched multiple times.
    */
   exclusive?: boolean;
@@ -70,22 +77,31 @@ const defaults: HtmlTools.ElementDataOptions = {
 export async function findAndSavePagePatterns(
   input: Resource,
   patterns: PatternDefinition | (PatternDefinition | ConditionalPatternGroup)[],
-)  {
+) {
   const defs: PatternDefinition[] = [];
   if (Array.isArray(patterns)) {
     for (const pattern of patterns) {
       if (isPatternDefinition(pattern)) {
         defs.push(pattern);
-      }
-      else if (isConditionalPatternGroup(pattern) && filterByProperty(input, pattern)) {
+      } else if (
+        isConditionalPatternGroup(pattern) &&
+        filterByProperty(input, pattern)
+      ) {
         if (pattern.pattern) defs.push(pattern.pattern);
         if (pattern.patterns) defs.push(...pattern.patterns);
       }
     }
   }
 
-  const pts = defs.map(p => new Pattern({ key: p.patternKey, name: p.name, description: p.description }));
-  
+  const pts = defs.map(
+    p =>
+      new Pattern({
+        key: p.patternKey,
+        name: p.name,
+        description: p.description,
+      }),
+  );
+
   const instances = findPagePatterns(input, defs);
 
   const sg = await Spidergram.load();
@@ -110,16 +126,14 @@ export function findPagePatterns(
   const resource = input instanceof Resource ? input : undefined;
   for (const pattern of list) {
     results.push(
-      ...findPatternInstances(input, pattern).map(
-        fp => {
-          const pi = new AppearsOn({
-            ...fp,
-            pattern: `patterns/${ fp.patternKey ?? fp.pattern ?? 'null'}`,
-            page: resource ?? 'resources/null',
-          });
-          return pi;
-        }
-      ),
+      ...findPatternInstances(input, pattern).map(fp => {
+        const pi = new AppearsOn({
+          ...fp,
+          pattern: `patterns/${fp.patternKey ?? fp.pattern ?? 'null'}`,
+          page: resource ?? 'resources/null',
+        });
+        return pi;
+      }),
     );
   }
 
@@ -151,7 +165,7 @@ export function findPatternInstances(
         ),
       };
       if (pattern.properties) {
-        mapProperties(found, pattern.properties)
+        mapProperties(found, pattern.properties);
       }
       if (pattern.exclusive) {
         $(element).remove();

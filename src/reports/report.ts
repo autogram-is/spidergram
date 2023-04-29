@@ -1,6 +1,11 @@
 import { Query, JobStatus, Spidergram, AqFilter } from '../index.js';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
-import { AnyJson, isAnyJson, isJsonArray, isJsonMap } from '@salesforce/ts-types';
+import {
+  AnyJson,
+  isAnyJson,
+  isJsonArray,
+  isJsonMap,
+} from '@salesforce/ts-types';
 import { DateTime } from 'luxon';
 import { ReportConfig } from './report-types.js';
 import { buildQueryWithParents } from '../model/queries/query-inheritance.js';
@@ -72,7 +77,10 @@ export class ReportRunner {
     }
   }
 
-  async build(customConfig?: ReportConfig, filters: AqFilter[] = []): Promise<void> {
+  async build(
+    customConfig?: ReportConfig,
+    filters: AqFilter[] = [],
+  ): Promise<void> {
     const config = customConfig ?? this.config;
     // Give custom builder functions a chance to alter the queries,
     // populate custom data, or, you know, whatevs.
@@ -80,7 +88,7 @@ export class ReportRunner {
       await config.alterQueries(config, this);
     }
 
-    this.status.total += Object.keys(config.queries ?? {}).length
+    this.status.total += Object.keys(config.queries ?? {}).length;
 
     // Iterate over every query, modify it if necessary, and run it.
     for (const [name, query] of Object.entries(config.queries ?? {})) {
@@ -107,12 +115,12 @@ export class ReportRunner {
     const config = customConfig ?? this.config;
     config.data ??= {};
     config.settings ??= {};
-    config.settings.sheets ??= {}
+    config.settings.sheets ??= {};
 
     if (is.function_(config.alterData)) {
       await config.alterData(config, this);
     } else if (config.alterData) {
-      for (const [key, data] of Object.entries(config.data))  {
+      for (const [key, data] of Object.entries(config.data)) {
         const op = config.alterData[key] ?? config.alterData['default'];
         if (op) {
           if (op.action === 'split' && isJsonArray(data)) {
@@ -146,19 +154,25 @@ export class ReportRunner {
     const config = customConfig ?? this.config;
 
     this.events.emit('progress', this.status, 'Generating files');
-    config.settings ??= {}
+    config.settings ??= {};
 
     // Supply defaults and do token-replacement on the output path
-    let loc = config?.settings?.path as string ?? '{{date}} {{name}}';
+    let loc = (config?.settings?.path as string) ?? '{{date}} {{name}}';
     loc = loc.replace('{{name}}', config.name ?? 'report');
     loc = loc.replace('{{date}}', DateTime.now().toISODate() ?? '');
     config.settings.path = loc;
 
     if (is.function_(config.output)) {
       await config.output(config, this);
-    } else if (config.settings?.type === 'csv' || config.settings?.type === 'tsv') {
+    } else if (
+      config.settings?.type === 'csv' ||
+      config.settings?.type === 'tsv'
+    ) {
       await outputCsvReport(config, this);
-    } else if (this.config.settings?.type === 'json' || config.settings?.type === 'json5') {
+    } else if (
+      this.config.settings?.type === 'json' ||
+      config.settings?.type === 'json5'
+    ) {
       await outputJsonReport(config, this);
     } else {
       // Default to XLSX?
@@ -191,10 +205,13 @@ export class ReportRunner {
     return Promise.resolve(this.status);
   }
 
-  async _runReport(config: ReportConfig, filters: AqFilter[] = []): Promise<void> {
+  async _runReport(
+    config: ReportConfig,
+    filters: AqFilter[] = [],
+  ): Promise<void> {
     await Spidergram.load();
     return this.build(config, filters)
       .then(() => this.transform(config))
-      .then(() => this.output(config))
+      .then(() => this.output(config));
   }
 }

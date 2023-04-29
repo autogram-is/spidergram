@@ -20,7 +20,7 @@ export default class Initialize extends SgCommand {
       char: 'f',
       summary: 'Configuration file format',
       options: ['json', 'yaml', 'json5'],
-      default: 'json5'
+      default: 'json5',
     }),
     dbaddress: Flags.string({
       char: 'a',
@@ -60,8 +60,8 @@ export default class Initialize extends SgCommand {
     populate: Flags.boolean({
       char: 'p',
       summary: 'Populate the config file with common defaults',
-      default: true
-    })
+      default: true,
+    }),
   };
 
   async run() {
@@ -71,22 +71,25 @@ export default class Initialize extends SgCommand {
 
     if (sg.configFile) {
       // Is there already a config file? Prompt to ensure the user really wants to generate this.
-      await CLI.confirm(`A configuration file already exists. Create one anyways?`)
-        .then(confirmed => { if (!confirmed) this.exit(0); })
+      await CLI.confirm(
+        `A configuration file already exists. Create one anyways?`,
+      ).then(confirmed => {
+        if (!confirmed) this.exit(0);
+      });
     }
 
     const settings: SpidergramConfig = {
       configVersion: this.config.version,
       storageDirectory: flags.storage,
-      outputDirectory: flags.output,      
+      outputDirectory: flags.output,
       arango: {
         databaseName: flags.dbname,
         url: flags.dbaddress,
         auth: {
           username: flags.dbuser,
-          password: flags.dbpass
-        }
-      }
+          password: flags.dbpass,
+        },
+      },
     };
 
     if (flags.populate) {
@@ -116,11 +119,11 @@ export default class Initialize extends SgCommand {
         configData = JSON.stringify(settings, undefined, 4);
         break;
 
-      case 'json5': 
+      case 'json5':
         configData = stringify(settings, undefined, 4);
         break;
-        
-      case 'yaml': 
+
+      case 'yaml':
         configData = dump(settings);
         break;
     }
@@ -129,34 +132,39 @@ export default class Initialize extends SgCommand {
       this.error("The configuration file couln't be generated.");
     }
 
-    await writeFile(filePath, configData)
-      .then(() => this.log('Config file generated!'));
+    await writeFile(filePath, configData).then(() =>
+      this.log('Config file generated!'),
+    );
   }
 }
 
 type ArangoStatus = {
-  error?: boolean,
-  server: boolean,
-  auth: boolean,
-  db: boolean
-}
+  error?: boolean;
+  server: boolean;
+  auth: boolean;
+  db: boolean;
+};
 
-export async function testConnection(name: string, host: string, user: string, pass: string): Promise<ArangoStatus> {
+export async function testConnection(
+  name: string,
+  host: string,
+  user: string,
+  pass: string,
+): Promise<ArangoStatus> {
   const results = {
     error: true,
     server: true,
     auth: true,
-    db: true
+    db: true,
   };
 
   const connection = await ArangoStore.open(undefined, {
     url: host,
     auth: {
       username: user,
-      password: pass
-    }
-  })
-  .catch(() => results);
+      password: pass,
+    },
+  }).catch(() => results);
 
   if ('error' in connection) {
     return Promise.resolve(connection);
@@ -164,7 +172,7 @@ export async function testConnection(name: string, host: string, user: string, p
     return Promise.resolve({
       server: true,
       auth: true,
-      db: true
-    })
+      db: true,
+    });
   }
 }

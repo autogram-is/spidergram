@@ -1,13 +1,16 @@
-import { JsonCollection, JsonPrimitive } from "@salesforce/ts-types";
-import { XlsReportSettings } from "./output-xlsx.js";
-import { CsvReportSettings } from "./output-csv.js";
-import { JsonReportSettings } from "./output-json.js";
-import { ReportRunner } from "./report.js";
-import { ChildQuery, QueryInput } from "../model/queries/query-inheritance.js";
-import { AqFilter } from "aql-builder";
+import { JsonCollection, JsonPrimitive } from '@salesforce/ts-types';
+import { XlsReportSettings } from './output-xlsx.js';
+import { CsvReportSettings } from './output-csv.js';
+import { JsonReportSettings } from './output-json.js';
+import { ReportRunner } from './report.js';
+import { ChildQuery, QueryInput } from '../model/queries/query-inheritance.js';
+import { AqFilter } from 'aql-builder';
 
-export type ReportResult = { messages?: string[], errors?: Error[] };
-export type ReportWorker = (report: ReportConfig, runner: ReportRunner) => Promise<ReportResult>
+export type ReportResult = { messages?: string[]; errors?: Error[] };
+export type ReportWorker = (
+  report: ReportConfig,
+  runner: ReportRunner,
+) => Promise<ReportResult>;
 export type TransformOptions = Record<string, unknown>;
 
 export type BaseReportSettings = Record<string, unknown> & {
@@ -29,10 +32,14 @@ export type BaseReportSettings = Record<string, unknown> & {
   /**
    * Include datasets in final output even when they're empty.
    */
-  includeEmptyResults?: boolean,
+  includeEmptyResults?: boolean;
 };
 
-export type ReportSettings = BaseReportSettings | CsvReportSettings | JsonReportSettings | XlsReportSettings;
+export type ReportSettings =
+  | BaseReportSettings
+  | CsvReportSettings
+  | JsonReportSettings
+  | XlsReportSettings;
 
 /**
  * Configuration for a specific Spidergram report
@@ -65,11 +72,11 @@ export interface ReportConfig extends Record<string, unknown> {
 
   /**
    * Run the report multiple times, once for each entry in the 'repeat' property.
-   * 
+   *
    * The key of each repeat entry will be used as the new report name, and the value
    * (one or more AqFilters) will be applied to every alterable query in the report.
    */
-  repeat?: Record<string, AqFilter | AqFilter[]>
+  repeat?: Record<string, AqFilter | AqFilter[]>;
 
   /**
    * A keyed list of queries to be run when building this report's data. Query data can
@@ -90,7 +97,7 @@ export interface ReportConfig extends Record<string, unknown> {
    * Keyed JSON data containing results from the reports queries. Additional datasets
    * can also be included manually; this can be useful for explanitory/overview sheets,
    * or pre-built supplementary data used during the output process.
-   * 
+   *
    * Generally this collection's records correspond directly to the queries; transform
    * callbacks or query alteration flags may result in multiple datasets from a single
    * query, or multiple queries combined into a single dataset.
@@ -102,7 +109,7 @@ export interface ReportConfig extends Record<string, unknown> {
    * data after all queries have been run, but before output is generated. This can
    * be useful for date and number formatting and other cleanup.
    */
-  alterData?: ReportWorker | Record<string, ReportDataTransform>
+  alterData?: ReportWorker | Record<string, ReportDataTransform>;
 
   /**
    * A custom report generation function that assumes responsibility for processing
@@ -112,5 +119,9 @@ export interface ReportConfig extends Record<string, unknown> {
 }
 
 export type ReportDataTransform = ReportDataSplit | ReportDataPivot;
-export type ReportDataSplit = { action: 'split', property: string, mustMatch?: JsonPrimitive[] };
-export type ReportDataPivot = { action: 'pivot', property: string };
+export type ReportDataSplit = {
+  action: 'split';
+  property: string;
+  mustMatch?: JsonPrimitive[];
+};
+export type ReportDataPivot = { action: 'pivot'; property: string };

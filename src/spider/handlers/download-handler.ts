@@ -30,7 +30,8 @@ export async function downloadHandler(context: SpiderContext): Promise<void> {
       path.join(proj.config.storageDirectory ?? './storage', directory),
     );
     const fullPath = path.join(directory, fileName);
-    const results = await files().writeStream(fullPath, Duplex.from(response.body))
+    const results = await files()
+      .writeStream(fullPath, Duplex.from(response.body))
       .then(() => ({ bucket: 'downloads', path: fullPath }))
       .catch((error: unknown) => {
         if (error instanceof Error) {

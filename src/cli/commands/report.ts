@@ -5,7 +5,6 @@ import _ from 'lodash';
 import { queryFilterFlag } from '../shared/index.js';
 import { buildFilter } from '../shared/flag-query-tools.js';
 
-
 export default class DoReport extends SgCommand {
   static summary = 'Build and save a crawl report';
 
@@ -34,12 +33,12 @@ export default class DoReport extends SgCommand {
     output: Flags.string({
       char: 'o',
       summary: 'Output file type',
-      options: ['csv', 'tsv', 'json', 'json5', 'xlsx', 'debug']
+      options: ['csv', 'tsv', 'json', 'json5', 'xlsx', 'debug'],
     }),
     setting: Flags.string({
       char: 's',
       summary: 'Add custom report setting',
-      multiple: true
+      multiple: true,
     }),
   };
 
@@ -69,7 +68,10 @@ export default class DoReport extends SgCommand {
       } else {
         const data: Record<string, unknown>[] = Object.entries(reports).map(
           ([name, report]) => {
-            const r = report instanceof ReportRunner ? report : new ReportRunner(report);
+            const r =
+              report instanceof ReportRunner
+                ? report
+                : new ReportRunner(report);
             return {
               report: name,
               category: r.config.group,
@@ -93,7 +95,9 @@ export default class DoReport extends SgCommand {
 
     const definition = sg.config.reports?.[args.report ?? ''];
     const report =
-      definition instanceof ReportRunner ? definition : new ReportRunner(definition);
+      definition instanceof ReportRunner
+        ? definition
+        : new ReportRunner(definition);
 
     if (flags.filter) {
       const filters: AqFilter[] = [];
@@ -110,11 +114,15 @@ export default class DoReport extends SgCommand {
     if (flags.name) report.config.name = flags.name;
     if (flags.path) report.config.settings.path = flags.path;
     for (const s of flags.setting ?? []) {
-      _.set(report.config.settings, s.split('=').shift() ?? '', s.split('=').pop() ?? true);
+      _.set(
+        report.config.settings,
+        s.split('=').shift() ?? '',
+        s.split('=').pop() ?? true,
+      );
     }
 
     if (flags.output === 'debug') {
-      this.ux.styledHeader('Report structure')
+      this.ux.styledHeader('Report structure');
       this.ux.styledJSON(report.config);
     } else {
       if (flags.output) report.config.settings.type = flags.output;
@@ -126,11 +134,17 @@ export default class DoReport extends SgCommand {
 
       this.ux.action.start('Running report');
       await report.run();
-      this.log(`Saved ${(report.status.files.length === 1) ? '1 report' : report.status.files.length + ' reports'}`);
-      report.status.files.map(file => this.log(`  ${file}`))
+      this.log(
+        `Saved ${
+          report.status.files.length === 1
+            ? '1 report'
+            : report.status.files.length + ' reports'
+        }`,
+      );
+      report.status.files.map(file => this.log(`  ${file}`));
 
       if (report.status.lastError) {
-        this.log('At least one error was encountered during processing:')
+        this.log('At least one error was encountered during processing:');
         this.log(report.status.lastError);
       }
     }

@@ -11,14 +11,14 @@ export class QueryFragments {
       pages_crawled: this.pages_crawled,
       pages_linked: this.pages_linked,
       urls_uncrawled: this.urls_uncrawled,
-      urls_redirected: this.urls_redirected
-    }
+      urls_redirected: this.urls_redirected,
+    };
   }
 
   /**
    * Returns a collection of Resources, each with the first URL request record that
-   * led to the resource. 
-   * 
+   * led to the resource.
+   *
    * @example Unfiltered return structure:
    * ```
    * [{
@@ -39,7 +39,7 @@ export class QueryFragments {
   static pages_crawled: AqQuery = {
     metadata: {
       category: 'partial',
-      description: "Crawled resources with URL and request data",
+      description: 'Crawled resources with URL and request data',
     },
     collection: 'resources',
     document: 'resource',
@@ -55,13 +55,13 @@ export class QueryFragments {
     ],
     filters: [
       { document: 'request', path: '_to', join: 'resource._id' },
-      { document: 'request', path: '_from', join: 'url._id' }
+      { document: 'request', path: '_from', join: 'url._id' },
     ],
   };
 
   /**
    * Returns a collection of Resources with URLs for all inbound and outbound links.
-   * 
+   *
    * @example Unfiltered return structure:
    * ```
    * [{
@@ -81,7 +81,7 @@ export class QueryFragments {
   static pages_linked: AqQuery = {
     metadata: {
       category: 'partial',
-      description: "Crawled resources with inlinks and outlinks",
+      description: 'Crawled resources with inlinks and outlinks',
     },
     collection: 'resources',
     document: 'resource',
@@ -105,7 +105,7 @@ export class QueryFragments {
                   filters: [{ path: '_id', join: 'lt._from' }],
                 },
               ],
-            }
+            },
           ],
           return: [{ path: 'url', document: 'source' }],
         },
@@ -122,7 +122,7 @@ export class QueryFragments {
               collection: 'unique_urls',
               document: 'target',
               filters: [{ path: '_id', join: 'lt._to' }],
-            }
+            },
           ],
           return: [{ path: 'url', document: 'target' }],
         },
@@ -140,7 +140,7 @@ export class QueryFragments {
   static urls_uncrawled: AqQuery = {
     metadata: {
       category: 'partial',
-      description: "URLs found but not yet visited",
+      description: 'URLs found but not yet visited',
     },
     collection: 'unique_urls',
     document: 'url',
@@ -194,7 +194,7 @@ export class QueryFragments {
   static urls_redirected: AqQuery = {
     metadata: {
       category: 'partial',
-      description: "Redirected URLs and received page data",
+      description: 'Redirected URLs and received page data',
     },
     collection: 'unique_urls',
     document: 'requested',
@@ -211,9 +211,14 @@ export class QueryFragments {
     filters: [
       { document: 'request', path: '_from', join: 'requested._id' },
       { document: 'request', path: '_to', join: 'received._id' },
-      { document: 'requested', path: 'parsed.href', eq: 'received.parsed.href', value: 'dynamic', negate: true },
+      {
+        document: 'requested',
+        path: 'parsed.href',
+        eq: 'received.parsed.href',
+        value: 'dynamic',
+        negate: true,
+      },
       { document: 'request', path: 'redirects', function: 'count', gt: 1 },
     ],
   };
 }
-

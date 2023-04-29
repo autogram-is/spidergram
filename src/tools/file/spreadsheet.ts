@@ -51,24 +51,19 @@ export class Spreadsheet {
 
   addSheet(input: unknown, name?: string) {
     if (isSimpleSheet(input)) {
-      utils.book_append_sheet(
-        this.workbook,
-        utils.json_to_sheet(input),
-        name,
-      );
+      utils.book_append_sheet(this.workbook, utils.json_to_sheet(input), name);
     } else if (isStructuredSheet(input)) {
-      const data = (isJsonArray(input.data) && isJsonArray(input.data[0])) ?
-        utils.aoa_to_sheet(input.data as (JsonPrimitive | Date | undefined)[][]) :
-        utils.json_to_sheet(input.data, {
-          header: input.header,
-          skipHeader: input.skipHeader,
-        });
+      const data =
+        isJsonArray(input.data) && isJsonArray(input.data[0])
+          ? utils.aoa_to_sheet(
+              input.data as (JsonPrimitive | Date | undefined)[][],
+            )
+          : utils.json_to_sheet(input.data, {
+              header: input.header,
+              skipHeader: input.skipHeader,
+            });
 
-      utils.book_append_sheet(
-        this.workbook,
-        data,
-        input.name ?? name,
-      );
+      utils.book_append_sheet(this.workbook, data, input.name ?? name);
     } else {
       throw new TypeError(
         'Input must be a SimpleSheet array or StructuredSheet object',
@@ -108,10 +103,16 @@ export class Spreadsheet {
       ...customOptions,
     };
 
-    return write(this.workbook, { Props: this.workbook.Props, ...options, type: 'buffer' }) as Buffer;
+    return write(this.workbook, {
+      Props: this.workbook.Props,
+      ...options,
+      type: 'buffer',
+    }) as Buffer;
   }
 
   toStream(customOptions: Partial<SpreadsheetGenerateOptions> = {}): Readable {
-    return Readable.from(this.toBuffer({ Props: this.workbook.Props, ...customOptions }));
+    return Readable.from(
+      this.toBuffer({ Props: this.workbook.Props, ...customOptions }),
+    );
   }
 }

@@ -1,8 +1,4 @@
-import {
-  Entity,
-  Expose,
-  Transform
-} from './entity.js';
+import { Entity, Expose, Transform } from './entity.js';
 import { NamedEntity, NamedEntityConstructorOptions } from './named-entity.js';
 
 export interface SiteConstructorOptions extends NamedEntityConstructorOptions {
@@ -12,7 +8,7 @@ export interface SiteConstructorOptions extends NamedEntityConstructorOptions {
 
 export class Site extends NamedEntity {
   readonly _collection = 'sites';
-  
+
   /**
    * A list of URLs that can be used to access this site
    */
@@ -37,9 +33,7 @@ export class Site extends NamedEntity {
     const { urls, ...dataForSuper } = data;
     super(dataForSuper);
 
-    this.urls = new Set<string>(
-      [...(urls ?? []).map(u => u.toString())]
-    );
+    this.urls = new Set<string>([...(urls ?? []).map(u => u.toString())]);
   }
 }
 

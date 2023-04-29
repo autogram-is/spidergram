@@ -1,61 +1,75 @@
-import { Spidergram } from "../config/index.js";
-import { FileTools } from "../tools/index.js";
-import { BaseReportSettings, ReportConfig } from "./report-types.js";
-import { Properties, ColInfo, CellObject, CellStyle, ExcelDataType, NumberFormat, RowInfo } from "xlsx-js-style";
+import { Spidergram } from '../config/index.js';
+import { FileTools } from '../tools/index.js';
+import { BaseReportSettings, ReportConfig } from './report-types.js';
+import {
+  Properties,
+  ColInfo,
+  CellObject,
+  CellStyle,
+  ExcelDataType,
+  NumberFormat,
+  RowInfo,
+} from 'xlsx-js-style';
 import xlspkg from 'xlsx-js-style';
 const { utils } = xlspkg;
 
-import { ReportRunner } from "./report.js";
-import { JsonCollection, JsonMap, JsonPrimitive, isJsonArray, isJsonMap } from "@salesforce/ts-types";
-import { DateTime } from "luxon";
-import is from "@sindresorhus/is";
-import _ from "lodash";
+import { ReportRunner } from './report.js';
+import {
+  JsonCollection,
+  JsonMap,
+  JsonPrimitive,
+  isJsonArray,
+  isJsonMap,
+} from '@salesforce/ts-types';
+import { DateTime } from 'luxon';
+import is from '@sindresorhus/is';
+import _ from 'lodash';
 
 /**
  * Output options specific to workbook-style spreadsheet files
  */
 export type XlsReportSettings = BaseReportSettings & {
-  type: 'xlsx',
+  type: 'xlsx';
 
   /**
    * Internal metadata about the spreadsheet, usually displayed by a program's
    * "document information" command.
    */
-  metadata?: Properties
+  metadata?: Properties;
 
   /**
    * A dictionary of per-sheet configuration options. Each key corresponds to a key
    * in the report's `data` property; if it exists, the `default` entry will be used
    * as a fallback for sheets with no specific settings.
    */
-  sheets?: Record<string, SheetSettings | undefined>
+  sheets?: Record<string, SheetSettings | undefined>;
 };
 
 type SheetSettings = {
   /**
    * A human-friendly name for the sheet.
    */
-  name?: string,
+  name?: string;
 
   /**
    * A human-friendly description of the data on the sheet.
    */
-  description?: string,
+  description?: string;
 
   /**
    * An output template to use when generating the sheet.
-   * 
+   *
    * - table: A traditional columns/rows data sheet, with styled header
-   * - cover: An array of strings to turned into  
+   * - cover: An array of strings to turned into
    * - inspector: Key/Value pairs, optionally grouped under subheadings.
    */
-  template?: 'table' | 'cover' | 'inspector'
+  template?: 'table' | 'cover' | 'inspector';
 
   /**
    * Settings for individual columns. The settings in the 'default' entry will be
    * applied to all columns.
    */
-  columns?: Record<string, ColumnSettings>,
+  columns?: Record<string, ColumnSettings>;
 
   /**
    * Default styling information for all cells in the sheet
@@ -65,55 +79,55 @@ type SheetSettings = {
   /**
    * Additional style information for heading columns and rows.
    */
-  headingStyle?: CellStyle,
-}
+  headingStyle?: CellStyle;
+};
 
 type ColumnSettings = {
   /**
    * Override the text of the column's first row.
    */
-  title?: string,
+  title?: string;
 
   /**
    * Add a hover/tooltip comment to the column's first row.
    */
-  comment?: string,
+  comment?: string;
 
   /**
    * Hide the column from view; its data will still be present and usable in formulas.
    */
-  hidden?: boolean,
+  hidden?: boolean;
 
   /**
    * Adjust the column to the width of its widest row.
-   * 
+   *
    * @defaultValue true
    */
-  autoFit?: boolean,
+  autoFit?: boolean;
 
   /**
    * Hard-code the width of the column. This measurement is in 'approxomate characters,' not pixels.
    */
-  width?: number,
+  width?: number;
 
   /**
    * The max width for the column. This measurement is in 'approxomate characters,' not pixels.
-   * 
+   *
    * @defaultValue 80
    */
-  maxWidth?: number,
+  maxWidth?: number;
 
   /**
    * The minimum width for the column. This measurement is in 'approxomate characters,' not pixels.
-   * 
+   *
    * @defaultValue 5
    */
-  minWidth?: number,
+  minWidth?: number;
 
   /**
    * Wrap the contents of this column rather than truncating or overflowing.
    */
-  wrap?: boolean
+  wrap?: boolean;
 
   /**
    * If the column is populated and wrapping is turned on, its Row's height should
@@ -123,19 +137,19 @@ type ColumnSettings = {
 
   /**
    * Override data type auto-detection. Possible values:
-   * 
+   *
    * - "b": boolean
    * - "n": number
    * - "s": string
    * - "d": date
    */
-  type?: ExcelDataType,
+  type?: ExcelDataType;
 
   /**
    * If the data type is set to 'n' or 'd', this format will be used used by Excel
    * when displaying the data. it does not change the underlying cell value.
    */
-  format?: NumberFormat,
+  format?: NumberFormat;
 
   /**
    * Attempt to parse and/or coerce the column's data before creating the sheet.
@@ -143,9 +157,8 @@ type ColumnSettings = {
    * and 'parse' to 'true' means Spidergram will ATTEMPT to turn timestamps, ISO dates,
    * and more into "clean" dates.
    */
-  parse?: boolean,
-}
-
+  parse?: boolean;
+};
 
 /**
  * Default fallback settings for a sheet. Incoming values are merged with these settings.
@@ -157,17 +170,20 @@ const sheetDefaults: SheetSettings = {
     alignment: {
       vertical: 'top',
       horizontal: 'left',
-    }
+    },
   },
   columns: {
     default: {
       autoFit: true,
-      maxWidth: 80
-    }
-  }
-}
+      maxWidth: 80,
+    },
+  },
+};
 
-export async function outputXlsxReport(config: ReportConfig, runner: ReportRunner): Promise<void> {
+export async function outputXlsxReport(
+  config: ReportConfig,
+  runner: ReportRunner,
+): Promise<void> {
   const sg = await Spidergram.load();
 
   const datasets = config.data ?? {};
@@ -181,9 +197,12 @@ export async function outputXlsxReport(config: ReportConfig, runner: ReportRunne
 
   for (const [name, data] of Object.entries(datasets)) {
     if (data.length === 0 && !settings.includeEmptyResults) continue;
-    const sheetSettings = _.defaultsDeep(settings.sheets[name] || settings.sheets.default, sheetDefaults);
+    const sheetSettings = _.defaultsDeep(
+      settings.sheets[name] || settings.sheets.default,
+      sheetDefaults,
+    );
 
-    switch (sheetSettings.template) { 
+    switch (sheetSettings.template) {
       case 'table':
         buildTabularSheet(name, data, sheetSettings, rpt);
         break;
@@ -199,7 +218,14 @@ export async function outputXlsxReport(config: ReportConfig, runner: ReportRunne
 
   await sg
     .files('output')
-    .write(curFilePath, rpt.toBuffer({ cellStyles: true, Props: settings.metadata, compression: true }))
+    .write(
+      curFilePath,
+      rpt.toBuffer({
+        cellStyles: true,
+        Props: settings.metadata,
+        compression: true,
+      }),
+    )
     .then(() => {
       runner.status.finished++;
       runner.status.files.push(curFilePath);
@@ -208,7 +234,12 @@ export async function outputXlsxReport(config: ReportConfig, runner: ReportRunne
   return Promise.resolve();
 }
 
-function buildTabularSheet(name: string, data: JsonCollection, settings: SheetSettings, rpt: FileTools.Spreadsheet) {
+function buildTabularSheet(
+  name: string,
+  data: JsonCollection,
+  settings: SheetSettings,
+  rpt: FileTools.Spreadsheet,
+) {
   if (!isJsonArray(data) || !isJsonMap(data[0])) {
     // We can only work with arrays of maps here; in the future we might be able to
     // expand it to deal with other stuff.
@@ -226,28 +257,32 @@ function buildTabularSheet(name: string, data: JsonCollection, settings: SheetSe
 
   settings.columns ??= {};
 
-  if (sheet["!ref"]) {
-    const range = utils.decode_range(sheet["!ref"]);
-    const dense = sheet["!data"];
+  if (sheet['!ref']) {
+    const range = utils.decode_range(sheet['!ref']);
+    const dense = sheet['!data'];
 
     const colSettings: ColumnSettings[] = [];
     for (const c of Object.keys(firstRow)) {
       colSettings.push({
         ...settings.columns[c],
-        ...settings.columns['default']
+        ...settings.columns['default'],
       });
     }
 
-    for(let R = 0; R <= range.e.r; ++R) {
+    for (let R = 0; R <= range.e.r; ++R) {
       const ri: RowInfo = {};
-      for(let C = 0; C <= range.e.c; ++C) {
-        const cell: CellObject = dense ? sheet["!data"]?.[R]?.[C] : sheet[utils.encode_cell({r:R, c:C})];
+      for (let C = 0; C <= range.e.c; ++C) {
+        const cell: CellObject = dense
+          ? sheet['!data']?.[R]?.[C]
+          : sheet[utils.encode_cell({ r: R, c: C })];
         const cs = colSettings[C];
-  
+
         cell.s = settings.style;
 
         if (R === 0) {
-          if (cs.comment) { cell.c = [{ t: cs.comment }] }
+          if (cs.comment) {
+            cell.c = [{ t: cs.comment }];
+          }
           if (cs.title) cell.v = cs.title;
           if (settings.headingStyle) {
             cell.s = { ...cell.s, ...settings.headingStyle };
@@ -270,22 +305,27 @@ function buildTabularSheet(name: string, data: JsonCollection, settings: SheetSe
     }
 
     for (const cs of colSettings) {
-      cs.width = Math.min(cs.maxWidth ?? 120, cs.width ?? 5)
-      cs.width = Math.max(cs.minWidth ?? 5, cs.width)
+      cs.width = Math.min(cs.maxWidth ?? 120, cs.width ?? 5);
+      cs.width = Math.max(cs.minWidth ?? 5, cs.width);
       colInfo.push({
         wch: cs.width,
         hidden: cs.hidden,
-      })
+      });
     }
 
-    sheet["!cols"] = colInfo;
-    sheet["!rows"] = rowInfo;
+    sheet['!cols'] = colInfo;
+    sheet['!rows'] = rowInfo;
   }
 }
 
-function buildInspectorSheet(name: string, input: JsonCollection, settings: SheetSettings, rpt: FileTools.Spreadsheet) {
+function buildInspectorSheet(
+  name: string,
+  input: JsonCollection,
+  settings: SheetSettings,
+  rpt: FileTools.Spreadsheet,
+) {
   const cells: JsonPrimitive[][] = [];
-  const data = (isJsonArray(input)) ? input[0] : input;
+  const data = isJsonArray(input) ? input[0] : input;
   if (!isJsonMap(data)) {
     return;
   }
@@ -297,18 +337,20 @@ function buildInspectorSheet(name: string, input: JsonCollection, settings: Shee
   // Now go through and align everything
   const sheet = rpt.workbook.Sheets[displayName];
 
-  if (sheet["!ref"]) {
-    const range = utils.decode_range(sheet["!ref"]);
-    const dense = sheet["!data"];
+  if (sheet['!ref']) {
+    const range = utils.decode_range(sheet['!ref']);
+    const dense = sheet['!data'];
     const rowInfo: RowInfo[] = [];
 
-    for(let R = 0; R <= range.e.r; ++R) {
+    for (let R = 0; R <= range.e.r; ++R) {
       const ri: RowInfo = {};
-      for(let C = 0; C <= range.e.c; ++C) {
-        const cell: CellObject = dense ? sheet["!data"]?.[R]?.[C] : sheet[utils.encode_cell({r:R, c:C})];
+      for (let C = 0; C <= range.e.c; ++C) {
+        const cell: CellObject = dense
+          ? sheet['!data']?.[R]?.[C]
+          : sheet[utils.encode_cell({ r: R, c: C })];
         if (!cell) continue;
         const cs = settings.columns?.[cell.v?.toString() ?? 'default'] ?? {};
-  
+
         cell.s = settings.style;
 
         if (C === 0) {
@@ -327,7 +369,9 @@ function buildInspectorSheet(name: string, input: JsonCollection, settings: Shee
             const maxHeight = 10;
             const ptSize = 12;
             cell.s = { alignment: { wrapText: true } };
-            const lines = Math.floor((cell.v?.toLocaleString().length ?? 0) / (cs.width ?? 80));
+            const lines = Math.floor(
+              (cell.v?.toLocaleString().length ?? 0) / (cs.width ?? 80),
+            );
             ri.hpt = ptSize * Math.min(maxHeight, lines);
           }
         }
@@ -335,41 +379,44 @@ function buildInspectorSheet(name: string, input: JsonCollection, settings: Shee
       rowInfo.push(ri);
     }
 
-    sheet["!cols"] = [{ wch: 20 }, { wch: 80 }];
-    sheet["!rows"] = rowInfo;
+    sheet['!cols'] = [{ wch: 20 }, { wch: 80 }];
+    sheet['!rows'] = rowInfo;
   }
 }
 
 function objectToArray(data: JsonMap, cells: JsonPrimitive[][]) {
   for (const [key, value] of Object.entries(data)) {
-
     if (isJsonArray(value)) {
       const rs = [...value];
       cells.push([key, rs.shift()?.toString() ?? null]);
       while (rs.length) {
         cells.push(['', rs.shift()?.toString() ?? null]);
       }
-
     } else if (isJsonMap(value)) {
       cells.push(['', '']);
       cells.push([key, '']);
       objectToArray(value, cells);
-    }
-    else if (is.string(value)) {
+    } else if (is.string(value)) {
       cells.push([key, value.slice(0, 30_000)]);
-    }
-    else {
-      cells.push([key, value ?? null])
+    } else {
+      cells.push([key, value ?? null]);
     }
   }
 }
 
-function buildCoverSheet(name: string, data: JsonCollection, settings: SheetSettings, rpt: FileTools.Spreadsheet) {
+function buildCoverSheet(
+  name: string,
+  data: JsonCollection,
+  settings: SheetSettings,
+  rpt: FileTools.Spreadsheet,
+) {
   // Not yet implemented
   console.log(name, data, settings, rpt);
 }
 
-function desperatelyAttemptToParseDate(input: string | number | boolean | Date | undefined) {
+function desperatelyAttemptToParseDate(
+  input: string | number | boolean | Date | undefined,
+) {
   let value = input;
   if (is.numericString(value)) {
     value = Number.parseInt(value);

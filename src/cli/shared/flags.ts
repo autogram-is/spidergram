@@ -94,7 +94,7 @@ export const analysisFlags = {
     char: 'r',
     summary: 'Reprocess already-analyzed pages',
     allowNo: true,
-    default: false
+    default: false,
   }),
   site: Flags.boolean({
     char: 's',

@@ -4,10 +4,11 @@ import {
   Entity,
   Reference,
   Resource,
-  Pattern
+  Pattern,
 } from '../index.js';
 
-export interface AppearsOnConstructorOptions extends RelationshipConstructorOptions<Pattern, Resource> {
+export interface AppearsOnConstructorOptions
+  extends RelationshipConstructorOptions<Pattern, Resource> {
   page?: Reference<Resource>;
   pattern?: Reference<Pattern>;
 }

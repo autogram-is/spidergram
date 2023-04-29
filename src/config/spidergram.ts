@@ -16,7 +16,14 @@ import is from '@sindresorhus/is';
 import _ from 'lodash';
 
 import * as defaults from './defaults.js';
-import { ArangoStore, Query, QueryFragments, QueryInput, ReportConfig, Resource } from '../index.js';
+import {
+  ArangoStore,
+  Query,
+  QueryFragments,
+  QueryInput,
+  ReportConfig,
+  Resource,
+} from '../index.js';
 import { globalNormalizer } from './global-normalizer.js';
 import { SpidergramConfig } from './spidergram-config.js';
 import { setTimeout } from 'timers/promises';
@@ -154,7 +161,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     if (this._loadedConfig?.value.finalizer) {
       await this._loadedConfig?.value.finalizer(this);
     }
-  
+
     this._initializing = false;
     this._needsInit = false;
     return Promise.resolve(this);
@@ -363,22 +370,22 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
         group: 'builtin',
         description: 'Summary of pages, downloadable media, and errors',
         settings: {
-          type: 'xlsx'
+          type: 'xlsx',
         },
         queries: {
-          'Overview': 'summary',
+          Overview: 'summary',
           'Crawled Pages': 'pages',
-          'Downloads': 'media',
-          'Errors': 'errors'
-        }
-      }
-    }
+          Downloads: 'media',
+          Errors: 'errors',
+        },
+      },
+    };
 
     this._activeConfig.reports ??= {};
     this._activeConfig.reports = {
       ...reports,
-      ...this._activeConfig.reports
-    }
+      ...this._activeConfig.reports,
+    };
   }
 
   buildDefaultQueries() {
@@ -390,7 +397,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
         .collect('content', 'mime')
         .collect('status', 'code')
         .sortBy('site', 'asc'),
-    
+
       pages: new Query(QueryFragments.pages_linked)
         .category('builtin')
         .description('Successfully crawled HTML pages')
@@ -401,32 +408,57 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
         .return('path', 'parsed.pathname')
         .return('title', 'data.title')
         .return('words', 'content.readability.words')
-        .return({ document: false, name: 'Inlinks', path: 'inlinks', function: 'length' })
-        .return({ document: false, name: 'Outlinks', path: 'outlinks', function: 'length' }),
-    
+        .return({
+          document: false,
+          name: 'Inlinks',
+          path: 'inlinks',
+          function: 'length',
+        })
+        .return({
+          document: false,
+          name: 'Outlinks',
+          path: 'outlinks',
+          function: 'length',
+        }),
+
       media: new Query(QueryFragments.pages_linked)
         .category('builtin')
         .description('Successfully crawled non-HTML content')
         .filterBy('code', 200)
-        .filterBy({ path: 'mime', eq: 'text/html', negate: true})
+        .filterBy({ path: 'mime', eq: 'text/html', negate: true })
         .sortBy('url', 'asc')
         .return('site', 'parsed.hostname')
         .return('path', 'parsed.pathname')
         .return('type', 'mime')
         .return('size', 'size')
-        .return({ document: false, name: 'Inlinks', path: 'inlinks', function: 'length' }),
+        .return({
+          document: false,
+          name: 'Inlinks',
+          path: 'inlinks',
+          function: 'length',
+        }),
 
       errors: new Query(QueryFragments.pages_linked)
         .category('builtin')
         .description('Errors encountered while crawling')
         .filterBy({ path: 'code', eq: 200, negate: true })
-        .sortBy({ document: false, path: 'inlinks', function: 'length', direction: 'desc' })
+        .sortBy({
+          document: false,
+          path: 'inlinks',
+          function: 'length',
+          direction: 'desc',
+        })
         .return('site', 'parsed.hostname')
         .return('path', 'parsed.pathname')
         .return('status', 'code')
         .return('message', 'message')
-        .return({ document: false, name: 'Inlinks', path: 'inlinks', function: 'length' }),
-  
+        .return({
+          document: false,
+          name: 'Inlinks',
+          path: 'inlinks',
+          function: 'length',
+        }),
+
       network: new Query({
         collection: 'resources',
         subqueries: [
@@ -438,20 +470,30 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
           { path: '_id', join: 'lt._from' },
           { document: 'lt', path: '_to', join: 'rw._from' },
           { document: 'rw', path: '_to', join: 'target._id' },
-          { path: 'parsed.hostname', eq: 'target.parsed.hostname', negate: true, value: 'dynamic' }
+          {
+            path: 'parsed.hostname',
+            eq: 'target.parsed.hostname',
+            negate: true,
+            value: 'dynamic',
+          },
         ],
         aggregates: [
           { name: 'source', path: 'parsed.hostname', function: 'collect' },
-          { name: 'destination', document: 'target', path: 'parsed.hostname', function: 'collect' },
+          {
+            name: 'destination',
+            document: 'target',
+            path: 'parsed.hostname',
+            function: 'collect',
+          },
         ],
-        count: 'strength'
-      })
+        count: 'strength',
+      }),
     };
 
     this._activeConfig.queries ??= {};
     this._activeConfig.queries = {
       ...queries,
-      ...this._activeConfig.queries
-    }
+      ...this._activeConfig.queries,
+    };
   }
 }

@@ -1,6 +1,18 @@
-import { Spidergram, Resource, HtmlTools, BrowserTools, EnqueueUrlOptions } from '../../index.js';
+import {
+  Spidergram,
+  Resource,
+  HtmlTools,
+  BrowserTools,
+  EnqueueUrlOptions,
+} from '../../index.js';
 import { rebuildResourceLinks } from './rebuild-resource-links.js';
-import { PageDataOptions, PageContentOptions, PatternDefinition, findAndSavePagePatterns, ConditionalPatternGroup } from '../html/index.js';
+import {
+  PageDataOptions,
+  PageContentOptions,
+  PatternDefinition,
+  findAndSavePagePatterns,
+  ConditionalPatternGroup,
+} from '../html/index.js';
 import { TechAuditOptions } from '../browser/index.js';
 import { PropertyMap, mapProperties } from '../map-properties.js';
 import _ from 'lodash';
@@ -37,8 +49,8 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
   /**
    * One or more {@link PropertyMap<Resource>} rules that determine what {@link Site}
    * the {@link Resource} belongs to.
-   * 
-   * The value here corresponds to the unique key of a {@link Site}; 
+   *
+   * The value here corresponds to the unique key of a {@link Site};
    */
   site?: PropertyMap<Resource> | PropertyMap<Resource>[] | false;
 
@@ -67,11 +79,11 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
   /**
    * A dictionary used to map existing data on a {@link Resource} to new properties.
    * If this property is set to `false`, property mapping is skipped entirely.
-   * 
+   *
    * The key of each entry is the destination name or dot-notation path of a property
    * Resource, and the value of each entry is one or more {@link PropertyMap<Resource>}
    * rules describing where the new property's value should be found.
-   * 
+   *
    * If an array is given, the individual {@link PropertyMap<Resource>} records will be
    * checked in order; the first one to produce a value will be used. If no value is
    * produced, the destination property will remain undefined.

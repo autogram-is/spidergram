@@ -1,10 +1,8 @@
-import {
-  Entity,
-  EntityConstructorOptions,
-} from './entity.js';
+import { Entity, EntityConstructorOptions } from './entity.js';
 import { sanitizeKey } from '../index.js';
 
-export interface NamedEntityConstructorOptions extends EntityConstructorOptions {
+export interface NamedEntityConstructorOptions
+  extends EntityConstructorOptions {
   key?: string;
   name?: string;
   description?: string;
@@ -21,7 +19,7 @@ export abstract class NamedEntity extends Entity {
   constructor(data: NamedEntityConstructorOptions = {}) {
     const { key, name, description, ...dataForSuper } = data;
     super(dataForSuper);
-    
+
     // We should test for missing key/name, but things get squirrelly during
     // serialization (IE, the incoming value is actaully '_key')
 

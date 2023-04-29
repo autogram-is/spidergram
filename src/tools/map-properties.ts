@@ -12,7 +12,10 @@ import is from '@sindresorhus/is';
  *   transformation rules
  * - a function that accepts the object and returns a property value or `undefined`
  */
-export type PropertyMap<T = unknown> = string | PropertyMapRule | ((input: T) => unknown);
+export type PropertyMap<T = unknown> =
+  | string
+  | PropertyMapRule
+  | ((input: T) => unknown);
 
 /**
  * Describes the location of a piece of data on a source object.
@@ -33,12 +36,12 @@ export interface PropertyMapRule extends Record<string, unknown> {
   /**
    * If a selector is used, return the number of matches rather than the content.
    */
-  count?: boolean
-  
+  count?: boolean;
+
   /**
-   * If a selector is used, return the value of an attribute rather than the element text. 
+   * If a selector is used, return the value of an attribute rather than the element text.
    */
-  attribute?: string
+  attribute?: string;
 
   /**
    * If the property value is found and is an array, limit the number of results
@@ -133,9 +136,9 @@ export interface PropertyMapRule extends Record<string, unknown> {
 
 export function mapProperties(
   obj: object,
-  map: Record<string, PropertyMap | PropertyMap[]>
+  map: Record<string, PropertyMap | PropertyMap[]>,
 ) {
-  const domDictionary: Record<string, cheerio.Root> = {}
+  const domDictionary: Record<string, cheerio.Root> = {};
 
   for (const [prop, rule] of Object.entries(map)) {
     _.set(obj, prop, findPropertyValue(obj, rule, domDictionary));
@@ -153,7 +156,7 @@ export function mapProperties(
 export function findPropertyValue<T = object>(
   object: T,
   locations: PropertyMap<T> | PropertyMap<T>[],
-  domDictionary: Record<string, cheerio.Root> = {}
+  domDictionary: Record<string, cheerio.Root> = {},
 ): unknown | undefined {
   const sources = Array.isArray(locations) ? locations : [locations];
   for (const source of sources) {
@@ -175,13 +178,12 @@ export function findPropertyValue<T = object>(
             v = matches.length;
           } else {
             if (matches.length > 0) {
-              v = matches
-                .slice(0, source.limit)
-                .map(e => {
-                  if (source.attribute) return $(e).attr(source.attribute)?.trim();
-                  else return $(e).text().trim();
-                });
-              v = (source.join || v.length === 1) ? v.join(source.join) : v;
+              v = matches.slice(0, source.limit).map(e => {
+                if (source.attribute)
+                  return $(e).attr(source.attribute)?.trim();
+                else return $(e).text().trim();
+              });
+              v = source.join || v.length === 1 ? v.join(source.join) : v;
               if (v?.length === 0) v = undefined;
             } else {
               v = undefined;
@@ -194,8 +196,7 @@ export function findPropertyValue<T = object>(
         if (undef(v, source)) {
           if (source.fallback) return source.fallback;
           return undefined;
-        }
-        else return v;
+        } else return v;
       }
     }
   }
@@ -278,13 +279,15 @@ function checkPropertyValue(
 function undef(value: unknown, rules?: PropertyMapRule): value is undefined {
   const nok = rules?.acceptNull ?? false;
   const eok = rules?.acceptEmpty ?? false;
-  
-  if (value === undefined ||
+
+  if (
+    value === undefined ||
     (value === null && !nok) ||
     (is.emptyArray(value) && !eok) ||
-    (is.emptyString(value) && !eok) || 
+    (is.emptyString(value) && !eok) ||
     (is.emptyObject(value) && !eok)
-  ) return true;
+  )
+    return true;
   return false;
 }
 

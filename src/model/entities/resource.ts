@@ -99,7 +99,7 @@ export class Resource extends Entity {
 
     if (site) {
       this.site = Entity.idFromReference(site);
-    }    
+    }
 
     this.message = message ?? '';
     this.headers = headers ?? {};

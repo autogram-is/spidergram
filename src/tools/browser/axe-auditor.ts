@@ -123,10 +123,14 @@ export class AxeAuditor {
     };
 
     if (page.isClosed()) {
-      return Promise.resolve({ error: new SpidergramError('Page was closed before action') });
+      return Promise.resolve({
+        error: new SpidergramError('Page was closed before action'),
+      });
     }
 
-    const kv = await KeyValueStore.open(typeof opt.save === 'string' ? opt.save : 'axe_audits');
+    const kv = await KeyValueStore.open(
+      typeof opt.save === 'string' ? opt.save : 'axe_audits',
+    );
 
     return AxeAuditor.run(page)
       .then(results => {

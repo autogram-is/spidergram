@@ -1,7 +1,15 @@
 import { UrlMutators, ParsedUrl } from '@autogram/url-tools';
 import minimatch from 'minimatch';
 
-type urlStringProps = 'protocol' | 'subdomain' | 'domain' | 'host' | 'hostname' | 'pathname' | 'search' | 'hash';
+type urlStringProps =
+  | 'protocol'
+  | 'subdomain'
+  | 'domain'
+  | 'host'
+  | 'hostname'
+  | 'pathname'
+  | 'search'
+  | 'hash';
 
 export interface NormalizerOptions {
   /**
@@ -79,11 +87,13 @@ export function globalNormalizer(
   if (opts.forceLowercase) {
     if (opts.forceLowercase === true) {
       url.href = url.href.toLocaleLowerCase();
-    }
-    else {
-      const props = Array.isArray(opts.forceLowercase) ? opts.forceLowercase : [opts.forceLowercase];
+    } else {
+      const props = Array.isArray(opts.forceLowercase)
+        ? opts.forceLowercase
+        : [opts.forceLowercase];
       for (const prop of props) {
-        url[prop as urlStringProps] = url[prop as urlStringProps].toLocaleLowerCase();
+        url[prop as urlStringProps] =
+          url[prop as urlStringProps].toLocaleLowerCase();
       }
     }
   }

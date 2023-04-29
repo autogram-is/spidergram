@@ -1,4 +1,10 @@
-import { ChildQuery, Spidergram, addToParentQuery, buildQueryWithParents, isChildQuery } from '../../index.js';
+import {
+  ChildQuery,
+  Spidergram,
+  addToParentQuery,
+  buildQueryWithParents,
+  isChildQuery,
+} from '../../index.js';
 import { QueryOptions } from 'arangojs/database.js';
 import {
   GeneratedAqlQuery,
@@ -25,8 +31,9 @@ export class Query extends AqBuilder {
     }
 
     if (isChildQuery(input)) {
-      const modified = await(buildQueryWithParents(input))
-        .then(q => q ? addToParentQuery(q, input as ChildQuery) : undefined);
+      const modified = await buildQueryWithParents(input).then(q =>
+        q ? addToParentQuery(q, input as ChildQuery) : undefined,
+      );
       if (modified) aq = modified;
     } else if (typeof input === 'string') {
       aq = aql`${literal(input)}`;
@@ -43,7 +50,10 @@ export class Query extends AqBuilder {
       .then(db => db.query<T>(aq, options).then(cursor => cursor.all()));
   }
 
-  constructor(input: string | ArangoCollection | AqStrict | AqQuery, document?: string) {
+  constructor(
+    input: string | ArangoCollection | AqStrict | AqQuery,
+    document?: string,
+  ) {
     // This avoids unpleasant situations where a base query spec is modified,
     // each time it's used, affecting all of the other queries based on it.
     if (isAqQuery(input)) {

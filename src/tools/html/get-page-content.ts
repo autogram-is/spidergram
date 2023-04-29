@@ -96,12 +96,10 @@ export async function getPageContent(
       ? options.selector
       : [options.selector];
     const $ = getCheerio(input);
-    markup = selectors.reduce(
-      (html, selector) => {
-        if (html.length === 0) html = $(selector).html() ?? '';
-        return html;
-      }, ''
-    );
+    markup = selectors.reduce((html, selector) => {
+      if (html.length === 0) html = $(selector).html() ?? '';
+      return html;
+    }, '');
   } else {
     markup = getMarkup(input);
   }

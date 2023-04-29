@@ -1,11 +1,6 @@
 import { Flags, Args } from '@oclif/core';
 import { LogLevel } from 'crawlee';
-import {
-  Spidergram,
-  Spider,
-  EntityQuery,
-  UniqueUrl,
-} from '../../index.js';
+import { Spidergram, Spider, EntityQuery, UniqueUrl } from '../../index.js';
 import { QueryFragments } from '../../model/queries/query-fragments.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
 import { filterUrl } from '../../tools/urls/filter-url.js';
@@ -44,10 +39,12 @@ export default class Crawl extends SgCommand {
     const sg = await Spidergram.load();
     const { argv: urls, flags } = await this.parse(Crawl);
 
-    const crawlTargets = [...sg.config.spider?.seed ?? [], ...urls ?? []];
+    const crawlTargets = [...(sg.config.spider?.seed ?? []), ...(urls ?? [])];
 
     if (crawlTargets.length == 0) {
-      this.error('Crawl URLs must be provided via the command line, or via the configuration file.');
+      this.error(
+        'Crawl URLs must be provided via the command line, or via the configuration file.',
+      );
     }
 
     if (flags.verbose) {

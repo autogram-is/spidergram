@@ -310,19 +310,28 @@ export class ArangoStore {
 }
 
 type validDelimiter = '-' | '_' | '.';
-export function sanitizeDbName(input: string, delimiter: validDelimiter = NAME_SEPARATOR): string {
+export function sanitizeDbName(
+  input: string,
+  delimiter: validDelimiter = NAME_SEPARATOR,
+): string {
   return input
     .replaceAll(INVALID_COLLECTION_CHARS_REGEX, delimiter)
     .replaceAll(/-+/g, delimiter);
 }
 
-export function sanitizeCollectionName(input: string, delimiter: validDelimiter = NAME_SEPARATOR): string {
+export function sanitizeCollectionName(
+  input: string,
+  delimiter: validDelimiter = NAME_SEPARATOR,
+): string {
   return input
     .replaceAll(INVALID_COLLECTION_CHARS_REGEX, delimiter)
     .replaceAll(/-+/g, delimiter);
 }
 
-export function sanitizeKey(input: string, delimiter: validDelimiter = NAME_SEPARATOR): string {
+export function sanitizeKey(
+  input: string,
+  delimiter: validDelimiter = NAME_SEPARATOR,
+): string {
   return input
     .replaceAll(INVALID_KEY_CHARS_REGEX, delimiter)
     .replaceAll(/-+/g, delimiter);

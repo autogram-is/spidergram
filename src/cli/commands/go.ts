@@ -33,10 +33,15 @@ export default class Go extends SgCommand {
     const sg = await Spidergram.load();
     const { argv: urls, flags } = await this.parse(Go);
 
-    const crawlTargets: string[] = [...sg.config.spider?.seed ?? [], ...urls ?? []];
+    const crawlTargets: string[] = [
+      ...(sg.config.spider?.seed ?? []),
+      ...(urls ?? []),
+    ];
 
     if (crawlTargets.length == 0) {
-      this.error('Crawl URLs must be provided via the command line, or via the configuration file.');
+      this.error(
+        'Crawl URLs must be provided via the command line, or via the configuration file.',
+      );
     }
 
     if (flags.erase) {
@@ -84,8 +89,14 @@ export default class Go extends SgCommand {
 
       this.ux.action.start('Crawl reports');
       await r.run();
-      this.log(`Saved ${(r.status.files.length === 1) ? '1 report' : r.status.files.length + ' reports'}`);
-      r.status.files.map(file => this.log(`  ${file}`))
+      this.log(
+        `Saved ${
+          r.status.files.length === 1
+            ? '1 report'
+            : r.status.files.length + ' reports'
+        }`,
+      );
+      r.status.files.map(file => this.log(`  ${file}`));
     }
 
     // We should perform some kin of wrapup step here.
