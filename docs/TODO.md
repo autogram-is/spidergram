@@ -6,11 +6,13 @@ Spidergram is currently "under active development," which is a nice way of sayin
 
 Moving forward, our plans include:
 
-- Additional documentation
-- Additional example project templates
-  - [x] Site-specific content extraction and auditing
-  - [x] Pattern analysis to audit design system usage across sites
-  - [ ] Path traversal to identify hard-to-find content
+- Configuration
+  - [ ] Sample configuration files for common crawling scenarios
+  - [ ] Eleventy-style configuration manager with explicit getters and setters
+  - [ ] Cleaner API-based access to configuration manager options
+  - [ ] Standardized setup of plugins/callbacks/handlers via configuration manager
+  - [ ] A 'tasks' construct to encapsulate custom import/export/analysis processes beyond reporting
+  - [ ] Convert `spidergram go` to a custom task
 - Reusable helpers and utilities for common analysis tasks
   - [x] Query-builder helpers for common reports
   - [x] CMS detection helper functions
