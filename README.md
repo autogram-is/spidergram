@@ -12,9 +12,8 @@ Spidergram is a customizable toolkit for crawling and analyzing complicated web 
 
 - Once you have Spidergram installed, `cd` to the directory where'd you'd like to store crawl data (temp files, downloads, generated reports, etc).
 - Run `spidergram status` to ensure it can find your ArangoDB server.
-- Run `spidergram go https://some-web-site.biz` and watch the progress bar go; once it's complete it will analyze every page and generate a summary report.
-
-The `spidergram go` command is a wrapper around three other commands: `spidergram crawl`, `spidergram analyze`, and `spidergram report`. You can use them to run each step in the process independently. For example, to re-run the crawl with different options, you can use the command `spidergram crawl --erase https://some-web-site.biz`. It will clear the database and start from scratch. You can aso enter additional URLs (or run the `crawl` command multiple times without the `--erase` flag) to combine multiple domains into a single crawl.
+- Run `spidergram go https://some-web-site.biz` (or any number of URLs you'd like to treat as a single crawl). Watch the progress bar go; once it's complete it will analyze every page and generate a summary report.
+- To re-run the crawl with different options, run `spidergram go` with the `--erase` flag. You can also use the subcommands `spidergram crawl`, `spidergram analyze`, and `spidergram report` to perform each step individually.
 
 The [CLI Documentation](docs/CLI.md) includes additional details about Spidergram's subcommands and options. You can build custom reports, inspect individual URLs before crawling them, generate tree diagrams representing URL structures, and more.
 
