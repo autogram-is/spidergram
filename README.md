@@ -13,7 +13,25 @@ Spidergram is a customizable toolkit for crawling and analyzing complicated web 
 - Once you have Spidergram installed, `cd` to the directory where'd you'd like to store crawl data (temp files, downloads, generated reports, etc).
 - Run `spidergram status` to ensure it can find your ArangoDB server.
 - Run `spidergram go https://some-web-site.biz` (or any number of URLs you'd like to treat as a single crawl). Watch the progress bar go; once it's complete it will analyze every page and generate a summary report.
-- To re-run the crawl with different options, run `spidergram go` with the `--erase` flag. You can also use the subcommands `spidergram crawl`, `spidergram analyze`, and `spidergram report` to perform each step individually.
+
+```bash
+❯ spidergram status
+
+SPIDERGRAM CONFIG
+Config file: /Users/jeff/my-crawl/spidergram.config.json
+
+ARANGODB
+Status:   online
+URL:      http://127.0.0.1:8529
+Database: spidergram
+
+❯ spidergram go https://my-website.biz
+
+Crawling URLs
+███████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 26% | ETA: 1214s | 227/858
+```
+
+To re-run the crawl with different options, run `spidergram go` with the `--erase` flag. You can also use the subcommands `spidergram crawl`, `spidergram analyze`, and `spidergram report` to perform each step individually.
 
 The [CLI Documentation](docs/CLI.md) includes additional details about Spidergram's subcommands and options. You can build custom reports, inspect individual URLs before crawling them, generate tree diagrams representing URL structures, and more.
 
@@ -23,13 +41,12 @@ To build your own custom NodeJS crawling and analysis tool on top of Spidergram'
 
 ## Why this thing?
 
-Large-scale inventory and analysis of web content is kind of hellish. Most automated tools are focused on SEO, and treat spreadsheets as a dense storage medium rather than a presentation tool. On the other hand, most programmer-friendly web scraping toolkits are built to automate web APIs or extract specific bits of data from others' web sites. (Grabbing a list of every product in an Amazon category, extracting job listings, etc.)
+Large-scale inventory and analysis of web content is kind of hellish. Most automated tools are focused on SEO, and treat spreadsheets as a dense storage medium rather than a tool to present specific views of the data. On the other hand, the programmer-friendly customizable web scraping toolkits are usually built to automate web APIs or extract specific targeted bits of data from others peoples' web sites. (Grabbing a list of every product in an Amazon category, extracting job listings, etc.)
 
 [Autogram](https://autogram.is) often works with companies that are trying to get a handle on their own huge web ecosystems. We needed:
 
-- Simple exploratory spidering, *and* complex conditional rules for normalizing and traversing large multi-site content ecosystems.
-- Configuration-based transformation and mapping of page data to eliminate as much grunt work as possible when categorizing and organizing raw crawl output.
-- The ability to preserve complex relationships between each page, the sub-page elements like design patterns that appear across all the sites, *and* layers of third-party data like client spreadsheets, CMS exports, analytics APIs, etc.
-- A solid framework for iterative analysis of that multi-layered data, not just a million-row spreadsheet and two weeks with Excel.
+- Simple exploratory spidering, with complex conditional rules for normalizing urls and traversing multiple inter-connected sites.
+- Easy ways to transform and map page data, to automate as much grunt work as possible when categorizing and organizing raw crawl data.
+- A storage system that could preserve complex relationships between each page, zoom in on sub-page elements like design patterns across all sites, *and* integate third-party data like client spreadsheets, CMS exports, analytics APIs, etc.
 
 There are tons of useful programs, hosted services, and open source projects that do *some* of that, but finding anything that supported it all was a nightmare. Unforatunately, we're huge nerds, so we had to go build it.
