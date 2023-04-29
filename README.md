@@ -28,7 +28,7 @@ Database: spidergram
 ❯ spidergram go https://my-website.biz
 
 Crawling URLs
-███████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 26% | ETA: 1214s | 227/858
+███████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 26% | ETA: 614s | 227/858
 ```
 
 To re-run the crawl with different options, run `spidergram go` with the `--erase` flag. You can also use the subcommands `spidergram crawl`, `spidergram analyze`, and `spidergram report` to perform each step individually.
