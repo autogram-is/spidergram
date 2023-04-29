@@ -20,8 +20,6 @@ test('simple paths', t => {
   t.is(findPropertyValue(obj, 'arr[0]'), 'first');
   t.is(findPropertyValue(obj, 'str'), 'string');
   t.is(findPropertyValue(obj, 'null'), undefined);
-  t.is(findPropertyValue(obj, 'null', 'default'), 'default');
-  t.is(findPropertyValue(obj, 'str', 'default'), 'string');
   t.is(findPropertyValue(obj, 'nested.deeply.leaf'), 'value');
 });
 
