@@ -107,9 +107,9 @@ export async function findAndSavePagePatterns(
   const sg = await Spidergram.load();
   await sg.arango.push(pts, false);
   await Query.run(aql`
-    FOR pi IN pattern_instance
-    FILTER pi._from == ${input.documentId}
-    REMOVE { _key: pi._key } IN pattern_instance
+    FOR instance IN appears_on
+    FILTER instance._to == ${input.documentId}
+    REMOVE { _key: instance._key } IN appears_on
   `);
   await sg.arango.push(instances);
 }
