@@ -1,5 +1,10 @@
 # Spidergram Changelog
 
+## v0.10.2 - 23-04-29
+
+- Removed an outdated reference to the old pattern_instances collection.
+- Disable pattern discovery and site name extraction when using the `ping` command to avoid altering crawl data
+
 ## v0.10.0 - 23-04-20 - Ham
 
 This release is dedicated to Peter Porker of Earth-8311, an innocent pig raised by animal scientist May Porker. After a freak acident with the world's first atomic powered hairdryer, Peter was bitten by the scientist and transformed into a crime-fighting superhero pig.

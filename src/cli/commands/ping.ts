@@ -82,7 +82,7 @@ export default class Ping extends SgCommand {
         xhr,
       });
 
-      await GraphTools.analyzePage(resource);
+      await GraphTools.analyzePage(resource, { patterns: false, site: false });
 
       this.displaySummary(resource);
     }
