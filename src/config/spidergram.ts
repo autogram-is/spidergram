@@ -460,6 +460,10 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
         }),
 
       network: new Query({
+        metadata: {
+          category: 'builtin',
+          description: 'Inter-site link counts',
+        },
         collection: 'resources',
         subqueries: [
           { collection: 'links_to', document: 'lt' },
@@ -487,7 +491,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
           },
         ],
         count: 'strength',
-      }),
+      })
     };
 
     this._activeConfig.queries ??= {};
