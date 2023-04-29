@@ -1,6 +1,6 @@
 # Spidergram
 
-Spidergram is a customizable toolkit for crawling and analyzing complicated web properties. While it can be used to craw any website, we (the folks at [Autogram](https://autogram.is)) designed it specifically for "ten websites in a trench coat" scenarios where a web property encompasses multiple CMSs, multiple domains, and multiple design systems, maintained by multiple teams.
+Spidergram is a customizable toolkit for crawling and analyzing complicated web properties. While it can be used to crawl any website, we (the folks at [Autogram](https://autogram.is)) designed it specifically for "ten websites in a trench coat" scenarios where a web property encompasses multiple CMSs, multiple domains, and multiple design systems, maintained by multiple teams.
 
 ## Installation
 
