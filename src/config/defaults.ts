@@ -33,7 +33,7 @@ export const urlNormalizerDefaults: NormalizerOptions = {
 };
 
 export const urlDiscoveryDefaults: EnqueueUrlOptions = {
-  save: true,
+  save: UrlMatchStrategy.All,
   crawl: UrlMatchStrategy.SameDomain,
   discardEmpty: true,
   discardlocalAnchors: true,

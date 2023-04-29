@@ -4,7 +4,7 @@ When it's installed globally, Spidergram exposes a `spidergram` command you can 
 
 ```markdown
 help        Display help for spidergram.
-setup       Create a new setting file for a crawl project
+init        Configure a new Spidergram project
 status      Settings and stats for the current project
 cleanup     A grab bag of disk and database tidying
 
