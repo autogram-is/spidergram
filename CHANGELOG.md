@@ -1,9 +1,12 @@
 # Spidergram Changelog
 
+## v0.10.3 - 23-05-10
+
+- Disable pattern discovery and site name extraction when using the `ping` command to avoid altering crawl data
+
 ## v0.10.2 - 23-04-29
 
 - Removed an outdated reference to the old pattern_instances collection.
-- Disable pattern discovery and site name extraction when using the `ping` command to avoid altering crawl data
 
 ## v0.10.0 - 23-04-20 - Ham
 
