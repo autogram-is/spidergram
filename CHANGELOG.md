@@ -1,5 +1,9 @@
 # Spidergram Changelog
 
+## v0.11 - 23-05-xx
+
+- Rather than thrashing the heck out of the current branch with bleeding edge point releases, we're experimenting with an even/odd stable/experimental split. That way the 0.10.x releases will stay consistent and sensible, 0.11.x will change rapidly, and 0.12.x will lock in the stuff that was hashed out in the 0.11.x releases.
+
 ## v0.10.3 - 23-05-10
 
 - Disable pattern discovery and site name extraction when using the `ping` command to avoid altering crawl data
