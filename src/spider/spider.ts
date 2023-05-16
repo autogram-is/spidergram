@@ -112,12 +112,29 @@ export class Spider extends PlaywrightCrawler {
       crawler.launchContext = { userAgent: internal.userAgent };
     }
 
+    crawler.browserPoolOptions = {
+      preLaunchHooks: [
+        async (_, launchContext) => {
+          launchContext.ignoreHTTPSErrors = true
+        }
+      ],
+    };
+
     // We're bumping this up to deal with exceptionally horrible sites.
     if (options.auditAccessibility) {
       // …And adding an extra buffer when the all1 checker is turned on.
       crawler.requestHandlerTimeoutSecs = (internal.handlerTimeout ?? 60) + 30;
     } else {
       crawler.requestHandlerTimeoutSecs = internal.handlerTimeout;
+    }
+
+    if (options.waitUntil) {
+      crawler.preNavigationHooks.push(
+        (ctx, opt) => {
+          opt ??= {};
+          opt.waitUntil = options.waitUntil;
+        } 
+      );
     }
 
     super(crawler, config);
@@ -306,6 +323,8 @@ function splitOptions(options: Partial<SpiderOptions> = {}) {
     postNavigationHooks,
     userAgent,
     handlerTimeout,
+    waitUntil,
+    shadowDom,
 
     ...crawlerOptions
   } = options;

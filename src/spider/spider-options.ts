@@ -23,6 +23,26 @@ export interface InternalSpiderOptions extends Dictionary {
   logLevel: LogLevel;
 
   /**
+   * Iterate over the browser document to ensure Shadow DOM elements
+   * are recognized and included in the page content.
+   * 
+   * Note: This may interfere with interactive on-page elements; in general,
+   * it should only be turned on if you know page content is NOT being
+   * recognized.
+   * 
+   * @defaultValue false
+   */
+  shadowDom?: boolean;
+
+  /**
+   * The indicator to wait for when determining whether a page has been fully loaded.
+   * 
+   * @see {@link Playwright Navigation Lifecycle | https://playwright.dev/dotnet/docs/navigations#navigation-lifecycle }
+   * @defaultValue "networkidle"
+   */
+  waitUntil?: "load"|"domcontentloaded"|"networkidle"|"commit";
+
+  /**
    * A function to process a successfully loaded page view. If none is
    * supplied, the default pageHandler will:
    *
