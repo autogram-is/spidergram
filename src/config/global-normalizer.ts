@@ -72,6 +72,20 @@ export interface NormalizerOptions {
   discardTrailingSlash?: boolean;
 
   /**
+   * For any search/querystring parameters whose names match the supplied pattern, collapse
+   * multiple values and use only the last one.
+   * 
+   * @example
+   * ```
+   * const url = new ParsedUrl('https://example.com/search.html?page=1&page=2&page=3');
+   * const newUrl = globalNormalizer(url, { collapseSearchParams: 'page' });
+   * console.log(newUrl.href);
+   * // https://example.com/search.html?page=3
+   * ```
+   */
+  collapseSearchParams?: string
+
+  /**
    * Alphabetize any search/querystring parameters, so links that supply params in different
    * orders are not incorrectly flagged as different URLs.
    */
@@ -134,6 +148,17 @@ export function globalNormalizer(
     UrlMutators.stripQueryParameters(url, opts.discardSearch);
 
   if (opts.discardTrailingSlash) UrlMutators.stripTrailingSlash(url);
+
+  if (opts.collapseSearchParams) {
+    const collapse = opts.collapseSearchParams;
+    const keys = ([...new Set(url.searchParams.keys()).values()]);
+    for (const key of keys) {
+      if (collapse === true || minimatch(key, collapse)) {
+        const value = url.searchParams.getAll(key).pop();
+        if (value) url.searchParams.set(key, value);
+      }
+    }
+  }
 
   if (opts.sortSearchParams) url.searchParams.sort();
 
