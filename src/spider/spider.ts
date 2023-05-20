@@ -1,9 +1,11 @@
 import is from '@sindresorhus/is';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import arrify from 'arrify';
-import { log, PlaywrightCrawlingContext, SystemInfo } from 'crawlee';
+import { log, PlaywrightCrawlingContext, PlaywrightDirectNavigationOptions, SystemInfo } from 'crawlee';
 import { FinalStatistics } from 'crawlee';
 import _ from 'lodash';
+import { chromium } from 'playwright-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
 // We have a chance to set the log level HIGHER when configuring,
 // but this (hopefully) ensures that sub-logs won't be created
@@ -108,9 +110,20 @@ export class Spider extends PlaywrightCrawler {
     ): Promise<void> =>
       handlers.failureHandler(ctx as unknown as SpiderContext, error);
 
-    if (internal.userAgent) {
-      crawler.launchContext = { userAgent: internal.userAgent };
+    const launchContext: typeof crawler['launchContext'] = {};
+    if (internal.userAgent && !internal.stealth) {
+      launchContext.userAgent = internal.userAgent
     }
+
+    launchContext.launchOptions ??= {};
+    launchContext.launchOptions.headless = crawler.headless
+
+    if (internal.stealth) {
+      chromium.use(StealthPlugin());
+      launchContext.launcher = chromium;
+    }
+    
+    crawler.launchContext = launchContext;
 
     crawler.browserPoolOptions = {
       preLaunchHooks: [
@@ -156,6 +169,10 @@ export class Spider extends PlaywrightCrawler {
     await helpers.enhanceSpiderContext(context as SpiderContext);
     await helpers.requestPrecheck(context as SpiderContext);
     await super._runRequestHandler(context);
+  }
+
+  protected override async _navigationHandler(crawlingContext: PlaywrightCrawlingContext, gotoOptions: PlaywrightDirectNavigationOptions) {
+    return super._navigationHandler(crawlingContext, gotoOptions);
   }
 
   /**

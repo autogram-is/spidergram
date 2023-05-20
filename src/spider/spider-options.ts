@@ -98,6 +98,14 @@ export interface InternalSpiderOptions extends Dictionary {
   urls: EnqueueUrlOptions;
 
   /**
+   * Tailor the spider's browser settings to hide the fact that it's an automated
+   * crawler. If this option is set, the {@link userAgent} property will be ignored.
+   * 
+   * Note that the stealth option is experimental and may cause issues with some sites.
+   */
+  stealth?: boolean;
+
+  /**
    * An array of MIME type strings used to recognize HTTP requests as
    * parsable HTML pages. Specific mime types or glob strings ('text/*', etc.)
    * can be used.
