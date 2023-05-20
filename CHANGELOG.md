@@ -1,5 +1,11 @@
 # Spidergram Changelog
 
+## v0.10.4 - 23-05-22
+
+- Fixed URL crawl/save filtering. If multiple filters are supplied, *any* match will cause the URL to be treated as a match. Explicit rejection of URLs is still possible using the full UrlFilter syntax; i.e., `crawl: { propert: 'hostname', glob: '*foo.com', reject: true }`.
+- Added a `collapseSearchParams` normalizer option, so borked URL Search Param values like `page=1?page=2?page=3` can be collapsed to the last value in the list. The config value should be a glob pattern matching Search Param keys; i.e., `'name'` or `'{name,id,search}'` etc.
+- Added support for stealth crawling; setting `spider.stealth` to TRUE in the Spidergram config will use the `playwright-extras` plugin to mask the crawler's identity. This is experimental and turned off by default; some pages currently cause it to crash the spider, requiring repeated restarts of the crawler to finish a site.
+
 ## v0.10.3 - 23-05-10
 
 - Disable pattern discovery and site name extraction when using the `ping` command to avoid altering crawl data
