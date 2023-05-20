@@ -74,6 +74,8 @@ export default class DeleteEntities extends SgCommand {
           this.exit(0);
         }
   
+        this.ux.action.start('Deleting');
+        
         q.spec.return = undefined;
         q.spec.remove = undefined;
         q.return('_id');
@@ -95,11 +97,14 @@ export default class DeleteEntities extends SgCommand {
           this.ux.action.status = qs.spec.collection.toString();
           await qs.run();
         }
+
+        this.ux.action.stop();
       }
       
       q.spec.remove = undefined;
       q.spec.return = undefined;
       q.remove();
+      this.ux.action.status = q.spec.collection.toString();
       await q.run();
     }
   }
