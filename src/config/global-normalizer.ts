@@ -73,7 +73,8 @@ export interface NormalizerOptions {
 
   /**
    * For any search/querystring parameters whose names match the supplied pattern, collapse
-   * multiple values and use only the last one.
+   * multiple values and use only the last one. Setting the property to `true` collapses
+   * all search parameters regardless of name.
    * 
    * @example
    * ```
@@ -83,7 +84,7 @@ export interface NormalizerOptions {
    * // https://example.com/search.html?page=3
    * ```
    */
-  collapseSearchParams?: string
+  collapseSearchParams?: true | string
 
   /**
    * Alphabetize any search/querystring parameters, so links that supply params in different
