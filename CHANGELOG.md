@@ -6,6 +6,7 @@
 - Added a `collapseSearchParams` normalizer option, so borked URL Search Param values like `page=1?page=2?page=3` can be collapsed to the last value in the list. The config value should be a glob pattern matching Search Param keys; i.e., `'name'` or `'{name,id,search}'` etc.
 - Added support for stealth crawling; setting `spider.stealth` to TRUE in the Spidergram config will use the `playwright-extras` plugin to mask the crawler's identity. This is experimental and turned off by default; some pages currently cause it to crash the spider, requiring repeated restarts of the crawler to finish a site.
 - Added a `delete` CLI command that can be used to remove crawl records and dependent relationships. It uses the same filtering syntax as the `query` CLI command, but is obviously much more dangerous. Using `query` first, then `delete`ing when you know you're sure of the results, is strongly recommended. This is particularly useful, though, when you'd like to 'forget' and re-crawl a set of pages. In the future we'll be adding support for explicitly recrawling without this dangerous step, but for now it's quite handy.
+- Bumped `@axe-core/playwright` to version 4.7.1
 
 ## v0.10.3 - 23-05-10
 
