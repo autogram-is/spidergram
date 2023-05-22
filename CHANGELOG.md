@@ -1,5 +1,13 @@
 # Spidergram Changelog
 
+## v0.10.4 - 23-05-22
+
+- Fixed URL crawl/save filtering. If multiple filters are supplied, *any* match will cause the URL to be treated as a match. Explicit rejection of URLs is still possible using the full UrlFilter syntax; i.e., `crawl: { propert: 'hostname', glob: '*foo.com', reject: true }`.
+- Added a `collapseSearchParams` normalizer option, so borked URL Search Param values like `page=1?page=2?page=3` can be collapsed to the last value in the list. The config value should be a glob pattern matching Search Param keys; i.e., `'name'` or `'{name,id,search}'` etc.
+- Added support for stealth crawling; setting `spider.stealth` to TRUE in the Spidergram config will use the `playwright-extras` plugin to mask the crawler's identity. This is experimental and turned off by default; some pages currently cause it to crash the spider, requiring repeated restarts of the crawler to finish a site.
+- Added a `delete` CLI command that can be used to remove crawl records and dependent relationships. It uses the same filtering syntax as the `query` CLI command, but is obviously much more dangerous. Using `query` first, then `delete`ing when you know you're sure of the results, is strongly recommended. This is particularly useful, though, when you'd like to 'forget' and re-crawl a set of pages. In the future we'll be adding support for explicitly recrawling without this dangerous step, but for now it's quite handy.
+- Bumped `@axe-core/playwright` to version 4.7.1
+
 ## v0.10.3 - 23-05-10
 
 - Disable pattern discovery and site name extraction when using the `ping` command to avoid altering crawl data
@@ -78,7 +86,7 @@ This release is dedicated to Peter Porker of Earth-8311, an innocent pig raised 
   - `report.dropEmptyQueries` does what it says on the tin
   - `report.pivotSingleResults` triggers a check for queries that return only one row, and pivots them for friendlier display. Still experimental.
   - The `report.queries` list allows a new 'modified query' structure, which includes both a pointer to an already-defined base query and a set of additional filters, return values, and so on. This allows you to reuse complex base, then filter them to a specific subdomain or other criteria without copying and pasting the underlying definition.
-  - `report.modifications` is an optional list of modifications that will be made to _each query_ in the report.
+  - `report.modifications` is an optional list of modifications that will be made to *each query* in the report.
   - The `spidergram report` command now supports the `--filter` flag; any filters from the command line will be added as 'modifications' to the report when it runs, allowing you to build a universal report and run it multiple times with different filters.
 - Added a simple check for certain recursive URL chains (like `http://example.com/~/~/~/~`). `spider.urls.recursivePathThreshold` is set to 3 by default, and setting it to 1 or less turns off the recursion-check.
 - The `spider.auditAccessibility` setting now allows the full audit to be saved to a separate table, with several summary formats (by impact, by category) for the primary results saved to the Resource.
@@ -227,7 +235,7 @@ This release is dedicated to teen crime-fighter Gwen Stacy of Earth-65. She jugg
 
 ## v0.8.0 - 23-01-27
 
-This release is dedicated to Miles Morales of Earth-6160, star of _Into The Spider-Verse_.
+This release is dedicated to Miles Morales of Earth-6160, star of *Into The Spider-Verse*.
 
 - Improvements to structured **data and content parsing**; `HtmlTools.getPageData()` and `HtmlTools.getPageContent()` are now useful as general-purpose extractors across most crawl data.
 - `HtmlTools.findPattern()` now pulls **more data for each component**, including raw internal markup if desired.

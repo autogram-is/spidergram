@@ -1,10 +1,12 @@
+import { getPageMarkup } from '../../tools/browser/get-page-markup.js';
 import { BrowserTools } from '../../tools/index.js';
 import { SpiderContext } from '../context.js';
 
 export async function pageHandler(context: SpiderContext) {
   const { saveResource, enqueueUrls, page } = context;
 
-  const body = await page.content();
+  const body = await getPageMarkup(page, context.shadowDom);
+
   const cookies = context.saveCookies
     ? await page.context().cookies()
     : undefined;

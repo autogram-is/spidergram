@@ -23,6 +23,26 @@ export interface InternalSpiderOptions extends Dictionary {
   logLevel: LogLevel;
 
   /**
+   * Iterate over the browser document to ensure Shadow DOM elements
+   * are recognized and included in the page content.
+   * 
+   * Note: This may interfere with interactive on-page elements; in general,
+   * it should only be turned on if you know page content is NOT being
+   * recognized.
+   * 
+   * @defaultValue false
+   */
+  shadowDom?: boolean;
+
+  /**
+   * The indicator to wait for when determining whether a page has been fully loaded.
+   * 
+   * @see {@link Playwright Navigation Lifecycle | https://playwright.dev/dotnet/docs/navigations#navigation-lifecycle }
+   * @defaultValue "networkidle"
+   */
+  waitUntil?: "load"|"domcontentloaded"|"networkidle"|"commit";
+
+  /**
    * A function to process a successfully loaded page view. If none is
    * supplied, the default pageHandler will:
    *
@@ -76,6 +96,14 @@ export interface InternalSpiderOptions extends Dictionary {
    * @type {EnqueueUrlOptions}
    */
   urls: EnqueueUrlOptions;
+
+  /**
+   * Tailor the spider's browser settings to hide the fact that it's an automated
+   * crawler. If this option is set, the {@link userAgent} property will be ignored.
+   * 
+   * Note that the stealth option is experimental and may cause issues with some sites.
+   */
+  stealth?: boolean;
 
   /**
    * An array of MIME type strings used to recognize HTTP requests as

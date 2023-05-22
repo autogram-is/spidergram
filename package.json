@@ -67,7 +67,7 @@
   },
   "dependencies": {
     "@autogram/url-tools": "^2.5.4",
-    "@axe-core/playwright": "^4.6.0",
+    "@axe-core/playwright": "^4.7.1",
     "@oclif/plugin-help": "^5",
     "@oclif/plugin-plugins": "^2.4.1",
     "@proload/core": "^0.3.3",
@@ -79,7 +79,7 @@
     "@sindresorhus/is": "^5.3.0",
     "@types/js-yaml": "^4.0.5",
     "@vladfrangu/async_event_emitter": "^2.1.2",
-    "aql-builder": "^0.5.6",
+    "aql-builder": "^0.6.0",
     "arrify": "^3.0.0",
     "caterpillar": "^6.8.0",
     "chalk": "^5.1.2",
@@ -102,8 +102,10 @@
     "office-document-properties": "^1.1.0",
     "p-queue": "^7.3.4",
     "pdfjs-dist": "^3.4.120",
+    "playwright-extra": "^4.3.6",
     "prepend-http": "^4.0.0",
     "proload-plugin-json5": "github:autogram-is/proload-plugin-json5",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "read-pkg-up": "^9.1.0",
     "readability-scores": "^1.0.8",
     "reflect-metadata": "^0.1.13",
@@ -154,7 +156,7 @@
     "crawlee": "^3.2.0",
     "googleapis": "^108.0.1",
     "html-to-text": "^9.0.0",
-    "playwright": "^1.32.1",
+    "playwright": "^1.33.0",
     "vega": "^5.22.1",
     "vega-lite": "^5.6.0"
   }
