@@ -1,5 +1,9 @@
 # Spidergram Changelog
 
+## v0.11.0-dev - UNRELEASED
+
+- Moving to an Ubuntu-ish even/odd cycle of "stable" and "experimental" releases.
+
 ## v0.10.4 - 23-05-22
 
 - Fixed URL crawl/save filtering. If multiple filters are supplied, *any* match will cause the URL to be treated as a match. Explicit rejection of URLs is still possible using the full UrlFilter syntax; i.e., `crawl: { propert: 'hostname', glob: '*foo.com', reject: true }`.
