@@ -16,42 +16,42 @@ export interface ElementData {
 /**
  * Flags and settings for extraction of data from HTML elements.
  */
-export interface ElementDataOptions {
+export type ElementDataOptions = {
   /**
    * Add the name of the element's HTML tag to the returned data.
    *
    * @defaultValue `false`
    */
-  saveTag?: boolean;
+  saveTag?: boolean,
 
   /**
    * Convert the 'class' attribute into a 'classes' array.
    *
    * @defaultValue `true`
    */
-  splitClasses?: boolean;
+  splitClasses?: boolean,
 
   /**
    * Treat the element's internal HTML as a `content` pseudo-attribute.
    *
    * @defaultValue `false`
    */
-  saveHtml?: boolean;
+  saveHtml?: boolean,
 
   /**
    * Group `data-` attributes into a dictionary for easier traversal
    *
    * @defaultValue `true`
    */
-  parseData?: boolean;
+  parseData?: boolean,
 
   /**
    * Ignore empty attribute values, even ones like `disabled`.
    *
    * @defaultValue `true`
    */
-  dropEmptyAttributes?: boolean;
-}
+  dropEmptyAttributes?: boolean,
+};
 
 const defaults: ElementDataOptions = {
   splitClasses: true,

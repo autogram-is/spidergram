@@ -6,4 +6,6 @@
 
 export * from './analyze-page.js';
 export * from './rebuild-resource-links.js';
-export * from './get-resource-site.js';
+
+export * from './build-patterns.js';
+export * from './build-sites.js'

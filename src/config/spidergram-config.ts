@@ -19,6 +19,8 @@ import {
   ConfigurationOptions as CrawleeConfigOptions,
 } from 'crawlee';
 import { SpiderCli } from '../cli/shared/index.js';
+import { SiteDefinition } from '../tools/graph/build-sites.js';
+import { ConditionalPatternGroup, PatternDefinition } from '../tools/graph/build-patterns.js';
 
 /**
  * Global configuration settings for Spidergram and its key components. Many of these
@@ -162,6 +164,17 @@ export interface SpidergramConfig extends Record<string, unknown> {
    * Extraction options for structured metadata on crawled pages.
    */
   pageTechnologies?: TechAuditOptions;
+
+  /**
+   * Definitions for individual sites or site sections inside the pool of
+   * crawled pages.
+   */
+  sites?: SiteDefinition[];
+
+  /**
+   * Definitions for design patterns and components used on the site.
+   */
+  patterns?: (PatternDefinition | ConditionalPatternGroup)[];
 
   /**
    * A key/value collection of pre-written queries that can be used

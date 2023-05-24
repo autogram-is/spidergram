@@ -6,13 +6,7 @@ import {
   EnqueueUrlOptions,
 } from '../../index.js';
 import { rebuildResourceLinks } from './rebuild-resource-links.js';
-import {
-  PageDataOptions,
-  PageContentOptions,
-  PatternDefinition,
-  findAndSavePagePatterns,
-  ConditionalPatternGroup,
-} from '../html/index.js';
+import { PageDataOptions, PageContentOptions } from '../html/index.js';
 import { TechAuditOptions } from '../browser/index.js';
 import { PropertyMap, mapProperties } from '../map-properties.js';
 import _ from 'lodash';
@@ -21,7 +15,6 @@ import {
   MimeTypeMap,
   processResourceFile,
 } from '../file/process-resource-file.js';
-import { getResourceSite } from './get-resource-site.js';
 
 /**
  * Options to control the behavior of the processPage utility function.
@@ -45,14 +38,6 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
    * @defaultValues
    */
   files?: MimeTypeMap | false;
-
-  /**
-   * One or more {@link PropertyMap<Resource>} rules that determine what {@link Site}
-   * the {@link Resource} belongs to.
-   *
-   * The value here corresponds to the unique key of a {@link Site};
-   */
-  site?: PropertyMap<Resource> | PropertyMap<Resource>[] | false;
 
   /**
    * Options for content analysis, including the transformation of core page content
@@ -89,12 +74,6 @@ export interface PageAnalysisOptions extends Record<string, unknown> {
    * produced, the destination property will remain undefined.
    */
   properties?: Record<string, PropertyMap> | false;
-
-  /**
-   * An array of {@link PatternDefinition} rules or {@link ConditionalPatternGroup} used
-   * to detect instances of known design components in each page's markup.
-   */
-  patterns?: (PatternDefinition | ConditionalPatternGroup)[] | false;
 }
 
 export async function analyzePage(
@@ -147,14 +126,6 @@ export async function analyzePage(
 
   if (options.properties) {
     mapProperties(resource, options.properties);
-  }
-
-  if (options.patterns) {
-    await findAndSavePagePatterns(resource, options.patterns);
-  }
-
-  if (options.site) {
-    resource.site = await getResourceSite(resource, options.site, true);
   }
 
   resource._analyzed = DateTime.now().toISO();
