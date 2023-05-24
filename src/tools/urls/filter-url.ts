@@ -80,7 +80,10 @@ export function filterUrl(
   return false;
 }
 
-// This is a bit tricky; we return a boolean OR a null; the null, confusingly,
+// We use a 'true, null, false' trio to represent three types of results:
+// If the filter matches the incoming value, we return TRUE.
+// If it does not, we return NULL.
+// If it does not, and the filter is REQUIRED, we return FALSE.
 function singleFilter(
   url: ParsedUrl,
   filter: UrlFilter,
@@ -92,20 +95,20 @@ function singleFilter(
         return true;
 
       case UrlMatchStrategy.SameDirectory:
-        if (contextUrl === undefined) return false;
-        if (url.domain !== contextUrl.domain) return false;
-        return url.pathname.startsWith(contextUrl.pathname);
+        if (contextUrl === undefined) return null;
+        if (url.domain !== contextUrl.domain) return null;
+        return url.pathname.startsWith(contextUrl.pathname) ? true : null;
 
       case UrlMatchStrategy.SameDomain:
-        if (contextUrl === undefined) return false;
-        return url.domain === contextUrl.domain;
+        if (contextUrl === undefined) return null;
+        return (url.domain === contextUrl.domain) ? true : null;
 
       case UrlMatchStrategy.SameHostname:
-        if (contextUrl === undefined) return false;
-        return url.hostname === contextUrl.hostname;
+        if (contextUrl === undefined) return null;
+        return (url.hostname === contextUrl.hostname) ? true : null;
 
       default:
-        return false;
+        return null;
     }
   } else if (isUrlRegexFilter(filter)) {
     const regex = is.regExp(filter.regex)
@@ -117,12 +120,11 @@ function singleFilter(
     // In 'reject' mode, failure to find a match is not acceptance.
     // Invert the boolean and return `null | false` rather than `true | false`
     if (filter.reject) {
-      accept = !accept;
-      return accept ? null : false;
+      return !accept ? null : false;
     }
-    return accept;
+    return accept ? true : null;
   } else if (is.regExp(filter)) {
-    return filter.test(url.href);
+    return filter.test(url.href) ? true : null;
   } else if (isUrlGlobFilter(filter)) {
     let accept = minimatch(
       _.get(url.properties as object, filter.property ?? 'href', ''),
@@ -132,18 +134,17 @@ function singleFilter(
     // In 'reject' mode, failure to find a match is not acceptance.
     // Invert the boolean and return `null | false` rather than `true | false`
     if (filter.reject) {
-      accept = !accept;
-      return accept ? null : false;
+      return !accept ? null : false;
     }
-    return accept;
+    return accept ? true : null;
   } else if (is.string(filter)) {
     // Treat it as a glob to match against the url's href
-    return minimatch(url.href, filter, { dot: true });
+    return minimatch(url.href, filter, { dot: true }) ? true : null;
   } else if (is.function_(filter)) {
     return filter(url, contextUrl);
   }
 
-  return false;
+  return null;
 }
 
 // We accept a staggering array of filter types. Come, behold our filters.
@@ -175,4 +176,4 @@ export type UrlRegexFilter = {
 export type UrlFilterFunction = (
   candidate: ParsedUrl,
   current?: ParsedUrl,
-) => boolean;
+) => boolean | null;

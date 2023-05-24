@@ -8,7 +8,7 @@ import {
   UrlTools,
   HtmlTools,
   NormalizedUrl,
-  aql,
+  Query,
 } from '../../index.js';
 import _ from 'lodash';
 
@@ -100,12 +100,10 @@ export async function saveUrls(
     results.links.length > 0 &&
     options.discardExisting
   ) {
-    const deleteLinkTos = aql`
-      FOR lt IN links_to
-      FILTER lt._from == ${resource.documentId}
-      REMOVE lt IN links_to
-    `;
-    await graph.db.query(deleteLinkTos);
+    await new Query('links_to')
+      .filterBy('_from', resource.documentId)
+      .remove()
+      .run()
   }
 
   return graph
