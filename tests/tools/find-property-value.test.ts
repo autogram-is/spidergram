@@ -12,7 +12,7 @@ const obj = {
       leaf: 'value'
     }
   },
-  html: "<body><h1 class='foo'>headline</h1><p>first <span class='example'>paragraph</span></p><p>second paragraph</p></body>",
+  html: "<body><h1 class='h1class'>headline</h1><p>first <span class='spanClass'>paragraph</span></p><p>second paragraph</p></body>",
 }
 
 test('simple paths', t => {
@@ -32,7 +32,7 @@ test('css selectors', t => {
 });
 
 test('attr values', t => {
-  t.is(findPropertyValue(obj, { source: 'html', selector: 'h1', attribute: 'class' }), 'foo');
+  t.is(findPropertyValue(obj, { source: 'html', selector: 'h1', attribute: 'class' }), 'h1class');
 });
 
 test('filters', t => {
@@ -53,4 +53,17 @@ test('filters', t => {
 
   t.is(findPropertyValue(obj, { source: 'arr', in: ['fourth', 'third'] }), 'third');
   t.is(findPropertyValue(obj, { source: 'arr', in: ['fourth'] }), undefined);
+});
+
+test('multiple sources', t => {
+  t.is(findPropertyValue(obj, [
+    { source: 'missing.property' },
+    { source: 'html', selector: 'h1', attribute: 'class' },
+    'str'
+  ]), 'h1class');
+
+  t.is(findPropertyValue(obj, [
+    'str',
+    { source: 'missing.property' },
+  ]), 'string');
 });

@@ -134,15 +134,17 @@ export interface PropertyMapRule extends Record<string, unknown> {
   negate?: true;
 }
 
-export function mapProperties(
-  obj: object,
+export function mapProperties<T extends object>(
+  obj: T,
   map: Record<string, PropertyMap | PropertyMap[]>,
-) {
+): T {
   const domDictionary: Record<string, cheerio.Root> = {};
 
   for (const [prop, rule] of Object.entries(map)) {
     _.set(obj, prop, findPropertyValue(obj, rule, domDictionary));
   }
+
+  return obj;
 }
 
 /**
@@ -193,13 +195,13 @@ export function findPropertyValue<T = object>(
           v = checkPropertyValue(v, source);
         }
 
-        if (undef(v, source)) {
-          if (source.fallback) return source.fallback;
-          return undefined;
-        } else return v;
+        if (!undef(v, source)) {
+          return v;
+        }
       }
     }
   }
+  
   return undefined;
 }
 
@@ -209,49 +211,49 @@ export function findPropertyValue<T = object>(
  */
 function checkPropertyValue(
   value: unknown,
-  conditions: PropertyMapRule,
+  rule: PropertyMapRule,
 ): unknown {
-  if (conditions.eq !== undefined) {
-    if (_.isEqual(conditions.eq, value)) {
-      return conditions.negate ? undefined : getReturnValue(value, conditions);
+  if (rule.eq !== undefined) {
+    if (_.isEqual(rule.eq, value)) {
+      return rule.negate ? undefined : getReturnValue(value, rule);
     }
-  } else if (conditions.gt !== undefined && value) {
-    if (value > conditions.gt) {
-      return conditions.negate ? undefined : getReturnValue(value, conditions);
+  } else if (rule.gt !== undefined && value) {
+    if (value > rule.gt) {
+      return rule.negate ? undefined : getReturnValue(value, rule);
     }
-  } else if (conditions.lt !== undefined && value) {
-    if (value < conditions.lt) {
-      return conditions.negate ? undefined : getReturnValue(value, conditions);
+  } else if (rule.lt !== undefined && value) {
+    if (value < rule.lt) {
+      return rule.negate ? undefined : getReturnValue(value, rule);
     }
-  } else if (conditions.in !== undefined && conditions.in.length > 0) {
+  } else if (rule.in !== undefined && rule.in.length > 0) {
     let foundMatch = false;
     if (Array.isArray(value)) {
-      const returnValue = _.intersection(conditions.in, value);
+      const returnValue = _.intersection(rule.in, value);
       if (returnValue.length === 0)
-        return getReturnValue(undefined, conditions);
+        return getReturnValue(undefined, rule);
       if (returnValue.length === 1)
-        return getReturnValue(returnValue[0], conditions);
-      return getReturnValue(returnValue, conditions);
+        return getReturnValue(returnValue[0], rule);
+      return getReturnValue(returnValue, rule);
     } else {
-      for (const condition of conditions.in) {
+      for (const condition of rule.in) {
         if (_.isEqual(condition, value)) {
           foundMatch = true;
-          if (conditions.negate) continue;
-          return getReturnValue(value, conditions);
+          if (rule.negate) continue;
+          return getReturnValue(value, rule);
         }
       }
     }
-    if (conditions.negate && foundMatch) return undefined;
-  } else if (conditions.contains !== undefined) {
-    if (Array.isArray(value) && value.includes(conditions.contains)) {
-      return conditions.negate ? undefined : getReturnValue(value, conditions);
+    if (rule.negate && foundMatch) return undefined;
+  } else if (rule.contains !== undefined) {
+    if (Array.isArray(value) && value.includes(rule.contains)) {
+      return rule.negate ? undefined : getReturnValue(value, rule);
     }
-  } else if (conditions.matching !== undefined) {
+  } else if (rule.matching !== undefined) {
     if (typeof value === 'string') {
-      if (minimatch(value, conditions.matching)) {
-        return conditions.negate
+      if (minimatch(value, rule.matching)) {
+        return rule.negate
           ? undefined
-          : getReturnValue(value, conditions);
+          : getReturnValue(value, rule);
       }
     } else if (Array.isArray(value)) {
       const returnList = value
@@ -259,16 +261,16 @@ function checkPropertyValue(
         .filter(
           v =>
             typeof v === 'string' &&
-            conditions.matching &&
-            minimatch(v, conditions.matching),
+            rule.matching &&
+            minimatch(v, rule.matching),
         );
-      if (conditions.join || returnList.length === 1) {
+      if (rule.join || returnList.length === 1) {
         return getReturnValue(
-          returnList.slice(conditions.limit).join(conditions.join),
-          conditions,
+          returnList.slice(rule.limit).join(rule.join),
+          rule,
         );
       } else {
-        return getReturnValue(returnList.slice(conditions.limit), conditions);
+        return getReturnValue(returnList.slice(rule.limit), rule);
       }
     }
   }
@@ -276,13 +278,13 @@ function checkPropertyValue(
   return undefined;
 }
 
-function undef(value: unknown, rules?: PropertyMapRule): value is undefined {
-  const nok = rules?.acceptNull ?? false;
-  const eok = rules?.acceptEmpty ?? false;
+function undef(value: unknown, rule?: PropertyMapRule): value is undefined {
+  const nok = rule?.acceptNull ?? false;
+  const eok = rule?.acceptEmpty ?? false;
 
   if (
     value === undefined ||
-    (value === null && !nok) ||
+    (is.null_(value) && !nok) ||
     (is.emptyArray(value) && !eok) ||
     (is.emptyString(value) && !eok) ||
     (is.emptyObject(value) && !eok)
@@ -291,16 +293,16 @@ function undef(value: unknown, rules?: PropertyMapRule): value is undefined {
   return false;
 }
 
-function getReturnValue(value: unknown, definition: PropertyMapRule) {
-  if (value !== undefined) {
-    if (definition.value !== undefined) {
-      if (is.function_(definition.value)) {
-        return definition.value(value, definition);
+function getReturnValue(value: unknown, rule: PropertyMapRule) {
+  if (!undef(value, rule)) {
+    if (rule.value !== undefined) {
+      if (is.function_(rule.value)) {
+        return rule.value(value, rule);
       }
-      return definition.value;
+      return rule.value;
     } else return value;
-  } else if (definition.fallback !== undefined) {
-    return definition.fallback;
+  } else if (rule.fallback !== undefined) {
+    return rule.fallback;
   }
   return undefined;
 }

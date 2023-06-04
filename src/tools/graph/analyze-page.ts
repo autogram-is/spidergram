@@ -146,7 +146,7 @@ export async function analyzePage(
   }
 
   if (options.properties) {
-    mapProperties(resource, options.properties);
+    resource = mapProperties(resource, options.properties);
   }
 
   if (options.patterns) {
