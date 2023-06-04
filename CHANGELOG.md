@@ -1,5 +1,10 @@
 # Spidergram Changelog
 
+## v0.10.5 - 23-05-22
+
+- Fix early bailout on property map values with multiple sources
+- Update urlFilter tests to match the true/false/null response scenarios
+
 ## v0.10.4 - 23-05-22
 
 - Fixed URL crawl/save filtering. If multiple filters are supplied, *any* match will cause the URL to be treated as a match. Explicit rejection of URLs is still possible using the full UrlFilter syntax; i.e., `crawl: { propert: 'hostname', glob: '*foo.com', reject: true }`.
