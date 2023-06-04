@@ -126,22 +126,29 @@ test('predicate function', t => {
 
 test('multiple filters', t => {
   t.true(UrlTools.filterUrl(url, [() => true, () => true]));
-  t.true(UrlTools.filterUrl(url, [() => true, () => false]));
+  t.true(UrlTools.filterUrl(url, [() => true, () => null]));
+  t.false(UrlTools.filterUrl(url, [() => true, () => false]));
 
   t.true(UrlTools.filterUrl(url, [() => true, () => true], { mode: 'any' }));
-  t.true(UrlTools.filterUrl(url, [() => true, () => false], { mode: 'any' }));
-  t.true(UrlTools.filterUrl(url, [() => false, () => true], { mode: 'any' }));
+  t.true(UrlTools.filterUrl(url, [() => true, () => null], { mode: 'any' }));
+  t.true(UrlTools.filterUrl(url, [() => null, () => true], { mode: 'any' }));
+  
+  t.false(UrlTools.filterUrl(url, [() => false, () => true], { mode: 'any' }));
+  t.false(UrlTools.filterUrl(url, [() => true, () => false], { mode: 'any' }));
   t.false(UrlTools.filterUrl(url, [() => false, () => false], { mode: 'any' }));
 
   t.true(UrlTools.filterUrl(url, [() => true, () => true], { mode: 'all' }));
   t.false(UrlTools.filterUrl(url, [() => true, () => false], { mode: 'all' }));
-  t.false(UrlTools.filterUrl(url, [() => false, () => true], { mode: 'all' }));
-  t.false(UrlTools.filterUrl(url, [() => false, () => false], { mode: 'all' }));
+  t.false(UrlTools.filterUrl(url, [() => null, () => true], { mode: 'all' }));
+  t.false(UrlTools.filterUrl(url, [() => null, () => false], { mode: 'all' }));
   
   t.false(UrlTools.filterUrl(url, [() => true, () => true], { mode: 'none' }));
   t.false(UrlTools.filterUrl(url, [() => true, () => false], { mode: 'none' }));
   t.false(UrlTools.filterUrl(url, [() => false, () => true], { mode: 'none' }));
+
   t.true(UrlTools.filterUrl(url, [() => false, () => false], { mode: 'none' }));
+  t.true(UrlTools.filterUrl(url, [() => null, () => null], { mode: 'none' }));
+  t.true(UrlTools.filterUrl(url, [() => false, () => null], { mode: 'none' }));
 });
 
 test('reject filters', t => {
