@@ -24,6 +24,15 @@ export class AppearsOn extends Relationship<Pattern, Resource> {
 
     super(dataForSuper);
   }
+
+  protected override keySeed(): unknown {
+    return {
+      from: this._from,
+      label: this.label,
+      selector: this?.uniqueSelector,
+      to: this._to,
+    };
+  }
 }
 
 Entity.types.set('appears_on', {
