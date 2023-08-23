@@ -1,5 +1,7 @@
 # Spidergram Changelog
 
+## v0.10.7 - 00-00-00
+
 ## v0.10.6 - 23-08-22
 
 ### Important Wappalyzer Update
