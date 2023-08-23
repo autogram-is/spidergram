@@ -35,7 +35,7 @@ export default class DeleteEntities extends SgCommand {
     const { flags } = await this.parse(DeleteEntities);
     const sg = await Spidergram.load();
 
-    const docCollections = ['unique_urls', 'resources', 'sites', 'patterns', 'fragments'];
+    const docCollections = ['unique_urls', 'resources', 'sites', 'patterns'];
     const relCollections = ['appears_on', 'links_to', 'is_child_of', 'is_variant_of', 'responds_with'];
 
     // If a collection was passed in, start building a query.
