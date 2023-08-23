@@ -101,13 +101,13 @@ export class TechAuditor {
       if (!catIsCached)
         await this.cacheCategories(
           options.categoriesUrl ??
-            'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/categories.json',
+            'https://raw.githubusercontent.com/autogram-is/wappalyzer/main/src/categories.json',
         );
 
       if (!techIsCached) {
         await this.cacheTechnologies(
           options.technologiesUrl ??
-            'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/technologies',
+            'https://raw.githubusercontent.com/autogram-is/wappalyzer/main/src/technologies',
         );
       }
 

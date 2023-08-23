@@ -84,9 +84,9 @@ export const pageDataDefaults: PageDataOptions = {
 export const pageTechnologyDefaults: TechAuditOptions = {
   forceReload: false,
   technologiesUrl:
-    'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/technologies',
+    'https://raw.githubusercontent.com/autogram-is/wappalyzer/main/src/technologies',
   categoriesUrl:
-    'https://raw.githubusercontent.com/wappalyzer/wappalyzer/master/src/categories.json',
+    'https://raw.githubusercontent.com/autogram-is/wappalyzer/main/src/categories.json',
   technologies: {},
   categories: {},
 };
