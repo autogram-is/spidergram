@@ -1,5 +1,19 @@
 # Spidergram Changelog
 
+## v0.10.6 - 23-08-22
+
+### Important Wappalyzer Update
+
+The Wappalyzer project has taken its GPL-licensed code repositories private.
+while the latest release exists on NPM, the uncached technology fingerprint definitions are
+no longer available from Wappalyzer's GitHub account. For the time being, a [fork](https://github.com/autogram-is/wappalyzer) of the last public Wappalyzer release is being used.
+
+### Fixes
+
+- Complex multi-source property matches no longer skip matches when filtering results
+- Fixed persistence of patterns and pattern instances
+- Use a dedicated fork of the Wappalyzer project for tech definitions (longer-term fix in progress)
+
 ## v0.10.5 - 23-05-22
 
 - Fix early bailout on property map values with multiple sources
