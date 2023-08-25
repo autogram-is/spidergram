@@ -90,6 +90,16 @@ export const crawlFlags = {
 };
 
 export const analysisFlags = {
+  all: Flags.boolean({
+    char: 'a',
+    summary: 'Process all possible information',
+    default: true
+  }),
+  none: Flags.boolean({
+    char: 'n',
+    summary: 'Only process specified options',
+    default: false
+  }),
   reprocess: Flags.boolean({
     char: 'r',
     summary: 'Reprocess already-analyzed pages',
@@ -104,7 +114,7 @@ export const analysisFlags = {
   content: Flags.boolean({
     char: 'c',
     allowNo: true,
-    summary: 'Extract key page content',
+    summary: 'Extract main page content',
   }),
   metadata: Flags.boolean({
     char: 'm',

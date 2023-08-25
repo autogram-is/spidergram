@@ -39,6 +39,16 @@ export default class Analyze extends SgCommand {
 
     const options: GraphTools.PageAnalysisOptions = {};
 
+    // This section is in desperate need of cleanup, the combinatorial
+    // cruft is nasty when it intersects with the config settings.
+    
+    if (flags.all) {
+      options.data ??= true;
+      options.content ??= true;
+      options.tech ??= true;
+      options.links ??= true;
+    }
+
     // True-by-default options
     if (flags.metadata === false) {
       options.data = false;
@@ -51,16 +61,16 @@ export default class Analyze extends SgCommand {
     }
 
     // False-by-default options
-    if (!flags.links) {
+    if (!flags.links && !flags.all) {
       options.links = false;
     }
-    if (!flags.properties) {
+    if (!flags.properties && !flags.all) {
       options.properties = false;
     }
-    if (!flags.designPatterns) {
+    if (!flags.designPatterns && !flags.all) {
       options.patterns = false;
     }
-    if (!flags.site) {
+    if (!flags.site && !flags.all) {
       options.site = false;
     }
 
