@@ -37,42 +37,38 @@ export default class Analyze extends SgCommand {
       this.output = OutputLevel.verbose;
     }
 
-    const options: GraphTools.PageAnalysisOptions = {};
+    const options = sg.config.analysis ?? {};
 
-    // This section is in desperate need of cleanup, the combinatorial
-    // cruft is nasty when it intersects with the config settings.
-    
+    let defaultFlag: boolean | undefined = undefined;
     if (flags.all) {
-      options.data ??= true;
-      options.content ??= true;
-      options.tech ??= true;
-      options.links ??= true;
+      defaultFlag = true;
+    } else if (flags.none) {
+      defaultFlag = false;
     }
 
-    // True-by-default options
-    if (flags.metadata === false) {
-      options.data = false;
-    }
-    if (flags.tech === false) {
-      options.tech = false;
-    }
-    if (flags.content === false) {
-      options.content = false;
-    }
+    // These can just be true or false
+    flags.metadata ??= defaultFlag ?? true;
+    flags.content ??= defaultFlag ?? true;
+    
+    // These only make sense with config settings
+    flags.properties ??= defaultFlag ?? true;
+    flags.designPatterns ??= defaultFlag ?? true;
+    flags.site ??= defaultFlag ?? true;
 
-    // False-by-default options
-    if (!flags.links && !flags.all) {
-      options.links = false;
-    }
-    if (!flags.properties && !flags.all) {
-      options.properties = false;
-    }
-    if (!flags.designPatterns && !flags.all) {
-      options.patterns = false;
-    }
-    if (!flags.site && !flags.all) {
-      options.site = false;
-    }
+    // These are false by default
+    flags.tech ??= defaultFlag ?? false;
+    flags.links ??= defaultFlag ?? false;
+
+    if (flags.metadata === false) options.data = false;
+    if (flags.content === false) options.content = false;
+    if (flags.tech === false) delete options.tech;
+    if (flags.properties === false) options.properties = false;
+    if (flags.designPatterns === false) options.patterns = false;
+    if (flags.site === false) options.site = false;
+
+    if (flags.links === false) options.links = false;
+    if (flags.links === true) options.links = true;
+    if (flags.tech === false) options.tech = false;
 
     const worker = new WorkerQuery<Resource>('resources', {
       concurrency: flags.concurrency,
