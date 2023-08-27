@@ -46,29 +46,93 @@ export default class Analyze extends SgCommand {
       defaultFlag = false;
     }
 
-    // These can just be true or false
-    flags.metadata ??= defaultFlag ?? true;
-    flags.content ??= defaultFlag ?? true;
-    
-    // These only make sense with config settings
-    flags.properties ??= defaultFlag ?? true;
-    flags.designPatterns ??= defaultFlag ?? true;
-    flags.site ??= defaultFlag ?? true;
 
-    // These are false by default
-    flags.tech ??= defaultFlag ?? false;
-    flags.links ??= defaultFlag ?? false;
+    // This series of checks is less than ideal, but until we clean up the configuration
+    // data we have to navigate the inconsistencies of booleans and options being jammed
+    // into the same variable.
 
-    if (flags.metadata === false) options.data = false;
-    if (flags.content === false) options.content = false;
-    if (flags.tech === false) delete options.tech;
-    if (flags.properties === false) options.properties = false;
-    if (flags.designPatterns === false) options.patterns = false;
-    if (flags.site === false) options.site = false;
+    switch (flags.metadata) {
+      case true:
+        options.data = true;
+        break;
+      case false:
+        options.data = false;
+        break;
+      default:
+        if (defaultFlag === false) options.data = false;
+        break;
+    }
 
-    if (flags.links === false) options.links = false;
-    if (flags.links === true) options.links = true;
-    if (flags.tech === false) options.tech = false;
+    switch (flags.content) {
+      case true: 
+        options.content = true;
+        break;
+      case false:
+        options.content = false;
+        break;
+      default:
+        if (defaultFlag === false) options.content = false;
+        break;
+    }
+
+    switch (flags.tech) {
+      case true:
+        options.tech = true;
+        break;
+      case false:
+        options.tech = false;
+        break;
+      default:
+        if (defaultFlag === true) options.tech = true;
+        break;
+    }
+
+    switch (flags.links) {
+      case true:
+        options.links = true;
+        break;
+      case false:
+        options.links = false;
+        break;
+      default:
+        if (defaultFlag === true) options.links = true;
+        break;
+    }
+
+
+    // Options that can't accept a simple boolean
+    switch (flags.properties) {
+      case true:
+        break;
+      case false:
+        options.properties = false;
+        break;
+      default:
+        if (defaultFlag === false) options.properties = false;
+        break;
+    }
+
+    switch (flags.designPatterns) {
+      case true:
+        break;
+      case false:
+        options.patterns = false;
+        break;
+      default:
+        if (defaultFlag === false) options.patterns = false;
+        break;
+    }
+
+    switch (flags.site) {
+      case true:
+        break;
+      case false:
+        options.site = false;
+        break;
+      default:
+        if (defaultFlag === false) options.site = false;
+        break;
+    }
 
     const worker = new WorkerQuery<Resource>('resources', {
       concurrency: flags.concurrency,
@@ -96,3 +160,4 @@ export default class Analyze extends SgCommand {
     });
   }
 }
+
