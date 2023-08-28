@@ -184,6 +184,7 @@ export class ScreenshotTool {
           page.url(),
           v,
           undefined,
+          fullPage
         )}.${type}`;
         if (fullPage === false) {
           pwOptions.clip = { x: 0, y: 0, ...materializedViewports[v] };
@@ -205,7 +206,7 @@ export class ScreenshotTool {
           let filename = `${directory}/${this.getFilename(
             page.url(),
             v,
-            selector,
+            selector
           )}.${type}`;
           const max = Math.min(limit, await page.locator(selector).count());
 
@@ -225,7 +226,7 @@ export class ScreenshotTool {
               filename = `${directory}/${this.getFilename(
                 page.url(),
                 v,
-                selector,
+                selector
               )}-${l}.${type}`;
             }
             const buffer = await locator.screenshot(pwOptions);
@@ -293,10 +294,10 @@ export class ScreenshotTool {
   }
 
   // In theory, we could use this for subdirectories in addition to long filenames.
-  protected getFilename(url: string, viewport: string, selector?: string) {
+  protected getFilename(url: string, viewport: string, selector?: string, fullPage?: boolean) {
     let path = new URL(url).pathname.replaceAll('/', '-').slice(1);
     if (path.length === 0) path = 'index';
-    const components = [new URL(url).hostname, path, viewport];
+    const components = [new URL(url).hostname, path, fullPage ? `${viewport}-full` : viewport];
     if (selector) components.push(selector);
     return components
       .map(c => c.replaceAll(/<>:"\/\|?\*/g, '-'))
