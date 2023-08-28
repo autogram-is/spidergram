@@ -72,7 +72,7 @@ export const pageDataDefaults: PageDataOptions = {
   attributes: true,
   head: true,
   meta: true,
-  links: false,
+  links: true,
   noscript: false,
   scripts: false,
   json: true,
