@@ -1,6 +1,8 @@
 import { Spidergram } from '../config/index.js';
 import { FileTools } from '../tools/index.js';
 import { BaseReportSettings, ReportConfig } from './report-types.js';
+import { ensureDir } from 'fs-extra';
+import path from 'path';
 import {
   Properties,
   ColInfo,
@@ -215,6 +217,13 @@ export async function outputXlsxReport(
     }
   }
   const curFilePath = `${outputPath}.xlsx`;
+
+  const bin = path.join(
+    sg.config.outputDirectory ??
+      sg.config.storageDirectory ??
+      './storage',
+  );
+  await ensureDir(path.join(bin, path.dirname(curFilePath)));
 
   await sg
     .files('output')
