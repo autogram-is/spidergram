@@ -10,13 +10,12 @@ import {
 import { SpiderCli } from '../shared/spider-cli.js';
 import { launchPlaywright } from 'crawlee';
 import { AxeAuditor } from '../../tools/browser/axe-auditor.js';
+import { getPageMarkup } from '../../tools/browser/get-page-markup.js';
 
 export default class Ping extends SgCommand {
   static summary = 'Examine a page with the current analyzer settings';
 
   static usage = '<%= config.bin %> <%= command.id %> [url]';
-
-  static flags = {};
 
   static args = {
     url: Args.url({
@@ -32,12 +31,13 @@ export default class Ping extends SgCommand {
     const { args } = await this.parse(Ping);
 
     this.ux.action.start(`Fetching ${args.url.toString()}`);
+    const shadow = sg.config.spider?.shadowDom ?? false;
 
     const browser = await launchPlaywright();
     const page = await browser.newPage();
-    const response = (await page.goto(args.url.toString())) ?? undefined;
+    const response = (await page.goto(args.url.toString(), { waitUntil: sg.config.spider?.waitUntil })) ?? undefined;
 
-    const body = await page.content();
+    const body = await getPageMarkup(page, shadow);
 
     const cookies = sg.config.spider?.saveCookies
       ? (await page.context().cookies()).map(cookie =>
@@ -97,7 +97,7 @@ export default class Ping extends SgCommand {
       Type: r.mime ?? 'unknown',
       'Body classes':
         (r.get('data.attributes.classes') as string[] | undefined) ?? '',
-      Cookies: r.cookies?.length ?? 0,
+      Cookies: r.cookies?.length ?? 0
     };
     this.log(c.header('Overview'));
     this.ux.info(CLI.infoList(overview));
@@ -123,9 +123,15 @@ export default class Ping extends SgCommand {
       string,
       number | string
     >;
+    const text = r.get('content.text');
+
     if (Object.keys(readability).length > 0) {
       this.log(c.header('Page Content'));
-      this.ux.info(CLI.infoList(readability));
+      const output = {
+        ...readability,
+        text: typeof(text) === 'string' ? text.slice(0, 256) : ''
+      }  
+      this.ux.info(CLI.infoList(output));
     }
 
     const violations = r.get('accessibility', {}) as Record<string, number>;

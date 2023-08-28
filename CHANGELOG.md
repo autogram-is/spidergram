@@ -2,6 +2,10 @@
 
 ## v0.10.7 - 00-00-00
 
+- Grab LINK tags in the HTML HEAD by default during extraction
+- Fixed a flag-handling error that caused auto-extracted data to be overwritten in some analysis modes
+- Fixed issues in shadow dom expansion; set `config.spider.shadowDom` to TRUE to activate the begavior. NOTE: Ny default spidergram only waits until 'domcontentloaded', which may not populate the shadow elements. If shadow DOM elements aren't appearing, try setting `config.spider.waitUntil` to 'networkidle'.
+
 ## v0.10.6 - 23-08-22
 
 ### Important Wappalyzer Update
