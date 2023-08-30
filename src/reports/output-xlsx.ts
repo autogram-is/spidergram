@@ -255,7 +255,8 @@ function buildTabularSheet(
     return;
   }
 
-  const displayName = (settings.name ?? name).slice(0, 31);
+  let displayName = (settings.name ?? name).slice(0, 31);
+  if (displayName.length === 0) displayName = 'Empty';
 
   rpt.addSheet({ displayName, data }, displayName);
   const sheet = rpt.workbook.Sheets[displayName];

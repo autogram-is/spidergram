@@ -1,10 +1,12 @@
 # Spidergram Changelog
 
-## v0.10.7 - 00-00-00
+## v0.10.7 - 23-08-30
 
-- Grab LINK tags in the HTML HEAD by default during extraction
+- Grab link tags in the HTML HEAD by default during extraction
 - Fixed a flag-handling error that caused auto-extracted data to be overwritten in some analysis modes
 - Fixed issues in shadow dom expansion; set `config.spider.shadowDom` to TRUE to activate the begavior. NOTE: Ny default spidergram only waits until 'domcontentloaded', which may not populate the shadow elements. If shadow DOM elements aren't appearing, try setting `config.spider.waitUntil` to 'networkidle'.
+- Screenshots pathnames include the cropped/full flag, so batch output won't overwrite older screenshots.
+- Excel reports that split based on a column with empty values no longer error out.
 
 ## v0.10.6 - 23-08-22
 
