@@ -114,7 +114,7 @@
     "terminal-link": "^3.0.0",
     "ts-exif-parser": "^0.2.2",
     "typefs": "^2.0.0",
-    "uuid": "^9.0.0",
+    "uuid": "^9.0.1",
     "wappalyzer-core": "^6.10.54",
     "xlsx-js-style": "^1.2.0"
   },
@@ -142,7 +142,7 @@
     "eslint": "^8.30.0",
     "eslint-plugin-ava": "^13.2.0",
     "nyc": "^15.1.0",
-    "oclif": "^3.7.0",
+    "oclif": "^4.0.3",
     "prettier": "^2.8.1",
     "shx": "^0.3.3",
     "ts-node": "^10.8.0",
@@ -153,10 +153,10 @@
     "@oclif/core": "^2.6.3",
     "arangojs": "^8.1.0",
     "cheerio": "^1.0.0-rc.12",
-    "crawlee": "^3.2.0",
+    "crawlee": "^3.5.8",
     "googleapis": "^108.0.1",
-    "html-to-text": "^9.0.0",
-    "playwright": "^1.36.2",
+    "html-to-text": "^9.0.5",
+    "playwright": "^1.39.0",
     "vega": "^5.22.1",
     "vega-lite": "^5.6.0"
   }
