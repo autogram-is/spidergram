@@ -184,15 +184,19 @@ export async function getPageData(
 
     parseElementsToArray($, 'script').forEach(script => {
       if (script.type?.includes('json') && typeof script.content === 'string') {
-        const jsonData = toAnyJson(JSON.parse(script.content)) ?? {};
-        if (
-          options.schemaOrg &&
-          isJsonMap(jsonData) &&
-          HtmlTools.isSchemaOrg(jsonData)
-        ) {
-          results.schemaOrg = HtmlTools.getSchemaOrgData(jsonData);
-        } else {
-          json.push({ ...script, content: jsonData });
+        try {
+          const jsonData = toAnyJson(JSON.parse(script.content)) ?? {};
+          if (
+            options.schemaOrg &&
+            isJsonMap(jsonData) &&
+            HtmlTools.isSchemaOrg(jsonData)
+          ) {
+            results.schemaOrg = HtmlTools.getSchemaOrgData(jsonData);
+          } else {
+            json.push({ ...script, content: jsonData });
+          }
+        } catch(err: unknown) {
+          scripts.push(script);
         }
       } else if (options.scripts) {
         scripts.push(script);
