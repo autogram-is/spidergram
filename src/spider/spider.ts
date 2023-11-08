@@ -329,7 +329,18 @@ export class Spider extends PlaywrightCrawler {
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 function splitOptions(options: Partial<SpiderOptions> = {}) {
+  const internal = _.defaultsDeep(
+    options,
+    Spidergram.config.spider,
+  ) as InternalSpiderOptions;
+
+  // This strips out options we know conflict between our options and crawlee's
   const {
+    seed,
+    saveCookies,
+    savePerformance,
+    saveXhrList,
+    auditAccessibility,
     logLevel,
     pageHandler,
     requestHandlers,
@@ -341,16 +352,14 @@ function splitOptions(options: Partial<SpiderOptions> = {}) {
     userAgent,
     handlerTimeout,
     waitUntil,
+    stealth,
     shadowDom,
 
     ...crawlerOptions
-  } = options;
+  } = internal;
 
   return {
-    internal: _.defaultsDeep(
-      options,
-      Spidergram.config.spider,
-    ) as InternalSpiderOptions,
+    internal,
     crawler: crawlerOptions as PlaywrightCrawlerOptions,
   };
 }

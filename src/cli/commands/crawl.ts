@@ -1,6 +1,6 @@
 import { Flags, Args } from '@oclif/core';
 import { LogLevel } from 'crawlee';
-import { Spidergram, Spider, EntityQuery, UniqueUrl } from '../../index.js';
+import { Spidergram, Spider, EntityQuery, UniqueUrl, SpiderOptions } from '../../index.js';
 import { QueryFragments } from '../../model/queries/query-fragments.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
 import { filterUrl } from '../../tools/urls/filter-url.js';
@@ -62,21 +62,23 @@ export default class Crawl extends SgCommand {
       }
     }
 
-    const spider = new Spider({
-      logLevel: flags.verbose ? LogLevel.DEBUG : LogLevel.OFF,
-      maxConcurrency: flags.concurrency,
-      maxRequestsPerMinute: flags.rate,
-      downloadMimeTypes: flags.download,
+    const options: Partial<SpiderOptions> = {
       urls: {
         save: flags.discover === 'none' ? () => false : flags.discover,
         crawl: flags.enqueue === 'none' ? () => false : flags.enqueue,
       },
-    });
-    spider.on('progress', status => this.updateProgress(status));
-    spider.on('end', status => {
-      this.stopProgress();
-      this.log(sg.cli.summarizeStatus(status));
-    });
+    };
+    options.logLevel = flags.verbose ? LogLevel.DEBUG : LogLevel.OFF;
+    if (flags.concurrency) options.maxConcurrency = flags.concurrency;
+    if (flags.rate) options.maxRequestsPerMinute = flags.rate;
+    if (flags.download) options.downloadMimeTypes = flags.download;
+
+    const spider = new Spider(options)
+      .on('progress', status => this.updateProgress(status))
+      .on('end', status => {
+        this.stopProgress();
+        this.log(sg.cli.summarizeStatus(status));
+      });
 
     if (flags.resume && flags.enqueue !== 'none') {
       this.ux.action.start('Retrieving already-queued URLs');
