@@ -1,7 +1,7 @@
 import { SgCommand } from '../index.js';
-import { Spidergram, Dataset, KeyValueStore, UniqueUrl, UrlSource, NormalizedUrl } from '../../index.js';
+import { Spidergram, Dataset, KeyValueStore, UniqueUrl, UrlSource, NormalizedUrl, isValidName } from '../../index.js';
 import { Flags, Args } from '@oclif/core';
-import { parse as parseCsv } from '@fast-csv/parse';
+import { parse } from '@fast-csv/parse';
 import { extractUrls } from 'crawlee';
 import path from 'path';
 import is from '@sindresorhus/is';
@@ -75,16 +75,7 @@ export default class Import extends SgCommand {
       case '.tsv':
       case '.csv':
         // Read in object mode and process as usual.
-        createReadStream(args.file)
-          .pipe(
-            parseCsv({
-              headers: true,
-              objectMode: true,
-              delimiter: (ext === '.tsv' ? '\t' : ',')
-            })
-            .on('error', error => this.error(error))
-            .on('data', row => isJsonMap(row) ? rawData.push(row) : void 0 )
-          );
+        rawData.push(...await readCsv(args.file, ext));
         break;
         
       default:
@@ -100,6 +91,12 @@ export default class Import extends SgCommand {
     }
 
     if (rawData.length) {
+      const datasetName = flags.dataset ?? path.parse(args.file).name;
+
+      if (!isValidName(datasetName)) {
+        this.error(`${datasetName} is not a valid dataset name. (A-Z, a-z, 0-9, underscores, and dashes only)`)
+      }
+
       if (flags.urls) {
         const urls: UniqueUrl[] = rawData
           .map(r => (r.url ?? r.address ?? r.href)?.toString() ?? '').filter(u => u.length)
@@ -117,17 +114,27 @@ export default class Import extends SgCommand {
       }
 
       if (flags.key) {
-        const kvs = await KeyValueStore.open(flags.dataset);
+        const kvs = await KeyValueStore.open(datasetName);
         const entries = rawData
           .filter(d => flags.key && is.nonEmptyStringAndNotWhitespace(d[flags.key]))
           .map(d => [d[flags.key ?? ''], d]);
         await kvs.setValues(Object.fromEntries(entries));
       } else {
-        const ds = await Dataset.open(flags.dataset);
+        const ds = await Dataset.open(datasetName);
         await ds.pushData(rawData);
       }
 
       this.ux.info(`Imported ${rawData.length} records`);
     }
   }
+}
+
+async function readCsv(file: string, ext = '.csv') {
+  const data: JsonMap[] = [];
+  return new Promise<JsonMap[]>(resolve => {
+    createReadStream(file)
+    .pipe(parse({ headers: true, objectMode: true, delimiter: (ext === '.tsv' ? '\t' : ',') }))
+    .on('data', row => isJsonMap(row) ? data.push(row) : console.log(row))
+    .on('end', () => resolve(data));
+  })
 }

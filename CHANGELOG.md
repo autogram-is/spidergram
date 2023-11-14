@@ -2,6 +2,7 @@
 
 ## v0.10.8 - 23-11-15
 
+- Added `spidergram import <file>` to manually populate target URLs, and import arbitrary datasets for reporting.
 - Pass all config values to the crawler even when options were set from the CLI
 - Update to the latest version of Crawlee; this enables the `config.spider.sameDomainDelaySecs` property, which agressively throttles visits to touchy domains without affecting the rest of the crawl.
 - Re-enable Robots.txt and Sitemap downloading
