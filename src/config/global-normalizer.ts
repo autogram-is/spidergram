@@ -84,13 +84,25 @@ export interface NormalizerOptions {
    * // https://example.com/search.html?page=3
    * ```
    */
-  collapseSearchParams?: true | string
+  collapseSearchParams?: true | string;
 
   /**
    * Alphabetize any search/querystring parameters, so links that supply params in different
    * orders are not incorrectly flagged as different URLs.
    */
   sortSearchParams?: boolean;
+
+  /**
+   * An optional list of strings to find and replace in the URL. The `match` property, if
+   * it starts and ends with the `/` character, can be a regular expression.
+   */
+  replace?: UrlReplacement | UrlReplacement[]
+}
+
+interface UrlReplacement {
+  match: string | RegExp;
+  value: string;
+  all?: boolean;
 }
 
 export function globalNormalizer(
@@ -163,5 +175,11 @@ export function globalNormalizer(
 
   if (opts.sortSearchParams) url.searchParams.sort();
 
+  if (opts.replace) {
+    const replacements = Array.isArray(opts.replace) ? opts.replace : [opts.replace];
+    for (const r of replacements) {
+      url.href = r.all ? url.href.replaceAll(r.match, r.value) : url.href.replace(r.match, r.value);
+    }
+  }
   return url;
 }
