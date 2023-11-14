@@ -44,6 +44,12 @@ export class KeyValueStore extends GenericStore {
     return store.setValue(key, value);
   }
 
+  static async setValues<T = unknown>(key: string, values: Record<string, T>) {
+    const store = await this.open();
+    return store.setValues(values);
+  }
+
+
   static async getValue<T = unknown>(key: string): Promise<T | undefined>;
   static async getValue<T = unknown>(key: string, defaultValue: T): Promise<T>;
   static async getValue<T = unknown>(
@@ -74,5 +80,17 @@ export class KeyValueStore extends GenericStore {
     if (!isValidKey(key)) throw new TypeError('Invalid key');
     const record = await this.collection.document(key, { graceful: true });
     return (record?.value as T) ?? defaultValue ?? undefined;
+  }
+
+  async setValues<T = unknown>(values: Record<string, T>, strict = false) {
+    for (const [key, val] of Object.entries(values)) {
+      if (!isValidKey(key)) {
+        if (strict) throw new TypeError('Invalid key');
+      } else {
+        const data = { _key: key, val };
+        return this.collection.save(data, { overwriteMode: 'replace' });    
+      }
+    }
+    return Promise.resolve(this);
   }
 }
