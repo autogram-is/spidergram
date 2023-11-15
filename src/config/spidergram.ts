@@ -491,7 +491,7 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
           },
         ],
         count: 'strength',
-      })
+      }),
     };
 
     this._activeConfig.queries ??= {};

@@ -195,7 +195,7 @@ export async function getPageData(
           } else {
             json.push({ ...script, content: jsonData });
           }
-        } catch(err: unknown) {
+        } catch (err: unknown) {
           scripts.push(script);
         }
       } else if (options.scripts) {

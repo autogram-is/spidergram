@@ -25,7 +25,6 @@ export async function requestPrecheck(context: SpiderContext): Promise<void> {
   // a simple status check.
   request.skipNavigation = true;
 
- 
   if (requestMeta.statusCode < 199 || requestMeta.statusCode > 399) {
     // Anything outside of the 200-300 zone, we override the label with 'status'
     // to ensure processing halts. For some sites (if the 404 page returns
@@ -35,7 +34,10 @@ export async function requestPrecheck(context: SpiderContext): Promise<void> {
     // Thankfully, there's not really any variation in where robots.txt can live.
     // Sitemaps are a little trickier.
     request.label = 'robotstxt';
-  } else if (requestMeta.url.includes('sitemap') && requestMeta.url.endsWith('.xml')) {
+  } else if (
+    requestMeta.url.includes('sitemap') &&
+    requestMeta.url.endsWith('.xml')
+  ) {
     // Thankfully, there's not really any variation in where robots.txt can live.
     // Sitemaps are a little trickier.
     request.label = 'sitemap';

@@ -103,7 +103,7 @@ export async function saveUrls(
     await new Query('links_to')
       .filterBy('_from', resource.documentId)
       .remove()
-      .run()
+      .run();
   }
 
   return graph

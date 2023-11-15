@@ -75,7 +75,7 @@ export interface NormalizerOptions {
    * For any search/querystring parameters whose names match the supplied pattern, collapse
    * multiple values and use only the last one. Setting the property to `true` collapses
    * all search parameters regardless of name.
-   * 
+   *
    * @example
    * ```
    * const url = new ParsedUrl('https://example.com/search.html?page=1&page=2&page=3');
@@ -96,7 +96,7 @@ export interface NormalizerOptions {
    * An optional list of strings to find and replace in the URL. The `match` property, if
    * it starts and ends with the `/` character, can be a regular expression.
    */
-  replace?: UrlReplacement | UrlReplacement[]
+  replace?: UrlReplacement | UrlReplacement[];
 }
 
 interface UrlReplacement {
@@ -164,7 +164,7 @@ export function globalNormalizer(
 
   if (opts.collapseSearchParams) {
     const collapse = opts.collapseSearchParams;
-    const keys = ([...new Set(url.searchParams.keys()).values()]);
+    const keys = [...new Set(url.searchParams.keys()).values()];
     for (const key of keys) {
       if (collapse === true || minimatch(key, collapse)) {
         const value = url.searchParams.getAll(key).pop();
@@ -176,9 +176,13 @@ export function globalNormalizer(
   if (opts.sortSearchParams) url.searchParams.sort();
 
   if (opts.replace) {
-    const replacements = Array.isArray(opts.replace) ? opts.replace : [opts.replace];
+    const replacements = Array.isArray(opts.replace)
+      ? opts.replace
+      : [opts.replace];
     for (const r of replacements) {
-      url.href = r.all ? url.href.replaceAll(r.match, r.value) : url.href.replace(r.match, r.value);
+      url.href = r.all
+        ? url.href.replaceAll(r.match, r.value)
+        : url.href.replace(r.match, r.value);
     }
   }
   return url;

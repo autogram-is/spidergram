@@ -35,7 +35,10 @@ export default class Ping extends SgCommand {
 
     const browser = await launchPlaywright();
     const page = await browser.newPage();
-    const response = (await page.goto(args.url.toString(), { waitUntil: sg.config.spider?.waitUntil })) ?? undefined;
+    const response =
+      (await page.goto(args.url.toString(), {
+        waitUntil: sg.config.spider?.waitUntil,
+      })) ?? undefined;
 
     const body = await getPageMarkup(page, shadow);
 
@@ -97,7 +100,7 @@ export default class Ping extends SgCommand {
       Type: r.mime ?? 'unknown',
       'Body classes':
         (r.get('data.attributes.classes') as string[] | undefined) ?? '',
-      Cookies: r.cookies?.length ?? 0
+      Cookies: r.cookies?.length ?? 0,
     };
     this.log(c.header('Overview'));
     this.ux.info(CLI.infoList(overview));
@@ -129,8 +132,8 @@ export default class Ping extends SgCommand {
       this.log(c.header('Page Content'));
       const output = {
         ...readability,
-        text: typeof(text) === 'string' ? text.slice(0, 256) : ''
-      }  
+        text: typeof text === 'string' ? text.slice(0, 256) : '',
+      };
       this.ux.info(CLI.infoList(output));
     }
 

@@ -49,7 +49,6 @@ export class KeyValueStore extends GenericStore {
     return store.setValues(values);
   }
 
-
   static async getValue<T = unknown>(key: string): Promise<T | undefined>;
   static async getValue<T = unknown>(key: string, defaultValue: T): Promise<T>;
   static async getValue<T = unknown>(
@@ -88,7 +87,7 @@ export class KeyValueStore extends GenericStore {
         if (strict) throw new TypeError('Invalid key');
       } else {
         const data = { _key: key, val };
-        return this.collection.save(data, { overwriteMode: 'replace' });    
+        return this.collection.save(data, { overwriteMode: 'replace' });
       }
     }
     return Promise.resolve(this);

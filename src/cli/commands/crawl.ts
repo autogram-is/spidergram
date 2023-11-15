@@ -1,6 +1,12 @@
 import { Flags, Args } from '@oclif/core';
 import { LogLevel } from 'crawlee';
-import { Spidergram, Spider, EntityQuery, UniqueUrl, SpiderOptions } from '../../index.js';
+import {
+  Spidergram,
+  Spider,
+  EntityQuery,
+  UniqueUrl,
+  SpiderOptions,
+} from '../../index.js';
 import { QueryFragments } from '../../model/queries/query-fragments.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
 import { filterUrl } from '../../tools/urls/filter-url.js';

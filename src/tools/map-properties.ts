@@ -66,7 +66,7 @@ export interface PropertyMapRule extends Record<string, unknown> {
    *
    * @defaultValue: undefined
    */
-split?: string | RegExp;
+  split?: string | RegExp;
 
   /**
    * If the property is not found, or the selector returns empty results, return this value
@@ -186,13 +186,16 @@ export function findPropertyValue<T = object>(
           } else {
             if (matches.length > 0) {
               v = matches.slice(0, source.limit);
-              v = (source.join || v.length === 1) ? v.join(source.join) : v;
+              v = source.join || v.length === 1 ? v.join(source.join) : v;
               if (v?.length === 0) v = undefined;
             } else {
               v = undefined;
             }
           }
-        } else if (typeof v === 'string' && typeof source.selector === 'string') {
+        } else if (
+          typeof v === 'string' &&
+          typeof source.selector === 'string'
+        ) {
           const $ = domDictionary[source.source] ?? getCheerio(v);
           domDictionary[source.source] ??= $;
 
@@ -206,7 +209,7 @@ export function findPropertyValue<T = object>(
                   return $(e).attr(source.attribute)?.trim();
                 else return $(e).text().trim();
               });
-              v = (source.join || v.length === 1) ? v.join(source.join) : v;
+              v = source.join || v.length === 1 ? v.join(source.join) : v;
               if (v?.length === 0) v = undefined;
             } else {
               v = undefined;
@@ -222,7 +225,7 @@ export function findPropertyValue<T = object>(
       }
     }
   }
-  
+
   return undefined;
 }
 
@@ -230,10 +233,7 @@ export function findPropertyValue<T = object>(
  * This internal function applies the filtering logic for potential property values;
  * if `conditions.selector` was populated.
  */
-function checkPropertyValue(
-  value: unknown,
-  rule: PropertyMapRule,
-): unknown {
+function checkPropertyValue(value: unknown, rule: PropertyMapRule): unknown {
   if (rule.eq !== undefined) {
     if (_.isEqual(rule.eq, value)) {
       return rule.negate ? undefined : getReturnValue(value, rule);
@@ -250,10 +250,8 @@ function checkPropertyValue(
     let foundMatch = false;
     if (Array.isArray(value)) {
       const returnValue = _.intersection(rule.in, value);
-      if (returnValue.length === 0)
-        return getReturnValue(undefined, rule);
-      if (returnValue.length === 1)
-        return getReturnValue(returnValue[0], rule);
+      if (returnValue.length === 0) return getReturnValue(undefined, rule);
+      if (returnValue.length === 1) return getReturnValue(returnValue[0], rule);
       return getReturnValue(returnValue, rule);
     } else {
       for (const condition of rule.in) {
@@ -272,9 +270,7 @@ function checkPropertyValue(
   } else if (rule.matching !== undefined) {
     if (typeof value === 'string') {
       if (minimatch(value, rule.matching)) {
-        return rule.negate
-          ? undefined
-          : getReturnValue(value, rule);
+        return rule.negate ? undefined : getReturnValue(value, rule);
       }
     } else if (Array.isArray(value)) {
       const returnList = value

@@ -1,7 +1,12 @@
 import is from '@sindresorhus/is';
 import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import arrify from 'arrify';
-import { log, PlaywrightCrawlingContext, PlaywrightDirectNavigationOptions, SystemInfo } from 'crawlee';
+import {
+  log,
+  PlaywrightCrawlingContext,
+  PlaywrightDirectNavigationOptions,
+  SystemInfo,
+} from 'crawlee';
 import { FinalStatistics } from 'crawlee';
 import _ from 'lodash';
 import { chromium } from 'playwright-extra';
@@ -110,26 +115,26 @@ export class Spider extends PlaywrightCrawler {
     ): Promise<void> =>
       handlers.failureHandler(ctx as unknown as SpiderContext, error);
 
-    const launchContext: typeof crawler['launchContext'] = {};
+    const launchContext: (typeof crawler)['launchContext'] = {};
     if (internal.userAgent && !internal.stealth) {
-      launchContext.userAgent = internal.userAgent
+      launchContext.userAgent = internal.userAgent;
     }
 
     launchContext.launchOptions ??= {};
-    launchContext.launchOptions.headless = crawler.headless
+    launchContext.launchOptions.headless = crawler.headless;
 
     if (internal.stealth) {
       chromium.use(StealthPlugin());
       launchContext.launcher = chromium;
     }
-    
+
     crawler.launchContext = launchContext;
 
     crawler.browserPoolOptions = {
       preLaunchHooks: [
         async (_, launchContext) => {
-          launchContext.ignoreHTTPSErrors = true
-        }
+          launchContext.ignoreHTTPSErrors = true;
+        },
       ],
     };
 
@@ -142,12 +147,10 @@ export class Spider extends PlaywrightCrawler {
     }
 
     if (options.waitUntil) {
-      crawler.preNavigationHooks.push(
-        (ctx, opt) => {
-          opt ??= {};
-          opt.waitUntil = options.waitUntil;
-        } 
-      );
+      crawler.preNavigationHooks.push((ctx, opt) => {
+        opt ??= {};
+        opt.waitUntil = options.waitUntil;
+      });
     }
 
     super(crawler, config);
@@ -171,7 +174,10 @@ export class Spider extends PlaywrightCrawler {
     await super._runRequestHandler(context);
   }
 
-  protected override async _navigationHandler(crawlingContext: PlaywrightCrawlingContext, gotoOptions: PlaywrightDirectNavigationOptions) {
+  protected override async _navigationHandler(
+    crawlingContext: PlaywrightCrawlingContext,
+    gotoOptions: PlaywrightDirectNavigationOptions,
+  ) {
     return super._navigationHandler(crawlingContext, gotoOptions);
   }
 

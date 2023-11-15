@@ -25,7 +25,7 @@ export default class Analyze extends SgCommand {
       summary: 'The maximum number of results to process',
     }),
     debug: Flags.boolean({
-      summary: 'Preview the settings, but do not run the analysis'
+      summary: 'Preview the settings, but do not run the analysis',
     }),
     verbose: CLI.outputFlags.verbose,
   };
@@ -50,7 +50,7 @@ export default class Analyze extends SgCommand {
       tech: flags.tech ?? flags.all ?? false,
       patterns: flags.designPatterns ?? flags.all ?? false,
       links: flags.links ?? flags.all ?? false,
-    }
+    };
 
     const options = sg.config.analysis ?? {};
 
@@ -70,8 +70,8 @@ export default class Analyze extends SgCommand {
       this.ux.styledJSON({
         concurrency: flags.concurrency?.toString(),
         limit: flags.limit?.toString(),
-        ...options
-    });
+        ...options,
+      });
       this.exit();
     }
 
@@ -101,4 +101,3 @@ export default class Analyze extends SgCommand {
     });
   }
 }
-

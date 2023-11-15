@@ -101,11 +101,11 @@ function singleFilter(
 
       case UrlMatchStrategy.SameDomain:
         if (contextUrl === undefined) return null;
-        return (url.domain === contextUrl.domain) ? true : null;
+        return url.domain === contextUrl.domain ? true : null;
 
       case UrlMatchStrategy.SameHostname:
         if (contextUrl === undefined) return null;
-        return (url.hostname === contextUrl.hostname) ? true : null;
+        return url.hostname === contextUrl.hostname ? true : null;
 
       default:
         return null;

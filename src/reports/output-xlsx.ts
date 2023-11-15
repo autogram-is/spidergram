@@ -219,9 +219,7 @@ export async function outputXlsxReport(
   const curFilePath = `${outputPath}.xlsx`;
 
   const bin = path.join(
-    sg.config.outputDirectory ??
-      sg.config.storageDirectory ??
-      './storage',
+    sg.config.outputDirectory ?? sg.config.storageDirectory ?? './storage',
   );
   await ensureDir(path.join(bin, path.dirname(curFilePath)));
 

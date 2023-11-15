@@ -36,11 +36,17 @@ export default class DeleteEntities extends SgCommand {
     const sg = await Spidergram.load();
 
     const docCollections = ['unique_urls', 'resources', 'sites', 'patterns'];
-    const relCollections = ['appears_on', 'links_to', 'is_child_of', 'is_variant_of', 'responds_with'];
+    const relCollections = [
+      'appears_on',
+      'links_to',
+      'is_child_of',
+      'is_variant_of',
+      'responds_with',
+    ];
 
     // If a collection was passed in, start building a query.
-    // If 'orphans' was specified, start calculating the number of 
-  
+    // If 'orphans' was specified, start calculating the number of
+
     if (flags.collection) {
       if (!docCollections.includes(flags.collection)) {
         this.error(`No collection named '${flags.collection}'.`);
@@ -54,28 +60,38 @@ export default class DeleteEntities extends SgCommand {
       }
 
       const cq = new Query(q.spec);
-      cq.return('_id')
+      cq.return('_id');
       const delCount = (await cq.run()).length;
 
       if (delCount === 0) {
         this.error('No matching documents.');
       }
 
-      const confirmation = flags.force ? true : await CLI.confirm(`Delete ${delCount} matching ${flags.collection} documents?`);
+      const confirmation = flags.force
+        ? true
+        : await CLI.confirm(
+            `Delete ${delCount} matching ${flags.collection} documents?`,
+          );
       if (!confirmation) {
         this.ux.info(`Delete canceled; no documents were affected.`);
         this.exit(0);
       }
 
       if (flags.orphans) {
-        const confirmation = flags.force ? true : await CLI.confirm(`Delete all relationships connected to the affected documents?`);
+        const confirmation = flags.force
+          ? true
+          : await CLI.confirm(
+              `Delete all relationships connected to the affected documents?`,
+            );
         if (!confirmation) {
-          this.ux.info(`Delete canceled; no documents or relationships were affected.`);
+          this.ux.info(
+            `Delete canceled; no documents or relationships were affected.`,
+          );
           this.exit(0);
         }
-  
+
         this.ux.action.start('Deleting');
-        
+
         q.spec.return = undefined;
         q.spec.remove = undefined;
         q.return('_id');
@@ -89,8 +105,13 @@ export default class DeleteEntities extends SgCommand {
         }
 
         // Special case handling for body HTML storage; we need to clean this up later.
-        if (q.spec.collection === 'resources' && sg.config.offloadBodyHtml === 'db') {
-          queries.push(new Query('kv_body_html').filterBy('_key', ids).remove());
+        if (
+          q.spec.collection === 'resources' &&
+          sg.config.offloadBodyHtml === 'db'
+        ) {
+          queries.push(
+            new Query('kv_body_html').filterBy('_key', ids).remove(),
+          );
         }
 
         for (const qs of queries) {
@@ -100,7 +121,7 @@ export default class DeleteEntities extends SgCommand {
 
         this.ux.action.stop();
       }
-      
+
       q.spec.remove = undefined;
       q.spec.return = undefined;
       q.remove();
