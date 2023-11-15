@@ -1,6 +1,6 @@
 import { SgCommand } from '../index.js';
 import { Spidergram, Dataset, KeyValueStore, UniqueUrl, UrlSource, NormalizedUrl, isValidName, UuidFactory } from '../../index.js';
-import { Flags, Args } from '@oclif/core';
+import { Flags, Args, Command } from '@oclif/core';
 import { parse } from '@fast-csv/parse';
 import { extractUrls } from 'crawlee';
 import path from 'path';
@@ -13,6 +13,20 @@ const { readFile, readJSON, existsSync, createReadStream } = fse;
 
 export default class Import extends SgCommand {
   static description = 'Import URLs to crawl, or a dataset for analysis';
+  static examples: Command.Example[] = [
+    {
+      description: `Import and enqueue URLs from a sitemap.txt`,
+      command: `spidergram import sitemap.txt --urls`,
+    },
+    {
+      description: `Import a CSV file into the 'analytics' key value store, indexed by the 'address' column`,
+      command: `spidergram import google-analytics.csv --dataset=analytics --key=address`,
+    },
+    {
+      description: `Preview the output without saving the data`,
+      command: `spidergram import my-data.json --debug`,
+    }
+  ];
 
   static flags = {
     urls: Flags.boolean({
@@ -20,8 +34,8 @@ export default class Import extends SgCommand {
       summary: 'Import the data as crawlable URLs',
     }),
 
-    dataset: Flags.string({
-      char: 'd',
+    collection: Flags.string({
+      char: 'c',
       summary: 'Collection name to store the imported records',
       exclusive: ['urls'] 
     }),
@@ -110,10 +124,10 @@ export default class Import extends SgCommand {
     }
 
     if (rawData.length) {
-      const datasetName = flags.dataset ?? path.parse(args.file).name;
+      const storeName = flags.collection ?? path.parse(args.file).name;
 
-      if (!isValidName(datasetName)) {
-        this.error(`${datasetName} is not a valid dataset name. (A-Z, a-z, 0-9, underscores, and dashes only)`)
+      if (!isValidName(storeName)) {
+        this.error(`${storeName} is not a valid dataset name. (A-Z, a-z, 0-9, underscores, and dashes only)`)
       }
 
       if (flags.urls) {
@@ -140,7 +154,7 @@ export default class Import extends SgCommand {
       }
 
       if (flags.key) {
-        const kvs = await KeyValueStore.open(datasetName);
+        const kvs = await KeyValueStore.open(storeName);
         const entries = rawData
           .filter(d => flags.key && is.nonEmptyStringAndNotWhitespace(d[flags.key]))
           .map(d => [d[flags.key ?? ''], d]);
@@ -150,7 +164,7 @@ export default class Import extends SgCommand {
           await kvs.setValues(Object.fromEntries(entries));
         }
       } else if (flags.hash) {
-        const kvs = await KeyValueStore.open(datasetName);
+        const kvs = await KeyValueStore.open(storeName);
         const entries = rawData
           .map(d => {
             let hash = '';
@@ -181,7 +195,7 @@ export default class Import extends SgCommand {
           await kvs.setValues(Object.fromEntries(entries));
         }
       } else {
-        const ds = await Dataset.open(datasetName);
+        const ds = await Dataset.open(storeName);
         if (flags.debug) {
           this.logJson(rawData);
         } else {
