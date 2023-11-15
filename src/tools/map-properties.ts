@@ -61,6 +61,14 @@ export interface PropertyMapRule extends Record<string, unknown> {
   join?: string;
 
   /**
+   * If the property value is found and is a string, split it into an array using this
+   * character or regular expression.
+   *
+   * @defaultValue: undefined
+   */
+split?: string | RegExp;
+
+  /**
    * If the property is not found, or the selector returns empty results, return this value
    * as a fallback.
    *
@@ -171,7 +179,20 @@ export function findPropertyValue<T = object>(
     } else {
       let v = _.get(object, source.source);
       if (!undef(v, source)) {
-        if (typeof v === 'string' && typeof source.selector === 'string') {
+        if (typeof v == 'string' && source.split) {
+          const matches = v.split(source.split);
+          if (source.count) {
+            v = matches.length;
+          } else {
+            if (matches.length > 0) {
+              v = matches.slice(0, source.limit);
+              v = (source.join || v.length === 1) ? v.join(source.join) : v;
+              if (v?.length === 0) v = undefined;
+            } else {
+              v = undefined;
+            }
+          }
+        } else if (typeof v === 'string' && typeof source.selector === 'string') {
           const $ = domDictionary[source.source] ?? getCheerio(v);
           domDictionary[source.source] ??= $;
 
@@ -185,7 +206,7 @@ export function findPropertyValue<T = object>(
                   return $(e).attr(source.attribute)?.trim();
                 else return $(e).text().trim();
               });
-              v = source.join || v.length === 1 ? v.join(source.join) : v;
+              v = (source.join || v.length === 1) ? v.join(source.join) : v;
               if (v?.length === 0) v = undefined;
             } else {
               v = undefined;
