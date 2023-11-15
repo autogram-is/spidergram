@@ -93,12 +93,11 @@ export const analysisFlags = {
   all: Flags.boolean({
     char: 'a',
     summary: 'Process all possible information',
-    default: true
   }),
   none: Flags.boolean({
     char: 'n',
+    exclusive: ['all'],
     summary: 'Only process specified options',
-    default: false
   }),
   reprocess: Flags.boolean({
     char: 'r',
