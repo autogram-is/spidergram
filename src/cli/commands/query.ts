@@ -1,5 +1,5 @@
 import { SgCommand } from '../index.js';
-import { Flags, Args } from '@oclif/core';
+import { Flags, Args, Command } from '@oclif/core';
 import {
   OutputLevel,
   Spidergram,
@@ -7,6 +7,7 @@ import {
   isAqlAggregateFunction,
   FileTools,
   isAqQuery,
+  AqlAggregateFunction,
 } from '../../index.js';
 import _ from 'lodash';
 import { readFile } from 'fs/promises';
@@ -26,9 +27,23 @@ export default class RunQuery extends SgCommand {
   static strict = false;
 
   static summary = 'Run a query against the crawl data';
+  
+  static examples: Command.Example[] = [
+    { 
+      description: `Generate a CSV file containing URLs that returned HTTP errors`,
+      command: `<%= command.id %> --filter "code>400" --return code --return url --output errors.csv`
+    },
+    { 
+      description: `Display the number of 404 errors encountered, by site`,
+      command: `<%= command.id %> --filter code=404 --group parsed.hostname`
+    },
+    {
+      description: `Display the average page load time by site`,
+      command: `<%= command.id %> --avg "avg_ms=timing.duration" --group "host=parsed.hostname"`
+    }
+  ]; 
 
-  static usage =
-    '<%= command.id %> [query name>] [--input <value> | --aql <value> | --collection=<value>] ...';
+  static usage = '<%= command.id %> [query name>] [--input <value> | --aql <value> | --collection=<value>] ...';
 
   static args = {
     query: Args.string({
@@ -399,7 +414,7 @@ debug: Display the query spec and generated AQL statement without running it
       for (const a of flags[fnc] ?? []) {
         const [name, path] = a.split('=');
         if (isAqlAggregateFunction(fnc)) {
-          qb.aggregate({ name, path, function: fnc });
+          qb.aggregate({ name, path, function: fnc as AqlAggregateFunction, type: 'number' });
         }
       }
     }
