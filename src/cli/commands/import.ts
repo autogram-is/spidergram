@@ -1,5 +1,5 @@
 import { SgCommand } from '../index.js';
-import { Spidergram, Dataset, KeyValueStore, UniqueUrl, UrlSource, NormalizedUrl, isValidName } from '../../index.js';
+import { Spidergram, Dataset, KeyValueStore, UniqueUrl, UrlSource, NormalizedUrl, isValidName, UuidFactory } from '../../index.js';
 import { Flags, Args } from '@oclif/core';
 import { parse } from '@fast-csv/parse';
 import { extractUrls } from 'crawlee';
@@ -8,6 +8,7 @@ import is from '@sindresorhus/is';
 
 import fse from 'fs-extra';
 import { JsonMap, asJsonMap, isJsonArray, isJsonMap } from '@salesforce/ts-types';
+import _ from 'lodash';
 const { readFile, readJSON, existsSync, createReadStream } = fse;
 
 export default class Import extends SgCommand {
@@ -28,6 +29,13 @@ export default class Import extends SgCommand {
     key: Flags.string({
       char: 'k',
       summary: 'Record key property; if set, records will be saved to a KVS',
+      exclusive: ['urls', 'hash'] 
+    }),
+
+    hash: Flags.string({
+      char: 'h',
+      summary: 'Hash the specified properties to create a key, and save to a KVS',
+      multiple: true,
       exclusive: ['urls'] 
     }),
 
@@ -41,6 +49,10 @@ export default class Import extends SgCommand {
     base: Flags.url({
       char: 'b',
       summary: 'Base address for relative URLs',
+    }),
+
+    debug: Flags.boolean({
+      summary: 'Output results to console rather than saving'
     })
   };
 
@@ -85,8 +97,15 @@ export default class Import extends SgCommand {
           .then(data => data.toString() ?? '')
           .then(string => extractUrls({ string }))
           .then(urls => urls.map(url => new UniqueUrl({ url, source: UrlSource.Import, base: flags.base })))
-          .then(urls => sg.arango.push(urls, false))
-          .then(results => this.ux.info(`Imported ${results.length} URLs`));
+          .then(urls => {
+            if (flags.debug) {
+              this.logJson(urls.map(uu => uu.url));
+              this.ux.info(`Processed but did not import ${urls.length} URLs`);
+              return Promise.resolve()
+            } else {
+              return sg.arango.push(urls, false).then(results => this.ux.info(`Imported ${results.length} URLs`));
+            }
+          })
         this.exit();
     }
 
@@ -98,13 +117,20 @@ export default class Import extends SgCommand {
       }
 
       if (flags.urls) {
+        // We're inserting URLs into the crawl queue, not a separate dataset
         const urls: UniqueUrl[] = rawData
           .map(r => (r.url ?? r.address ?? r.href)?.toString() ?? '').filter(u => u.length)
           .map(url => new UniqueUrl({ url, source: UrlSource.Import, base: flags.base }));
-        await sg.arango.push(urls, false)
+          
+        if (flags.debug) {
+          this.logJson(urls.map(uu => uu.url));
+          this.ux.info(`Processed but did not import ${urls.length} URLs`);
+        } else {
+          await sg.arango.push(urls, false)
           .then(results => this.ux.info(`Imported ${results.length} URLs`));
-        
+        }
       } else if (flags.normalize) {
+        // We're not inserting queue records, but there's a URL property to be normalized
         rawData.forEach(j => {
           if (flags.normalize in j && is.nonEmptyStringAndNotWhitespace(j[flags.normalize])) {
             const u = j[flags.normalize]?.toString() ?? '';
@@ -118,13 +144,52 @@ export default class Import extends SgCommand {
         const entries = rawData
           .filter(d => flags.key && is.nonEmptyStringAndNotWhitespace(d[flags.key]))
           .map(d => [d[flags.key ?? ''], d]);
-        await kvs.setValues(Object.fromEntries(entries));
+        if (flags.debug) {
+          this.logJson(entries);
+        } else {
+          await kvs.setValues(Object.fromEntries(entries));
+        }
+      } else if (flags.hash) {
+        const kvs = await KeyValueStore.open(datasetName);
+        const entries = rawData
+          .map(d => {
+            let hash = '';
+            if (flags.hash && flags.hash.length == 1) {
+              if (flags.hash[0] == 'all') {
+                // Generate from the entire object
+                hash = UuidFactory.generate(d);
+              } else if (UuidFactory.isUuid(d[flags.hash[0]]?.toString() ?? '')) {
+                // Hash is already a Uuid
+                hash = d[flags.hash[0]]?.toString() ?? '';
+              } else {
+                // Generate from the key
+                hash = UuidFactory.generate(d[flags.hash[0]])
+              }
+            } else if (flags.hash && flags.hash.length > 1) {
+              // Generate from a specific set of keys
+              const props: Record<string, unknown> = {};
+              for (const p of flags.hash) {
+                props[p] = _.get(d, p);
+              }
+              hash = UuidFactory.generate(props);
+            }
+            return [hash, d];
+          });
+        if (flags.debug) {
+          this.logJson(Object.fromEntries(entries));
+        } else {
+          await kvs.setValues(Object.fromEntries(entries));
+        }
       } else {
         const ds = await Dataset.open(datasetName);
-        await ds.pushData(rawData);
+        if (flags.debug) {
+          this.logJson(rawData);
+        } else {
+          await ds.pushData(rawData);
+        }
       }
 
-      this.ux.info(`Imported ${rawData.length} records`);
+      this.ux.info(`${flags.debug ? 'Processed but did not import' : 'Imported'} ${rawData.length} records`);
     }
   }
 }
