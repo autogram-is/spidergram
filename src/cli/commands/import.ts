@@ -26,7 +26,7 @@ import _ from 'lodash';
 const { readFile, readJSON, existsSync, createReadStream } = fse;
 
 export default class Import extends SgCommand {
-  static description = 'Import URLs to crawl, or a dataset for analysis';
+  static description = 'Import URLs to crawl, or a collection for analysis';
   static examples: Command.Example[] = [
     {
       description: `Import and enqueue URLs from a sitemap.txt`,
@@ -34,7 +34,7 @@ export default class Import extends SgCommand {
     },
     {
       description: `Import a CSV file into the 'analytics' key value store, indexed by the 'address' column`,
-      command: `spidergram import google-analytics.csv --dataset=analytics --key=address`,
+      command: `spidergram import google-analytics.csv --collection=analytics --key=address`,
     },
     {
       description: `Preview the output without saving the data`,
@@ -158,12 +158,12 @@ export default class Import extends SgCommand {
 
       if (!isValidName(storeName)) {
         this.error(
-          `${storeName} is not a valid dataset name. (A-Z, a-z, 0-9, underscores, and dashes only)`,
+          `${storeName} is not a valid collection name. (A-Z, a-z, 0-9, underscores, and dashes only)`,
         );
       }
 
       if (flags.urls) {
-        // We're inserting URLs into the crawl queue, not a separate dataset
+        // We're inserting URLs into the crawl queue, not a separate collection
         const urls: UniqueUrl[] = rawData
           .map(r => (r.url ?? r.address ?? r.href)?.toString() ?? '')
           .filter(u => u.length)
