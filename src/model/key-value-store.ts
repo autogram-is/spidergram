@@ -82,14 +82,15 @@ export class KeyValueStore extends GenericStore {
   }
 
   async setValues<T = unknown>(values: Record<string, T>, strict = false) {
+    const promises: Promise<void>[] = [];
     for (const [key, val] of Object.entries(values)) {
       if (!isValidKey(key)) {
         if (strict) throw new TypeError('Invalid key');
       } else {
         const data = { _key: key, val };
-        return this.collection.save(data, { overwriteMode: 'replace' });
+        promises.push(this.collection.save(data, { overwriteMode: 'replace' }).then(() => void 0))
       }
     }
-    return Promise.resolve(this);
+    return Promise.all(promises);
   }
 }
