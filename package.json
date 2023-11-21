@@ -67,7 +67,7 @@
   },
   "dependencies": {
     "@autogram/url-tools": "^2.5.4",
-    "@axe-core/playwright": "^4.7.1",
+    "@axe-core/playwright": "^4.8.1",
     "@oclif/plugin-help": "^5",
     "@oclif/plugin-plugins": "^2.4.1",
     "@proload/core": "^0.3.3",

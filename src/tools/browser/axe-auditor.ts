@@ -1,4 +1,4 @@
-import AxeBuilder from '@axe-core/playwright';
+import { AxeBuilder } from '@axe-core/playwright';
 import { Page } from 'playwright';
 import is from '@sindresorhus/is';
 import { KeyValueStore, Resource, SpidergramError } from '../../index.js';
@@ -96,8 +96,7 @@ const defaults: AxeAuditOptions = {
  */
 export class AxeAuditor {
   static async run(page: Page) {
-    // @ts-expect-error Temporary ugly Axe shim
-    const ab = new AxeBuilder.default({ page }) as AxeBuilder;
+    const ab = new AxeBuilder({ page });
 
     // In the future we may want to set additional options before running the analysis.
     return ab.analyze().catch(error => {
