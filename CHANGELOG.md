@@ -1,14 +1,16 @@
 # Spidergram Changelog
 
-## v0.10.8 - 23-11-15
+## v0.10.8 - 23-11-22
 
 - Added `spidergram import <file>` to manually populate target URLs, and import arbitrary datasets for reporting.
-- Pass all config values to the crawler even when options were set from the CLI
+- Added `spidergram pagespeed` to run Google's Pagespeed API reporting tool on sets of URLs.
+- Pass all config values to the crawler even when other options are set from the CLI
 - Support split/slice/join operations for string and array values when property mapping
 - Re-enable Robots.txt and Sitemap downloading
 - Recover gracefully from JSON parsing errors during page analysis
 - Added a 'replace' operation to the global URL normalizer for correcting specific borked URL patterns
 - Update to the latest version of Crawlee; this enables the `config.spider.sameDomainDelaySecs` property
+- Remove an axe library workaround that's no longer necessary
 
 ## v0.10.7 - 23-08-30
 
