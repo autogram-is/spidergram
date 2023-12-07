@@ -80,6 +80,12 @@ export default class Import extends SgCommand {
       summary: 'Base address for relative URLs',
     }),
 
+    append: Flags.boolean({
+      char: 'a',
+      default: false,
+      summary: 'Append imported data rather than replacing past imports',
+    }),
+
     debug: Flags.boolean({
       summary: 'Output results to console rather than saving',
     }),
@@ -105,13 +111,13 @@ export default class Import extends SgCommand {
 
     switch (ext) {
       case '.json':
-        readJSON(args.file)
+        await readJSON(args.file)
           .then(json => (isJsonArray(json) ? json : []))
           .then(json => json.map(j => asJsonMap(j)))
           .then(json =>
             json.forEach(j => {
               if (j) rawData.push(j);
-            }),
+            })
           );
         break;
 
@@ -153,7 +159,9 @@ export default class Import extends SgCommand {
         this.exit();
     }
 
-    if (rawData.length) {
+    if (rawData.length === 0) {
+      this.log('No records found in data file.')
+    } else {
       const storeName = flags.collection ?? path.parse(args.file).name;
 
       if (!isValidName(storeName)) {
@@ -207,6 +215,9 @@ export default class Import extends SgCommand {
         if (flags.debug) {
           this.logJson(entries);
         } else {
+          if (!flags.append) {
+            await kvs.empty();
+          }  
           await kvs.setValues(Object.fromEntries(entries));
         }
       } else if (flags.hash) {
@@ -237,6 +248,9 @@ export default class Import extends SgCommand {
         if (flags.debug) {
           this.logJson(Object.fromEntries(entries));
         } else {
+          if (!flags.append) {
+            await kvs.empty();
+          }  
           await kvs.setValues(Object.fromEntries(entries));
         }
       } else {
@@ -244,6 +258,9 @@ export default class Import extends SgCommand {
         if (flags.debug) {
           this.logJson(rawData);
         } else {
+          if (!flags.append) {
+            await ds.empty();
+          }
           await ds.pushData(rawData);
         }
       }
