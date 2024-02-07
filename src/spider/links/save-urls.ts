@@ -12,6 +12,8 @@ import {
 } from '../../index.js';
 import _ from 'lodash';
 
+const seenUrls: Set<string> = new Set<string>();
+
 export async function saveUrls(
   context: SpiderContext,
   links: HtmlTools.FoundLink | HtmlTools.FoundLink[],
@@ -21,6 +23,7 @@ export async function saveUrls(
     customOptions,
     context.urls,
   );
+
   const { graph, uniqueUrl, resource } = context;
   const results: {
     uniques: UniqueUrl[];
@@ -82,6 +85,16 @@ export async function saveUrls(
       results.uniques.push(uu);
     }
 
+    if (options.discardExisting) {
+      if (!seenUrls.has(uu.key) && !(await graph.exists(uu))) {
+        seenUrls.add(uu.key);
+        results.uniques.push(uu);
+      }
+    } else {
+      seenUrls.add(uu.key);
+      results.uniques.push(uu);
+    }
+
     if (resource !== undefined) {
       const lt = new LinksTo({
         from: resource,
@@ -95,6 +108,10 @@ export async function saveUrls(
   // This is a little complicated; when we're about to save new link_to records,
   // we need to make sure the old ones aren't cluttering things up. This is
   // about as clean as it gets, sadly.
+
+  // Actually: This should occur at the page processing level, not the URL list
+  // level. Doing it here is what makes a lot of our resource context slinging
+  // painful.
   if (
     resource !== undefined &&
     results.links.length > 0 &&
