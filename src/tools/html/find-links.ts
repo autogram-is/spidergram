@@ -79,6 +79,7 @@ export function findSitempLinks(input: string | cheerio.Root) {
       results.push({
         url: $(element).find('loc').text(),
         date: $(element).find('lastmod').text() ?? undefined,
+        label: 'sitemap',
       });
     });
 
