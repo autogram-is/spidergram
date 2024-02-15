@@ -1,5 +1,12 @@
 # Spidergram Changelog
 
+## v0.10.9 - 24-02-xx
+
+- Fix sitemap and robots.txt processing — they were saving but failing to read from the correct location
+- Add a `spidergram sitemap` command to gather URLs from one or more sites' robots.txt and sitemap.xml files
+- Use an in-memory URL cache during crawling to avoid thrashing the DB with "have we seen it before?" checks
+- Fix ingestion of JSON files when using the `spidergram import` command
+
 ## v0.10.8 - 23-11-22
 
 - Added `spidergram import <file>` to manually populate target URLs, and import arbitrary datasets for reporting.

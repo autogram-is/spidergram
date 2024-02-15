@@ -42,7 +42,7 @@ export async function robotsTxtHandler(context: SpiderContext) {
     await graph.push(resource);
 
     // Read it back in and pass along
-    const txt = await files().read(fileName);
+    const txt = await files().read(fullPath);
     const hostUrl = new URL(context.request.url);
     hostUrl.pathname = '';
     Robots.setRules(hostUrl, txt.toString());

@@ -41,7 +41,7 @@ export async function sitemapHandler(context: SpiderContext) {
     await graph.push(resource);
 
     // Now read it back in
-    const xml = await files().read(fileName);
+    const xml = await files().read(fullPath);
 
     // Now parse the sitemap and pull out URLs. Some sites (vanityfair.com is one
     // example) do odd things like sitemap URLs with querystrings
