@@ -39,6 +39,7 @@ export async function saveUrls(
       base: uniqueUrl?.url,
       referer: uniqueUrl?.url,
       depth: uniqueUrl === undefined ? 0 : uniqueUrl.depth + 1,
+      handler: options.handler ?? undefined,
       normalizer: options.normalizer ?? NormalizedUrl.normalizer,
     });
 
