@@ -82,6 +82,7 @@ export default class Sitemap extends SgCommand {
         this.log(sg.cli.summarizeStatus(status));
       });
 
+    this.startProgress('Downloading sitemaps');
     await spider.run(queue);
 
     return Promise.resolve();
