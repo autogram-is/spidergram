@@ -1,11 +1,12 @@
 # Spidergram Changelog
 
-## v0.10.9 - 24-02-xx
+## v0.10.9 - 24-02-23
 
 - Fix sitemap and robots.txt processing — they were saving but failing to read from the correct location
 - Add a `spidergram sitemap` command to gather URLs from one or more sites' robots.txt and sitemap.xml files
 - Use an in-memory URL cache during crawling to avoid thrashing the DB with "have we seen it before?" checks
 - Fix ingestion of JSON files when using the `spidergram import` command
+- Made 'resume' behavior consistent across sitemap and crawl commands; resume is now the default, but can be toggled off as desired.
 
 ## v0.10.8 - 23-11-22
 
