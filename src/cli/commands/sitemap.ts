@@ -1,10 +1,13 @@
-import { Args } from '@oclif/core';
+import { Args, Flags } from '@oclif/core';
 import { Request } from 'crawlee';
 import {
+  EntityQuery,
   NormalizedUrlSet,
+  QueryFragments,
   Spider,
   SpiderOptions,
   Spidergram,
+  UniqueUrl,
 } from '../../index.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
 import { LogLevel } from 'crawlee';
@@ -16,11 +19,17 @@ export default class Sitemap extends SgCommand {
   static flags = {
     ...CLI.globalFlags,
     verbose: CLI.outputFlags.verbose,
+    resume: Flags.boolean({
+      char: 'r',
+      summary: 'Retrieve known but uncrawled sitemaps',
+      allowNo: true,
+      default: true,
+    })
   };
 
   static args = {
     urls: Args.string({
-      description: 'URLs to scan',
+      description: 'Hosts to scan for sitemaps',
       required: false,
     }),
   };
@@ -30,8 +39,19 @@ export default class Sitemap extends SgCommand {
     const { argv, flags } = await this.parse(Sitemap);
     const rawInput = [...sg.config.spider?.seed ?? [], ...argv]
 
-    // Make a de-duplicated set of hostnames present in the input
-    // and the configuration; we'll use those for robot and sitemap detection.
+    const queue: Request[] = [];
+
+
+    if (flags.resume) {
+      // Grab any existing uncrawled robots.txt or sitemap URLs
+      const uq = new EntityQuery<UniqueUrl>(QueryFragments.urls_uncrawled).filterBy('handler',['robotstxt', 'sitemap']);
+      const uus = await uq.run();
+      for (const uu of uus) {
+        queue.push(new Request({ url: uu.url, label: uu.label }));
+      }
+      this.log(`Queueing ${uus.length} known sitemaps`)
+    }
+
     const urls = new NormalizedUrlSet(
       rawInput.map(u => (typeof u === 'string') ? u : '').filter(u => u.length > 0),
       { strict: false,
@@ -41,14 +61,10 @@ export default class Sitemap extends SgCommand {
         }
       }
     );
-
-    if (urls.size == 0) {
-      this.error(
-        'No target URLs given.',
-      );
+    if (urls.size) {
+      this.log(`Queuing ${urls.size} additional hosts`)
     }
 
-    const queue: Request[] = [];
     for (const url of [...urls]) {
       queue.push(new Request({
         url: url.toString() + 'robots.txt',
@@ -60,6 +76,10 @@ export default class Sitemap extends SgCommand {
       }))
     }
 
+    if (queue.length == 0) {
+      this.error('No hostnames or sitemaps were given.');
+    }
+
     if (flags.verbose) {
       this.output = OutputLevel.verbose;
     }
@@ -69,9 +89,9 @@ export default class Sitemap extends SgCommand {
     const options: Partial<SpiderOptions> = {
       urls: {
         save: true,
-        crawl: { property: 'pathname', glob: '**/*.xml' }
+        crawl: { property: 'pathname', glob: '{/**/*.xml,/robots.txt}' }
       },
-      maxConcurrency: 1,
+      maxConcurrency: 4,
       logLevel: flags.verbose ? LogLevel.DEBUG : LogLevel.OFF
     };
 
@@ -82,7 +102,7 @@ export default class Sitemap extends SgCommand {
         this.log(sg.cli.summarizeStatus(status));
       });
 
-    this.startProgress('Downloading sitemaps');
+    this.startProgress('Retrieving sitemaps');
     await spider.run(queue);
 
     return Promise.resolve();

@@ -27,7 +27,10 @@ export default class Crawl extends SgCommand {
       description: 'Erase database before crawling',
     }),
     resume: Flags.boolean({
-      description: 'Resume a stopped crawl',
+      char: 'r',
+      summary: 'Resume crawling already-discovered URLs',
+      allowNo: true,
+      default: true,
     }),
     ...CLI.crawlFlags,
     verbose: CLI.outputFlags.verbose,
@@ -106,7 +109,7 @@ export default class Crawl extends SgCommand {
       this.ux.action.stop(`${uus.length} found.`);
 
       if (uus.length === 0) {
-        this.error('No uncrawled URLs matched the requested domains.');
+        this.error('No uncrawled URLs matched the URL filter criteria.');
       } else {
         this.startProgress('Resuming crawl');
         await spider.resume(uus);
