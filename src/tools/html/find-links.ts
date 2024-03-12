@@ -57,7 +57,7 @@ export function findHeadLinks(input: string | cheerio.Root) {
  * Finds links (with titles and publication dates, if present) in Sitemap
  * and SitemapIndex XML markup.
  */
-export function findSitempLinks(input: string | cheerio.Root) {
+export function findSitemapLinks(input: string | cheerio.Root) {
   const $ =
     typeof input === 'string' ? getCheerio(input, { xmlMode: true }) : input;
   const results: FoundLink[] = [];
