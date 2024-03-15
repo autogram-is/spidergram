@@ -3,6 +3,7 @@ import { AsyncEventEmitter } from '@vladfrangu/async_event_emitter';
 import arrify from 'arrify';
 import {
   log,
+  Request,
   PlaywrightCrawlingContext,
   PlaywrightDirectNavigationOptions,
   SystemInfo,
@@ -121,7 +122,7 @@ export class Spider extends PlaywrightCrawler {
     }
 
     launchContext.launchOptions ??= {};
-    launchContext.launchOptions.headless = crawler.headless;
+    launchContext.launchOptions.headless = !!crawler.headless;
 
     if (internal.stealth) {
       chromium.use(StealthPlugin());

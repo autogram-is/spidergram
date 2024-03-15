@@ -271,8 +271,8 @@ export function buildDateRange(
   today = DateTime.local(),
 ): { startDate: string; endDate: string } {
   // Prep the starting points
-  let start = today.minus({ days: 1 });
-  let end = today.minus({ days: 1 });
+  let start = today.minus({ days: 1 }) as DateTime<true> | DateTime<false>;
+  let end = today.minus({ days: 1 }) as DateTime<true> | DateTime<false>;
 
   // If the offset is non-negative, we want to 'snap' to a week, month, or year boundary.
   if (offset >= 0) {
@@ -287,8 +287,8 @@ export function buildDateRange(
           weekYear: start.year,
           weekNumber: start.weekNumber,
         })
-          .minus({ week: offset + 1 })
-          .startOf('week');
+        .minus({ week: offset + 1 })
+        .startOf('week');
         end = start.endOf('week');
         break;
 

@@ -18,10 +18,7 @@ export default class DoReport extends SgCommand {
       summary: 'Add a stored query to the generated report',
       multiple: true,
     }),
-    filter: {
-      ...queryFilterFlag,
-      summary: 'Add a filter to each query in the report',
-    },
+    filter: queryFilterFlag,
     name: Flags.string({
       char: 'n',
       summary: 'Report name',

@@ -26,10 +26,7 @@ export default class UrlTree extends SgCommand {
   ];
 
   static flags = {
-    filter: {
-      ...queryFilterFlag,
-      summary: 'Filter URLs when querying the database',
-    },
+    filter: queryFilterFlag,
     summary: Flags.boolean({
       summary: 'Display summary information about the full pool of URLs',
       default: true,
@@ -141,9 +138,11 @@ export default class UrlTree extends SgCommand {
       const responseData = await fetch(new URL(args.input))
         .then(response => response.text())
         .catch(reason => {
-          if (reason instanceof Error) this.error(reason.message);
-          else this.error('An error occurred loading the URL.');
+          if (reason instanceof Error) this.ux.error(reason.message);
+          else this.ux.error('An error occurred loading the URL.');
+          return '';
         });
+        
       rawUrls = responseData.match(URL_WITH_COMMAS_REGEX) || [];
     } else if (args.input.indexOf('.') !== -1) {
       const urlFile = await readFile(args.input)

@@ -23,10 +23,7 @@ export default class Pagespeed extends SgCommand {
       summary: 'A database collection to query for URLs',
       description: 'If no collection or input file is given, the "resources" collection in the Spidergram database will be used as the URL source.'
     }),
-    filter: {
-      ...queryFilterFlag,
-      require: ['collection'],
-    },
+    filter: queryFilterFlag,
     limit: Flags.integer({
       char: 'l',
       summary: 'Limit the number of URLs processed'

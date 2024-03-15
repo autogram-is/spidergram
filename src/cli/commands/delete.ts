@@ -8,15 +8,16 @@ import { Query, Spidergram } from '../../index.js';
 export default class DeleteEntities extends SgCommand {
   static description = 'Delete entries from the crawl database';
 
+  protected get statics(): typeof DeleteEntities {
+    return this.constructor as typeof DeleteEntities;
+  }
+
   static flags = {
     collection: Flags.string({
       char: 'c',
       summary: 'The collection whose items should be deleted',
     }),
-    filter: {
-      ...queryFilterFlag,
-      summary: 'Filter criteria for documents to delete',
-    },
+    filter: queryFilterFlag,
     orphans: Flags.boolean({
       char: 'o',
       summary: 'Delete orphaned relationships',

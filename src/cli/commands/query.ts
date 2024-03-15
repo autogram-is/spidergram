@@ -84,11 +84,7 @@ debug: Display the query spec and generated AQL statement without running it
       summary: 'The Arango collection to be queried',
       helpGroup: 'Query',
     }),
-    filter: {
-      ...queryFilterFlag,
-      exclusive: ['aql'],
-      helpGroup: 'Query',
-    },
+    filter: queryFilterFlag,
     return: Flags.string({
       char: 'r',
       exclusive: ['aql'],
