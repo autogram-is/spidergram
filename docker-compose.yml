@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   arangodb_container:
-    image: arangodb/arangodb:3.10.2
+    image: arangodb/arangodb
     restart: unless-stopped
     environment:
       ARANGO_NO_AUTH: 1
