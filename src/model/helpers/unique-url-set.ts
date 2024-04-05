@@ -152,6 +152,6 @@ export class UniqueUrlSet extends Set<UniqueUrl> {
       });
     }
 
-    return input;
+    return false;
   }
 }

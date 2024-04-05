@@ -40,7 +40,11 @@ export function filterUrl(
     if (options.contextUrl instanceof (ParsedUrl || NormalizedUrl)) {
       contextUrl = options.contextUrl;
     } else {
-      contextUrl = new ParsedUrl(options.contextUrl.toString());
+      try {
+        contextUrl = new ParsedUrl(options.contextUrl.toString());
+      } catch (err: unknown) {
+        contextUrl = undefined;
+      }
     }
   }
 
@@ -114,7 +118,7 @@ function singleFilter(
     const regex = is.regExp(filter.regex)
       ? filter.regex
       : new RegExp(filter.regex);
-    let accept = regex.test(
+    const accept = regex.test(
       _.get(url.properties as object, filter.property ?? 'href', ''),
     );
     // In 'reject' mode, failure to find a match is not acceptance.
@@ -126,7 +130,7 @@ function singleFilter(
   } else if (is.regExp(filter)) {
     return filter.test(url.href) ? true : null;
   } else if (isUrlGlobFilter(filter)) {
-    let accept = minimatch(
+    const accept = minimatch(
       _.get(url.properties as object, filter.property ?? 'href', ''),
       filter.glob,
       { dot: true },
