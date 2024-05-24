@@ -54,22 +54,18 @@ export class PageSpeed extends WorkerQuery<Resource> {
       defaults,
     );
     return pagespeed.pagespeedapi.runpagespeed(opt).then(response => {
-      if (response.status !== 200) {
-        throw new Error(response.statusText);
-      } else {
-        return response.data;
-      }
+      return response.data;
     });
   }
 
   /**
    * Returns a bare-bones overview of scores in all the requested categories.
    */
-  static formatScores(report: PageSpeedReport) {
+  static formatOverview(report: PageSpeedReport) {
     return {
       overall: report.loadingExperience?.overall_category ?? undefined,
       speedIndex:
-        report?.lighthouseResult?.audits?.['speed-index']?.displayValue ??
+        report?.lighthouseResult?.audits?.['speed-index']?.numericValue ??
         undefined,
       accessibility:
         report?.lighthouseResult?.categories?.accessibility?.score ?? undefined,
@@ -85,6 +81,45 @@ export class PageSpeed extends WorkerQuery<Resource> {
         : undefined,
     };
   }
+
+    /**
+   * Returns a bare-bones overview of scores in all the requested categories.
+   */
+    static formatDetailed(report: PageSpeedReport) {
+      const audits: Record<string, unknown> = {};
+      for (const [key, data] of Object.entries(report?.lighthouseResult?.audits || {})) {
+        if (data.score && data.score < 1) {
+          audits[key] = {
+            description: data.title,
+            score: data.score || undefined,
+            detail: data.displayValue || undefined,
+            numeric: data.numericValue || undefined,
+            unit: data.numericUnit || undefined,
+          }
+        }
+      }
+      
+      return {
+        overall: report.loadingExperience?.overall_category ?? undefined,
+        speedIndex:
+          report?.lighthouseResult?.audits?.['speed-index']?.numericValue ??
+          undefined,
+        accessibility:
+          report?.lighthouseResult?.categories?.accessibility?.score ?? undefined,
+        bestPractices:
+          report?.lighthouseResult?.categories?.['best-practices']?.score ??
+          undefined,
+        performance:
+          report?.lighthouseResult?.categories?.performance?.score ?? undefined,
+        pwa: report?.lighthouseResult?.categories?.pwa?.score ?? undefined,
+        seo: report?.lighthouseResult?.categories?.seo?.score ?? undefined,
+        audits,
+        timestamp: report?.analysisUTCTimestamp
+          ? new Date(report?.analysisUTCTimestamp).toISOString()
+          : undefined,
+      };
+    }
+  
 
   request: PageSpeedRequest;
 
@@ -135,7 +170,7 @@ export class PageSpeed extends WorkerQuery<Resource> {
   protected task: PageSpeedTask = async (resource, status, request, report) => {
     const sg = await Spidergram.load();
     if (report) {
-      resource.pagespeed = PageSpeed.formatScores(report);
+      resource.pagespeed = PageSpeed.formatDetailed(report);
       await sg.arango.push(resource);
     }
     return Promise.resolve();

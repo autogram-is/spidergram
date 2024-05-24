@@ -6,7 +6,7 @@ import { buildFilter } from '../shared/flag-query-tools.js';
 import { queryFilterFlag } from '../shared/flags.js';
 import { summarizeStatus } from '../shared/summarize-status.js';
 
-import { GoogleTools } from '../../index.js';
+import { GoogleTools, KeyValueStore } from '../../index.js';
 // import { PageSpeedTask } from '../../tools/google/pagespeed.js';
 
 export default class Pagespeed extends SgCommand {
@@ -57,23 +57,30 @@ export default class Pagespeed extends SgCommand {
         ps.limit(flags.limit);
       }
 
-      const results = await ps.run();
+      const kvs = await KeyValueStore.open('pagespeed');
+      this.startProgress('Retrieving Pagespeed data for crawled pages');
+
+      const results = await ps.run(async (resource, status) => {
+        if ((await kvs.getValue(resource._key)) === undefined) {
+          return GoogleTools.PageSpeed.getReport(resource.url)
+            .then(report => {
+              this.updateProgress(status);
+              if (report) {
+                const data = { url: resource.url, ...GoogleTools.PageSpeed.formatDetailed(report)};
+                return kvs.setValue(resource._key, data).then(() => void 0);
+              } else {
+                return Promise.resolve();
+              }
+            })
+            .catch((reason: unknown) => {
+              console.log(reason);
+            })
+          } else {
+            return undefined;
+          }
+      });
+      
       this.ux.info(summarizeStatus(results, false));
     }
   }
 }
-
-
-/**
-const customTask: PageSpeedTask = async (resource, status, request, report) => {
-  if (report) {
-    this.updateProgress(status);
-    const data = {
-      url: resource.url,
-      ...GoogleTools.PageSpeed.formatScores(report)
-    };
-    return kvs.setValue(resource._key, data).then(() => void 0);
-  }
-  return Promise.resolve();
-};
- */
