@@ -149,7 +149,6 @@
     "prettier": "^2.8.1",
     "shx": "^0.3.3",
     "ts-node": "^10.9.1",
-    "typedoc": "^0.25.12",
     "typescript": "^5.4.2"
   },
   "peerDependencies": {
