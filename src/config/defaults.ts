@@ -66,6 +66,7 @@ export const spiderDefaults: Partial<SpiderOptions> = {
   downloadMimeTypes: [],
   userAgent: `Spidergram ${readPackageUpSync()?.packageJson?.version}`,
   handlerTimeout: 180,
+  prefetchMethod: 'HEAD'
 };
 
 export const pageDataDefaults: PageDataOptions = {

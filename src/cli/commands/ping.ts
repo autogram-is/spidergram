@@ -34,7 +34,12 @@ export default class Ping extends SgCommand {
     const shadow = sg.config.spider?.shadowDom ?? false;
 
     const browser = await launchPlaywright();
-    const page = await browser.newPage();
+    const browserContext = browser.contexts()[0];
+    if (sg.config.spider?.cookies) {
+      browserContext.addCookies(sg.config.spider.cookies);
+    }
+    const page = await browserContext.newPage();
+
     const response =
       (await page.goto(args.url.toString(), {
         waitUntil: sg.config.spider?.waitUntil,
@@ -47,7 +52,7 @@ export default class Ping extends SgCommand {
           Object.fromEntries(Object.entries(cookie)),
         )
       : [];
-
+    
     const accessibility = sg.config.spider?.auditAccessibility
       ? await AxeAuditor.getAuditResults(page, {
           summary: 'impact',

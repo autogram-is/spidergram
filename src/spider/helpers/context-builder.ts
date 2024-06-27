@@ -35,9 +35,14 @@ export async function enhanceSpiderContext(
 
     graph: project.arango,
     files: project.files,
+    prefetchMethod: context.prefetchMethod,
 
     ...crawler.spiderOptions,
   });
+  
+  if (context.cookies && context.session) {
+    context.session.setCookies(context.cookies, context.request.url);
+  }
 
   await urls.saveCurrentUrl(context);
 }

@@ -104,6 +104,15 @@ export class Spider extends PlaywrightCrawler {
       ),
     ];
 
+    if (options.cookies) {
+      // crawler.useSessionPool = true;
+      // crawler.persistCookiesPerSession = true;
+
+      crawler.preNavigationHooks.push(
+        async ({ page }) => { await page.context().addCookies(options.cookies ?? []); }
+      )
+    }
+
     crawler.postNavigationHooks = [
       ...(internal.postNavigationHooks ?? []).map(hook =>
         contextualizeHook(hook),
@@ -136,7 +145,7 @@ export class Spider extends PlaywrightCrawler {
         async (_, launchContext) => {
           launchContext.ignoreHTTPSErrors = true;
         },
-      ],
+      ], useFingerprints: true
     };
 
     // We're bumping this up to deal with exceptionally horrible sites.
@@ -361,6 +370,8 @@ function splitOptions(options: Partial<SpiderOptions> = {}) {
     waitUntil,
     stealth,
     shadowDom,
+    cookies,
+    prefetchMethod,
 
     ...crawlerOptions
   } = internal;
