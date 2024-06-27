@@ -1,4 +1,9 @@
-import { Cookie, Dictionary, LogLevel, PlaywrightCrawlerOptions } from 'crawlee';
+import {
+  Cookie,
+  Dictionary,
+  LogLevel,
+  PlaywrightCrawlerOptions,
+} from 'crawlee';
 import { SpiderHook } from './hooks/index.js';
 import { EnqueueUrlOptions } from './links/index.js';
 import { SpiderRequestHandler } from './handlers/index.js';
@@ -192,8 +197,8 @@ export interface InternalSpiderOptions extends Dictionary {
    * @type {?number}
    */
   handlerTimeout?: number;
-  
-  cookies?: Cookie[],
 
-  prefetchMethod?: 'GET' | 'HEAD',
+  cookies?: Cookie[];
+
+  prefetchMethod?: 'GET' | 'HEAD';
 }

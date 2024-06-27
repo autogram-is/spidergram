@@ -287,8 +287,8 @@ export function buildDateRange(
           weekYear: start.year,
           weekNumber: start.weekNumber,
         })
-        .minus({ week: offset + 1 })
-        .startOf('week');
+          .minus({ week: offset + 1 })
+          .startOf('week');
         end = start.endOf('week');
         break;
 

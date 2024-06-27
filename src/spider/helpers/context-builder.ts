@@ -39,7 +39,7 @@ export async function enhanceSpiderContext(
 
     ...crawler.spiderOptions,
   });
-  
+
   if (context.cookies && context.session) {
     context.session.setCookies(context.cookies, context.request.url);
   }

@@ -142,7 +142,7 @@ export default class UrlTree extends SgCommand {
           else this.ux.error('An error occurred loading the URL.');
           return '';
         });
-        
+
       rawUrls = responseData.match(URL_WITH_COMMAS_REGEX) || [];
     } else if (args.input.indexOf('.') !== -1) {
       const urlFile = await readFile(args.input)

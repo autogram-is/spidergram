@@ -108,9 +108,9 @@ export class Spider extends PlaywrightCrawler {
       // crawler.useSessionPool = true;
       // crawler.persistCookiesPerSession = true;
 
-      crawler.preNavigationHooks.push(
-        async ({ page }) => { await page.context().addCookies(options.cookies ?? []); }
-      )
+      crawler.preNavigationHooks.push(async ({ page }) => {
+        await page.context().addCookies(options.cookies ?? []);
+      });
     }
 
     crawler.postNavigationHooks = [
@@ -145,7 +145,8 @@ export class Spider extends PlaywrightCrawler {
         async (_, launchContext) => {
           launchContext.ignoreHTTPSErrors = true;
         },
-      ], useFingerprints: true
+      ],
+      useFingerprints: true,
     };
 
     // We're bumping this up to deal with exceptionally horrible sites.

@@ -151,14 +151,14 @@ export interface InternalSpiderContext extends InternalSpiderOptions {
    * @type {Function}
    */
   files: (bucket?: string) => DiskDriver;
-  
+
   /**
    * Cookie values to set.
    */
   cookies: {
-    name: string,
-    value: string,
-    domain?: string,
+    name: string;
+    value: string;
+    domain?: string;
   }[];
 }
 

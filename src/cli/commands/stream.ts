@@ -1,16 +1,11 @@
 import { SgCommand } from '../index.js';
-import {
-  Spidergram,
-  Resource,
-} from '../../index.js';
+import { Spidergram, Resource } from '../../index.js';
 import { Flags, Args } from '@oclif/core';
 import { parse } from '@fast-csv/parse';
 import path from 'path';
 
 import fse from 'fs-extra';
-import {
-  isJsonMap,
-} from '@salesforce/ts-types';
+import { isJsonMap } from '@salesforce/ts-types';
 const { existsSync, createReadStream } = fse;
 
 export default class Stream extends SgCommand {
@@ -19,7 +14,7 @@ export default class Stream extends SgCommand {
     resources: Flags.boolean({
       char: 'r',
       summary: 'Import records as Resources',
-      exactlyOne: ['urls', 'resources', 'dataset', 'kvs']
+      exactlyOne: ['urls', 'resources', 'dataset', 'kvs'],
     }),
 
     urls: Flags.boolean({
@@ -71,7 +66,7 @@ export default class Stream extends SgCommand {
       .on('data', async row => {
         if (isJsonMap(row)) {
           if ('url' in row && typeof row.url === 'string') {
-            const resource = new Resource({ url: row.url })
+            const resource = new Resource({ url: row.url });
             for (const [key, value] of Object.entries(row)) {
               if (value) resource.set(key, value);
             }
@@ -86,7 +81,7 @@ export default class Stream extends SgCommand {
         return Promise.resolve();
       })
       .on('end', () => {
-        console.log('All data imported.')
+        console.log('All data imported.');
       });
 
     return Promise.resolve();

@@ -1,8 +1,5 @@
 import { Args } from '@oclif/core';
-import {
-  Spidergram,
-  SgCommand,
-} from '../../index.js';
+import { Spidergram, SgCommand } from '../../index.js';
 import { launchPlaywright } from 'crawlee';
 
 export default class Ping extends SgCommand {
@@ -23,7 +20,9 @@ export default class Ping extends SgCommand {
     const sg = await Spidergram.load();
     const { args } = await this.parse(Ping);
 
-    const browser = await launchPlaywright({ launchOptions: { headless: false }});
+    const browser = await launchPlaywright({
+      launchOptions: { headless: false },
+    });
     const browserContext = browser.contexts()[0];
     const page = await browserContext.newPage();
 
@@ -42,6 +41,11 @@ export default class Ping extends SgCommand {
     await page.close();
     await browser.close();
 
-    sg.files('output').write('cookies.json', Buffer.from(JSON.stringify({ spider: { cookies: cookies } }, undefined, 2)));
+    sg.files('output').write(
+      'cookies.json',
+      Buffer.from(
+        JSON.stringify({ spider: { cookies: cookies } }, undefined, 2),
+      ),
+    );
   }
 }

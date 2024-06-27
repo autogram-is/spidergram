@@ -117,7 +117,7 @@ export default class Import extends SgCommand {
           .then(json =>
             json.forEach(j => {
               if (j) rawData.push(j);
-            })
+            }),
           );
         break;
 
@@ -160,7 +160,7 @@ export default class Import extends SgCommand {
     }
 
     if (rawData.length === 0) {
-      this.log('No records found in data file.')
+      this.log('No records found in data file.');
     } else {
       const storeName = flags.collection ?? path.parse(args.file).name;
 
@@ -217,7 +217,7 @@ export default class Import extends SgCommand {
         } else {
           if (!flags.append) {
             await kvs.empty();
-          }  
+          }
           await kvs.setValues(Object.fromEntries(entries));
         }
       } else if (flags.hash) {
@@ -250,7 +250,7 @@ export default class Import extends SgCommand {
         } else {
           if (!flags.append) {
             await kvs.empty();
-          }  
+          }
           await kvs.setValues(Object.fromEntries(entries));
         }
       } else {

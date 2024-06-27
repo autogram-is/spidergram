@@ -82,44 +82,45 @@ export class PageSpeed extends WorkerQuery<Resource> {
     };
   }
 
-    /**
+  /**
    * Returns a bare-bones overview of scores in all the requested categories.
    */
-    static formatDetailed(report: PageSpeedReport) {
-      const audits: Record<string, unknown> = {};
-      for (const [key, data] of Object.entries(report?.lighthouseResult?.audits || {})) {
-        if (data.score && data.score < 1) {
-          audits[key] = {
-            description: data.title,
-            score: data.score || undefined,
-            detail: data.displayValue || undefined,
-            numeric: data.numericValue || undefined,
-            unit: data.numericUnit || undefined,
-          }
-        }
+  static formatDetailed(report: PageSpeedReport) {
+    const audits: Record<string, unknown> = {};
+    for (const [key, data] of Object.entries(
+      report?.lighthouseResult?.audits || {},
+    )) {
+      if (data.score && data.score < 1) {
+        audits[key] = {
+          description: data.title,
+          score: data.score || undefined,
+          detail: data.displayValue || undefined,
+          numeric: data.numericValue || undefined,
+          unit: data.numericUnit || undefined,
+        };
       }
-      
-      return {
-        overall: report.loadingExperience?.overall_category ?? undefined,
-        speedIndex:
-          report?.lighthouseResult?.audits?.['speed-index']?.numericValue ??
-          undefined,
-        accessibility:
-          report?.lighthouseResult?.categories?.accessibility?.score ?? undefined,
-        bestPractices:
-          report?.lighthouseResult?.categories?.['best-practices']?.score ??
-          undefined,
-        performance:
-          report?.lighthouseResult?.categories?.performance?.score ?? undefined,
-        pwa: report?.lighthouseResult?.categories?.pwa?.score ?? undefined,
-        seo: report?.lighthouseResult?.categories?.seo?.score ?? undefined,
-        audits,
-        timestamp: report?.analysisUTCTimestamp
-          ? new Date(report?.analysisUTCTimestamp).toISOString()
-          : undefined,
-      };
     }
-  
+
+    return {
+      overall: report.loadingExperience?.overall_category ?? undefined,
+      speedIndex:
+        report?.lighthouseResult?.audits?.['speed-index']?.numericValue ??
+        undefined,
+      accessibility:
+        report?.lighthouseResult?.categories?.accessibility?.score ?? undefined,
+      bestPractices:
+        report?.lighthouseResult?.categories?.['best-practices']?.score ??
+        undefined,
+      performance:
+        report?.lighthouseResult?.categories?.performance?.score ?? undefined,
+      pwa: report?.lighthouseResult?.categories?.pwa?.score ?? undefined,
+      seo: report?.lighthouseResult?.categories?.seo?.score ?? undefined,
+      audits,
+      timestamp: report?.analysisUTCTimestamp
+        ? new Date(report?.analysisUTCTimestamp).toISOString()
+        : undefined,
+    };
+  }
 
   request: PageSpeedRequest;
 

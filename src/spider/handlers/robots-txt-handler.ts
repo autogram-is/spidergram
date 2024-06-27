@@ -51,9 +51,10 @@ export async function robotsTxtHandler(context: SpiderContext) {
     const links: FoundLink[] = sitemaps.map(s => {
       return { url: s };
     });
-    await saveUrls(context, links, { handler: 'sitemap', normalizer: url => url }).then(savedLinks =>
-      enqueueRequests(context, savedLinks),
-    );
+    await saveUrls(context, links, {
+      handler: 'sitemap',
+      normalizer: url => url,
+    }).then(savedLinks => enqueueRequests(context, savedLinks));
   }
   return Promise.resolve();
 }

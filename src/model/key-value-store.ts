@@ -88,7 +88,11 @@ export class KeyValueStore extends GenericStore {
         if (strict) throw new TypeError('Invalid key');
       } else {
         const data = { _key: key, val };
-        promises.push(this.collection.save(data, { overwriteMode: 'replace' }).then(() => void 0))
+        promises.push(
+          this.collection
+            .save(data, { overwriteMode: 'replace' })
+            .then(() => void 0),
+        );
       }
     }
     return Promise.all(promises);

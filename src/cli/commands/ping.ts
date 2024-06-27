@@ -52,7 +52,7 @@ export default class Ping extends SgCommand {
           Object.fromEntries(Object.entries(cookie)),
         )
       : [];
-    
+
     const accessibility = sg.config.spider?.auditAccessibility
       ? await AxeAuditor.getAuditResults(page, {
           summary: 'impact',

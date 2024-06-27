@@ -9,7 +9,7 @@ import { Page } from 'playwright';
 export async function getPageMarkup(page: Page, shadowDom?: boolean) {
   if (shadowDom) {
     return page.evaluate<string>(() => {
-      for (let el of document.getElementsByTagName('*')) {
+      for (const el of document.getElementsByTagName('*')) {
         // If element contains shadow root then replace its
         // content with the HTML of shadow DOM.
         if (el.shadowRoot) el.innerHTML = el.shadowRoot.innerHTML;

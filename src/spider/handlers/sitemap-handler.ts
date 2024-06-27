@@ -51,15 +51,14 @@ export async function sitemapHandler(context: SpiderContext) {
     const subSitemaps = links.filter(l => l.label === 'sitemap');
     const normalLinks = links.filter(l => l.label !== 'sitemap');
 
-    context.log.debug(`Found ${subSitemaps.length} sitemaps, ${normalLinks.length} pages on ${resource.url}`)
-    
-    await saveUrls(
-      context,
-      subSitemaps,
-      { handler: 'sitemap', normalizer: url => url },
-    ).then(
-      savedLinks => enqueueRequests(context, savedLinks),
+    context.log.debug(
+      `Found ${subSitemaps.length} sitemaps, ${normalLinks.length} pages on ${resource.url}`,
     );
+
+    await saveUrls(context, subSitemaps, {
+      handler: 'sitemap',
+      normalizer: url => url,
+    }).then(savedLinks => enqueueRequests(context, savedLinks));
 
     await saveUrls(context, normalLinks).then(savedLinks =>
       enqueueRequests(context, savedLinks),
