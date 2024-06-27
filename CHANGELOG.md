@@ -1,5 +1,11 @@
 # Spidergram Changelog
 
+## v0.11.0 - 24-06-27
+
+- Cookies added to `spider.cookies` in the config file will be injected into all crawl requests, making crawling/analysis of logged-in sites possible.
+- The accompanying `spidergram login <url>` CLI command pops up a browser window, allows you to log into a site, then back on the command line records cookies that were sent as a result of the login process. The cookies are then saved in a JSON file for analysis or incorporation into the crawl config file.
+- Add support for both GET and HEAD in prefetch requests to determine a URL's status and mimetype; HEAD is still the default but some sites only respond to GET, because the internet is terrible.
+
 ## v0.10.10 - 24-06-15
 
 - Dependency updates (particularly Crawlee)

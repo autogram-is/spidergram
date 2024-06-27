@@ -1,6 +1,6 @@
 {
   "name": "spidergram",
-  "version": "0.10.10",
+  "version": "0.11.0",
   "description": "Structural analysis tools for complex web sites",
   "main": "./dist/index.js",
   "exports": "./dist/index.js",
@@ -39,7 +39,7 @@
   },
   "contributors": [
     "Jeff Eaton <jeff@autogram.is> (http://eaton.fyi)",
-    "Ethan Marcotte <karen@autogram.is> (https://ethanmarcotte.com)",
+    "Ethan Marcotte <me@ethanmarcotte.com> (https://ethanmarcotte.com)",
     "Karen McGrane <karen@autogram.is> (https://karenmcgrane.com)"
   ],
   "license": "GPL",
