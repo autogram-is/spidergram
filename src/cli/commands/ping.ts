@@ -94,6 +94,7 @@ export default class Ping extends SgCommand {
 
       this.displaySummary(resource);
     }
+    return;
   }
 
   displaySummary(r: Resource) {
@@ -153,5 +154,6 @@ export default class Ping extends SgCommand {
       this.log(c.header('Detected Technologies'));
       this.ux.info(CLI.infoList(detected, { sort: true }));
     }
+    return;
   }
 }
