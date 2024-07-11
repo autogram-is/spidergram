@@ -130,8 +130,8 @@ export class PageSpeed extends WorkerQuery<Resource> {
   ) {
     // Given Google's API limits, set the default to the public API threshold.
     const opt: WorkerQueryOptions = {
-      concurrency: 20,
-      interval: 1000,
+      concurrency: 10,
+      interval: 2000,
       intervalCap: request.key ? 2 : 1,
       ...options,
     };
@@ -141,7 +141,7 @@ export class PageSpeed extends WorkerQuery<Resource> {
     this.request = _.defaultsDeep(request, defaults);
     this.filterBy('code', 200)
       .filterBy('mime', 'text/html')
-      .limit(request.key ? 20_000 : 1000);
+      .limit(request.key ? 20_000 : 2000);
   }
 
   async run(customTask?: PageSpeedTask, force = false): Promise<JobStatus> {

@@ -85,6 +85,7 @@ export default class Pagespeed extends SgCommand {
         }
       });
 
+      this.stopProgress();
       this.ux.info(summarizeStatus(results, false));
     }
   }
