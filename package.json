@@ -7,7 +7,7 @@
   "types": "./dist/index.d.ts",
   "type": "module",
   "engines": {
-    "node": "^20.10.0"
+    "node": ">=20.10.0"
   },
   "bin": {
     "spidergram": "./bin/run.js"
@@ -76,10 +76,10 @@
     "@proload/plugin-typescript": "^0.2.1",
     "@proload/plugin-yaml": "^0.2.1",
     "@salesforce/ts-types": "^2.0.9",
-    "@sindresorhus/is": "^6.2.0",
+    "@sindresorhus/is": "^6.3.1",
     "@types/js-yaml": "^4.0.5",
     "@types/tough-cookie": "^4.0.5",
-    "@vladfrangu/async_event_emitter": "^2.1.2",
+    "@vladfrangu/async_event_emitter": "2.1.2",
     "aql-builder": "^0.6.3",
     "arrify": "^3.0.0",
     "caterpillar": "^6.8.0",
@@ -137,7 +137,7 @@
     "@types/luxon": "^3.1.0",
     "@types/mime": "^3.0.1",
     "@types/minimatch": "^5.1.2",
-    "@types/node": "^20.10.0",
+    "@types/node": "^20.16.1",
     "@types/object-hash": "^2.2.1",
     "@types/set-cookie-parser": "^2.4.2",
     "@types/uuid": "^8.3.4",

@@ -14,10 +14,10 @@
 		"pretty": true,
 		"removeComments": false,
 		"resolveJsonModule": true,
-    "target": "ES2022",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
-    "lib": ["ES2022", "DOM"],                            /* Specify a set of bundled library declaration files that describe the target runtime environment. */
+    "target": "ESNext",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+    "lib": ["ESNext", "DOM"],                            /* Specify a set of bundled library declaration files that describe the target runtime environment. */
     "experimentalDecorators": true,                      /* Enable experimental support for TC39 stage 2 draft decorators. */
-    "module": "ES2022",                                  /* Specify what module code is generated. */
+    "module": "ESNext",                                  /* Specify what module code is generated. */
     "moduleResolution": "node",                          /* Specify how TypeScript looks up a file from a given module specifier. */
     "declaration": true,                                 /* Generate .d.ts files from TypeScript and JavaScript files in your project. */
     "declarationMap": true,                              /* Create sourcemaps for d.ts files. */
