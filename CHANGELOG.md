@@ -1,6 +1,6 @@
 # Spidergram Changelog
 
-## v0.11.0 - 24-06-27
+## v0.10.11 - 24-08-19
 
 - Cookies added to `spider.cookies` in the config file will be injected into all crawl requests, making crawling/analysis of logged-in sites possible.
 - The accompanying `spidergram login <url>` CLI command pops up a browser window, allows you to log into a site, then back on the command line records cookies that were sent as a result of the login process. The cookies are then saved in a JSON file for analysis or incorporation into the crawl config file.

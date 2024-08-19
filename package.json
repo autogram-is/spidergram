@@ -1,6 +1,6 @@
 {
   "name": "spidergram",
-  "version": "0.11.0",
+  "version": "0.10.11",
   "description": "Structural analysis tools for complex web sites",
   "main": "./dist/index.js",
   "exports": "./dist/index.js",
@@ -79,7 +79,7 @@
     "@sindresorhus/is": "^6.3.1",
     "@types/js-yaml": "^4.0.5",
     "@types/tough-cookie": "^4.0.5",
-    "@vladfrangu/async_event_emitter": "2.1.2",
+    "@vladfrangu/async_event_emitter": "2.3.0",
     "aql-builder": "^0.6.3",
     "arrify": "^3.0.0",
     "caterpillar": "^6.8.0",
