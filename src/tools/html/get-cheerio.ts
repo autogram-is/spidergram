@@ -12,6 +12,7 @@ export function getCheerio(
   } else if (input instanceof Resource) {
     return cheerio.load(input.body ?? '', options);
   } else {
-    return input;
+    // Update upstream checks
+    return input as cheerio.Root;
   }
 }
