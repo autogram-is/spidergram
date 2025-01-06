@@ -149,7 +149,7 @@ export default class Ping extends SgCommand {
       this.ux.info(CLI.infoList(violations));
     }
 
-    const detected = r.get('tech' ?? {}) as Record<string, string | string[]>;
+    const detected = r.get('tech', {}) as Record<string, string | string[]>;
     if (Object.keys(detected).length > 0) {
       this.log(c.header('Detected Technologies'));
       this.ux.info(CLI.infoList(detected, { sort: true }));
