@@ -10,7 +10,6 @@ export default class Backup extends SgCommand {
 
   async run() {
     const sg = await Spidergram.load();
-
     const db = sg.arango.db;
 
     const path = `./storage/backup/${new Date(Date.now()).toISOString().split('T')[0]}/`;
@@ -19,9 +18,11 @@ export default class Backup extends SgCommand {
     const collections = await db.listCollections();
     for (const c of collections) {
       if (!c.isSystem) {
-        await this.writeCollection(db, c.name, path)
+        const count = await this.writeCollection(db, c.name, path);
+        this.log(`Backed up ${count} ${c.name} records`);
       }
     }
+    this.log('Complete!');
   }
 
   async writeCollection(db: Database, collection: string, path: string) {
@@ -30,8 +31,10 @@ export default class Backup extends SgCommand {
     const cursor = await db.query(query);
     let count = 0;
     for await (const value of cursor) {
-      output.write(JSON.stringify(value, undefined, 0));
-      count++;
+      if (value !== undefined) {
+        output.write(JSON.stringify(value, undefined, 0) + '\n');
+        count++;
+      }
     }
     output.close();
     return count;
