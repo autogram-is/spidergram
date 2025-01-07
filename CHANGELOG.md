@@ -1,5 +1,13 @@
 # Spidergram Changelog
 
+## v0.10.12 - 25-01-07
+
+- Fixed a profoundly annoying issue in the `crawl` command that prevented new crawls from starting unless the `--resume=false` flag was set.
+- Changed `config.spider.headless` default to explicitly `true`
+- Changed the subtle but potentially confusing `config.normalizer.discardFirstSegment` default to `false`; replacing weird url subdomains like `ww2.example.com` with the base www version are best handled by a custom normalizer function, not a chain of fussy globs.
+- Fixed an issue in request prefetching that buried requests in errors before they could be processed.
+- Upgraded Crawlee dependency to 3.12.1, paving the way for some future additions.
+
 ## v0.10.11 - 24-08-19
 
 - Cookies added to `spider.cookies` in the config file will be injected into all crawl requests, making crawling/analysis of logged-in sites possible.

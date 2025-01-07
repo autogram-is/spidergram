@@ -1,6 +1,6 @@
 {
   "name": "spidergram",
-  "version": "0.10.11",
+  "version": "0.10.12",
   "description": "Structural analysis tools for complex web sites",
   "main": "./dist/index.js",
   "exports": "./dist/index.js",
@@ -157,7 +157,7 @@
     "@oclif/core": "^3.25.0",
     "arangojs": "^8.8.0",
     "cheerio": "^1.0.0-rc.12",
-    "crawlee": "^3.8.1",
+    "crawlee": "^3.12.1",
     "googleapis": "^134.0.0",
     "html-to-text": "^9.0.5",
     "playwright": "^1.42.1",
