@@ -24,7 +24,6 @@ import { PageAnalysisOptions } from '../tools/graph/analyze-page.js';
 export const urlNormalizerDefaults: NormalizerOptions = {
   forceProtocol: 'https:',
   forceLowercase: 'href',
-  discardFirstSegment: 'ww[w0-9]*',
   discardAnchor: true,
   discardAuth: true,
   discardIndex: '**/{index,default}.{htm,html,aspx,php}',
@@ -67,6 +66,8 @@ export const spiderDefaults: Partial<SpiderOptions> = {
   userAgent: `Spidergram ${readPackageUpSync()?.packageJson?.version}`,
   handlerTimeout: 180,
   prefetchMethod: 'HEAD',
+  headless: true,
+  stealth: false,
 };
 
 export const pageDataDefaults: PageDataOptions = {
