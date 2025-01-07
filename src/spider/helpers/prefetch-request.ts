@@ -18,7 +18,6 @@ export async function prefetchRequest(context: SpiderContext) {
         headers: response.headers,
         method: context.prefetchMethod ?? 'HEAD',
       };
-      response.destroy();
       return context.requestMeta;
     });
 }
