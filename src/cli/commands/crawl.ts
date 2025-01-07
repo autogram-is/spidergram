@@ -5,6 +5,7 @@ import {
   Spider,
   EntityQuery,
   UniqueUrl,
+  UniqueUrlSet,
   SpiderOptions,
 } from '../../index.js';
 import { QueryFragments } from '../../model/queries/query-fragments.js';
@@ -50,12 +51,6 @@ export default class Crawl extends SgCommand {
 
     const crawlTargets = [...(sg.config.spider?.seed ?? []), ...(urls ?? [])];
 
-    if (crawlTargets.length == 0) {
-      this.error(
-        'Crawl URLs must be provided via the command line, or via the configuration file.',
-      );
-    }
-
     if (flags.verbose) {
       this.output = OutputLevel.verbose;
     }
@@ -69,6 +64,12 @@ export default class Crawl extends SgCommand {
       if (confirmation) {
         await sg.arango.erase({ eraseAll: true });
       }
+    }
+
+    // If the crawl targets don't already exist in the database, add them
+    if (crawlTargets.length) {
+      const uus = new UniqueUrlSet(crawlTargets, { guessProtocol: true });
+      await sg.arango.push([...uus.values()], false);
     }
 
     const options: Partial<SpiderOptions> = {
