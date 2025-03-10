@@ -1,5 +1,9 @@
 # Spidergram Changelog
 
+## v0.10.13 - 25-03-10
+
+- Dependency updates: Crawlee 3.13, Playwright 1.51, and PDFJS 4.10.38. Note that if you've installed older versions of Playwright as a dependency, you might need to update the installed browser binaries.
+
 ## v0.10.12 - 25-01-07
 
 - Fixed a profoundly annoying issue in the `crawl` command that prevented new crawls from starting unless the `--resume=false` flag was set.
