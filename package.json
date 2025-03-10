@@ -103,7 +103,7 @@
     "office-document-properties": "^1.1.0",
     "p-queue": "^7.3.4",
     "pdfjs-dist": "^4.10.38",
-    "playwright-core": "^1.42.1",
+    "playwright-core": "^1.51.0",
     "playwright-extra": "^4.3.6",
     "prepend-http": "^4.0.0",
     "proload-plugin-json5": "github:autogram-is/proload-plugin-json5",
@@ -157,10 +157,10 @@
     "@oclif/core": "^3.25.0",
     "arangojs": "^8.8.0",
     "cheerio": "^1.0.0-rc.12",
-    "crawlee": "^3.12.1",
+    "crawlee": "^3.13.0",
     "googleapis": "^134.0.0",
     "html-to-text": "^9.0.5",
-    "playwright": "^1.42.1",
+    "playwright": "^1.51.0",
     "vega": "^5.28.0",
     "vega-lite": "^5.17.0"
   }
