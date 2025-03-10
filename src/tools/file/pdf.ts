@@ -1,10 +1,8 @@
-import pdfd from 'pdfjs-dist';
+import { getDocument, VerbosityLevel } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { PDFPageProxy, PDFDocumentProxy } from 'pdfjs-dist';
 import { GenericFile, GenericFileData } from './generic-file.js';
 import { TextTools } from '../index.js';
 import _ from 'lodash';
-
-const { getDocument, VerbosityLevel } = pdfd;
 
 export class Pdf extends GenericFile {
   // Application/pdf is the "correct" one but some legacy applications
