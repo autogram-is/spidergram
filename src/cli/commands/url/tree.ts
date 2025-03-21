@@ -12,6 +12,7 @@ import { readFile } from 'fs/promises';
 import minimatch from 'minimatch';
 import { queryFilterFlag } from '../../shared/flags.js';
 import { buildFilter } from '../../shared/flag-query-tools.js';
+import { SpiderCli } from '../../shared/spider-cli.js';
 
 export default class UrlTree extends SgCommand {
   static summary = 'Build a tree from a list of URLs';
@@ -128,6 +129,7 @@ export default class UrlTree extends SgCommand {
   async run() {
     const { args, flags } = await this.parse(UrlTree);
     const sg = await Spidergram.load();
+    const cli = new SpiderCli();
 
     let rawUrls: string[] = [];
     let filteredUrls: string[] = [];
@@ -276,8 +278,8 @@ export default class UrlTree extends SgCommand {
         }
         output.push(summaryLines.join('\n'));
       } else {
-        this.log(sg.cli.header('URL Summary'));
-        this.log(sg.cli.infoList(summary));
+        this.log(cli.header('URL Summary'));
+        this.log(cli.infoList(summary));
       }
     }
 

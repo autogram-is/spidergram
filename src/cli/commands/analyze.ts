@@ -9,6 +9,7 @@ import { CLI, SgCommand } from '../index.js';
 import { buildFilter } from '../shared/flag-query-tools.js';
 import { queryFilterFlag } from '../shared/flags.js';
 import { Flags } from '@oclif/core';
+import { SpiderCli } from '../shared/spider-cli.js';
 
 export default class Analyze extends SgCommand {
   static summary = 'Analyze the content of all crawled pages';
@@ -35,6 +36,7 @@ export default class Analyze extends SgCommand {
   async run() {
     const { flags } = await this.parse(Analyze);
     const sg = await Spidergram.load();
+    const cli = new SpiderCli();
 
     if (flags.verbose) {
       this.output = OutputLevel.verbose;
@@ -91,7 +93,7 @@ export default class Analyze extends SgCommand {
     worker.on('progress', status => this.updateProgress(status));
     worker.on('end', status => {
       this.stopProgress();
-      this.log(sg.cli.summarizeStatus(status));
+      this.log(cli.summarizeStatus(status));
     });
 
     await worker.run(async resource => {

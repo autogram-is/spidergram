@@ -11,6 +11,7 @@ import {
 import { QueryFragments } from '../../model/queries/query-fragments.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
 import { filterUrl } from '../../tools/urls/filter-url.js';
+import { SpiderCli } from '../shared/spider-cli.js';
 
 export default class Crawl extends SgCommand {
   static summary = 'Crawl and store a site';
@@ -47,6 +48,7 @@ export default class Crawl extends SgCommand {
 
   async run() {
     const sg = await Spidergram.load();
+    const cli = new SpiderCli();
     const { argv: urls, flags } = await this.parse(Crawl);
 
     const crawlTargets = [...(sg.config.spider?.seed ?? []), ...(urls ?? [])];
@@ -87,7 +89,7 @@ export default class Crawl extends SgCommand {
       .on('progress', status => this.updateProgress(status))
       .on('end', status => {
         this.stopProgress();
-        this.log(sg.cli.summarizeStatus(status));
+        this.log(cli.summarizeStatus(status));
       });
 
     if (flags.resume && flags.enqueue !== 'none') {

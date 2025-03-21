@@ -11,6 +11,7 @@ import {
 } from '../../index.js';
 import { CLI, OutputLevel, SgCommand } from '../index.js';
 import { LogLevel } from 'crawlee';
+import { SpiderCli } from '../shared/spider-cli.js';
 
 export default class Sitemap extends SgCommand {
   static summary = 'Populate URLs from sitemaps';
@@ -36,6 +37,7 @@ export default class Sitemap extends SgCommand {
 
   async run() {
     const sg = await Spidergram.load();
+    const cli = new SpiderCli();
     const { argv, flags } = await this.parse(Sitemap);
     const rawInput = [...(sg.config.spider?.seed ?? []), ...argv];
 
@@ -107,7 +109,7 @@ export default class Sitemap extends SgCommand {
       .on('progress', status => this.updateProgress(status))
       .on('end', status => {
         this.stopProgress();
-        this.log(sg.cli.summarizeStatus(status));
+        this.log(cli.summarizeStatus(status));
       });
 
     this.startProgress('Retrieving sitemaps');

@@ -1,7 +1,8 @@
-import { SgCommand, ScreenshotTool, Spidergram } from '../../index.js';
+import { SgCommand, ScreenshotTool } from '../../index.js';
 import { Flags, Args } from '@oclif/core';
 import { PlaywrightCrawler } from 'crawlee';
 import is from '@sindresorhus/is';
+import { SpiderCli } from '../shared/spider-cli.js';
 
 export default class Screenshot extends SgCommand {
   static summary = 'Save screenshots of pages and page elements';
@@ -60,7 +61,7 @@ export default class Screenshot extends SgCommand {
   };
 
   async run() {
-    const sg = await Spidergram.load();
+    const cli = new SpiderCli();
     const { argv: urls, flags } = await this.parse(Screenshot);
 
     if (!is.array<string>(urls)) {
@@ -88,7 +89,7 @@ export default class Screenshot extends SgCommand {
       )
       .on('end', status => {
         this.ux.action.stop();
-        this.ux.info(sg.cli.summarizeStatus(status));
+        this.ux.info(cli.summarizeStatus(status));
       });
 
     const crawler = new PlaywrightCrawler({

@@ -6,7 +6,6 @@ import json5 from 'proload-plugin-json5';
 
 import { ensureDir, exists } from 'fs-extra';
 
-import { Logger, Filter, Human } from 'caterpillar';
 import { Configuration as CrawleeConfig } from 'crawlee';
 import { Storage as FileStore } from 'typefs';
 import { ParsedUrl, NormalizedUrl, UrlMutators } from '@autogram/url-tools';
@@ -27,7 +26,6 @@ import {
 import { globalNormalizer } from './global-normalizer.js';
 import { SpidergramConfig } from './spidergram-config.js';
 import { setTimeout } from 'timers/promises';
-import { SpiderCli } from '../cli/shared/index.js';
 import { readPackageUpSync } from 'read-pkg-up';
 
 export class SpidergramError extends Error {}
@@ -98,13 +96,6 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
     // indexes, and so on here.
     await this.attemptArangoConnection(true);
 
-    // Centralized logging; also pipes logs to stderr unless logLevel is FALSE.
-    this.setLogger(
-      new Logger({
-        defaultLevel: this.config.logLevel ? this.config.logLevel : undefined,
-      }),
-    );
-
     // Set up file storage defaults
     if (this.config.typefs) {
       FileStore.config = this.config.typefs;
@@ -136,26 +127,17 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
       this._crawleeConfig = this.config.crawlee;
     } else {
       this._crawleeConfig = new CrawleeConfig(this.config.crawlee);
-      this.crawlee.set(
-        'logLevel',
-        this.logger.getLogLevel(this.config.logLevel ? this.config.logLevel : 0)
-          ?.levelNumber ?? 0,
-      );
-      // TODO: Implement Arango Storage Client for Crawlee
-      // this._crawleeConfig.useStorageClient(arangoStorageClient)
+      this.crawlee.set('logLevel', this.config.logLevel);
     }
 
     // Global URL normalizer
-    if (is.function_(this.config.normalizer)) {
+    if (is.function(this.config.normalizer)) {
       this.setNormalizer(this.config.normalizer);
     } else if (is.plainObject(this.config.normalizer)) {
       this.setNormalizer((url: ParsedUrl) =>
         globalNormalizer(url, { ...this.config.normalizer }),
       );
     }
-
-    // CLI Utilities
-    this._cli = this._loadedConfig?.value.cli ?? new SpiderCli();
 
     // Give config scripts a chance to modify things
     if (this._loadedConfig?.value.finalizer) {
@@ -232,11 +214,9 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
   protected _loadedConfig?: Config<T>;
   protected _activeConfig: T;
 
-  protected _logger?: Logger;
   protected _arango?: ArangoStore;
   protected _crawleeConfig?: CrawleeConfig;
   protected _normalizer?: UrlMutators.UrlMutator;
-  protected _cli?: SpiderCli;
   protected _version?: string;
 
   protected constructor() {
@@ -320,39 +300,6 @@ export class Spidergram<T extends SpidergramConfig = SpidergramConfig> {
       return FileStore.disk();
     }
     return FileStore.disk(bucket);
-  }
-
-  get cli() {
-    this._cli ??= new SpiderCli();
-    return this._cli;
-  }
-
-  setLogger(input: Logger) {
-    if (this._logger && this._logger !== input) {
-      this._logger.end();
-    }
-    this._logger = input;
-
-    if (this.config.logLevel) {
-      // consider logging to Arango as well
-      this._logger
-        .pipe(
-          new Filter({
-            filterLevel:
-              this._logger.getLogLevel(this.config.logLevel)?.levelNumber ?? 0,
-          }),
-        )
-        .pipe(new Human({ color: true }))
-        .pipe(process.stderr);
-    }
-  }
-
-  get logger() {
-    if (this._logger === undefined) {
-      throw new SpidergramError('No Logger created');
-    } else {
-      return this._logger;
-    }
   }
 
   setCrawleeConfig(input: CrawleeConfig) {

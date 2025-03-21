@@ -8,6 +8,7 @@ import {
   ReportRunner,
 } from '../../index.js';
 import { CLI, SgCommand } from '../index.js';
+import { SpiderCli } from '../shared/spider-cli.js';
 
 export default class Go extends SgCommand {
   static summary = 'Crawl and analyze a site, then generate a report.';
@@ -31,6 +32,7 @@ export default class Go extends SgCommand {
 
   async run() {
     const sg = await Spidergram.load();
+    const cli = new SpiderCli();
     const { argv: urls, flags } = await this.parse(Go);
 
     const crawlTargets: string[] = [
@@ -63,7 +65,7 @@ export default class Go extends SgCommand {
     this.startProgress('Crawling URLs');
     await spider
       .run(crawlTargets)
-      .then(status => this.ux.info(sg.cli.summarizeStatus(status)));
+      .then(status => this.ux.info(cli.summarizeStatus(status)));
 
     // Analyze
     const analyzer = new WorkerQuery<Resource>('resources')
@@ -77,7 +79,7 @@ export default class Go extends SgCommand {
           .then(resource => sg.arango.push(resource))
           .then(() => resource.url);
       })
-      .then(status => this.ux.info(sg.cli.summarizeStatus(status)));
+      .then(status => this.ux.info(cli.summarizeStatus(status)));
 
     // Report
     for (const [name, report] of Object.entries(sg.config.reports ?? {})) {
