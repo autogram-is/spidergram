@@ -1,5 +1,4 @@
-import { getDocument, VerbosityLevel } from 'pdfjs-dist/legacy/build/pdf.mjs';
-import { PDFPageProxy, PDFDocumentProxy } from 'pdfjs-dist';
+import { type PDFPageProxy, type PDFDocumentProxy, getDocument, VerbosityLevel } from 'pdfjs-dist';
 import { GenericFile, GenericFileData } from './generic-file.js';
 import { TextTools } from '../index.js';
 import _ from 'lodash';
