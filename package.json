@@ -106,6 +106,7 @@
     "playwright-extra": "^4.3.6",
     "prepend-http": "^4.0.0",
     "proload-plugin-json5": "github:autogram-is/proload-plugin-json5",
+    "punycode": "^2.3.1",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "read-pkg-up": "^9.1.0",
     "readability-scores": "^1.0.8",
@@ -162,5 +163,10 @@
     "playwright": "^1.51.0",
     "vega": "^5.28.0",
     "vega-lite": "^5.17.0"
+  },
+  "overrides": {
+    "node-fetch@2.x": {
+      "whatwg-url": "14.x"
+    }
   }
 }
