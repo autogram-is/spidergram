@@ -3,6 +3,7 @@
 ## v0.10.13 - 25-03-10
 
 - Dependency updates: Crawlee 3.13, Playwright 1.51, and PDFJS 4.10.38. Note that if you've installed older versions of Playwright as a dependency, you might need to update the installed browser binaries.
+- Removing `log` and `cli` configuration from Spidergram's global configuration; these mechanisms were never well-supported and other mechanisms and added additional complexity to the already-jank configuration loading process.
 
 ## v0.10.12 - 25-01-07
 
